@@ -7,8 +7,9 @@ import { privacySecret, userRef } from '../common/privacy';
 import { parse } from '../common/zod';
 import { pdfText } from './pdf-text';
 import { VerificationService } from './verification.service';
+import { Lang } from '../common/lang';
 
-const EmailBody = z.object({ orgId: z.string(), email: z.string().trim().toLowerCase().email() });
+const EmailBody = z.object({ orgId: z.string(), email: z.string().trim().toLowerCase().email(), lang: Lang });
 const ConfirmBody = z.object({ orgId: z.string(), code: z.string().regex(/^\d{6}$/) });
 const DocBody = z.object({ orgId: z.string() });
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -26,7 +27,7 @@ export class VerificationController {
   @HttpCode(202)
   async email(@Body() body: unknown, @CurrentUser() user: AuthUser) {
     const b = parse(EmailBody, body);
-    await this.v.sendEmailCode(this.ref(user), b.orgId, b.email);
+    await this.v.sendEmailCode(this.ref(user), b.orgId, b.email, b.lang);
     return { sent: true };
   }
 

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
+import { Lang } from '../common/lang';
 import { parse } from '../common/zod';
 import { AuthGuard, CurrentUser } from './auth.guard';
 import { AuthService, type AuthUser } from './auth.service';
 import { clearSessionCookie, readCookie, SESSION_COOKIE, setSessionCookie } from './session';
 
-const LinkBody = z.object({ email: z.string().trim().toLowerCase().email().max(254) });
+const LinkBody = z.object({ email: z.string().trim().toLowerCase().email().max(254), lang: Lang });
 const VerifyBody = z.object({ token: z.string().min(20).max(200) });
 
 @Controller('auth')
@@ -17,7 +18,8 @@ export class AuthController {
   @Post('magic-link')
   @HttpCode(202)
   async magicLink(@Body() body: unknown) {
-    await this.auth.requestLink(parse(LinkBody, body).email);
+    const b = parse(LinkBody, body);
+    await this.auth.requestLink(b.email, b.lang);
     return { sent: true };
   }
 

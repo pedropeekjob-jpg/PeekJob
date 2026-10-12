@@ -7,6 +7,7 @@ import { isUuid } from '../common/zod';
 import { PG_POOL, tx } from '../db/db.module';
 import { shouldActivate } from '../domain/activation';
 import { extractNifs } from './nif-extract';
+import { pick, type Lang } from '../common/lang';
 
 export const CODE_MINUTES = 10;
 export const MAX_CODE_ATTEMPTS = 5;
@@ -26,7 +27,7 @@ export class VerificationService {
   }
 
   /** Envia um código para o email de trabalho. O email só existe em memória durante o envio. */
-  async sendEmailCode(userRef: string, orgId: string, workEmail: string) {
+  async sendEmailCode(userRef: string, orgId: string, workEmail: string, lang: Lang = 'pt') {
     const org = await this.org(orgId);
     const domain = workEmail.split('@')[1]?.toLowerCase();
     const domains = (await this.pool.query('SELECT domain FROM org_domains WHERE org_id = $1', [orgId])).rows.map((r) => r.domain);
@@ -43,8 +44,12 @@ export class VerificationService {
     try {
       await this.mailer.send({
         to: workEmail,
-        subject: 'Código de verificação PeekJob',
-        text: `O teu código é ${code}. Serve para confirmar que trabalhas em ${org.name} e é válido durante ${CODE_MINUTES} minutos.\nNão guardamos este email.`,
+        subject: pick(lang, 'Código de verificação PeekJob', 'Your PeekJob verification code'),
+        text: pick(
+          lang,
+          `O teu código é ${code}. Serve para confirmar que trabalhas em ${org.name} e é válido durante ${CODE_MINUTES} minutos.\nNão guardamos este email.`,
+          `Your code is ${code}. It confirms that you work at ${org.name} and is valid for ${CODE_MINUTES} minutes.\nWe don't store this email.`,
+        ),
       });
     } catch {
       await this.pool.query('DELETE FROM verification_codes WHERE user_ref = $1 AND org_id = $2', [userRef, orgId]);

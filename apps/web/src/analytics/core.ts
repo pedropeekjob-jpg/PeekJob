@@ -39,6 +39,7 @@ export interface AnalyticsOptions {
   origin: string;
   appVersion: string;
   appMode: 'api' | 'demo';
+  lang: string;
   onBoot?: () => void;
 }
 
@@ -61,7 +62,7 @@ export function createAnalytics(o: AnalyticsOptions) {
     gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
     gtag('js', new Date());
     gtag('config', id, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
-    gtag('set', 'user_properties', { app_version: o.appVersion, app_mode: o.appMode });
+    gtag('set', 'user_properties', { app_version: o.appVersion, app_mode: o.appMode, ui_lang: o.lang });
     o.loadScript(`https://www.googletagmanager.com/gtag/js?id=${id}`);
     o.onBoot?.();
   }

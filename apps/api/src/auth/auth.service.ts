@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable, Logger, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { Pool } from 'pg';
 import { webOrigin } from '../common/config';
+import { pick, type Lang } from '../common/lang';
 import { PG_POOL, tx } from '../db/db.module';
 import { emailHash, normalizeEmail, randomToken, sha256 } from './crypto';
 import { MAILER, type Mailer } from './mailer';
@@ -22,7 +23,7 @@ export class AuthService {
     @Inject(MAILER) private readonly mailer: Mailer,
   ) {}
 
-  async requestLink(rawEmail: string) {
+  async requestLink(rawEmail: string, lang: Lang = 'pt') {
     const email = normalizeEmail(rawEmail);
     const eh = emailHash(email);
     const recent = await this.pool.query(
@@ -37,12 +38,16 @@ export class AuthService {
       `INSERT INTO login_tokens (token_hash, email_hash, expires_at) VALUES ($1, $2, now() + make_interval(mins => $3))`,
       [sha256(token), eh, LOGIN_TOKEN_MINUTES],
     );
-    const link = `${webOrigin()}/#/entrar?token=${token}`;
+    const link = `${webOrigin()}/#/entrar?token=${token}${lang === 'en' ? '&lang=en' : ''}`;
     try {
       await this.mailer.send({
       to: email,
-      subject: 'O teu link de acesso à PeekJob',
-        text: `Olá! Abre este link para entrar na PeekJob (válido durante ${LOGIN_TOKEN_MINUTES} minutos):\n${link}\n\nSe não pediste este email, podes ignorá-lo.`,
+        subject: pick(lang, 'O teu link de acesso à PeekJob', 'Your PeekJob sign-in link'),
+        text: pick(
+          lang,
+          `Olá! Abre este link para entrar na PeekJob (válido durante ${LOGIN_TOKEN_MINUTES} minutos):\n${link}\n\nSe não pediste este email, podes ignorá-lo.`,
+          `Hi! Open this link to sign in to PeekJob (valid for ${LOGIN_TOKEN_MINUTES} minutes):\n${link}\n\nIf you didn't ask for this email, you can ignore it.`,
+        ),
         link,
       });
     } catch (e) {

@@ -24,11 +24,15 @@ export function configureApp(app: INestApplication) {
 function serveWeb(app: INestApplication, dir: string | undefined) {
   if (!dir || !existsSync(join(dir, 'index.html'))) return;
   const template = readFileSync(join(dir, 'index.html'), 'utf8');
-  const sendIndex = (res: Response, status = 200) =>
-    res.status(status).setHeader('cache-control', 'no-cache').type('html').send(renderIndex(template));
+  const sendIndex = (req: Request, res: Response, status = 200) =>
+    res
+      .status(status)
+      .setHeader('cache-control', 'no-cache')
+      .type('html')
+      .send(renderIndex(template, process.env, req.query.lang === 'en' ? 'en' : 'pt'));
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.method === 'GET' && (req.path === '/' || req.path === '/index.html')) return sendIndex(res);
+    if (req.method === 'GET' && (req.path === '/' || req.path === '/index.html')) return sendIndex(req, res);
     next();
   });
   app.use(
@@ -43,7 +47,7 @@ function serveWeb(app: INestApplication, dir: string | undefined) {
   app.use((req: Request, res: Response, next: NextFunction) => {
     const wantsHtml = req.method === 'GET' && (req.headers.accept ?? '').includes('text/html');
     if (!wantsHtml || req.path.includes('.')) return next();
-    sendIndex(res, routeTemplate(req.path) === '/404' ? 404 : 200);
+    sendIndex(req, res, routeTemplate(req.path) === '/404' ? 404 : 200);
   });
 }
 

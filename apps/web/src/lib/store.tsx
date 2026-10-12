@@ -5,7 +5,7 @@ import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
 import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
 import { detectRedFlags } from './moderation';
-import { tr } from '../i18n';
+import { getLang, tr } from '../i18n';
 
 /**
  * Estado da aplicação.
@@ -252,7 +252,7 @@ function useAppState() {
       login: (email: string) => set({ user: { email } }),
       requestLink: async (email: string): Promise<Result> => {
         try {
-          await api('/auth/magic-link', { body: { email } });
+          await api('/auth/magic-link', { body: { email, lang: getLang() } });
           track('login_link_requested', { result: 'sent' });
           return { ok: true };
         } catch (e) {
@@ -325,7 +325,7 @@ function useAppState() {
       /* Verificação anónima (modo API) */
       sendWorkEmailCode: async (orgId: string, email: string): Promise<Result> => {
         try {
-          await api('/verifications/email', { body: { orgId, email } });
+          await api('/verifications/email', { body: { orgId, email, lang: getLang() } });
           track('verification', { method: 'email', step: 'code_sent' });
           return { ok: true };
         } catch (e) {

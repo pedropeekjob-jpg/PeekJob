@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { apiMode } from '../api/http';
+import { getLang, subscribeLang } from '../i18n';
 import { createAnalytics, type ConsentStore, type ConsentValue } from './core';
 
 export type { EventMap, EventName } from './core';
@@ -83,10 +84,14 @@ export const analytics = createAnalytics({
   origin: location.origin,
   appVersion: (import.meta.env.VITE_APP_VERSION as string | undefined) ?? 'dev',
   appMode: apiMode ? 'api' : 'demo',
+  lang: getLang(),
   onBoot: () => void startWebVitals().catch(() => undefined),
 });
 
 export const track = analytics.track;
+
+// Idioma da interface como propriedade do utilizador (comparar PT e EN nos relatórios)
+subscribeLang(() => analytics.setUserProperty('ui_lang', getLang()));
 
 /** Estado do consentimento para os componentes (banner, Perfil) */
 export function useAnalyticsConsent(): { configured: boolean; value: ConsentValue } {

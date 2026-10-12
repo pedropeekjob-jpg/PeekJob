@@ -1,4 +1,5 @@
 import { apiMode } from '../api/http';
+import { getLang } from '../i18n';
 import { pageMeta } from './pages';
 import { routeTemplate } from './privacy';
 
@@ -13,6 +14,19 @@ function meta(name: string): HTMLMetaElement {
     document.head.appendChild(el);
   }
   return el;
+}
+
+/** Versões alternativas por idioma (Search Console: hreflang) */
+function alternates(base: string | null) {
+  document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((e) => e.remove());
+  if (!base) return;
+  for (const [hreflang, href] of [['pt-PT', base], ['en', `${base}?lang=en`], ['x-default', base]]) {
+    const el = document.createElement('link');
+    el.rel = 'alternate';
+    el.hreflang = hreflang;
+    el.href = href;
+    document.head.appendChild(el);
+  }
 }
 
 function canonical(href: string | null) {
@@ -34,7 +48,9 @@ export function applyPageMeta(pathname: string, override?: { title?: string; des
   if (desc) meta('description').content = desc;
   const indexable = m.index && apiMode && browserRouting;
   meta('robots').content = indexable ? 'index,follow' : 'noindex,nofollow';
-  canonical(indexable ? `${location.origin}${pathname.replace(/\/+$/, '') || '/'}` : null);
+  const base = indexable ? `${location.origin}${pathname.replace(/\/+$/, '') || '/'}` : null;
+  canonical(base ? (getLang() === 'en' ? `${base}?lang=en` : base) : null);
+  alternates(base);
 }
 
 /** Dados estruturados (EmployerAggregateRating) para a página de uma organização com avaliações */
