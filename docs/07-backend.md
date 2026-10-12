@@ -50,6 +50,7 @@
 | GET | `/me/messages` | sessão | Mensagens privadas de apoio com os contactos |
 | POST | `/me/messages/:id/read` | sessão | Marca a mensagem como lida |
 | GET | `/health` | todos | Estado da API e da base de dados |
+| GET | `/robots.txt`, `/sitemap.xml` | todos | Para o Search Console (organizações ativas no sitemap) |
 
 Ao publicar uma avaliação, a API responde assim:
 
@@ -85,7 +86,8 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 ```
 
 - **Domínio partilhado:** 41 testes (vitest).
-- **API:** 80 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **Web:** 22 testes (medição e privacidade).
+- **API:** 87 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia

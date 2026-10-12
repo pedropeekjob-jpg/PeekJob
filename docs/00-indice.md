@@ -12,6 +12,7 @@ Plataforma *mobile first* onde quem trabalha avalia, de forma anónima, **PME, a
 | 06 | [Próximos passos e questões em aberto](06-proximos-passos.md) | Jurídico, produto, técnica |
 | 07 | [Backend](07-backend.md) | Decisões técnicas, alimentação de dados, API, testes |
 | 08 | [Publicar](08-publicacao.md) | Neon, Resend e Render: passo a passo e variáveis |
+| 09 | [Medição e Search Console](09-medicao.md) | Eventos GA4, privacidade, configuração e análises para refactoring/rebranding |
 
 ## Ligações
 

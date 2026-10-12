@@ -39,6 +39,8 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `WEB_ORIGIN` | não | Endereço público (por omissão o do Render) |
 | `WEB_DIST` | já na imagem | Pasta da build da web servida pela API |
 | `SEED_DEMO` | não | `true` carrega as organizações de demonstração |
+| `GA_MEASUREMENT_ID` | não | Google Analytics 4 (`G-…`), ver [09 · Medição](09-medicao.md) |
+| `GSC_VERIFICATION` | não | Código da etiqueta HTML do Search Console |
 | `COOKIE_SAMESITE` | não | Só se a web ficar noutro domínio (`none`); não é o caso desta configuração |
 
 ## Verificado antes de publicar
