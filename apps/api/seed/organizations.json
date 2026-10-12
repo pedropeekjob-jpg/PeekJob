@@ -1,0 +1,12 @@
+[
+  { "name": "Padaria Ribeira", "type": "PME", "city": "Porto", "sector": "Restauração", "aliases": ["Padaria da Ribeira"], "locations": [{ "label": "Loja · Rua das Flores", "address": "Rua das Flores, 112, Porto", "lat": 41.1437, "lng": -8.6129 }, { "label": "Fabrico · Campanhã", "address": "Rua do Freixo, 40, Porto", "lat": 41.1462, "lng": -8.5813 }] },
+  { "name": "Associação Mãos Dadas", "type": "Associação", "city": "Braga", "sector": "Ação social" },
+  { "name": "Rede Vizinha", "type": "Voluntariado", "city": "Porto", "sector": "Comunidade" },
+  { "name": "Oficina Sete", "type": "PME", "city": "Porto", "sector": "Design" },
+  { "name": "Clínica Foz", "type": "PME", "city": "Porto", "sector": "Saúde" },
+  { "name": "Associação Ponte Norte", "type": "Associação", "city": "Porto", "sector": "Cultura" },
+  { "name": "Banco de Tempo Bonfim", "type": "Voluntariado", "city": "Porto", "sector": "Comunidade" },
+  { "name": "Café Vinha", "type": "PME", "city": "Vila Nova de Gaia", "sector": "Restauração" },
+  { "name": "Norte Logística", "type": "PME", "city": "Maia", "sector": "Logística" },
+  { "name": "Lavandaria Sol", "type": "PME", "city": "Matosinhos", "sector": "Limpeza" }
+]
