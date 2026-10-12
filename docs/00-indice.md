@@ -11,6 +11,7 @@ Plataforma *mobile first* onde quem trabalha avalia, de forma anónima, **PME, a
 | 05 | [POC](05-poc.md) | Protótipo funcional: como experimentar, o que faz, arquitetura |
 | 06 | [Próximos passos e questões em aberto](06-proximos-passos.md) | Jurídico, produto, técnica |
 | 07 | [Backend](07-backend.md) | Decisões técnicas, alimentação de dados, API, testes |
+| 08 | [Publicar](08-publicacao.md) | Neon, Resend e Render: passo a passo e variáveis |
 
 ## Ligações
 

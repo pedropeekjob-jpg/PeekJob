@@ -66,24 +66,14 @@ public/         logótipos, favicon, ícones da app, web manifest
   - o rascunho de avaliação de exemplo contém uma red flag.
 - Em **Perfil → Repor dados de demonstração** volta-se ao estado inicial.
 
-### Ligar a um backend
+### Ligada à API
 
-`src/api/orgs.ts` concentra as leituras. Os hooks (`useOrgs`, `useOrg`, `useRankedOrgs`, `searchOrgs`) mantêm os mesmos tipos, por isso basta trocá-los por pedidos à API. Por exemplo, com React Query: `GET /orgs`, `GET /orgs/:id`, `GET /orgs?q=&type=`.
-
-As escritas são as acções do store, cada uma com o pedido HTTP correspondente:
-
-| Acção | Pedido |
-|---|---|
-| `publish` | `POST /reviews` |
-| `toggleSave` | `PUT /me/saved` |
-| `reply` | `POST /reviews/:id/replies` |
-| `login` | link mágico por email |
+Com `VITE_API_URL` definido, a web usa a API (`src/api/`) em vez dos dados de exemplo: login por link mágico, pesquisa, avaliações, verificação e mensagens. `VITE_API_URL=/` é o modo de produção, com a API a servir a web. Ver [docs/07-backend.md](docs/07-backend.md) e [docs/08-publicacao.md](docs/08-publicacao.md).
 
 ## Antes de produção
 
 - Fazer a revisão jurídica do RGPD, da política de moderação e dos textos de apoio. Os contactos estão em `src/data/content.ts`. O telefone da ACT não foi verificado, por isso só é mostrado o site.
 - Substituir as regras de moderação por um modelo no servidor com revisão humana.
-- Implementar a verificação real (código por email e leitura do NIF), garantindo que a organização nunca fica ligada ao email ou ao ficheiro.
 - Mapa real: trocar `MapView` por MapLibre ou Leaflet com OpenStreetMap, usando o `lat`/`lng` já presente nos dados.
 - SEO: renderização no servidor (ex.: Next.js) para as páginas públicas das organizações.
 

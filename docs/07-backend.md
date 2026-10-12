@@ -12,6 +12,7 @@
 | 6 | **Organizações criadas por quem avalia nascem pendentes** | Evita organizações falsas criadas para difamar | Publicar logo, que abre a porta a abusos |
 | 7 | **Login por link mágico** e sessão em cookie httpOnly | Sem palavras-passe para gerir. A conta guarda só um hash do email; tokens e sessões também só em hash | Palavra-passe ou login social: mais atrito e mais dados pessoais |
 | 8 | **Verificação anónima** por código no email de trabalho ou NIF lido de um PDF (recibo/contrato) | Dá peso às avaliações sem guardar o email de trabalho nem o documento: guarda-se só o "sim" | Upload guardado para revisão humana: risco de RGPD desnecessário |
+| 9 | **A API serve a web em produção** (mesma origem) | O cookie de sessão é do próprio site: funciona no Safari/iPhone, que bloqueia cookies entre domínios. Sem CORS em produção | Web e API em domínios diferentes, com cookies `SameSite=None` (falham no Safari) ou tokens no browser (menos seguros) |
 
 ## Como se alimentam as organizações
 
@@ -29,7 +30,7 @@
 
 | Método | Rota | Quem | O que faz |
 |---|---|---|---|
-| POST | `/auth/magic-link` | todos | Envia o link de entrada (15 min, uso único, máx. 3 pedidos) → 202 |
+| POST | `/auth/magic-link` | todos | Envia o link de entrada (15 min, uso único, máx. 3 pedidos) → 202; email falhou → 503 |
 | POST | `/auth/verify` | todos | Troca o token pelo cookie de sessão `pj_session` (30 dias) |
 | GET | `/auth/me` | sessão | Quem está autenticado |
 | POST | `/auth/logout` | sessão | Termina a sessão → 204 |
@@ -74,8 +75,8 @@ VITE_API_URL=http://localhost:3000 npm run dev:web      # web em modo API
 ```
 
 - Sem `VITE_API_URL`, a web corre em **modo demonstração** (dados de exemplo no browser). É assim que está publicada no GitHub Pages.
-- Em desenvolvimento não há envio de emails: o link de entrada e os códigos aparecem no terminal da API.
-- **Produção:** se a web e a API estiverem em domínios diferentes, usar `COOKIE_SAMESITE=none` (o cookie passa a `Secure`, por isso exige HTTPS) e `WEB_ORIGIN` com o domínio da web.
+- Em desenvolvimento, sem `RESEND_API_KEY`, os emails não são enviados: o link de entrada e os códigos aparecem no terminal da API.
+- **Produção:** ver [08 · Publicar](08-publicacao.md). A imagem Docker junta a API e a web (`VITE_API_URL=/`).
 
 ## Testes
 
@@ -84,12 +85,10 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 ```
 
 - **Domínio partilhado:** 41 testes (vitest).
-- **API:** 66 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **API:** 80 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia
-- Envio real de emails (ex.: Postmark, Resend ou Amazon SES).
-- Publicar a API e a base de dados (ex.: Render, Fly.io ou Railway + PostgreSQL gerido).
 - Moderação: API de moderação + LLM para casos duvidosos e fila humana.
 - Guardadas e "útil" no servidor (hoje ficam no browser).
 - Verificação por fotografia do recibo (OCR); hoje só PDF com texto.
