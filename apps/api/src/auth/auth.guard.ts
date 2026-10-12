@@ -1,34 +1,24 @@
 import { CanActivate, createParamDecorator, ExecutionContext, ForbiddenException, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
+import { AuthService, type AuthUser } from './auth.service';
+import { readCookie, SESSION_COOKIE } from './session';
 
-/**
- * AUTENTICAÇÃO PROVISÓRIA (desenvolvimento e testes).
- * Lê o utilizador dos cabeçalhos x-user-id / x-user-role.
- * Na próxima fatia é substituída por link mágico por email + sessão (cookie httpOnly).
- * Nunca ativar em produção: ver ALLOW_DEV_AUTH.
- */
-export interface AuthUser {
-  id: string;
-  role: 'user' | 'moderator';
-}
-
+export type { AuthUser };
 const ROLES = 'roles';
 export const Roles = (...roles: AuthUser['role'][]) => SetMetadata(ROLES, roles);
 
-function readUser(req: Request): AuthUser | null {
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DEV_AUTH !== 'true') return null;
-  const id = req.header('x-user-id');
-  if (!id) return null;
-  return { id, role: req.header('x-user-role') === 'moderator' ? 'moderator' : 'user' };
-}
-
+/** Exige sessão válida (cookie pj_session); opcionalmente um papel (ex.: moderator). */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
-  canActivate(ctx: ExecutionContext) {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly auth: AuthService,
+  ) {}
+
+  async canActivate(ctx: ExecutionContext) {
     const req = ctx.switchToHttp().getRequest<Request & { user?: AuthUser }>();
-    const user = readUser(req);
+    const user = await this.auth.userForSession(readCookie(req, SESSION_COOKIE));
     if (!user) throw new UnauthorizedException('Inicia sessão para continuar');
     req.user = user;
     const roles = this.reflector.getAllAndOverride<AuthUser['role'][]>(ROLES, [ctx.getHandler(), ctx.getClass()]);

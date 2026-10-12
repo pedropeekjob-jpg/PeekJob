@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, Post, Query, Res, UseGuards } f
 import { CreateOrganizationInput, SearchOrganizationsQuery } from '@peekjob/shared';
 import type { Response } from 'express';
 import { z } from 'zod';
-import { AuthGuard, CurrentUser, Roles, type AuthUser } from '../auth/dev-auth';
+import { AuthGuard, CurrentUser, Roles, type AuthUser } from '../auth/auth.guard';
 import { privacySecret, userRef } from '../common/privacy';
 import { parse } from '../common/zod';
 import { MergedOrgRedirect, OrganizationsService } from './organizations.service';

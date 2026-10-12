@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, Inject, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { EMERGENCY_NUMBER, SUPPORT_CONTACTS } from '@peekjob/shared';
 import { Pool } from 'pg';
-import { AuthGuard, CurrentUser, type AuthUser } from '../auth/dev-auth';
+import { AuthGuard, CurrentUser, type AuthUser } from '../auth/auth.guard';
 import { privacySecret, userRef } from '../common/privacy';
 import { isUuid } from '../common/zod';
 import { PG_POOL } from '../db/db.module';

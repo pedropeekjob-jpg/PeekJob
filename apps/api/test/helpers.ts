@@ -33,7 +33,7 @@ export async function createTestApp(): Promise<TestCtx> {
     const key = `${name}:${role ?? 'user'}`;
     const cached = sessions.get(key);
     if (cached) return cached;
-    const email = `${name}@teste.pt`;
+    const email = name.includes("@") ? name : `${name}@teste.pt`;
     await http().post('/auth/magic-link').send({ email }).expect(202);
     const token = mailer.lastTokenFor(email);
     const res = await http().post('/auth/verify').send({ token }).expect(200);
