@@ -13,7 +13,7 @@ Plataforma *mobile first* onde quem trabalha avalia, de forma anónima, **PME, a
 
 ## Ligações
 
-- **Demo do POC:** https://claude.ai/artifact/YAX4VX7WTtosw5q3K4B1MT
+- **Demo do POC:** https://claude.ai/artifact/YAX4VX7WTtosw5q3K4B1MT ou https://pedropeekjob-jpg.github.io/PeekJob/
 - **Canvas de design (todos os ecrãs, logo animado, ícone):** https://claude.ai/artifact/16d6Uxfp8PCM7PGgdYo6Zf
 - **Estudo de mercado (documento original):** https://claude.ai/artifact/LfDPiMq6qqWWwAaHP6rWiV
 - **Código:** https://github.com/pedropeekjob-jpg/PeekJob
