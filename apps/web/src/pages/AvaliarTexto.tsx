@@ -19,7 +19,8 @@ export default function AvaliarTexto() {
   const [busy, setBusy] = useState(false);
   if (apiMode && draft.orgId && !org && !store.remote.ready) return null;
 
-  if (!draft.orgId || !org) return <Navigate to="/avaliar" replace />;
+  // Ao publicar o rascunho é limpo antes de ir para "publicado": não voltar a /avaliar pelo meio
+  if (!draft.orgId || !org) return busy ? null : <Navigate to="/avaliar" replace />;
   // Em desktop o passo 2 está no mesmo ecrã das notas
   if (desktop) return <Navigate to="/avaliar/notas" replace />;
 

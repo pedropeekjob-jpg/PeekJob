@@ -23,7 +23,8 @@ export default function AvaliarNotas() {
   const [help, setHelp] = useState<CriterionKey | null>(null);
   if (apiMode && draft.orgId && !org && !store.remote.ready) return null;
 
-  if (!draft.orgId || !org) return <Navigate to="/avaliar" replace />;
+  // Ao publicar o rascunho é limpo antes de ir para "publicado": não voltar a /avaliar pelo meio
+  if (!draft.orgId || !org) return busy ? null : <Navigate to="/avaliar" replace />;
 
   const loc = org.locations.find((l) => l.id === draft.locationId);
   const done = countDone(draft.scores);
