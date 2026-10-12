@@ -54,7 +54,7 @@ export function sessionCookie(setCookie: string | string[] | undefined): string 
 
 export async function resetDb(t: TestCtx) {
   await t.pool.query(
-    'TRUNCATE support_messages, reviews, org_locations, org_aliases, org_sources, organizations, sessions, login_tokens, users RESTART IDENTITY CASCADE',
+    'TRUNCATE verification_codes, verifications, org_domains, support_messages, reviews, org_locations, org_aliases, org_sources, organizations, sessions, login_tokens, users RESTART IDENTITY CASCADE',
   );
   t.sessions.clear();
   t.mailer.clear();
@@ -73,3 +73,17 @@ export async function insertOrg(
 }
 
 export const goodReview = { scores: { respeito: 5, salario: 4, equilibrio: 4 }, recommend: true, tags: ['Horários cumpridos'], text: 'Equipa unida e horários cumpridos.' };
+
+/** Gera um PDF simples (ex.: recibo de vencimento) com as linhas dadas */
+export function makePdf(lines: string[]): Promise<Buffer> {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const PDFDocument = require('pdfkit');
+  return new Promise((resolve) => {
+    const doc = new PDFDocument();
+    const chunks: Buffer[] = [];
+    doc.on('data', (c: Buffer) => chunks.push(c));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    lines.forEach((l) => doc.text(l));
+    doc.end();
+  });
+}
