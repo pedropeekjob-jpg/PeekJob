@@ -11,6 +11,12 @@ const RULES: [RegExp, string, string][] = [
   [/sem contrato|recibos? verdes/i, 'trabalho sem contrato', 'trabalho não declarado'],
   [/horas extra/i, 'horas extra não pagas', 'incumprimento salarial'],
   [/discrimin|racis|homof/i, 'discriminação', 'discriminação'],
+  // Inglês (as categorias ficam em português; a interface mostra-as no idioma de quem lê)
+  [/\blate (pay|salary|wages?)|(pay|salary|wages?) (is|are|was|were)( always| often)? late|unpaid wages?/i, 'salário em atraso', 'incumprimento salarial'],
+  [/\bbody\b|sexual|harass|grop|touch(es|ed|ing)? me|catcall/i, 'comentários sobre o corpo', 'assédio sexual'],
+  [/shout|yell|humiliat|threat|bully/i, 'humilhação', 'assédio moral'],
+  [/no contract|without a contract|cash in hand|off the books/i, 'trabalho sem contrato', 'trabalho não declarado'],
+  [/unpaid overtime|overtime (is |was )?(not|never) paid/i, 'horas extra não pagas', 'incumprimento salarial'],
 ];
 
 export interface RedFlagResult {

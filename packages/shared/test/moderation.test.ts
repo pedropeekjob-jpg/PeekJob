@@ -22,6 +22,16 @@ describe('detectRedFlags', () => {
     expect(r.flagged).toBe(true);
   });
 
+  it('deteta também textos em inglês (mesmas categorias)', () => {
+    const r = detectRedFlags('My pay is always late and the manager makes comments about my body. He shouts and humiliates us.');
+    expect(r.flagged).toBe(true);
+    expect(r.kinds).toEqual(expect.arrayContaining(['incumprimento salarial', 'assédio sexual', 'assédio moral']));
+    expect(detectRedFlags('Unpaid overtime every week, no contract, cash in hand.').kinds).toEqual(
+      expect.arrayContaining(['incumprimento salarial', 'trabalho não declarado']),
+    );
+    expect(detectRedFlags('Great team, fair pay and flexible hours.').flagged).toBe(false);
+  });
+
   it('não marca um texto positivo', () => {
     expect(detectRedFlags('Equipa simpática, horários cumpridos e salário a horas.').flagged).toBe(false);
   });
