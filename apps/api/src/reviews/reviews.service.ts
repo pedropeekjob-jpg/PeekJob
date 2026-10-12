@@ -40,9 +40,10 @@ export class ReviewsService {
         await c.query('SAVEPOINT ins');
         review = (
           await c.query(
-            `INSERT INTO reviews (org_id, location_id, author_ref, scores, avg, recommend, tags, text, flagged, flag_kinds)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-             RETURNING id, scores, avg, recommend, tags, text, flagged, created_at`,
+            `INSERT INTO reviews (org_id, location_id, author_ref, scores, avg, recommend, tags, text, flagged, flag_kinds, verified)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+                     EXISTS (SELECT 1 FROM verifications v WHERE v.org_id = $1 AND v.user_ref = $3))
+             RETURNING id, scores, avg, recommend, tags, text, flagged, verified, created_at`,
             [orgId, input.locationId ?? null, authorRef, input.scores, avg, input.recommend, input.tags, input.text, rf.flagged, rf.kinds],
           )
         ).rows[0];

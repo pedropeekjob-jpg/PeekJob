@@ -87,7 +87,7 @@ describe('Verificação anónima', () => {
   });
 
   describe('por recibo ou contrato (PDF)', () => {
-    const upload = async (cookie: { Cookie: string }, pdf: Buffer, id = orgId, type = 'application/pdf') =>
+    const upload = (cookie: { Cookie: string }, pdf: Buffer, id = orgId, type = "application/pdf") =>
       t.http().post('/verifications/document').set(cookie).field('orgId', id).attach('file', pdf, { filename: 'recibo.pdf', contentType: type });
 
     it('verifica quando o documento contém o NIF da organização', async () => {
