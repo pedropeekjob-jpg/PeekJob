@@ -59,7 +59,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build -w @peekjob/shared
-      - name: Build da demo (GA opcional: variável GA_ID_DEMO no repositório)
+      - name: Build da demo (GA opcional, variável GA_ID_DEMO no repositório)
         run: npm run build -w @peekjob/web
         env:
           VITE_GA_ID: ${{ vars.GA_ID_DEMO }}
