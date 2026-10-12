@@ -29,6 +29,8 @@ jobs:
         run: npm test -w @peekjob/shared
       - name: Build do domínio partilhado
         run: npm run build -w @peekjob/shared
+      - name: Testes da web (medição e privacidade)
+        run: npm test -w @peekjob/web
       - name: Testes da API (unitários + integração com PostgreSQL)
         run: npm test -w @peekjob/api
       - name: Typecheck e build
@@ -56,7 +58,12 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build -w @peekjob/web
+      - run: npm run build -w @peekjob/shared
+      - name: Build da demo (GA opcional: variável GA_ID_DEMO no repositório)
+        run: npm run build -w @peekjob/web
+        env:
+          VITE_GA_ID: ${{ vars.GA_ID_DEMO }}
+          VITE_APP_VERSION: ${{ github.sha }}
       - name: Juntar imagens da documentação (usadas no Confluence)
         run: |
           mkdir -p apps/web/dist/docs

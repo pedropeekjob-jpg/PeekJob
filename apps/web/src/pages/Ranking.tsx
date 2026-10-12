@@ -256,7 +256,7 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
             return (
               <Link
                 key={org.id}
-                to={`/org/${org.id}`}
+                to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type}
                 className="plain row"
                 style={{ gap: 12, padding: '12px 0', borderTop: '1px solid var(--line)', minHeight: 70 }}
               >
@@ -506,7 +506,7 @@ function Preview({ org, m, pos, prefs, all, setAll }: { org: Org; m: number; pos
           {all ? 'Ver só os 3 que valorizas' : `Ver os ${CRITERIA.length} critérios`}
         </button>
       </div>
-      <Link to={`/org/${org.id}`} className="btn btn-primary lift" style={{ height: 54 }}>
+      <Link to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} className="btn btn-primary lift" style={{ height: 54 }}>
         Ver página <Icon name="next" size={18} />
       </Link>
       <Link to="/metodologia" className="link" style={{ alignSelf: 'center', fontSize: 13, fontWeight: 500 }}>

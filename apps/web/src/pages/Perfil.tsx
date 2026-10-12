@@ -8,6 +8,7 @@ import { CRITERION } from '../data/criteria';
 import { useStore } from '../lib/store';
 import { fmt } from '../lib/format';
 import { useIsDesktop } from '../lib/useMedia';
+import { AnalyticsSwitch } from '../components/ConsentBanner';
 
 const DISPLAY = { fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0 } as const;
 
@@ -163,6 +164,7 @@ export default function Perfil() {
                     </span>
                   </Link>
                 ))}
+                <AnalyticsSwitch />
                 <button type="button" onClick={doLogout} className="row between pf-row" style={{ width: 'calc(100% + 20px)', minHeight: 56, padding: '0 10px', margin: '0 -10px', border: 0, borderRadius: 14, background: 'transparent', fontSize: 16, fontWeight: 500, color: 'var(--down)', textAlign: 'left' }}>
                   Terminar sessão
                   <span className="small muted" style={{ fontWeight: 400 }}>
@@ -234,6 +236,7 @@ export default function Perfil() {
           {settings.slice(1).map((s) => (
             <MRow key={s.label} to={s.to} label={s.label} style={rowStyle} />
           ))}
+          <AnalyticsSwitch />
           <button
             type="button"
             onClick={doLogout}

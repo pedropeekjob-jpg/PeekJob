@@ -75,7 +75,7 @@ export default function Guardadas() {
     const m = match(o, prefs);
     return (
       <article key={o.id} className="row" style={{ gap: desktop ? 16 : 12, padding: desktop ? '20px 0' : '14px 0', borderBottom: '1px solid var(--line)' }}>
-        <Link to={`/org/${o.id}`} className="plain row grow g-row" style={{ gap: desktop ? 18 : 12 }}>
+        <Link to={`/org/${o.id}`} data-ev="select_org" data-ev-org-type={o.type} className="plain row grow g-row" style={{ gap: desktop ? 18 : 12 }}>
           <Ring
             value={o.score}
             size={desktop ? 64 : 50}

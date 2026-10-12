@@ -11,6 +11,8 @@ import { BAYES_C, GLOBAL_MEAN, adjusted, matchScores } from '../lib/match';
 import { fmt } from '../lib/format';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { analytics } from '../analytics';
+import { openConsent } from '../components/ConsentBanner';
 
 /** Organizações de exemplo para a demonstração da "% para ti" */
 const EXAMPLE_ORGS = ['padaria-ribeira', 'maos-dadas', 'norte-logistica'].map((id) => ORG_BY_ID[id]).filter(Boolean);
@@ -482,7 +484,17 @@ function Privacy({ desktop = false }: { desktop?: boolean }) {
         <li>As avaliações são anónimas: a organização nunca sabe quem escreveu.</li>
         <li>Os comprovativos de verificação são apagados logo a seguir.</li>
         <li>Podes exportar ou apagar os teus dados quando quiseres.</li>
+        {analytics.configured() && (
+          <li>
+            Estatísticas (Google Analytics) só com a tua autorização: medimos páginas e passos, nunca o que escreves, onde trabalhas, o teu email ou o NIF. Sem publicidade.
+          </li>
+        )}
       </ul>
+      {analytics.configured() && (
+        <button type="button" className="link" onClick={openConsent} style={{ alignSelf: 'flex-start', fontSize: 14, background: 'none', border: 0, padding: 0 }}>
+          Gerir estatísticas <Icon name="next" size={16} />
+        </button>
+      )}
       <Link to="/perfil" className="link" style={{ alignSelf: 'flex-start', fontSize: 14 }}>
         Exportar ou apagar os meus dados <Icon name="next" size={16} />
       </Link>

@@ -128,7 +128,7 @@ function MobileInicio() {
           {list.map(({ org, match }) => (
             <Link
               key={org.id}
-              to={`/org/${org.id}`}
+              to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type}
               className="plain row lift"
               style={{ gap: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 20, padding: '10px 14px 10px 10px', minHeight: 68 }}
             >
@@ -158,7 +158,7 @@ function MobileInicio() {
         </Link>
         <div className="grow row pj-strip" style={{ gap: 16, overflowX: 'auto', whiteSpace: 'nowrap' }}>
           {movers.map((o) => (
-            <Link key={o.id} to={`/org/${o.id}`} className="plain row" style={{ flex: 'none', alignItems: 'baseline', gap: 6, padding: '12px 0', fontSize: 13, fontWeight: 500 }}>
+            <Link key={o.id} to={`/org/${o.id}`} data-ev="select_org" data-ev-org-type={o.type} className="plain row" style={{ flex: 'none', alignItems: 'baseline', gap: 6, padding: '12px 0', fontSize: 13, fontWeight: 500 }}>
               {o.name}
               <span className="mono" style={{ fontSize: 12, color: deltaColor(o) }}>
                 {deltaText(o)}
@@ -391,7 +391,7 @@ function DesktopInicio() {
             <Link
               key={org.id}
               ref={flip(org.id)}
-              to={`/org/${org.id}`}
+              to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type}
               className="plain card lift row"
               style={{ gap: 16, padding: '18px 22px' }}
             >

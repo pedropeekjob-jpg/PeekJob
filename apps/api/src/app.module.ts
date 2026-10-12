@@ -7,9 +7,10 @@ import { MyReviewsController } from './me/reviews.controller';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { VerificationModule } from './verification/verification.module';
+import { SeoController } from './web/seo.controller';
 
 @Module({
   imports: [DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule],
-  controllers: [HealthController, MessagesController, MyReviewsController],
+  controllers: [HealthController, MessagesController, MyReviewsController, SeoController],
 })
 export class AppModule {}

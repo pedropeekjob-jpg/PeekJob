@@ -49,6 +49,11 @@ describe('SEO e medição', () => {
     expect(res.text).toContain('"gaId":"G-TEST123"');
   });
 
+  it('caminhos que não existem: a aplicação com 404 (sem "soft 404" no Search Console)', async () => {
+    const res = await html('/nao-existe').expect(404);
+    expect(res.text).toContain('<div id="root">');
+  });
+
   it('pedidos da API (fetch) continuam a receber JSON', async () => {
     await t.http().get('/orgs').set('accept', '*/*').expect(200).expect('content-type', /json/);
     await t.http().get('/org/x').set('accept', 'application/json').expect(404);

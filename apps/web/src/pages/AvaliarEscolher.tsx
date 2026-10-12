@@ -9,6 +9,7 @@ import { ORG_TYPES, type Org, type OrgType } from '../data/orgs';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { DeskSteps, DISPLAY, FlowHead, LockLine } from './Avaliar.parts';
+import { useSearchTracking } from '../analytics/useSearchTracking';
 
 type Step = 'pick' | 'confirm' | 'add';
 
@@ -37,6 +38,7 @@ export default function AvaliarEscolher() {
   const chosen = useOrg(chosenId);
   const nq = q.trim();
   const search = useSearch(nq, { includePending: true });
+  useSearchTracking('avaliar', nq, search.items.length, search.loading);
   const results = useMemo(
     () => (nq ? search.items : [...orgs].sort((a, b) => b.reviewsCount - a.reviewsCount)),
     [orgs, nq, search.items],

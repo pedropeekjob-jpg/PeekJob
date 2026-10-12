@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { analytics } from '../analytics';
 import { useStore } from '../lib/store';
+import { openConsent } from './ConsentBanner';
 import { useIsDesktop } from '../lib/useMedia';
 import { Logo } from './Brand';
 import { Icon } from './Icon';
@@ -10,23 +12,23 @@ export function DesktopHeader() {
   const unread = messages.filter((m) => !m.read).length;
   return (
     <header className="container row" style={{ gap: 28, paddingTop: 20, paddingBottom: 20 }}>
-      <Link to="/" aria-label="PeekJob, início">
+      <Link to="/" aria-label="PeekJob, início" data-ev="nav_click" data-ev-area="header" data-ev-item="logo">
         <Logo height={52} />
       </Link>
       <nav aria-label="Principal" className="row wrap grow" style={{ gap: 24 }}>
-        <NavLink className="navl" to="/ranking">Ranking</NavLink>
-        <NavLink className="navl" to="/setores">Tipos e setores</NavLink>
-        <NavLink className="navl" to="/metodologia">Como calculamos</NavLink>
-        <NavLink className="navl" to="/para-organizacoes">Para organizações</NavLink>
+        <NavLink className="navl" to="/ranking" data-ev="nav_click" data-ev-area="header" data-ev-item="ranking">Ranking</NavLink>
+        <NavLink className="navl" to="/setores" data-ev="nav_click" data-ev-area="header" data-ev-item="setores">Tipos e setores</NavLink>
+        <NavLink className="navl" to="/metodologia" data-ev="nav_click" data-ev-area="header" data-ev-item="metodologia">Como calculamos</NavLink>
+        <NavLink className="navl" to="/para-organizacoes" data-ev="nav_click" data-ev-area="header" data-ev-item="para-organizacoes">Para organizações</NavLink>
       </nav>
-      <NavLink to="/guardadas" className={({ isActive }) => 'icon-btn' + (isActive ? ' on' : '')} aria-label="Guardadas">
+      <NavLink to="/guardadas" data-ev="nav_click" data-ev-area="header" data-ev-item="guardadas" className={({ isActive }) => 'icon-btn' + (isActive ? ' on' : '')} aria-label="Guardadas">
         <Icon name="bookmark" size={18} />
       </NavLink>
-      <NavLink to="/perfil" className={({ isActive }) => 'icon-btn' + (isActive ? ' on' : '')} aria-label={unread ? `Perfil, ${unread} mensagem nova` : 'Perfil'}>
+      <NavLink to="/perfil" data-ev="nav_click" data-ev-area="header" data-ev-item="perfil" className={({ isActive }) => 'icon-btn' + (isActive ? ' on' : '')} aria-label={unread ? `Perfil, ${unread} mensagem nova` : 'Perfil'}>
         <Icon name="user" size={18} />
         {unread > 0 && <span className="badge">{unread}</span>}
       </NavLink>
-      <Link to="/avaliar" className="btn btn-primary" style={{ height: 46, borderRadius: 14 }}>
+      <Link to="/avaliar" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="header" className="btn btn-primary" style={{ height: 46, borderRadius: 14 }}>
         Avaliar onde trabalho
       </Link>
     </header>
@@ -42,11 +44,16 @@ export function DesktopFooter() {
           <span className="small muted">Avaliações anónimas de quem trabalha em pequenas organizações.</span>
         </div>
         <nav aria-label="Rodapé" className="row wrap" style={{ gap: 20 }}>
-          <Link className="navl small" to="/setores">Tipos e setores</Link>
-          <Link className="navl small" to="/metodologia">Como calculamos</Link>
-          <Link className="navl small" to="/metodologia#privacidade">Privacidade</Link>
-          <Link className="navl small" to="/para-organizacoes">Para organizações</Link>
-          <Link className="navl small" to="/entrar">Entrar</Link>
+          <Link className="navl small" to="/setores" data-ev="nav_click" data-ev-area="footer" data-ev-item="setores">Tipos e setores</Link>
+          <Link className="navl small" to="/metodologia" data-ev="nav_click" data-ev-area="footer" data-ev-item="metodologia">Como calculamos</Link>
+          <Link className="navl small" to="/metodologia#privacidade" data-ev="nav_click" data-ev-area="footer" data-ev-item="privacidade">Privacidade</Link>
+          <Link className="navl small" to="/para-organizacoes" data-ev="nav_click" data-ev-area="footer" data-ev-item="para-organizacoes">Para organizações</Link>
+          <Link className="navl small" to="/entrar" data-ev="nav_click" data-ev-area="footer" data-ev-item="entrar">Entrar</Link>
+          {analytics.configured() && (
+            <button type="button" className="navl small" onClick={openConsent} style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer' }}>
+              Estatísticas
+            </button>
+          )}
         </nav>
       </div>
     </footer>
@@ -60,22 +67,22 @@ export function BottomNav() {
   const cur = (p: string) => (p === '/' ? pathname === '/' : pathname.startsWith(p)) ? 'page' : undefined;
   return (
     <nav aria-label="Navegação principal" className="bottom-nav">
-      <Link to="/" aria-current={cur('/')}>
+      <Link to="/" aria-current={cur('/')} data-ev="nav_click" data-ev-area="tabbar" data-ev-item="inicio">
         <Icon name="home" size={22} />
         Início
       </Link>
-      <Link to="/ranking" aria-current={cur('/ranking')}>
+      <Link to="/ranking" aria-current={cur('/ranking')} data-ev="nav_click" data-ev-area="tabbar" data-ev-item="ranking">
         <Icon name="ranking" size={22} />
         Ranking
       </Link>
-      <Link to="/avaliar" className="fab" aria-label="Avaliar onde trabalho">
+      <Link to="/avaliar" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="tabbar" className="fab" aria-label="Avaliar onde trabalho">
         <Icon name="plus" size={24} stroke={2.2} />
       </Link>
-      <Link to="/guardadas" aria-current={cur('/guardadas')}>
+      <Link to="/guardadas" aria-current={cur('/guardadas')} data-ev="nav_click" data-ev-area="tabbar" data-ev-item="guardadas">
         <Icon name="bookmark" size={22} />
         Guardadas
       </Link>
-      <Link to="/perfil" aria-current={cur('/perfil')}>
+      <Link to="/perfil" aria-current={cur('/perfil')} data-ev="nav_click" data-ev-area="tabbar" data-ev-item="perfil">
         <Icon name="user" size={22} />
         Perfil
         {unread > 0 && <span className="badge" style={{ right: 8 }}>{unread}</span>}

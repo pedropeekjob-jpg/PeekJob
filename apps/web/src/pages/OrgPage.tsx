@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { applyPageMeta, setOrgStructuredData } from '../analytics/seo';
 import { useOrg, useOrgStatus } from '../api/orgs';
 import { Ring } from '../components/Data';
 import { Icon } from '../components/Icon';
@@ -23,10 +24,32 @@ export default function OrgPage({ tab }: { tab: Tab }) {
   const { id } = useParams();
   const org = useOrg(id);
   const status = useOrgStatus(id);
+  useOrgMeta(org, tab);
   if (!org && status === 'loading') return <Shell nav><div className="page" role="status"><span className="sk" style={{ height: 120, borderRadius: 24 }} /><span className="sk" style={{ height: 300, borderRadius: 24 }} /></div></Shell>;
   if (!org) return <OrgNotFound id={id} />;
   // key: estado local (locais, "ver mais") recomeça ao mudar de organização
   return <OrgView key={org.id} org={org} tab={tab} />;
+}
+
+/** Título e descrição com o nome da organização + dados estruturados (Search Console: resultados com nota) */
+function useOrgMeta(org: Org | undefined, tab: Tab) {
+  const { pathname } = useLocation();
+  const name = org?.name;
+  const score = org?.score ?? 0;
+  const count = org?.reviewsCount ?? 0;
+  useEffect(() => {
+    if (!org || !name) return;
+    const what = tab === 'salarios' ? 'Salários' : tab === 'entrevistas' ? 'Entrevistas' : 'Avaliações';
+    applyPageMeta(pathname, {
+      title: `${name} · ${what} de quem lá trabalha · PeekJob`,
+      description: count
+        ? `${org.type} em ${org.city}. Nota ${fmt(score)} em ${plural(count, 'avaliação anónima', 'avaliações anónimas')} de quem lá trabalha.`
+        : `${org.type} em ${org.city}. Ainda sem avaliações: se trabalhas lá, sê a primeira pessoa a avaliar.`,
+    });
+    setOrgStructuredData(tab === 'avaliacoes' ? { name, score, reviewsCount: count } : null);
+    return () => setOrgStructuredData(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, name, score, count, tab]);
 }
 
 /* ------------------------------------------------------------------ */

@@ -4,3 +4,4 @@ export * from './match';
 export * from './moderation';
 export * from './schemas';
 export * from './support';
+export * from './routes';

@@ -9,9 +9,11 @@ RUN npm ci
 COPY packages/shared packages/shared
 COPY apps/api apps/api
 COPY apps/web apps/web
+# O Render passa o commit como build arg: identifica a versão nas estatísticas (antes/depois de cada mudança)
+ARG RENDER_GIT_COMMIT=dev
 RUN npm run build -w @peekjob/shared \
  && npm run build -w @peekjob/api \
- && VITE_API_URL=/ npm run build -w @peekjob/web
+ && VITE_API_URL=/ VITE_ROUTER=browser VITE_APP_VERSION=$RENDER_GIT_COMMIT npm run build -w @peekjob/web
 
 FROM node:20-slim
 ENV NODE_ENV=production WEB_DIST=/app/web PORT=3000

@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
+import { applyPageMeta, browserRouting } from './analytics/seo';
+import { ConsentBanner } from './components/ConsentBanner';
 import { StoreProvider } from './lib/store';
 import Inicio from './pages/Inicio';
 import Preferencias from './pages/Preferencias';
@@ -32,12 +35,32 @@ function ScrollTop() {
   return null;
 }
 
-// HashRouter: funciona em qualquer alojamento estático (link de demonstração) sem configurar o servidor.
+/** Em cada ecrã: título/robots/canonical (Search Console) e page_view (Analytics, se houver consentimento) */
+function PageTracking() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    setCurrentTemplate(() => routeTemplate(pathname));
+    applyPageMeta(pathname);
+    analytics.pageView(pathname);
+  }, [pathname]);
+  // Quem aceita a meio da visita: conta a página onde está
+  useEffect(() => analytics.subscribe(() => analytics.pageView(pathname)), [pathname]);
+  return null;
+}
+
+/**
+ * Produção (VITE_ROUTER=browser): URLs reais, indexáveis pelo Google.
+ * Demo (GitHub Pages): HashRouter, funciona em qualquer alojamento estático sem configurar o servidor.
+ */
+const Router = browserRouting ? BrowserRouter : HashRouter;
+
 export default function App() {
   return (
     <StoreProvider>
-      <HashRouter>
+      <Router>
         <ScrollTop />
+        <PageTracking />
+        <ConsentBanner />
         <Routes>
           <Route path="/" element={<Inicio />} />
           <Route path="/preferencias" element={<Preferencias />} />
@@ -63,7 +86,7 @@ export default function App() {
           <Route path="/painel" element={<Painel />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </HashRouter>
+      </Router>
     </StoreProvider>
   );
 }

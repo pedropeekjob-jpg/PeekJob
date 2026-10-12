@@ -17,5 +17,10 @@ services:
         sync: false
       - key: MAIL_FROM
         sync: false
+      # Google Analytics 4 (ex.: G-ABC123) e Search Console (só o código da etiqueta HTML); opcionais
+      - key: GA_MEASUREMENT_ID
+        sync: false
+      - key: GSC_VERIFICATION
+        sync: false
       - key: SEED_DEMO
         value: "true"

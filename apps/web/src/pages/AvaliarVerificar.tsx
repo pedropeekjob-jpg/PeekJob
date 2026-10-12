@@ -326,7 +326,7 @@ export default function AvaliarVerificar() {
                     {primaryLabel} {!primaryDisabled && <Icon name="next" size={18} stroke={2} />}
                   </button>
                 )}
-                <button type="button" className="link" style={{ color: 'var(--body)', fontWeight: 500, fontSize: 15 }} onClick={skip}>
+                <button type="button" data-ev="verification" data-ev-method="none" data-ev-step="skipped" className="link" style={{ color: 'var(--body)', fontWeight: 500, fontSize: 15 }} onClick={skip}>
                   Avaliar sem verificar
                 </button>
                 <Link to="/avaliar" className="link" style={{ color: 'var(--body)', fontWeight: 500, fontSize: 15, marginLeft: 'auto' }}>
@@ -369,7 +369,7 @@ export default function AvaliarVerificar() {
           right={
             <>
               <span className="small muted">Antes de começar</span>
-              <button type="button" onClick={skip} style={{ minWidth: 44, height: 44, border: 0, background: 'none', fontSize: 15, fontWeight: 500, color: 'var(--body)', padding: 0, textAlign: 'right' }}>
+              <button type="button" onClick={skip} data-ev="verification" data-ev-method="none" data-ev-step="skipped" style={{ minWidth: 44, height: 44, border: 0, background: 'none', fontSize: 15, fontWeight: 500, color: 'var(--body)', padding: 0, textAlign: 'right' }}>
                 Saltar
               </button>
             </>

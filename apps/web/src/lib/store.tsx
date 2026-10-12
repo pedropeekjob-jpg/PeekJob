@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { api, ApiError, apiMode, errorText } from '../api/http';
 import { toMessage, toMyReview, toOrg, type ApiOrg, type ApiReview } from '../api/mappers';
 import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
-import type { Org, OrgType, Scores } from '../data/orgs';
+import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
+import { textLengthBucket, track } from '../analytics';
 import { detectRedFlags } from './moderation';
 
 /**
@@ -68,6 +69,10 @@ interface State {
 export type Failure = { ok: false; status: number; message: string; body: Record<string, any> | null };
 /** Resultado de uma ação que pode falhar na API */
 export type Result<T = undefined> = { ok: true; value?: T } | Failure;
+
+/** Categoria de uma falha para a medição (nunca a mensagem) */
+const failKind = (f: Failure) =>
+  f.status === 429 ? 'rate_limited' : f.status === 422 ? 'moderation_blocked' : f.status === 409 ? 'duplicate' : f.status === 401 ? 'auth' : f.status === 0 ? 'network' : 'error';
 
 const fail = (e: unknown): Failure => ({
   ok: false,
@@ -159,6 +164,13 @@ function useAppState() {
   const loadingRef = useRef<Record<string, boolean>>({});
   const stRef = useRef(st);
   stRef.current = st;
+  const remoteRef = useRef(remote);
+  remoteRef.current = remote;
+  const orgTypeOf = (id: string | null) => {
+    if (!id) return undefined;
+    const r = remoteRef.current;
+    return (r.details[id] ?? r.known[id] ?? r.orgs?.find((o) => o.id === id) ?? ORG_BY_ID[id])?.type ?? stRef.current.added.find((a) => a.id === id)?.type;
+  };
 
   useEffect(() => {
     try {
@@ -224,7 +236,10 @@ function useAppState() {
 
   const actions = useMemo(
     () => ({
-      setPrefs: (prefs: CriterionKey[]) => set({ prefs, onboarded: true }),
+      setPrefs: (prefs: CriterionKey[]) => {
+        track('prefs_saved', { priorities_count: prefs.length, top_priority: prefs[0] });
+        set({ prefs, onboarded: true });
+      },
       togglePref: (k: CriterionKey) =>
         set((s) => {
           const p = s.prefs.includes(k) ? s.prefs.filter((x) => x !== k) : s.prefs.length < 3 ? [...s.prefs, k] : s.prefs;
@@ -237,19 +252,25 @@ function useAppState() {
       requestLink: async (email: string): Promise<Result> => {
         try {
           await api('/auth/magic-link', { body: { email } });
+          track('login_link_requested', { result: 'sent' });
           return { ok: true };
         } catch (e) {
-          return fail(e);
+          const f = fail(e);
+          track('login_link_requested', { result: failKind(f) });
+          return f;
         }
       },
       verifyLink: async (token: string): Promise<Result> => {
         try {
           await api('/auth/verify', { body: { token } });
+          track('login', { method: 'magic_link', result: 'success' });
           set({ user: { email: '' } });
           await loadMine();
           return { ok: true };
         } catch (e) {
-          return fail(e);
+          const f = fail(e);
+          track('login', { method: 'magic_link', result: f.status === 401 ? 'link_expired' : failKind(f) });
+          return f;
         }
       },
       logout: async () => {
@@ -257,8 +278,14 @@ function useAppState() {
         set({ user: null, ...(apiMode ? { myReviews: [], messages: [] } : {}) });
       },
 
-      toggleSave: (id: string) => set((s) => ({ saved: s.saved.includes(id) ? s.saved.filter((x) => x !== id) : [...s.saved, id] })),
-      toggleUseful: (id: string) => set((s) => ({ useful: { ...s.useful, [id]: !s.useful[id] } })),
+      toggleSave: (id: string) => {
+        track('save_org', { saved: !stRef.current.saved.includes(id) });
+        set((s) => ({ saved: s.saved.includes(id) ? s.saved.filter((x) => x !== id) : [...s.saved, id] }));
+      },
+      toggleUseful: (id: string) => {
+        track('mark_helpful', { helpful: !stRef.current.useful[id] });
+        set((s) => ({ useful: { ...s.useful, [id]: !s.useful[id] } }));
+      },
       updateDraft: (patch: Partial<Draft>) => set((s) => ({ draft: { ...s.draft, ...patch } })),
       startDraft: (orgId: string, locationId: string | null) =>
         set((s) => ({ draft: s.draft.orgId === orgId ? { ...s.draft, locationId } : { ...emptyDraft(), orgId, locationId } })),
@@ -275,15 +302,18 @@ function useAppState() {
             added: s.added.some((a) => a.id === id) ? s.added : [...s.added, { name: o.name, type: o.type, city: o.city, id }],
             draft: { ...emptyDraft(), orgId: id },
           }));
+          track('review_org_created', { org_type: o.type, result: 'created' });
           return { ok: true, value: { id, duplicates: [] } };
         }
         try {
           const r = await api<{ id: string; name: string; type: OrgType; city: string; possibleDuplicates: { id: string; name: string }[] }>('/orgs', { body: o });
           set((s) => ({ added: [...s.added.filter((a) => a.id !== r.id), { id: r.id, name: r.name, type: r.type, city: r.city }], draft: { ...emptyDraft(), orgId: r.id } }));
+          track('review_org_created', { org_type: o.type, result: r.possibleDuplicates.length ? 'created_with_duplicates' : 'created' });
           return { ok: true, value: { id: r.id, duplicates: r.possibleDuplicates } };
         } catch (e) {
           if (e instanceof ApiError && e.status === 409 && e.body?.existingId) {
             set({ draft: { ...emptyDraft(), orgId: e.body.existingId } });
+            track('review_org_created', { org_type: o.type, result: 'existing' });
             void loadOrg(e.body.existingId);
             return { ok: true, value: { id: e.body.existingId as string, duplicates: [] } };
           }
@@ -295,17 +325,23 @@ function useAppState() {
       sendWorkEmailCode: async (orgId: string, email: string): Promise<Result> => {
         try {
           await api('/verifications/email', { body: { orgId, email } });
+          track('verification', { method: 'email', step: 'code_sent' });
           return { ok: true };
         } catch (e) {
-          return fail(e);
+          const f = fail(e);
+          track('verification', { method: 'email', step: `send_${failKind(f)}` });
+          return f;
         }
       },
       confirmWorkEmailCode: async (orgId: string, code: string): Promise<Result> => {
         try {
           await api('/verifications/email/confirm', { body: { orgId, code } });
+          track('verification', { method: 'email', step: 'confirmed' });
           return { ok: true };
         } catch (e) {
-          return fail(e);
+          const f = fail(e);
+          track('verification', { method: 'email', step: f.status === 400 ? 'code_rejected' : `confirm_${failKind(f)}` });
+          return f;
         }
       },
       verifyDocument: async (orgId: string, file: File): Promise<Result> => {
@@ -314,9 +350,12 @@ function useAppState() {
           form.append('orgId', orgId);
           form.append('file', file);
           await api('/verifications/document', { form });
+          track('verification', { method: 'document', step: 'confirmed' });
           return { ok: true };
         } catch (e) {
-          return fail(e);
+          const f = fail(e);
+          track('verification', { method: 'document', step: f.status === 422 ? 'nif_not_found' : f.status === 415 ? 'not_pdf' : failKind(f) });
+          return f;
         }
       },
 
@@ -326,7 +365,16 @@ function useAppState() {
        * Modo API: o servidor modera (422 com sugestão se houver insultos/nomes) e cria a mensagem de apoio.
        */
       publish: async (): Promise<Result> => {
+        const pd = stRef.current.draft;
+        const submitInfo = {
+          verified: !!pd.verified,
+          criteria_count: Object.values(pd.scores).filter((v) => typeof v === 'number').length,
+          tags_count: pd.tags.length,
+          text_length: textLengthBucket(pd.text.trim().length),
+          org_type: orgTypeOf(pd.orgId),
+        };
         if (!apiMode) {
+          track('review_submit', { result: 'published', ...submitInfo });
           set((s) => {
             const d = s.draft;
             if (!d.orgId) return {};
@@ -354,10 +402,13 @@ function useAppState() {
           set((s) => ({ myReviews: [mine, ...s.myReviews.filter((x) => x.id !== mine.id)], lastPublished: mine.id, draft: emptyDraft() }));
           void loadMine().catch(() => undefined);
           void loadOrgs().catch(() => undefined);
+          track('review_submit', { result: 'published', ...submitInfo });
           await loadOrg(d.orgId, true); // o ecrã seguinte mostra o nº de avaliações já atualizado
           return { ok: true };
         } catch (e) {
-          return fail(e);
+          const f = fail(e);
+          track('review_submit', { result: failKind(f), ...submitInfo });
+          return f;
         }
       },
 

@@ -11,6 +11,7 @@ import { match } from '../lib/match';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { fmt, plural } from '../lib/format';
+import { useSearchTracking } from '../analytics/useSearchTracking';
 
 const SEARCH_MS = 900;
 const LIMIT = 6;
@@ -70,6 +71,7 @@ export default function Pesquisa() {
   };
 
   const found = useSearch(applied, { type });
+  useSearchTracking('pesquisa', applied, found.items.length, found.loading, type);
   const results: Result[] = useMemo(
     () =>
       found.items
@@ -157,7 +159,7 @@ function ResultRow({ r, desktop = false }: { r: Result; desktop?: boolean }) {
   const size = desktop ? 52 : 46;
   return (
     <Link
-      to={`/org/${org.id}`}
+      to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type}
       className="plain row pj-res"
       style={{ gap: desktop ? 16 : 12, padding: desktop ? '14px 12px' : '12px 0', borderTop: '1px solid var(--line)', borderRadius: desktop ? 4 : 0, minHeight: 70 }}
     >

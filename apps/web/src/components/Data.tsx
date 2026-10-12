@@ -140,7 +140,7 @@ export function Trend({ v }: { v: number | 'novo' }) {
 /** Linha magra de organização: anel, nome, 1 metadado e % para ti */
 export function OrgRow({ org, match, right, to, meta }: { org: Org; match?: number; right?: React.ReactNode; to?: string; meta?: string }) {
   return (
-    <Link to={to ?? `/org/${org.id}`} className="plain row" style={{ gap: 14, padding: '14px 0', minHeight: 72 }}>
+    <Link to={to ?? `/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} data-ev-match={match} className="plain row" style={{ gap: 14, padding: '14px 0', minHeight: 72 }}>
       <Ring value={org.score} size={50} muted={!org.reviewsCount} />
       <span className="grow stack" style={{ gap: 2 }}>
         <span className="ellipsis" style={{ fontWeight: 600 }}>
@@ -156,7 +156,7 @@ export function OrgRow({ org, match, right, to, meta }: { org: Org; match?: numb
 /** Cartão magro de organização (grelhas) */
 export function OrgCard({ org, match }: { org: Org; match: number }) {
   return (
-    <Link to={`/org/${org.id}`} className="plain card lift" style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 18 }}>
+    <Link to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} data-ev-match={match} className="plain card lift" style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 18 }}>
       <Ring value={org.score} size={60} />
       <span className="grow stack" style={{ gap: 4 }}>
         <span style={{ fontWeight: 600, fontSize: 17 }} className="ellipsis">

@@ -737,3 +737,31 @@ a.plain {
   padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
   margin-top: auto;
 }
+
+/* Pedido de consentimento (estatísticas) */
+.consent {
+  position: fixed;
+  z-index: 40;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: 0 12px 40px rgba(1, 11, 19, 0.16);
+}
+.consent .btn {
+  flex: 1;
+}
+@media (min-width: 900px) {
+  .consent {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    max-width: 440px;
+  }
+}
