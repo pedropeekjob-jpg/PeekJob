@@ -1,23 +1,29 @@
-# PeekJob · POC
+# PeekJob
 
 Prova de conceito da PeekJob: avaliações anónimas de quem trabalha em **PME, associações, voluntariado e empresas em nome individual**, com foco em **respeito, direitos humanos e diversidade**.
 
 A documentação do projeto (estudo de mercado, decisões, ecrãs, marca) está em [`docs/`](docs/00-indice.md).
 
-Uma única aplicação web, *mobile first*. Abaixo de 900 px mostra os ecrãs mobile; a partir de 900 px mostra os ecrãs desktop. Os ecrãs seguem os designs aprovados no canvas.
+Monorepo em TypeScript, desenvolvido com **test first**:
+
+| Pasta | O que é |
+|---|---|
+| `apps/web` | Aplicação web (React + Vite), *mobile first*: abaixo de 900 px ecrãs mobile, acima ecrãs desktop. Demo: https://pedropeekjob-jpg.github.io/PeekJob/ |
+| `apps/api` | API (NestJS + PostgreSQL) — ver [docs/07-backend.md](docs/07-backend.md) |
+| `packages/shared` | Regras partilhadas: NIF, moderação (red flags, insultos/nomes), compatibilidade, validação |
 
 ## Correr localmente
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # gera dist/ (estático, funciona em qualquer alojamento)
-npm run preview
+npm run dev:web                       # http://localhost:5173
+docker compose up -d db               # PostgreSQL para a API
+npm test                              # domínio partilhado + API (precisa de TEST_DATABASE_URL)
 ```
 
-Requisitos: Node 18 ou superior.
+Requisitos: Node 20 ou superior. Cada push corre os testes no GitHub Actions e publica a demo.
 
-## O que está incluído
+## Web: o que está incluído
 
 | Área | Rotas |
 |---|---|

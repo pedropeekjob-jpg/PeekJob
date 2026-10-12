@@ -10,6 +10,7 @@ Plataforma *mobile first* onde quem trabalha avalia, de forma anónima, **PME, a
 | 04 | [Marca](04-marca.md) | Logótipo, cores, tipografia, logo animado, ícone da app e favicon |
 | 05 | [POC](05-poc.md) | Protótipo funcional: como experimentar, o que faz, arquitetura |
 | 06 | [Próximos passos e questões em aberto](06-proximos-passos.md) | Jurídico, produto, técnica |
+| 07 | [Backend](07-backend.md) | Decisões técnicas, alimentação de dados, API, testes |
 
 ## Ligações
 
