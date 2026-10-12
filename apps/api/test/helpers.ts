@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { InMemoryMailer, MAILER } from '../src/auth/mailer';
 import { configureApp } from '../src/main';
 
 export const TEST_DB = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@localhost:5544/peekjob_test';
@@ -10,27 +11,54 @@ export const TEST_DB = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@loc
 export interface TestCtx {
   app: INestApplication;
   pool: Pool;
+  mailer: InMemoryMailer;
   http: () => ReturnType<typeof request>;
+  /** Entra com o link mágico (como uma pessoa real) e devolve o cabeçalho Cookie da sessão */
+  login: (name: string, role?: 'moderator') => Promise<{ Cookie: string }>;
+  sessions: Map<string, { Cookie: string }>;
 }
 
 export async function createTestApp(): Promise<TestCtx> {
   process.env.DATABASE_URL = TEST_DB;
   process.env.PRIVACY_SECRET = 'segredo-de-teste';
-  const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
+  const mailer = new InMemoryMailer();
+  const mod = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(MAILER).useValue(mailer).compile();
   const app = mod.createNestApplication();
   configureApp(app);
   await app.init();
   const pool = new Pool({ connectionString: TEST_DB });
-  return { app, pool, http: () => request(app.getHttpServer()) };
+  const http = () => request(app.getHttpServer());
+  const sessions = new Map<string, { Cookie: string }>();
+  const login = async (name: string, role?: 'moderator') => {
+    const key = `${name}:${role ?? 'user'}`;
+    const cached = sessions.get(key);
+    if (cached) return cached;
+    const email = `${name}@teste.pt`;
+    await http().post('/auth/magic-link').send({ email }).expect(202);
+    const token = mailer.lastTokenFor(email);
+    const res = await http().post('/auth/verify').send({ token }).expect(200);
+    if (role) await pool.query('UPDATE users SET role = $2 WHERE id = $1', [res.body.user.id, role]);
+    const cookie = { Cookie: sessionCookie(res.headers['set-cookie']) };
+    sessions.set(key, cookie);
+    return cookie;
+  };
+  return { app, pool, mailer, http, login, sessions };
 }
 
-export async function resetDb(pool: Pool) {
-  await pool.query('TRUNCATE support_messages, reviews, org_locations, org_aliases, org_sources, organizations RESTART IDENTITY CASCADE');
+export function sessionCookie(setCookie: string | string[] | undefined): string {
+  const list = Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : [];
+  const c = list.find((x) => x.startsWith('pj_session='));
+  if (!c) throw new Error('Sem cookie de sessão');
+  return c.split(';')[0];
 }
 
-/** Cabeçalhos da autenticação de desenvolvimento (substituída pelo link mágico na próxima fatia) */
-export const asUser = (id: string) => ({ 'x-user-id': id });
-export const asModerator = (id = 'mod-1') => ({ 'x-user-id': id, 'x-user-role': 'moderator' });
+export async function resetDb(t: TestCtx) {
+  await t.pool.query(
+    'TRUNCATE support_messages, reviews, org_locations, org_aliases, org_sources, organizations, sessions, login_tokens, users RESTART IDENTITY CASCADE',
+  );
+  t.sessions.clear();
+  t.mailer.clear();
+}
 
 export async function insertOrg(
   pool: Pool,
