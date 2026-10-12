@@ -9,7 +9,7 @@ describe('SEO e medição', () => {
   const env = { ...process.env };
   beforeAll(async () => {
     const dir = mkdtempSync(join(tmpdir(), 'pj-web-'));
-    writeFileSync(join(dir, 'index.html'), '<!doctype html><html><head><title>PeekJob</title><!--pj:head--></head><body><div id="root"></div></body></html>');
+    writeFileSync(join(dir, 'index.html'), '<!doctype html><html lang="pt-PT"><head><title>PeekJob</title><!--pj:head--></head><body><div id="root"></div></body></html>');
     process.env.WEB_DIST = dir;
     process.env.WEB_ORIGIN = 'https://peekjob.pt';
     t = await createTestApp();
@@ -74,5 +74,20 @@ describe('SEO e medição', () => {
     expect(res.text).toContain(`<loc>https://peekjob.pt/org/${active}</loc>`);
     expect(res.text).not.toContain(pending);
     expect(res.text).not.toContain('/avaliar');
+  });
+
+  it('sitemap.xml indica a versão em inglês de cada página (hreflang)', async () => {
+    const res = await t.http().get('/sitemap.xml').expect(200);
+    expect(res.text).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+    expect(res.text).toContain('<xhtml:link rel="alternate" hreflang="pt-PT" href="https://peekjob.pt/ranking"/>');
+    expect(res.text).toContain('<xhtml:link rel="alternate" hreflang="en" href="https://peekjob.pt/ranking?lang=en"/>');
+    expect(res.text).toContain('<xhtml:link rel="alternate" hreflang="x-default" href="https://peekjob.pt/ranking"/>');
+  });
+
+  it('com ?lang=en o HTML já sai com lang="en-GB" (antes do JavaScript)', async () => {
+    const res = await html('/sobre?lang=en').expect(200);
+    expect(res.text).toContain('<html lang="en-GB"');
+    const pt = await html('/sobre').expect(200);
+    expect(pt.text).toContain('<html lang="pt-PT"');
   });
 });

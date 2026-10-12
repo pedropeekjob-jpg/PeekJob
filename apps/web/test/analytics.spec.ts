@@ -58,7 +58,7 @@ function setup(opts: { id?: string; stored?: 'granted' | 'denied' | null } = {})
   const dataLayer: unknown[] = [];
   const loadScript = vi.fn();
   const clearCookies = vi.fn();
-  const a = createAnalytics({ measurementId: opts.id, consent, dataLayer, loadScript, clearCookies, origin: 'https://peekjob.pt', appVersion: 'abc123', appMode: 'api' });
+  const a = createAnalytics({ measurementId: opts.id, consent, dataLayer, loadScript, clearCookies, origin: 'https://peekjob.pt', appVersion: 'abc123', appMode: 'api', lang: 'en' });
   const calls = () => dataLayer.map((x) => Array.from(x as ArrayLike<unknown>));
   const events = () => calls().filter((c) => c[0] === 'event');
   return { a, calls, events, loadScript, clearCookies, stored: () => value };
@@ -93,7 +93,7 @@ describe('Consentimento e envio', () => {
     expect(config[2]).toMatchObject({ send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
     const consent = s.calls().find((c) => c[0] === 'consent' && c[1] === 'default')!;
     expect(consent[2]).toMatchObject({ ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
-    expect(s.calls().find((c) => c[0] === 'set' && c[1] === 'user_properties')![2]).toMatchObject({ app_version: 'abc123', app_mode: 'api' });
+    expect(s.calls().find((c) => c[0] === 'set' && c[1] === 'user_properties')![2]).toMatchObject({ app_version: 'abc123', app_mode: 'api', ui_lang: 'en' });
   });
 
   it('page_view vai com o modelo da rota, sem id nem token', () => {
