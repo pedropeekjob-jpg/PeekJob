@@ -1,0 +1,23 @@
+PeekJob — ícone e favicon
+
+Conceito: os dois "e" de "peek" com a pupila na parte fechada — os olhos que espreitam.
+Cores: fundo ink #010B13, letras brancas, pupilas teal #00A9AF.
+
+Ficheiros
+- peekjob-icon.svg ............ mestre (quadrado, sem cantos; o sistema arredonda)
+- peekjob-icon-rounded.svg .... com cantos, para apresentações e lojas que não arredondam
+- app-icon-1024.png ........... iOS / App Store (sem transparência)
+- icon-512.png, icon-192.png .. Android / PWA
+- icon-maskable-512.png ....... Android adaptativo (desenho dentro da zona segura de 80%)
+- apple-touch-icon.png ........ 180×180, ecrã principal do iPhone
+- favicon.svg ................. favicon moderno (desenho mais cheio para tamanhos pequenos)
+- favicon.ico ................. 16, 32 e 48 px, para browsers antigos
+- favicon-16/32/48.png
+- site.webmanifest
+
+No <head> da aplicação
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#010B13">

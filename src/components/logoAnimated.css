@@ -1,0 +1,40 @@
+/* Logo animado PeekJob — gerado a partir do design (8 s em ciclo) */
+.pj{display:block;overflow:visible}
+.pj *{animation-duration:var(--pj-dur,8s);animation-iteration-count:infinite;animation-timing-function:cubic-bezier(.45,0,.2,1)}
+.pj .pj-e{stroke-dasharray:71.49 14.59}
+.pj .pj-pupil{transform-box:fill-box;transform-origin:center;transform:scale(0);animation-name:pjPupil}
+.pj .pj-eyes{animation-name:pjLook}
+.pj .pj-bstem{stroke-dasharray:21.6 21.6;animation-name:pjStem}
+.pj .pj-handle{stroke-dasharray:8 8;stroke-dashoffset:8;animation-name:pjHandle}
+.pj .pj-mag{animation-name:pjMag}
+.pj .pj-glass{animation-name:pjGlass}
+.pj .pj-arm{animation-name:pjArmRoad}
+.pj .pj-leg{animation-name:pjLegRoad}
+.pj .pj-revA{stroke-dasharray:38.2 38.2;stroke-dashoffset:38.2;animation-name:pjRevA}
+.pj .pj-revL{stroke-dasharray:21.3 21.3;stroke-dashoffset:21.3;animation-name:pjRevL}
+.pj .pj-route{stroke-dasharray:.01 4.4;opacity:0}
+.pj .pj-routeA{animation:pjMarch .7s linear infinite,pjRouteA var(--pj-dur,8s) cubic-bezier(.45,0,.2,1) infinite}
+.pj .pj-routeL{animation:pjMarch .7s linear infinite,pjRouteL var(--pj-dur,8s) cubic-bezier(.45,0,.2,1) infinite}
+.pj .pj-pinA,.pj .pj-pinL,.pj .pj-pulse,.pj .pj-node{transform-box:fill-box;transform-origin:center;transform:scale(0)}
+.pj .pj-pinA{animation-name:pjPinA}
+.pj .pj-pinL{animation-name:pjPinL}
+.pj .pj-pulse{animation-name:pjPulse;animation-timing-function:ease-out}
+.pj .pj-node{animation-name:pjNode}
+@keyframes pjPupil{0%,7%{transform:scale(0)}13%{transform:scale(1.15)}15%,85%{transform:scale(1)}16.5%{transform:scaleY(.15)}18%{transform:scale(1)}92%,100%{transform:scale(0)}}
+@keyframes pjLook{0%,15%{transform:translate(0,0)}20%,23%{transform:translate(-5.8px,.4px)}28%,31%{transform:translate(5.8px,.4px)}37%,47%{transform:translate(5px,-2px)}55%,72%{transform:translate(5.6px,.9px)}80%,100%{transform:translate(0,0)}}
+@keyframes pjStem{0%,14%{stroke-dashoffset:0}20%,80%{stroke-dashoffset:-21.6}86%,100%{stroke-dashoffset:0}}
+@keyframes pjHandle{0%,18%{stroke-dashoffset:8}24%,78%{stroke-dashoffset:0}83%,100%{stroke-dashoffset:8}}
+@keyframes pjMag{0%,24%{transform:translate(0,0)}36%{transform:translate(-1px,-50px)}40%{transform:translate(1.5px,-52px)}44%{transform:translate(-1.5px,-48px)}47%{transform:translate(0,-50px)}57%{transform:translate(-6.5px,-30px)}61%{transform:translate(-5px,-28px)}72%{transform:translate(-6px,-29px)}82%,100%{transform:translate(0,0)}}
+@keyframes pjGlass{0%,30%{fill-opacity:0}36%,72%{fill-opacity:.12}63%{fill-opacity:.32}80%,100%{fill-opacity:0}}
+@keyframes pjArmRoad{0%,17%{stroke:var(--pj-ink,#010B13)}23%,80%{stroke:var(--pj-road,#E2E5E6)}87%,100%{stroke:var(--pj-ink,#010B13)}}
+@keyframes pjLegRoad{0%,17%{stroke:#00A9AF}23%,80%{stroke:var(--pj-road,#E2E5E6)}87%,100%{stroke:#00A9AF}}
+@keyframes pjRevA{0%,23%{stroke-dashoffset:38.2}35%,100%{stroke-dashoffset:0}}
+@keyframes pjRevL{0%,49%{stroke-dashoffset:21.3}60%,100%{stroke-dashoffset:0}}
+@keyframes pjMarch{from{stroke-dashoffset:0}to{stroke-dashoffset:-4.41}}
+@keyframes pjRouteA{0%,22%{opacity:0;stroke:var(--pj-ink,#010B13)}24%,45%{opacity:1;stroke:var(--pj-ink,#010B13)}49%,80%{opacity:1;stroke:#A7A9AC}86%,100%{opacity:0;stroke:#A7A9AC}}
+@keyframes pjRouteL{0%,48%{opacity:0}50%,80%{opacity:1}86%,100%{opacity:0}}
+@keyframes pjPinA{0%,33%{transform:scale(0);stroke:var(--pj-ink,#010B13)}36%{transform:scale(1.25)}38%,45%{transform:scale(1);stroke:var(--pj-ink,#010B13)}49%,80%{transform:scale(.8);stroke:#A7A9AC}85%,100%{transform:scale(0);stroke:#A7A9AC}}
+@keyframes pjPinL{0%,59%{transform:scale(0)}62%{transform:scale(1.4)}65%,80%{transform:scale(1)}85%,100%{transform:scale(0)}}
+@keyframes pjPulse{0%,61%{transform:scale(1);opacity:0}62%{transform:scale(1);opacity:.9}74%,100%{transform:scale(3.6);opacity:0}}
+@keyframes pjNode{0%,18%{opacity:0;transform:scale(0)}23%{opacity:1;transform:scale(1.4)}26%,80%{opacity:1;transform:scale(1)}86%,100%{opacity:0;transform:scale(0)}}
+@media (prefers-reduced-motion: reduce){.pj *{animation:none!important}.pj .pj-route,.pj .pj-pupil,.pj .pj-pinA,.pj .pj-pinL,.pj .pj-pulse,.pj .pj-node{display:none}}

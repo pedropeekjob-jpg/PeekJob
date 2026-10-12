@@ -1,0 +1,73 @@
+<svg class="pj" width="568" height="312" xmlns="http://www.w3.org/2000/svg" viewBox="71 31 142 78" role="img" aria-label="PeekJob"><title>PeekJob</title><style>:root{--pj-ink:#FFFFFF;--pj-node:#010B13;--pj-road:#2A3238;--pj-bg:#010B13}.pj{display:block;overflow:visible}
+.pj *{animation-duration:var(--pj-dur,8s);animation-iteration-count:infinite;animation-timing-function:cubic-bezier(.45,0,.2,1)}
+.pj .pj-e{stroke-dasharray:71.49 14.59}
+.pj .pj-pupil{transform-box:fill-box;transform-origin:center;transform:scale(0);animation-name:pjPupil}
+.pj .pj-eyes{animation-name:pjLook}
+.pj .pj-bstem{stroke-dasharray:21.6 21.6;animation-name:pjStem}
+.pj .pj-handle{stroke-dasharray:8 8;stroke-dashoffset:8;animation-name:pjHandle}
+.pj .pj-mag{animation-name:pjMag}
+.pj .pj-glass{animation-name:pjGlass}
+.pj .pj-arm{animation-name:pjArmRoad}
+.pj .pj-leg{animation-name:pjLegRoad}
+.pj .pj-revA{stroke-dasharray:38.2 38.2;stroke-dashoffset:38.2;animation-name:pjRevA}
+.pj .pj-revL{stroke-dasharray:21.3 21.3;stroke-dashoffset:21.3;animation-name:pjRevL}
+.pj .pj-route{stroke-dasharray:.01 4.4;opacity:0}
+.pj .pj-routeA{animation:pjMarch .7s linear infinite,pjRouteA var(--pj-dur,8s) cubic-bezier(.45,0,.2,1) infinite}
+.pj .pj-routeL{animation:pjMarch .7s linear infinite,pjRouteL var(--pj-dur,8s) cubic-bezier(.45,0,.2,1) infinite}
+.pj .pj-pinA,.pj .pj-pinL,.pj .pj-pulse,.pj .pj-node{transform-box:fill-box;transform-origin:center;transform:scale(0)}
+.pj .pj-pinA{animation-name:pjPinA}
+.pj .pj-pinL{animation-name:pjPinL}
+.pj .pj-pulse{animation-name:pjPulse;animation-timing-function:ease-out}
+.pj .pj-node{animation-name:pjNode}
+@keyframes pjPupil{0%,7%{transform:scale(0)}13%{transform:scale(1.15)}15%,85%{transform:scale(1)}16.5%{transform:scaleY(.15)}18%{transform:scale(1)}92%,100%{transform:scale(0)}}
+@keyframes pjLook{0%,15%{transform:translate(0,0)}20%,23%{transform:translate(-5.8px,.4px)}28%,31%{transform:translate(5.8px,.4px)}37%,47%{transform:translate(5px,-2px)}55%,72%{transform:translate(5.6px,.9px)}80%,100%{transform:translate(0,0)}}
+@keyframes pjStem{0%,14%{stroke-dashoffset:0}20%,80%{stroke-dashoffset:-21.6}86%,100%{stroke-dashoffset:0}}
+@keyframes pjHandle{0%,18%{stroke-dashoffset:8}24%,78%{stroke-dashoffset:0}83%,100%{stroke-dashoffset:8}}
+@keyframes pjMag{0%,24%{transform:translate(0,0)}36%{transform:translate(-1px,-50px)}40%{transform:translate(1.5px,-52px)}44%{transform:translate(-1.5px,-48px)}47%{transform:translate(0,-50px)}57%{transform:translate(-6.5px,-30px)}61%{transform:translate(-5px,-28px)}72%{transform:translate(-6px,-29px)}82%,100%{transform:translate(0,0)}}
+@keyframes pjGlass{0%,30%{fill-opacity:0}36%,72%{fill-opacity:.12}63%{fill-opacity:.32}80%,100%{fill-opacity:0}}
+@keyframes pjArmRoad{0%,17%{stroke:var(--pj-ink,#010B13)}23%,80%{stroke:var(--pj-road,#E2E5E6)}87%,100%{stroke:var(--pj-ink,#010B13)}}
+@keyframes pjLegRoad{0%,17%{stroke:#00A9AF}23%,80%{stroke:var(--pj-road,#E2E5E6)}87%,100%{stroke:#00A9AF}}
+@keyframes pjRevA{0%,23%{stroke-dashoffset:38.2}35%,100%{stroke-dashoffset:0}}
+@keyframes pjRevL{0%,49%{stroke-dashoffset:21.3}60%,100%{stroke-dashoffset:0}}
+@keyframes pjMarch{from{stroke-dashoffset:0}to{stroke-dashoffset:-4.41}}
+@keyframes pjRouteA{0%,22%{opacity:0;stroke:var(--pj-ink,#010B13)}24%,45%{opacity:1;stroke:var(--pj-ink,#010B13)}49%,80%{opacity:1;stroke:#A7A9AC}86%,100%{opacity:0;stroke:#A7A9AC}}
+@keyframes pjRouteL{0%,48%{opacity:0}50%,80%{opacity:1}86%,100%{opacity:0}}
+@keyframes pjPinA{0%,33%{transform:scale(0);stroke:var(--pj-ink,#010B13)}36%{transform:scale(1.25)}38%,45%{transform:scale(1);stroke:var(--pj-ink,#010B13)}49%,80%{transform:scale(.8);stroke:#A7A9AC}85%,100%{transform:scale(0);stroke:#A7A9AC}}
+@keyframes pjPinL{0%,59%{transform:scale(0)}62%{transform:scale(1.4)}65%,80%{transform:scale(1)}85%,100%{transform:scale(0)}}
+@keyframes pjPulse{0%,61%{transform:scale(1);opacity:0}62%{transform:scale(1);opacity:.9}74%,100%{transform:scale(3.6);opacity:0}}
+@keyframes pjNode{0%,18%{opacity:0;transform:scale(0)}23%{opacity:1;transform:scale(1.4)}26%,80%{opacity:1;transform:scale(1)}86%,100%{opacity:0;transform:scale(0)}}
+@media (prefers-reduced-motion: reduce){.pj *{animation:none!important}.pj .pj-route,.pj .pj-pupil,.pj .pj-pinA,.pj .pj-pinL,.pj .pj-pulse,.pj .pj-node{display:none}}</style>
+<defs>
+ <mask id="pjmAs" maskUnits="userSpaceOnUse" x="71" y="31" width="142" height="78"><path class="pj-revA" d="M158.47 52H169.57A16.5 16.5 0 0 0 186.07 35.5V34.5" fill="none" stroke="#FFFFFF" stroke-width="9"/></mask>
+ <mask id="pjmLs" maskUnits="userSpaceOnUse" x="71" y="31" width="142" height="78"><path class="pj-revL" d="M159.34 54.4A13.5 13.5 0 0 1 172.84 67.9" fill="none" stroke="#FFFFFF" stroke-width="9"/></mask>
+</defs>
+<g fill="none" stroke-width="6">
+ <path class="pj-leg" stroke="#00A9AF" d="M159.34 54.4A13.5 13.5 0 0 1 172.84 67.9"/>
+ <path class="pj-j" stroke="#00A9AF" d="M172.9 73.88V95.4A8.5 8.5 0 0 1 155.9 95.4"/>
+ <circle class="pj-o" cx="181.44" cy="95.42" r="8.5" stroke="var(--pj-ink,#010B13)"/>
+ <g stroke="var(--pj-ink,#010B13)">
+  <circle cx="89.63" cy="51.2" r="13.7"/>
+  <path d="M75.93 51.2V83.92"/>
+  <path class="pj-e" d="M130.85 51.20A13.7 13.7 0 0 0 103.45 51.20A13.7 13.7 0 0 0 130.85 51.20"/>
+  <path class="pj-e" d="M158.25 51.20A13.7 13.7 0 0 0 130.85 51.20A13.7 13.7 0 0 0 158.25 51.20"/>
+  <path d="M103.45 52H158.47"/>
+  <path d="M158.47 34.5V67.9"/>
+  <path class="pj-arm" d="M158.47 52H169.57A16.5 16.5 0 0 0 186.07 35.5V34.5"/>
+ </g>
+ <g mask="url(#pjmAs)"><path class="pj-route pj-routeA" d="M158.47 52H169.57A16.5 16.5 0 0 0 186.07 35.5V34.5" stroke="var(--pj-ink,#010B13)" stroke-width="2.6" stroke-linecap="round"/></g>
+ <g mask="url(#pjmLs)"><path class="pj-route pj-routeL" d="M159.34 54.4A13.5 13.5 0 0 1 172.84 67.9" stroke="#00A9AF" stroke-width="2.6" stroke-linecap="round"/></g>
+ <circle class="pj-pinA" cx="186.07" cy="35" r="2.4" stroke="var(--pj-ink,#010B13)" stroke-width="1.8" fill="var(--pj-bg,#FFFFFF)"/>
+ <circle class="pj-pulse" cx="172.84" cy="68.6" r="2.6" stroke="#00A9AF" stroke-width="1.2"/>
+ <circle class="pj-pinL" cx="172.84" cy="68.6" r="2.6" stroke="#00A9AF" stroke-width="2" fill="var(--pj-bg,#FFFFFF)"/>
+ <g class="pj-eyes" fill="var(--pj-ink,#010B13)" stroke="none">
+  <circle class="pj-pupil" cx="117.15" cy="45.3" r="2.7"/>
+  <circle class="pj-pupil" cx="144.55" cy="45.3" r="2.7"/>
+ </g>
+ <circle class="pj-node" cx="158.47" cy="52" r="1.5" fill="var(--pj-node,#FFFFFF)" stroke="none"/>
+ <g class="pj-mag">
+  <circle class="pj-glass" cx="198.46" cy="95.45" r="8.5" stroke="#00A9AF" fill="#00A9AF" fill-opacity="0"/>
+  <path class="pj-bstem" stroke="#00A9AF" d="M189.96 95.45V73.94"/>
+  <path class="pj-handle" stroke="#00A9AF" stroke-linecap="round" d="M206.31 103.30L211.90 108.89"/>
+ </g>
+</g>
+</svg>
