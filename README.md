@@ -58,6 +58,10 @@ src/
 public/         logótipos, favicon, ícones da app, web manifest
 ```
 
+## Idiomas
+
+Português (por omissão) e inglês (UK). Os textos ficam lado a lado no código: `tr('Texto', 'Text')` (ver `apps/web/src/i18n/`). O idioma escolhe-se no seletor PT · EN ou com `?lang=en`; os emails da API seguem o idioma de quem os pede.
+
 ## Estado e dados
 
 - O estado (preferências, guardadas, rascunho, avaliações, mensagens) vive em `src/lib/store.tsx` e fica guardado no `localStorage`.

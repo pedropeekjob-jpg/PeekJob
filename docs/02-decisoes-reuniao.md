@@ -19,3 +19,5 @@ Reunião de 11 de outubro de 2026. Cada ponto pedido e a forma como ficou resolv
 - Logo animado para loadings (olhos nos "e", "k" em dois caminhos, "b" em lupa) — ver [04 · Marca](04-marca.md).
 - Ecrãs mais limpos: uma pergunta por ecrã, informação secundária a um toque.
 - Ícone da app e favicon a partir dos "olhos" do logo.
+- Nova página inicial a partir do esboço do cliente: em cima explorar/procurar (B4), em baixo avaliar (B5); cabeçalho Sobre, Ranking, Contacto (B1–B3); rodapé com Facebook e Instagram.
+- Dois idiomas: português (por omissão) e inglês.

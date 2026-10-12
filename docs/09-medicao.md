@@ -32,7 +32,7 @@ Verificado no browser num fluxo completo (entrar, pesquisar, avaliar, publicar):
 | `save_org`, `mark_helpful` | Guardar, "útil" | `saved` / `helpful` | Interesse e confiança no conteúdo |
 | `web_vitals` | LCP, INP, CLS | `metric_name`, `value`, `rating`, `page_path` | Que ecrãs refatorar por desempenho |
 
-Propriedades do utilizador: `app_version` (commit publicado, para comparar antes/depois de cada mudança) e `app_mode` (api ou demo).
+Propriedades do utilizador: `ui_lang` (pt/en), `app_version` (commit publicado, para comparar antes/depois de cada mudança) e `app_mode` (api ou demo).
 
 **Medir um botão novo sem código:** `data-ev="cta_click" data-ev-cta="nome" data-ev-area="hero"` no elemento.
 
@@ -54,7 +54,7 @@ Propriedades do utilizador: `app_version` (commit publicado, para comparar antes
 O que está preparado para o Google:
 - URLs reais em produção (sem `#`), com os links antigos a continuar a funcionar;
 - `robots.txt` que fecha as páginas pessoais;
-- `sitemap.xml` com as organizações ativas;
+- `sitemap.xml` com as organizações ativas e a versão em inglês de cada página (hreflang, `?lang=en`);
 - 404 verdadeiros;
 - título, descrição e canonical por página, com o nome da organização nas páginas de cada uma;
 - dados estruturados `EmployerAggregateRating` (nota e nº de avaliações).

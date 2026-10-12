@@ -30,7 +30,7 @@
 
 | Método | Rota | Quem | O que faz |
 |---|---|---|---|
-| POST | `/auth/magic-link` | todos | Envia o link de entrada (15 min, uso único, máx. 3 pedidos) → 202; email falhou → 503 |
+| POST | `/auth/magic-link` | todos | Envia o link de entrada (15 min, uso único, máx. 3 pedidos) → 202; email falhou → 503. `lang: 'en'` envia o email em inglês |
 | POST | `/auth/verify` | todos | Troca o token pelo cookie de sessão `pj_session` (30 dias) |
 | GET | `/auth/me` | sessão | Quem está autenticado |
 | POST | `/auth/logout` | sessão | Termina a sessão → 204 |
@@ -85,9 +85,9 @@ VITE_API_URL=http://localhost:3000 npm run dev:web      # web em modo API
 TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm test
 ```
 
-- **Domínio partilhado:** 41 testes (vitest).
+- **Domínio partilhado:** 42 testes (vitest).
 - **Web:** 22 testes (medição e privacidade).
-- **API:** 87 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **API:** 92 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia
