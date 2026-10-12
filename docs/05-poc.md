@@ -1,6 +1,6 @@
 # 05 · POC (protótipo funcional)
 
-- **Experimentar:** https://claude.ai/artifact/YAX4VX7WTtosw5q3K4B1MT (privado; abrir no telemóvel para ver a versão mobile, no computador para a desktop).
+- **Experimentar:** https://pedropeekjob-jpg.github.io/PeekJob/ (público; abrir no telemóvel para ver a versão mobile, no computador para a desktop).
 - **Código:** raiz deste repositório — ver o [README](../README.md) para correr localmente, estrutura e como ligar a um backend.
 
 ## O que dá para fazer
