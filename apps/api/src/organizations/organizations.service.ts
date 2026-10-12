@@ -20,6 +20,31 @@ export class MergedOrgRedirect {
 
 const num = (v: unknown) => (v == null ? null : Number(v));
 
+/** Expressão SQL com a média por critério (chaves fixas, sem input do utilizador) */
+const CRITERIA_SQL = `jsonb_build_object(${CRITERION_KEYS.map((k) => `'${k}', round(avg((r.scores ->> '${k}')::numeric), 1)`).join(', ')})`;
+
+const AGG_SELECT = `
+  SELECT o.id, o.name, o.type, o.city, o.sector, o.status, o.nif_verified,
+         count(r.id)::int AS reviews_count, round(avg(r.avg), 1) AS score, ${CRITERIA_SQL} AS criteria
+    FROM organizations o
+    LEFT JOIN reviews r ON r.org_id = o.id AND r.status = 'published'`;
+
+function toPublicOrg(row: Record<string, any>) {
+  const criteria = Object.fromEntries(CRITERION_KEYS.map((k) => [k, num(row.criteria?.[k])]));
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    city: row.city,
+    sector: row.sector,
+    status: row.status,
+    nifVerified: row.nif_verified,
+    reviewsCount: row.reviews_count,
+    score: num(row.score),
+    criteria,
+  };
+}
+
 @Injectable()
 export class OrganizationsService {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
@@ -98,21 +123,21 @@ export class OrganizationsService {
     if (org.status === 'merged' && org.merged_into) throw new MergedOrgRedirect(org.merged_into);
     if (org.status !== 'active') throw new NotFoundException();
 
-    const agg = await this.pool.query(
-      `SELECT count(*)::int AS n, round(avg(avg), 1) AS score FROM reviews WHERE org_id = $1 AND status = 'published'`,
+    const agg = await this.pool.query(`${AGG_SELECT} WHERE o.id = $1 GROUP BY o.id`, [id]);
+    const locs = await this.pool.query(
+      `SELECT id, label, address, lat, lng FROM org_locations WHERE org_id = $1 AND status = 'active' ORDER BY created_at`,
       [id],
     );
-    const crit = await this.pool.query(
-      `SELECT k, round(avg((r.scores ->> k)::numeric), 1) AS v
-         FROM reviews r CROSS JOIN unnest($2::text[]) AS k
-        WHERE r.org_id = $1 AND r.status = 'published' AND r.scores ? k
-        GROUP BY k`,
-      [id, CRITERION_KEYS as unknown as string[]],
+    return { ...toPublicOrg(agg.rows[0]), locations: locs.rows };
+  }
+
+  /** Organizações ativas com agregados (para o início e o ranking da web). */
+  async listActive(limit = 200) {
+    const { rows } = await this.pool.query(
+      `${AGG_SELECT} WHERE o.status = 'active' GROUP BY o.id ORDER BY reviews_count DESC, o.name LIMIT $1`,
+      [limit],
     );
-    const criteria = Object.fromEntries(CRITERION_KEYS.map((k) => [k, null as number | null]));
-    crit.rows.forEach((r) => (criteria[r.k] = num(r.v)));
-    const { merged_into: _m, nif_verified, ...pub } = org;
-    return { ...pub, nifVerified: nif_verified, reviewsCount: agg.rows[0].n, score: num(agg.rows[0].score), criteria };
+    return rows.map(toPublicOrg);
   }
 
   async approve(id: string) {

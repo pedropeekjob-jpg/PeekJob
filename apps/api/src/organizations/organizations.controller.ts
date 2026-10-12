@@ -13,6 +13,11 @@ const MergeBody = z.object({ targetId: z.string().uuid() });
 export class OrganizationsController {
   constructor(private readonly orgs: OrganizationsService) {}
 
+  @Get()
+  async list() {
+    return { items: await this.orgs.listActive() };
+  }
+
   @Get('search')
   async search(@Query() query: unknown) {
     return { items: await this.orgs.search(parse(SearchOrganizationsQuery, query)) };
