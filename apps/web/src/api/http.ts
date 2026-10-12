@@ -1,9 +1,11 @@
 /**
  * Cliente HTTP da API. Ativo quando VITE_API_URL está definido;
  * sem ele a web corre em modo demonstração (dados de exemplo no browser).
+ * VITE_API_URL=/ → a API está na mesma origem (produção: a API serve a web).
  */
-export const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '');
-export const apiMode = !!API_URL;
+const RAW_API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+export const apiMode = !!RAW_API_URL;
+export const API_URL = (RAW_API_URL ?? '').replace(/\/$/, '');
 
 export class ApiError extends Error {
   constructor(

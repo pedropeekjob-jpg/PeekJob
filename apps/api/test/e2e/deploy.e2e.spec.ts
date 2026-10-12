@@ -1,7 +1,7 @@
 import { mkdtempSync, mkdirSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { createTestApp, resetDb, TestCtx } from '../helpers';
+import { createTestApp, insertOrg, resetDb, TestCtx } from '../helpers';
 
 /** Em produção a API serve também a web (mesma origem: o cookie de sessão funciona no Safari/iPhone). */
 describe('Publicação', () => {
@@ -59,6 +59,14 @@ describe('Publicação', () => {
       const res = await t.http().post('/auth/magic-link').send({ email: 'a@teste.pt' }).expect(503);
       expect(res.body.message).toMatch(/email/i);
       await t.http().post('/auth/magic-link').send({ email: 'a@teste.pt' }).expect(202);
+    });
+
+    it('o mesmo para o código de verificação (503)', async () => {
+      const me = await t.login('ana');
+      const orgId = await insertOrg(t.pool, { name: 'Oficina Sete' });
+      t.mailer.failNext = true;
+      const res = await t.http().post('/verifications/email').set(me).send({ orgId, email: 'ana@oficina7.pt' }).expect(503);
+      expect(res.body.message).toMatch(/email/i);
     });
   });
 });

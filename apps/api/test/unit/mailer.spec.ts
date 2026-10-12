@@ -21,7 +21,7 @@ describe('Envio de emails', () => {
 
   it('Resend: um erro do serviço lança exceção sem expor o destinatário', async () => {
     const fetchFn = (async () => new Response('{"message":"invalid"}', { status: 422 })) as unknown as typeof fetch;
-    const err = await new ResendMailer('re_123', 'a@b.pt', fetchFn).send(msg).catch((e) => e as Error);
+    const err = (await new ResendMailer('re_123', 'a@b.pt', fetchFn).send(msg).catch((e) => e)) as Error;
     expect(err).toBeInstanceOf(Error);
     expect(err.message).toContain('422');
     expect(err.message).not.toContain('pessoa@gmail.com');

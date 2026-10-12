@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 import { randomInt } from 'crypto';
 import { Pool, PoolClient } from 'pg';
 import { MAILER, type Mailer } from '../auth/mailer';
@@ -40,11 +40,16 @@ export class VerificationService {
        ON CONFLICT (user_ref, org_id) DO UPDATE SET code_hash = EXCLUDED.code_hash, attempts = 0, expires_at = EXCLUDED.expires_at, created_at = now()`,
       [userRef, orgId, sha256(`${userRef}:${code}`), CODE_MINUTES],
     );
-    await this.mailer.send({
-      to: workEmail,
-      subject: 'Código de verificação PeekJob',
-      text: `O teu código é ${code}. Serve para confirmar que trabalhas em ${org.name} e é válido durante ${CODE_MINUTES} minutos.\nNão guardamos este email.`,
-    });
+    try {
+      await this.mailer.send({
+        to: workEmail,
+        subject: 'Código de verificação PeekJob',
+        text: `O teu código é ${code}. Serve para confirmar que trabalhas em ${org.name} e é válido durante ${CODE_MINUTES} minutos.\nNão guardamos este email.`,
+      });
+    } catch {
+      await this.pool.query('DELETE FROM verification_codes WHERE user_ref = $1 AND org_id = $2', [userRef, orgId]);
+      throw new ServiceUnavailableException('Não foi possível enviar o email. Tenta outra vez daqui a pouco.');
+    }
   }
 
   async confirmEmailCode(userRef: string, orgId: string, code: string) {

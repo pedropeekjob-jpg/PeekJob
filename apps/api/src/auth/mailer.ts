@@ -13,7 +13,7 @@ export interface Mailer {
   send(msg: MailMessage): Promise<void>;
 }
 
-/** Desenvolvimento: mostra o email (e o link) nos logs. Em produção trocar por SMTP/serviço de email. */
+/** Desenvolvimento: mostra o email (e o link) nos logs. Em produção usa-se o ResendMailer. */
 @Injectable()
 export class ConsoleMailer implements Mailer {
   private readonly log = new Logger('Email');
@@ -27,11 +27,18 @@ export class ConsoleMailer implements Mailer {
 /** Testes: guarda os emails em memória. */
 export class InMemoryMailer implements Mailer {
   outbox: MailMessage[] = [];
+  /** Simula uma falha do serviço de email no próximo envio */
+  failNext = false;
   async send(msg: MailMessage) {
+    if (this.failNext) {
+      this.failNext = false;
+      throw new Error('falha simulada');
+    }
     this.outbox.push(msg);
   }
   clear() {
     this.outbox = [];
+    this.failNext = false;
   }
   lastTokenFor(to: string): string {
     const m = [...this.outbox].reverse().find((x) => x.to === to.trim().toLowerCase());

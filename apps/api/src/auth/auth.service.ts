@@ -1,5 +1,6 @@
-import { HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { Pool } from 'pg';
+import { webOrigin } from '../common/config';
 import { PG_POOL, tx } from '../db/db.module';
 import { emailHash, normalizeEmail, randomToken, sha256 } from './crypto';
 import { MAILER, type Mailer } from './mailer';
@@ -15,6 +16,7 @@ export interface AuthUser {
 
 @Injectable()
 export class AuthService {
+  private readonly log = new Logger('Auth');
   constructor(
     @Inject(PG_POOL) private readonly pool: Pool,
     @Inject(MAILER) private readonly mailer: Mailer,
@@ -35,14 +37,20 @@ export class AuthService {
       `INSERT INTO login_tokens (token_hash, email_hash, expires_at) VALUES ($1, $2, now() + make_interval(mins => $3))`,
       [sha256(token), eh, LOGIN_TOKEN_MINUTES],
     );
-    const web = (process.env.WEB_ORIGIN ?? 'http://localhost:5173').split(',')[0].replace(/\/$/, '');
-    const link = `${web}/#/entrar?token=${token}`;
-    await this.mailer.send({
+    const link = `${webOrigin()}/#/entrar?token=${token}`;
+    try {
+      await this.mailer.send({
       to: email,
       subject: 'O teu link de acesso à PeekJob',
-      text: `Olá! Abre este link para entrar na PeekJob (válido durante ${LOGIN_TOKEN_MINUTES} minutos):\n${link}\n\nSe não pediste este email, podes ignorá-lo.`,
-      link,
-    });
+        text: `Olá! Abre este link para entrar na PeekJob (válido durante ${LOGIN_TOKEN_MINUTES} minutos):\n${link}\n\nSe não pediste este email, podes ignorá-lo.`,
+        link,
+      });
+    } catch (e) {
+      // O link não chegou: não conta para o limite de pedidos.
+      await this.pool.query('DELETE FROM login_tokens WHERE token_hash = $1', [sha256(token)]);
+      this.log.error(`Falha no envio do link: ${(e as Error).message}`);
+      throw new ServiceUnavailableException('Não foi possível enviar o email. Tenta outra vez daqui a pouco.');
+    }
   }
 
   /** Troca um link mágico (uso único) por uma sessão. Devolve o id da sessão para o cookie. */
