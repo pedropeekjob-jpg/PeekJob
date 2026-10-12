@@ -11,10 +11,11 @@ export class ResendMailer implements Mailer {
     private readonly apiKey: string,
     private readonly from: string,
     private readonly fetchFn: typeof fetch = fetch,
+    private readonly baseUrl = 'https://api.resend.com',
   ) {}
 
   async send(msg: MailMessage): Promise<void> {
-    const res = await this.fetchFn('https://api.resend.com/emails', {
+    const res = await this.fetchFn(`${this.baseUrl}/emails`, {
       method: 'POST',
       headers: { authorization: `Bearer ${this.apiKey}`, 'content-type': 'application/json' },
       body: JSON.stringify({ from: this.from, to: [msg.to], subject: msg.subject, text: msg.text }),
@@ -28,7 +29,8 @@ export class ResendMailer implements Mailer {
 export function createMailer(env: Env = process.env): Mailer {
   if (env.RESEND_API_KEY) {
     if (!env.MAIL_FROM) throw new Error('MAIL_FROM em falta (ex.: "PeekJob <ola@peekjob.pt>")');
-    return new ResendMailer(env.RESEND_API_KEY, env.MAIL_FROM);
+    // RESEND_API_URL só para testes de ponta a ponta (servidor de email falso).
+    return new ResendMailer(env.RESEND_API_KEY, env.MAIL_FROM, fetch, env.RESEND_API_URL);
   }
   if (env.NODE_ENV === 'production') throw new Error('RESEND_API_KEY em falta: em produção os emails têm de ser enviados');
   return new ConsoleMailer();

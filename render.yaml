@@ -1,0 +1,21 @@
+# Render Blueprint: um serviço com a API e a web (mesma origem), na região de Frankfurt (UE).
+# A base de dados é externa (ex.: Neon, PostgreSQL gerido na UE): colar o DATABASE_URL no painel.
+services:
+  - type: web
+    name: peekjob
+    runtime: docker
+    region: frankfurt
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: PRIVACY_SECRET
+        generateValue: true
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: SEED_DEMO
+        value: "true"

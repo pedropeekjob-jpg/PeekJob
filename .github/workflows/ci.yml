@@ -36,6 +36,13 @@ jobs:
           npm run build -w @peekjob/api
           npm run build -w @peekjob/web
 
+  docker:
+    # Garante que a imagem de produção (API + web) constrói
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t peekjob:ci .
+
   deploy-demo:
     needs: test
     if: github.ref == 'refs/heads/main'
