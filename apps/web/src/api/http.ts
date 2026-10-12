@@ -1,3 +1,5 @@
+import { getLang, tr } from '../i18n';
+
 /**
  * Cliente HTTP da API. Ativo quando VITE_API_URL está definido;
  * sem ele a web corre em modo demonstração (dados de exemplo no browser).
@@ -30,14 +32,17 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
 }
 
 /** Mensagem legível para um erro da API */
-export function errorText(e: unknown, fallback = 'Algo correu mal. Tenta outra vez.'): string {
+export function errorText(e: unknown, fallback = tr('Algo correu mal. Tenta outra vez.', 'Something went wrong. Please try again.')): string {
   if (e instanceof ApiError) {
-    if (e.status === 429) return 'Demasiadas tentativas. Espera uns minutos.';
-    if (e.status === 401) return 'A sessão terminou. Entra outra vez.';
+    if (e.status === 429) return tr('Demasiadas tentativas. Espera uns minutos.', 'Too many attempts. Please wait a few minutes.');
+    if (e.status === 401) return tr('A sessão terminou. Entra outra vez.', 'Your session has ended. Please sign in again.');
+    if (e.status === 503) return tr('Não foi possível enviar o email. Tenta outra vez daqui a pouco.', 'We couldn’t send the email. Please try again shortly.');
+    // As mensagens da API estão em português; em inglês usa-se uma mensagem geral
+    if (getLang() === 'en') return fallback;
     const m = e.body?.message;
     if (typeof m === 'string') return m;
     if (Array.isArray(m)) return m.join(' ');
   }
-  if (e instanceof TypeError) return 'Sem ligação ao servidor.';
+  if (e instanceof TypeError) return tr('Sem ligação ao servidor.', 'No connection to the server.');
   return fallback;
 }

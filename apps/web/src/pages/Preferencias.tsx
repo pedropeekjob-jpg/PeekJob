@@ -22,7 +22,7 @@ export default function Preferencias() {
   };
   const skip = () => {
     finishOnboarding();
-    navigate('/');
+    navigate('/explorar');
   };
 
   const n = picks.length;

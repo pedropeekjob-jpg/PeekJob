@@ -17,7 +17,7 @@ export default function APreparar() {
   const go = useCallback(() => {
     if (done.current) return;
     done.current = true;
-    navigate('/', { replace: true });
+    navigate('/explorar', { replace: true });
   }, [navigate]);
 
   useEffect(() => {

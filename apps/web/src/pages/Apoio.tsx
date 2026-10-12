@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { Accordion } from '../components/UI';
-import { SUPPORT, SUPPORT_TIPS } from '../data/content';
+import { SUPPORT, supportTips } from '../data/content';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 
@@ -37,7 +37,7 @@ export default function Apoio() {
           title: <span style={{ ...DISPLAY, fontSize: desktop ? 22 : 20 }}>O que pode ajudar</span>,
           body: (
             <ul className="stack" style={{ margin: 0, padding: 0, listStyle: 'none', gap: desktop ? 12 : 8 }}>
-              {[...SUPPORT_TIPS, ...(desktop ? ['Confirma horários e contactos no site de cada entidade.'] : [])].map((t) => (
+              {[...supportTips(), ...(desktop ? ['Confirma horários e contactos no site de cada entidade.'] : [])].map((t) => (
                 <li key={t} className="row" style={{ gap: 12, alignItems: 'flex-start', fontSize: 15, lineHeight: 1.45, color: 'var(--body)' }}>
                   <span aria-hidden="true" style={{ flex: 'none', marginTop: 6, width: 12, height: 12, borderRadius: 6, border: '3px solid var(--purple)' }} />
                   {t}

@@ -1,4 +1,5 @@
 import type { Org, OrgLocation, OrgType, Review, Scores } from '../data/orgs';
+import { ago } from '../lib/format';
 import type { MyReview, SupportMessage } from '../lib/store';
 
 /** Formas devolvidas pela API */
@@ -28,14 +29,7 @@ export interface ApiReview {
   createdAt: string;
 }
 
-export const when = (iso: string) => {
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return 'hoje';
-  if (days === 1) return 'ontem';
-  if (days < 30) return `há ${days} dias`;
-  if (days < 365) return `há ${Math.round(days / 30)} meses`;
-  return `há ${Math.round(days / 365)} anos`;
-};
+export const when = (iso: string) => ago(Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 
 const KEYS: (keyof Scores)[] = ['salario', 'equilibrio', 'respeito', 'ambiente', 'lideranca', 'estabilidade', 'progressao', 'proposito'];
 

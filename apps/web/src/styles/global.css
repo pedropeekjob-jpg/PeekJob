@@ -765,3 +765,106 @@ a.plain {
     max-width: 440px;
   }
 }
+
+/* ---- Navegação do cliente (Sobre, Ranking, Contacto), idioma e rodapé ---- */
+.page-x {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.caps-link {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 0;
+  position: relative;
+  white-space: nowrap;
+}
+@media (min-width: 900px) {
+  .caps-link {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+  }
+}
+.caps-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.caps-link:hover::after,
+.caps-link[aria-current='page']::after {
+  transform: scaleX(1);
+}
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--field);
+  background: var(--surface);
+}
+.lang-switch button {
+  border: 0;
+  background: none;
+  min-width: 36px;
+  height: 30px;
+  border-radius: 999px;
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  cursor: pointer;
+}
+.lang-switch button[aria-pressed='true'] {
+  background: var(--ink);
+  color: #fff;
+}
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 32px 0 40px;
+  background: var(--ground);
+}
+.site-footer.is-compact {
+  padding: 28px 0 calc(var(--nav-h) + 28px);
+}
+.site-footer .social a {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.site-footer .social a:hover {
+  color: var(--teal-text);
+}
+.footer-links {
+  gap: 8px 20px;
+  justify-content: center;
+}
+.footer-links a,
+.footer-links button {
+  color: var(--body);
+  text-decoration: none;
+  font-size: 13px;
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.footer-links a:hover,
+.footer-links button:hover {
+  color: var(--ink);
+}

@@ -97,7 +97,7 @@ function MobileInicio() {
   return (
     <div className="page">
       <div className="row between">
-        <Logo height={44} />
+        <Link to="/" aria-label="PeekJob"><Logo height={44} /></Link>
         <Link to="/perfil" className="icon-btn" aria-label="Perfil">
           <Icon name="user" size={18} />
         </Link>

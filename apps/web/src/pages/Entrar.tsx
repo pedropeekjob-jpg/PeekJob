@@ -35,7 +35,7 @@ export default function Entrar() {
     if (!apiMode || !token || tried.current) return;
     tried.current = true;
     verifyLink(token).then((r) => {
-      if (r.ok) nav(onboarded ? '/' : '/preferencias', { replace: true });
+      if (r.ok) nav(onboarded ? '/explorar' : '/preferencias', { replace: true });
       else setLinkState('error');
     });
   }, [token, verifyLink, nav, onboarded]);

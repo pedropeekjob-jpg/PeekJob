@@ -4,7 +4,11 @@ import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
 import { ConsentBanner } from './components/ConsentBanner';
 import { StoreProvider } from './lib/store';
+import { LangRoot } from './i18n';
 import Inicio from './pages/Inicio';
+import Home from './pages/Home';
+import Sobre from './pages/Sobre';
+import Contacto from './pages/Contacto';
 import Preferencias from './pages/Preferencias';
 import APreparar from './pages/APreparar';
 import Pesquisa from './pages/Pesquisa';
@@ -57,12 +61,16 @@ const Router = browserRouting ? BrowserRouter : HashRouter;
 export default function App() {
   return (
     <StoreProvider>
+      <LangRoot>
       <Router>
         <ScrollTop />
         <PageTracking />
         <ConsentBanner />
         <Routes>
-          <Route path="/" element={<Inicio />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/explorar" element={<Inicio />} />
+          <Route path="/sobre" element={<Sobre />} />
+          <Route path="/contacto" element={<Contacto />} />
           <Route path="/preferencias" element={<Preferencias />} />
           <Route path="/a-preparar" element={<APreparar />} />
           <Route path="/pesquisa" element={<Pesquisa />} />
@@ -87,6 +95,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
+      </LangRoot>
     </StoreProvider>
   );
 }
