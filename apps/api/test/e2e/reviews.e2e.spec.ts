@@ -30,8 +30,8 @@ describe('Avaliações', () => {
     const res = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
     const raw = JSON.stringify(res.body);
     expect(raw).not.toMatch(/pessoa|reviewer|user/i);
-    const row = await t.pool.query('SELECT reviewer_ref FROM reviews');
-    expect(row.rows[0].reviewer_ref).not.toContain('pessoa');
+    const row = await t.pool.query('SELECT author_ref FROM reviews');
+    expect(row.rows[0].author_ref).not.toContain('pessoa');
   });
 
   it('uma avaliação por pessoa por organização (409)', async () => {

@@ -1,24 +1,23 @@
-import { reviewerRef, userRef } from '../../src/common/privacy';
+import { userRef } from '../../src/common/privacy';
 
-describe('pseudonimização de quem avalia', () => {
-  const secret = 's3gredo';
-
-  it('é estável para a mesma pessoa e organização', () => {
-    expect(reviewerRef(secret, 'u1', 'org-a')).toBe(reviewerRef(secret, 'u1', 'org-a'));
+/**
+ * Decisão: cada pessoa tem um pseudónimo (HMAC do id com um segredo do servidor).
+ * Precisamos dele para "as minhas avaliações", mensagens de apoio, exportar/apagar dados (RGPD)
+ * e para detetar a mesma pessoa ao fundir organizações duplicadas.
+ * Nunca é devolvido pela API e não permite chegar ao email sem o segredo e a tabela de contas.
+ */
+describe('pseudonimização (userRef)', () => {
+  it('é estável para a mesma pessoa', () => {
+    expect(userRef('s3gredo', 'u1')).toBe(userRef('s3gredo', 'u1'));
   });
 
-  it('é diferente entre organizações (não dá para ligar as avaliações de uma pessoa)', () => {
-    expect(reviewerRef(secret, 'u1', 'org-a')).not.toBe(reviewerRef(secret, 'u1', 'org-b'));
+  it('muda com o segredo', () => {
+    expect(userRef('s3gredo', 'u1')).not.toBe(userRef('outro', 'u1'));
   });
 
   it('não contém o identificador original', () => {
-    const ref = reviewerRef(secret, 'pessoa@gmail.com', 'org-a');
+    const ref = userRef('s3gredo', 'pessoa@gmail.com');
     expect(ref).not.toContain('pessoa');
     expect(ref).toMatch(/^[a-f0-9]{64}$/);
-  });
-
-  it('userRef é independente da organização e do reviewerRef', () => {
-    expect(userRef(secret, 'u1')).toBe(userRef(secret, 'u1'));
-    expect(userRef(secret, 'u1')).not.toBe(reviewerRef(secret, 'u1', 'org-a'));
   });
 });
