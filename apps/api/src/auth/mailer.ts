@@ -18,7 +18,9 @@ export interface Mailer {
 export class ConsoleMailer implements Mailer {
   private readonly log = new Logger('Email');
   async send(msg: MailMessage) {
-    this.log.log(`Para ${msg.to}: ${msg.subject}${msg.link ? ` → ${msg.link}` : ''}`);
+    // Em desenvolvimento mostra o conteúdo (link ou código) para se poder testar sem servidor de email.
+    const body = process.env.NODE_ENV === 'production' ? '' : ` | ${msg.text.replace(/\s+/g, ' ')}`;
+    this.log.log(`Para ${msg.to}: ${msg.subject}${msg.link ? ` → ${msg.link}` : ''}${body}`);
   }
 }
 

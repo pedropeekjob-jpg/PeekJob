@@ -2,6 +2,7 @@ import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
+import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
@@ -14,7 +15,8 @@ const PROMISES = ['Guardamos só o “sim”.', 'Email e ficheiro não ficam.', 
 export default function AvaliarVerificar() {
   const desktop = useIsDesktop();
   const nav = useNavigate();
-  const { draft, updateDraft } = useStore();
+  const store = useStore();
+  const { draft, updateDraft } = store;
   const org = useOrg(draft.orgId);
 
   const [method, setMethod] = useState<Method>(draft.verified ?? 'email');
@@ -24,8 +26,12 @@ export default function AvaliarVerificar() {
   const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
   const [resent, setResent] = useState(false);
   const [file, setFile] = useState('');
+  const [fileObj, setFileObj] = useState<File | null>(null);
+  const [apiErr, setApiErr] = useState('');
+  const [busy, setBusy] = useState(false);
   const digitRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  if (apiMode && draft.orgId && !org && !store.remote.ready) return null;
   if (!draft.orgId || !org) return <Navigate to="/avaliar" replace />;
 
   const loc = org.locations.find((l) => l.id === draft.locationId);
@@ -34,12 +40,21 @@ export default function AvaliarVerificar() {
   const isEmail = method === 'email';
   const codeStep = isEmail && step === 'code';
 
-  const sendCode = () => {
+  const sendCode = async () => {
     if (!EMAIL_RE.test(email.trim())) {
       setEmailError('Escreve um email válido, por exemplo nome@organizacao.pt.');
       return;
     }
     setEmailError('');
+    if (apiMode) {
+      setBusy(true);
+      const r = await store.sendWorkEmailCode(org.id, email.trim());
+      setBusy(false);
+      if (!r.ok) {
+        setEmailError(r.status === 401 ? 'Entra primeiro para verificar.' : r.message);
+        return;
+      }
+    }
     setStep('code');
     setResent(false);
     setTimeout(() => digitRefs.current[0]?.focus(), 30);
@@ -73,8 +88,18 @@ export default function AvaliarVerificar() {
   };
 
   const canContinue = isEmail ? codeStep && codeOk : !!file;
-  const finish = () => {
-    if (!canContinue) return;
+  const finish = async () => {
+    if (!canContinue || busy) return;
+    if (apiMode) {
+      setApiErr('');
+      setBusy(true);
+      const r = isEmail ? await store.confirmWorkEmailCode(org.id, code.join('')) : await store.verifyDocument(org.id, fileObj!);
+      setBusy(false);
+      if (!r.ok) {
+        setApiErr(r.status === 401 ? 'Entra primeiro para verificar.' : r.status === 415 ? 'Envia o recibo ou contrato em PDF.' : r.message);
+        return;
+      }
+    }
     updateDraft({ verified: method });
     nav('/avaliar/notas');
   };
@@ -217,10 +242,12 @@ export default function AvaliarVerificar() {
         <input
           id="vf"
           type="file"
-          accept="image/*,application/pdf"
+          accept={apiMode ? 'application/pdf' : 'image/*,application/pdf'}
           onChange={(e) => {
             const f = e.target.files?.[0];
             setFile(f ? f.name : '');
+            setFileObj(f ?? null);
+            setApiErr('');
           }}
           style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }}
         />
@@ -248,6 +275,11 @@ export default function AvaliarVerificar() {
       {isEmail && !codeStep && emailBlock}
       {codeStep && codeBlock}
       {!isEmail && docBlock}
+      {apiErr && (
+        <div role="alert" className="card warn" style={{ padding: '12px 16px', fontSize: 14 }}>
+          {apiErr}
+        </div>
+      )}
     </div>
   );
 

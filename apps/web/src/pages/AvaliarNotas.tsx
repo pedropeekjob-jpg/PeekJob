@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { Ring } from '../components/Data';
+import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import type { CriterionKey } from '../data/criteria';
 import { avgOf, useStore } from '../lib/store';
@@ -17,7 +18,10 @@ export default function AvaliarNotas() {
   const store = useStore();
   const { draft, updateDraft } = store;
   const org = useOrg(draft.orgId);
+  const [pubErr, setPubErr] = useState<{ message: string; suggestion?: string } | null>(null);
+  const [busy, setBusy] = useState(false);
   const [help, setHelp] = useState<CriterionKey | null>(null);
+  if (apiMode && draft.orgId && !org && !store.remote.ready) return null;
 
   if (!draft.orgId || !org) return <Navigate to="/avaliar" replace />;
 
@@ -41,9 +45,18 @@ export default function AvaliarNotas() {
     const recLabel = draft.recommend === true ? 'recomendas' : draft.recommend === false ? 'não recomendas' : 'sem resposta';
     const canPublish = !insult && done > 0;
     const toggleTag = (t: string) => updateDraft({ tags: draft.tags.includes(t) ? draft.tags.filter((x) => x !== t) : [...draft.tags, t] });
-    const publish = () => {
-      if (!canPublish) return;
-      store.publish();
+    const publish = async () => {
+      if (!canPublish || busy) return;
+      setBusy(true);
+      const r = await store.publish();
+      setBusy(false);
+      if (!r.ok) {
+        if (r.status === 422 && r.body?.suggestion) setPubErr({ message: 'Tira nomes de pessoas e insultos. Descreve a situação.', suggestion: r.body.suggestion });
+        else if (r.status === 409) setPubErr({ message: 'Já avaliaste esta organização.' });
+        else if (r.status === 401) setPubErr({ message: 'Entra para publicar.' });
+        else setPubErr({ message: r.message });
+        return;
+      }
       nav('/avaliar/feito');
     };
 
@@ -145,7 +158,27 @@ export default function AvaliarNotas() {
                 </div>
               )}
 
-              <button type="button" className="btn btn-dark lift" style={{ height: 56 }} disabled={!canPublish} onClick={publish}>
+              {pubErr && (
+
+                <div role="alert" className="card warn" style={{ padding: '12px 16px', fontSize: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+                  <span>{pubErr.message}</span>
+
+                  {pubErr.suggestion && (
+
+                    <button type="button" className="link" style={{ padding: 0, minHeight: 32 }} onClick={() => { updateDraft({ text: pubErr.suggestion! }); setPubErr(null); }}>
+
+                      Usar a versão sugerida
+
+                    </button>
+
+                  )}
+
+                </div>
+
+              )}
+
+              <button type="button" className="btn btn-dark lift" style={{ height: 56 }} disabled={!canPublish || busy} onClick={publish}>
                 {insult ? 'Corrige a frase para publicar' : done ? 'Publicar avaliação' : 'Dá pelo menos uma nota'}
               </button>
               <LockLine>Publicada sem o teu nome.</LockLine>

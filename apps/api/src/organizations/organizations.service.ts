@@ -25,7 +25,8 @@ const CRITERIA_SQL = `jsonb_build_object(${CRITERION_KEYS.map((k) => `'${k}', ro
 
 const AGG_SELECT = `
   SELECT o.id, o.name, o.type, o.city, o.sector, o.status, o.nif_verified,
-         count(r.id)::int AS reviews_count, round(avg(r.avg), 1) AS score, ${CRITERIA_SQL} AS criteria
+         count(r.id)::int AS reviews_count, round(avg(r.avg), 1) AS score, ${CRITERIA_SQL} AS criteria,
+         count(r.id) FILTER (WHERE r.flag_kinds && ARRAY['assédio sexual', 'assédio moral'])::int AS harassment_reports
     FROM organizations o
     LEFT JOIN reviews r ON r.org_id = o.id AND r.status = 'published'`;
 
@@ -40,6 +41,8 @@ function toPublicOrg(row: Record<string, any>) {
     status: row.status,
     nifVerified: row.nif_verified,
     reviewsCount: row.reviews_count,
+    /** nº de avaliações que descrevem possível assédio (só o número; o conteúdo da mensagem de apoio é privado) */
+    harassmentReports: row.harassment_reports,
     score: num(row.score),
     criteria,
   };

@@ -4,6 +4,7 @@ import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { Ring } from '../components/Data';
 import { Empty } from '../components/UI';
+import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { useStore } from '../lib/store';
 import { fmt, plural } from '../lib/format';
@@ -38,7 +39,8 @@ export default function AvaliarFeito() {
   }
 
   const name = org?.name ?? 'A organização';
-  const total = (org?.reviewsCount ?? 0) + 1;
+  // modo API: o servidor já conta a nova avaliação; demonstração: soma-a aqui
+  const total = apiMode ? org?.reviewsCount ?? 1 : (org?.reviewsCount ?? 0) + 1;
   const unread = messages.filter((m) => !m.read).length || 1;
   const ringAria = `A tua nota média: ${fmt(review.avg)} de 5`;
   const orgLink = org ? `/org/${org.id}` : '/';

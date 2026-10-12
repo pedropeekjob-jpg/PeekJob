@@ -6,7 +6,7 @@ import { Icon } from '../components/Icon';
 import { LogoAnimated } from '../components/Brand';
 import { CRITERION } from '../data/criteria';
 import { ORG_TYPES, type Org } from '../data/orgs';
-import { searchOrgs, useOrgs } from '../api/orgs';
+import { useSearch, useOrgs } from '../api/orgs';
 import { match } from '../lib/match';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
@@ -69,15 +69,16 @@ export default function Pesquisa() {
     pickType('Todas');
   };
 
+  const found = useSearch(applied, { type });
   const results: Result[] = useMemo(
     () =>
-      searchOrgs(orgs, applied, type)
+      found.items
         .map((o) => ({
           org: o,
           match: o.reviewsCount > 0 ? (prefs.length ? match(o, prefs) : Math.round((o.score / 5) * 100)) : null,
         }))
         .sort((a, b) => (b.match ?? -1) - (a.match ?? -1) || b.org.score - a.org.score),
-    [orgs, applied, type, prefs],
+    [found.items, prefs],
   );
 
   const view: ViewProps = {

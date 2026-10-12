@@ -72,6 +72,15 @@ describe('Avaliações', () => {
       expect(other.body.items).toHaveLength(0);
     });
 
+    it('a página pública mostra só o número de relatos de assédio (nunca o texto da mensagem)', async () => {
+      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(flaggedReview).expect(201);
+      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u2')).send({ ...goodReview, text: 'Há meses que pagam com atraso.' }).expect(201);
+      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u3')).send(goodReview).expect(201);
+      const res = await t.http().get(`/orgs/${orgId}`).expect(200);
+      expect(res.body.harassmentReports).toBe(1);
+      expect(JSON.stringify(res.body)).not.toMatch(/incumprimento|kinds/);
+    });
+
     it('marca as mensagens como lidas', async () => {
       await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(flaggedReview).expect(201);
       const { body } = await t.http().get('/me/messages').set(await t.login('u1'));

@@ -4,7 +4,7 @@ import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { Ring } from '../components/Data';
 import { MapView } from '../components/MapView';
-import { useOrgs, searchOrgs } from '../api/orgs';
+import { useOrg, useOrgs, useSearch } from '../api/orgs';
 import { ORG_TYPES, type Org, type OrgType } from '../data/orgs';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
@@ -34,12 +34,16 @@ export default function AvaliarEscolher() {
   const [addCity, setAddCity] = useState('');
   const [addError, setAddError] = useState('');
 
-  const chosen = chosenId ? orgs.find((o) => o.id === chosenId) : undefined;
+  const chosen = useOrg(chosenId);
   const nq = q.trim();
+  const search = useSearch(nq, { includePending: true });
   const results = useMemo(
-    () => (nq ? searchOrgs(orgs, nq) : [...orgs].sort((a, b) => b.reviewsCount - a.reviewsCount)),
-    [orgs, nq],
+    () => (nq ? search.items : [...orgs].sort((a, b) => b.reviewsCount - a.reviewsCount)),
+    [orgs, nq, search.items],
   );
+  const [busy, setBusy] = useState(false);
+  // o local escolhido tem de existir na organização (em modo API os locais chegam depois)
+  const effectiveLoc = chosen && chosen.locations.some((l) => l.id === locId) ? locId : chosen?.locations[0]?.id ?? null;
   const list = results.slice(0, desktop ? 5 : nq ? 6 : 4);
 
   const pick = (o: Org) => {
@@ -57,17 +61,24 @@ export default function AvaliarEscolher() {
     if (step === 'confirm' && desktop) setStep('pick');
   };
 
-  const next = (e?: FormEvent) => {
+  const next = async (e?: FormEvent) => {
     e?.preventDefault();
+    if (busy) return;
     if (step === 'confirm' && chosen) {
-      startDraft(chosen.id, locId);
+      startDraft(chosen.id, effectiveLoc);
       nav('/avaliar/verificar');
     } else if (step === 'add') {
       if (!addName.trim() || !addCity.trim()) {
         setAddError(!addName.trim() ? 'Escreve o nome da organização.' : 'Escreve a localidade.');
         return;
       }
-      addOrg({ name: addName.trim(), type: addType, city: addCity.trim() });
+      setBusy(true);
+      const r = await addOrg({ name: addName.trim(), type: addType, city: addCity.trim() });
+      setBusy(false);
+      if (!r.ok) {
+        setAddError(r.status === 401 ? 'Entra primeiro para adicionar uma organização.' : r.message);
+        return;
+      }
       updateDraft({ locationId: 'sede' });
       nav('/avaliar/verificar');
     }
@@ -161,7 +172,7 @@ export default function AvaliarEscolher() {
         </span>
       </div>
       <div style={desktop ? { background: 'var(--surface)', borderRadius: 24, padding: 8 } : undefined}>
-        <MapView locations={chosen.locations} active={locId} onPick={setLocId} height={desktop ? 300 : 130} showLink={desktop} />
+        <MapView locations={chosen.locations} active={effectiveLoc} onPick={setLocId} height={desktop ? 300 : 130} showLink={desktop} />
       </div>
       <div
         role="radiogroup"
@@ -169,7 +180,7 @@ export default function AvaliarEscolher() {
         style={desktop ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(250px, 100%), 1fr))', gap: 12 } : { display: 'flex', flexDirection: 'column' }}
       >
         {chosen.locations.map((l) => {
-          const on = l.id === locId;
+          const on = l.id === effectiveLoc;
           return (
             <button
               key={l.id}

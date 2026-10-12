@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
+import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { useStore } from '../lib/store';
 import { detectRedFlags, hasInsultOrName, softenText } from '../lib/moderation';
@@ -13,6 +15,9 @@ export default function AvaliarTexto() {
   const store = useStore();
   const { draft, updateDraft } = store;
   const org = useOrg(draft.orgId);
+  const [pubErr, setPubErr] = useState<{ message: string; suggestion?: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  if (apiMode && draft.orgId && !org && !store.remote.ready) return null;
 
   if (!draft.orgId || !org) return <Navigate to="/avaliar" replace />;
   // Em desktop o passo 2 está no mesmo ecrã das notas
@@ -24,9 +29,18 @@ export default function AvaliarTexto() {
   const done = countDone(draft.scores);
   const canPublish = !insult && done > 0;
   const toggleTag = (t: string) => updateDraft({ tags: draft.tags.includes(t) ? draft.tags.filter((x) => x !== t) : [...draft.tags, t] });
-  const publish = () => {
-    if (!canPublish) return;
-    store.publish();
+  const publish = async () => {
+    if (!canPublish || busy) return;
+    setBusy(true);
+    const r = await store.publish();
+    setBusy(false);
+    if (!r.ok) {
+      if (r.status === 422 && r.body?.suggestion) setPubErr({ message: 'Tira nomes de pessoas e insultos. Descreve a situação.', suggestion: r.body.suggestion });
+      else if (r.status === 409) setPubErr({ message: 'Já avaliaste esta organização.' });
+      else if (r.status === 401) setPubErr({ message: 'Entra para publicar.' });
+      else setPubErr({ message: r.message });
+      return;
+    }
     nav('/avaliar/feito');
   };
 
@@ -105,7 +119,17 @@ export default function AvaliarTexto() {
 
         <div className="sticky-cta stack" style={{ gap: 10 }}>
           <LockLine center>Publicação anónima</LockLine>
-          <button type="button" className="btn btn-primary btn-block" style={{ height: 56 }} disabled={!canPublish} onClick={publish}>
+          {pubErr && (
+            <div role="alert" className="card warn" style={{ padding: '12px 16px', fontSize: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <span>{pubErr.message}</span>
+              {pubErr.suggestion && (
+                <button type="button" className="link" style={{ padding: 0, minHeight: 32 }} onClick={() => { updateDraft({ text: pubErr.suggestion! }); setPubErr(null); }}>
+                  Usar a versão sugerida
+                </button>
+              )}
+            </div>
+          )}
+          <button type="button" className="btn btn-primary btn-block" style={{ height: 56 }} disabled={!canPublish || busy} onClick={publish}>
             {insult ? 'Corrige a frase para publicar' : 'Publicar avaliação'}
           </button>
         </div>

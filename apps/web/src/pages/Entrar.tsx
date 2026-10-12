@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { apiMode } from '../api/http';
 import { Shell } from '../components/Layout';
 import { Logo } from '../components/Brand';
 import { Icon } from '../components/Icon';
@@ -22,24 +23,69 @@ const RINGS_D: [number, number, number, number, string, number][] = [
 export default function Entrar() {
   const desktop = useIsDesktop();
   const nav = useNavigate();
-  const { user, login } = useStore();
+  const { user, login, requestLink, verifyLink, onboarded } = useStore();
+  const [params] = useSearchParams();
+  const token = params.get('token');
+  const [linkState, setLinkState] = useState<'idle' | 'checking' | 'error'>(token && apiMode ? 'checking' : 'idle');
+  const [busy, setBusy] = useState(false);
+  const tried = useRef(false);
+
+  // Modo API: a pessoa chega aqui pelo link do email (#/entrar?token=...)
+  useEffect(() => {
+    if (!apiMode || !token || tried.current) return;
+    tried.current = true;
+    verifyLink(token).then((r) => {
+      if (r.ok) nav(onboarded ? '/' : '/preferencias', { replace: true });
+      else setLinkState('error');
+    });
+  }, [token, verifyLink, nav, onboarded]);
   const [email, setEmail] = useState(user?.email ?? '');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
-  const send = (e: FormEvent) => {
+  const send = async (e: FormEvent) => {
     e.preventDefault();
     if (!EMAIL_RE.test(email.trim())) {
       setError('Escreve um email válido, por exemplo nome@gmail.com.');
       return;
     }
     setError('');
+    if (apiMode) {
+      setBusy(true);
+      const r = await requestLink(email.trim());
+      setBusy(false);
+      if (!r.ok) {
+        setError(r.message);
+        return;
+      }
+    }
     setSent(true);
   };
   const open = () => {
     login(email.trim());
     nav('/preferencias');
   };
+
+  if (linkState !== 'idle') {
+    return (
+      <Shell chrome="none">
+        <div className="page no-nav" style={{ minHeight: '100dvh', justifyContent: 'center', alignItems: 'flex-start' }}>
+          <Logo height={48} />
+          {linkState === 'checking' ? (
+            <p className="lead" role="status">A entrar…</p>
+          ) : (
+            <div className="stack" style={{ gap: 12 }} role="alert">
+              <h1 style={{ ...DISPLAY, fontSize: 30 }}>Este link já não funciona.</h1>
+              <p className="lead">Os links valem 15 minutos e só podem ser usados uma vez.</p>
+              <Link to="/entrar" className="btn btn-primary" onClick={() => setLinkState('idle')}>
+                Pedir um novo link
+              </Link>
+            </div>
+          )}
+        </div>
+      </Shell>
+    );
+  }
 
   const rings = (list: typeof RINGS_M, pct: boolean) =>
     list.map(([x, y, s, b, c, o], i) => (
@@ -90,7 +136,7 @@ export default function Entrar() {
       </div>
       {desktop ? (
         <>
-          <button type="submit" className="btn btn-primary btn-block lift" style={{ height: 56 }}>
+          <button type="submit" className="btn btn-primary btn-block lift" style={{ height: 56 }} disabled={busy}>
             Receber link de acesso
           </button>
           <span className="row small muted" style={{ gap: 8 }}>
@@ -101,7 +147,7 @@ export default function Entrar() {
       ) : (
         <>
           <div className="small muted">Sem palavra-passe nem nome. Enviamos-te um link.</div>
-          <button type="submit" className="btn btn-primary btn-block" style={{ height: 56, marginTop: 'auto' }}>
+          <button type="submit" className="btn btn-primary btn-block" style={{ height: 56, marginTop: "auto" }} disabled={busy}>
             Receber link de acesso
           </button>
         </>
@@ -123,11 +169,12 @@ export default function Entrar() {
           <strong style={{ color: 'var(--ink)' }}>{email.trim()}</strong>. {desktop ? 'Válido 15 minutos.' : 'Vale 15 minutos.'}
         </p>
       </div>
-      {desktop && (
+      {desktop && !apiMode && (
         <button type="button" className="btn btn-dark btn-block lift" style={{ height: 56 }} onClick={open}>
           Abri o link · continuar
         </button>
       )}
+      {apiMode && <p className="small muted">Abre o link nesse email para entrar. Podes fechar esta página.</p>}
       <button type="button" className="link" style={{ alignSelf: 'flex-start', fontSize: desktop ? 15 : 14 }} onClick={() => setSent(false)}>
         Usar outro email
       </button>
@@ -182,9 +229,11 @@ export default function Entrar() {
             {sent ? (
               <>
                 {sentBlock}
-                <button type="button" className="btn btn-dark btn-block" style={{ height: 56, marginTop: 'auto' }} onClick={open}>
-                  Abri o link · continuar
-                </button>
+                {!apiMode && (
+                  <button type="button" className="btn btn-dark btn-block" style={{ height: 56, marginTop: 'auto' }} onClick={open}>
+                    Abri o link · continuar
+                  </button>
+                )}
               </>
             ) : (
               <div className="stack" style={{ flex: 1 }}>

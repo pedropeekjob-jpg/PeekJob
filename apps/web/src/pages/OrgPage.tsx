@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useOrg } from '../api/orgs';
+import { useOrg, useOrgStatus } from '../api/orgs';
 import { Ring } from '../components/Data';
 import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
@@ -22,6 +22,8 @@ const MIN_SALARIES = 3;
 export default function OrgPage({ tab }: { tab: Tab }) {
   const { id } = useParams();
   const org = useOrg(id);
+  const status = useOrgStatus(id);
+  if (!org && status === 'loading') return <Shell nav><div className="page" role="status"><span className="sk" style={{ height: 120, borderRadius: 24 }} /><span className="sk" style={{ height: 300, borderRadius: 24 }} /></div></Shell>;
   if (!org) return <OrgNotFound id={id} />;
   // key: estado local (locais, "ver mais") recomeça ao mudar de organização
   return <OrgView key={org.id} org={org} tab={tab} />;
@@ -365,8 +367,11 @@ function ReviewsSection({ org, desktop }: { org: Org; desktop: boolean }) {
   const { startReview } = useOrgBasics(org);
   const [all, setAll] = useState(false);
   const mine = myReviews.filter((r) => r.orgId === org.id);
-  const shown = all ? org.reviews : org.reviews.slice(0, 2);
-  if (!mine.length && !org.reviews.length) {
+  // a tua avaliação aparece à parte, com a etiqueta "A tua avaliação"
+  const mineIds = new Set(mine.map((r) => r.id));
+  const others = org.reviews.filter((r) => !mineIds.has(r.id));
+  const shown = all ? others : others.slice(0, 2);
+  if (!mine.length && !others.length) {
     return (
       <Empty
         title="Ainda sem avaliações."
@@ -387,7 +392,7 @@ function ReviewsSection({ org, desktop }: { org: Org; desktop: boolean }) {
       {shown.map((r) => (
         <ReviewItem key={r.id} r={r} org={org} desktop={desktop} />
       ))}
-      {org.reviews.length > 2 && (
+      {others.length > 2 && (
         <button
           type="button"
           className={desktop ? 'btn btn-ghost lift' : 'btn btn-ghost btn-block'}
