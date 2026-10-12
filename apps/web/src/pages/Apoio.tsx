@@ -6,6 +6,8 @@ import { Accordion } from '../components/UI';
 import { SUPPORT, supportTips } from '../data/content';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { tr } from '../i18n';
+import { flagLabel } from '../i18n/labels';
 
 const DISPLAY = { fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0 } as const;
 
@@ -27,17 +29,23 @@ export default function Apoio() {
   };
 
   const intro = msg
-    ? `O que descreveste pode configurar ${msg.kinds.join(' e ')}. Estas entidades ajudam${desktop ? '-te' : ''}, sem custos.`
-    : 'Se algo no teu trabalho pode ser ilegal — salários em atraso, assédio, discriminação — estas entidades ajudam, sem custos.';
+    ? tr(
+        `O que descreveste pode configurar ${msg.kinds.map(flagLabel).join(' e ')}. Estas entidades ajudam${desktop ? '-te' : ''}, sem custos.`,
+        `What you described may amount to ${msg.kinds.map(flagLabel).join(' and ')}. These organisations can help${desktop ? ' you' : ''}, free of charge.`,
+      )
+    : tr(
+        'Se algo no teu trabalho pode ser ilegal — salários em atraso, assédio, discriminação — estas entidades ajudam, sem custos.',
+        'If something at your work may be illegal — late pay, harassment, discrimination — these organisations can help, free of charge.',
+      );
 
   const tips = (
     <Accordion
       items={[
         {
-          title: <span style={{ ...DISPLAY, fontSize: desktop ? 22 : 20 }}>O que pode ajudar</span>,
+          title: <span style={{ ...DISPLAY, fontSize: desktop ? 22 : 20 }}>{tr('O que pode ajudar', 'What can help')}</span>,
           body: (
             <ul className="stack" style={{ margin: 0, padding: 0, listStyle: 'none', gap: desktop ? 12 : 8 }}>
-              {[...supportTips(), ...(desktop ? ['Confirma horários e contactos no site de cada entidade.'] : [])].map((t) => (
+              {[...supportTips(), ...(desktop ? [tr('Confirma horários e contactos no site de cada entidade.', 'Check opening hours and contact details on each organisation’s website.')] : [])].map((t) => (
                 <li key={t} className="row" style={{ gap: 12, alignItems: 'flex-start', fontSize: 15, lineHeight: 1.45, color: 'var(--body)' }}>
                   <span aria-hidden="true" style={{ flex: 'none', marginTop: 6, width: 12, height: 12, borderRadius: 6, border: '3px solid var(--purple)' }} />
                   {t}
@@ -53,17 +61,20 @@ export default function Apoio() {
   const privateBadge = (
     <span className="row" style={{ gap: 8, fontSize: 13, fontWeight: 600, padding: desktop ? '8px 14px' : '6px 10px', borderRadius: 999, background: 'var(--purple-text)' }}>
       <Icon name="lock" size={12} stroke={2.2} />
-      Só tu vês esta mensagem
+      {tr('Só tu vês esta mensagem', 'Only you can see this message')}
     </span>
   );
 
   const found = msg?.found.length ? (
     <p style={{ margin: 0, fontSize: 13, color: '#E0CCEE' }}>
-      Na tua avaliação: {msg.found.join(', ')}.
+      {tr('Na tua avaliação: ', 'In your review: ')}{msg.found.map(flagLabel).join(', ')}.
     </p>
   ) : null;
 
-  const disclaimer = 'A PeekJob não apresenta queixas por ti nem partilha esta mensagem com a organização — não é uma entidade de denúncia.';
+  const disclaimer = tr(
+    'A PeekJob não apresenta queixas por ti nem partilha esta mensagem com a organização — não é uma entidade de denúncia.',
+    'PeekJob doesn’t file complaints for you or share this message with the organisation — we’re not a reporting body.',
+  );
 
   /* ---------- Desktop ---------- */
   if (desktop) {
@@ -78,12 +89,12 @@ export default function Apoio() {
             <div className="row wrap" style={{ gap: 14 }}>
               <button type="button" onClick={back} className="row" style={{ height: 44, padding: '0 16px 0 12px', borderRadius: 22, border: '1px solid #A47BC4', background: 'transparent', gap: 8, color: '#fff', fontSize: 14, fontWeight: 600 }}>
                 <Icon name="back" size={18} />
-                Voltar
+                {tr('Voltar', 'Back')}
               </button>
               {privateBadge}
             </div>
             <h1 id="apoio-titulo" style={{ ...DISPLAY, maxWidth: 760, fontSize: 56, lineHeight: 1.02, letterSpacing: '-0.01em' }}>
-              Não tens de passar por isto sozinho/a.
+              {tr('Não tens de passar por isto sozinho/a.', 'You don’t have to go through this alone.')}
             </h1>
             <p style={{ margin: 0, maxWidth: 620, fontSize: 16, lineHeight: 1.55, color: '#F0E6F7' }}>{intro}</p>
             {found}
@@ -106,7 +117,7 @@ export default function Apoio() {
                 </div>
                 <div className="row wrap" style={{ gap: 8 }}>
                   {o.tel && (
-                    <a className="btn btn-dark lift" href={o.tel} aria-label={`Ligar para ${o.name}, ${o.phone}`} style={{ height: 48, borderRadius: 16, padding: '0 16px', fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 15 }}>
+                    <a className="btn btn-dark lift" href={o.tel} aria-label={tr(`Ligar para ${o.name}, ${o.phone}`, `Call ${o.name}, ${o.phone}`)} style={{ height: 48, borderRadius: 16, padding: '0 16px', fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 15 }}>
                       <Icon name="phone" size={16} />
                       {o.phone}
                     </a>
@@ -128,8 +139,8 @@ export default function Apoio() {
             <a href="tel:112" className="plain row lift" style={{ flex: '1 1 320px', gap: 18 }}>
               <span style={{ flex: 'none', width: 76, height: 76, borderRadius: 38, border: '6px solid var(--down)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...DISPLAY, fontWeight: 700, fontSize: 24, color: 'var(--warn-text)' }}>112</span>
               <span className="stack" style={{ gap: 4 }}>
-                <span style={{ ...DISPLAY, fontSize: 22, color: 'var(--warn-text)' }}>Estás em perigo agora?</span>
-                <span style={{ fontSize: 15, color: 'var(--body)' }}>Liga 112. É gratuito.</span>
+                <span style={{ ...DISPLAY, fontSize: 22, color: 'var(--warn-text)' }}>{tr('Estás em perigo agora?', 'Are you in danger right now?')}</span>
+                <span style={{ fontSize: 15, color: 'var(--body)' }}>{tr('Liga 112. É gratuito.', 'Call 112. It’s free.')}</span>
               </span>
             </a>
             <section className="stack" style={{ flex: '1.4 1 420px', minWidth: 0, borderBottom: '1px solid var(--line)' }}>
@@ -142,7 +153,7 @@ export default function Apoio() {
               {disclaimer}
             </p>
             <Link to="/perfil" className="link" style={{ fontSize: 15 }}>
-              Voltar ao perfil <Icon name="next" size={16} />
+              {tr('Voltar ao perfil', 'Back to profile')} <Icon name="next" size={16} />
             </Link>
           </div>
         </div>
@@ -156,13 +167,13 @@ export default function Apoio() {
       <section aria-labelledby="apoio-titulo" style={{ background: 'var(--purple)', color: '#fff' }}>
         <div className="stack" style={{ maxWidth: 560, margin: '0 auto', padding: '20px 20px 28px', gap: 16 }}>
           <div className="row between">
-            <button type="button" aria-label="Voltar" onClick={back} className="icon-btn" style={{ background: 'transparent', borderColor: '#8E5BB5', color: '#fff' }}>
+            <button type="button" aria-label={tr('Voltar', 'Back')} onClick={back} className="icon-btn" style={{ background: 'transparent', borderColor: '#8E5BB5', color: '#fff' }}>
               <Icon name="back" size={18} />
             </button>
             {privateBadge}
           </div>
           <h1 id="apoio-titulo" style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.08 }}>
-            Não tens de passar por isto sozinho/a.
+            {tr('Não tens de passar por isto sozinho/a.', 'You don’t have to go through this alone.')}
           </h1>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.45, color: '#F0E6F7' }}>{intro}</p>
           {found}
@@ -183,7 +194,7 @@ export default function Apoio() {
             </div>
             <div className="row wrap" style={{ gap: 8, paddingLeft: 56 }}>
               {o.tel && (
-                <a href={o.tel} aria-label={`Ligar para ${o.name}, ${o.phone}`} className="btn btn-dark" style={{ height: 44, padding: '0 14px', borderRadius: 14, fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 15 }}>
+                <a href={o.tel} aria-label={tr(`Ligar para ${o.name}, ${o.phone}`, `Call ${o.name}, ${o.phone}`)} className="btn btn-dark" style={{ height: 44, padding: '0 14px', borderRadius: 14, fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 15 }}>
                   <Icon name="phone" size={16} />
                   {o.phone}
                 </a>
@@ -207,11 +218,14 @@ export default function Apoio() {
         ))}
 
         <div className="row" style={{ gap: 14, padding: '16px 0', borderBottom: '1px solid var(--line)' }}>
-          <a href="tel:112" aria-label="Ligar 112" className="plain" style={{ flex: 'none', width: 44, height: 44, borderRadius: 22, border: '4px solid var(--down)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...DISPLAY, fontWeight: 700, fontSize: 13, color: 'var(--warn-text)' }}>
+          <a href="tel:112" aria-label={tr('Ligar 112', 'Call 112')} className="plain" style={{ flex: 'none', width: 44, height: 44, borderRadius: 22, border: '4px solid var(--down)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...DISPLAY, fontWeight: 700, fontSize: 13, color: 'var(--warn-text)' }}>
             112
           </a>
           <span style={{ fontSize: 15, color: 'var(--body)' }}>
-            Em perigo agora? Liga <strong style={{ color: 'var(--ink)' }}>112</strong>.
+            {tr(
+              <>Em perigo agora? Liga <strong style={{ color: 'var(--ink)' }}>112</strong>.</>,
+              <>In danger right now? Call <strong style={{ color: 'var(--ink)' }}>112</strong>.</>,
+            )}
           </span>
         </div>
 

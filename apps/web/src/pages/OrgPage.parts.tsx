@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Dots } from '../components/Data';
 import { Icon } from '../components/Icon';
 import { CRITERION, type CriterionKey } from '../data/criteria';
+import { tr } from '../i18n';
 import { deg, fmt } from '../lib/format';
 
 /** Anel com conteúdo livre no centro (ex.: "4,4" + "de 5") */
@@ -77,7 +78,7 @@ export function BigRing({
 export function PrioMark({ n, color }: { n: number; color: string }) {
   return (
     <span
-      title={`Prioridade ${n}`}
+      title={tr(`Prioridade ${n}`, `Priority ${n}`)}
       aria-hidden="true"
       style={{
         flex: 'none',
@@ -121,9 +122,14 @@ export function CritLine({
 }) {
   const c = CRITERION[k];
   const aria =
-    `${c.label} ${value == null ? 'sem dados' : fmt(value) + ' de 5'}` +
-    (priority ? `, a tua prioridade ${priority}` : '') +
-    (delta != null ? `, ${delta > 0 ? 'subiu ' + fmt(delta) : delta < 0 ? 'desceu ' + fmt(-delta) : 'igual'} esta semana` : '');
+    `${c.label} ${value == null ? tr('sem dados', 'no data') : fmt(value) + tr(' de 5', ' out of 5')}` +
+    (priority ? tr(`, a tua prioridade ${priority}`, `, your priority ${priority}`) : '') +
+    (delta != null
+      ? tr(
+          `, ${delta > 0 ? 'subiu ' + fmt(delta) : delta < 0 ? 'desceu ' + fmt(-delta) : 'igual'} esta semana`,
+          `, ${delta > 0 ? 'up ' + fmt(delta) : delta < 0 ? 'down ' + fmt(-delta) : 'unchanged'} this week`,
+        )
+      : '');
   return (
     <div
       role="group"
@@ -153,7 +159,7 @@ export function CritLine({
           aria-hidden="true"
           style={{ fontSize: 13, textAlign: 'right', color: delta > 0 ? 'var(--up)' : delta < 0 ? 'var(--down)' : 'var(--muted)' }}
         >
-          {delta > 0 ? '▲ ' + fmt(delta) : delta < 0 ? '▼ ' + fmt(-delta) : '= 0,0'}
+          {delta > 0 ? '▲ ' + fmt(delta) : delta < 0 ? '▼ ' + fmt(-delta) : tr('= 0,0', '= 0.0')}
         </span>
       )}
     </div>
@@ -161,7 +167,7 @@ export function CritLine({
 }
 
 /** Botão redondo de voltar (mobile), com destino de reserva quando não há histórico */
-export function BackButton({ fallback, label = 'Voltar' }: { fallback: string; label?: string }) {
+export function BackButton({ fallback, label = tr('Voltar', 'Back') }: { fallback: string; label?: string }) {
   const nav = useNavigate();
   const go = () => {
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;

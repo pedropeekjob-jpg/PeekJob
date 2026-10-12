@@ -7,6 +7,8 @@ import { ORG_TYPES, type Org, type OrgType } from '../data/orgs';
 import { useOrgs } from '../api/orgs';
 import { fmt, plural } from '../lib/format';
 import { useIsDesktop } from '../lib/useMedia';
+import { tr } from '../i18n';
+import { orgTypeLabel, sectorLabel } from '../i18n/labels';
 
 type SortKey = 'nota' | 'resp' | 'n';
 
@@ -47,18 +49,18 @@ export default function Setores() {
       <div className={desktop ? 'container' : 'page'} style={desktop ? { paddingBottom: 64 } : { gap: 0 }}>
         <div className="stack" style={{ gap: 12, padding: desktop ? '32px 0 40px' : '8px 0 28px' }}>
           <h1 className="h1" style={desktop ? { fontSize: 'clamp(36px, 4vw, 52px)', lineHeight: 1 } : undefined}>
-            Encontra o teu tipo de lugar.
+            {tr('Encontra o teu tipo de lugar.', 'Find your kind of place.')}
           </h1>
           <p className="lead" style={{ fontSize: 16 }}>
-            Escolhe um tipo e compara os setores.
+            {tr('Escolhe um tipo e compara os setores.', 'Pick a type and compare sectors.')}
           </p>
         </div>
 
         <section aria-labelledby="t-tipos" className="stack" style={{ gap: 16 }}>
           <h2 id="t-tipos" className="h2" style={{ fontSize: 22 }}>
-            Tipo de organização
+            {tr('Tipo de organização', 'Type of organisation')}
           </h2>
-          <div role="group" aria-label="Tipo de organização" className="grid-auto" style={{ gap: desktop ? 14 : 10, gridTemplateColumns: desktop ? undefined : 'repeat(2, minmax(0, 1fr))' }}>
+          <div role="group" aria-label={tr('Tipo de organização', 'Type of organisation')} className="grid-auto" style={{ gap: desktop ? 14 : 10, gridTemplateColumns: desktop ? undefined : 'repeat(2, minmax(0, 1fr))' }}>
             {types.map(({ t, n, score }) => {
               const on = type === t;
               return (
@@ -74,12 +76,12 @@ export default function Setores() {
                     border: `2px solid ${on ? 'var(--teal)' : 'var(--line)'}`, background: on ? 'var(--teal-tint)' : 'var(--surface)', textAlign: 'left',
                   }}
                 >
-                  <Ring value={score} size={desktop ? 60 : 48} muted={!n} inner={on ? 'var(--teal-tint)' : 'var(--surface)'} ariaLabel={n ? `Nota média ${fmt(score)} de 5` : 'Ainda sem nota'} />
+                  <Ring value={score} size={desktop ? 60 : 48} muted={!n} inner={on ? 'var(--teal-tint)' : 'var(--surface)'} ariaLabel={n ? tr(`Nota média ${fmt(score)} de 5`, `Average score ${fmt(score)} out of 5`) : tr('Ainda sem nota', 'No score yet')} />
                   <span className="stack" style={{ gap: 3, minWidth: 0 }}>
                     <span className="num" style={{ fontSize: desktop ? 20 : 17, lineHeight: 1.1 }}>
-                      {t}
+                      {orgTypeLabel(t)}
                     </span>
-                    <span className="small muted">{plural(n, 'organização', 'organizações')}</span>
+                    <span className="small muted">{plural(n, tr('organização', 'organisation'), tr('organizações', 'organisations'))}</span>
                   </span>
                 </button>
               );
@@ -87,11 +89,11 @@ export default function Setores() {
           </div>
           <div className="row wrap" style={{ gap: 12 }}>
             <Link to={rankHref} className="btn btn-dark" style={{ fontSize: 15, flex: desktop ? undefined : '1 1 auto' }}>
-              Ver ranking · {type ?? 'todos os tipos'} <Icon name="next" size={18} />
+              {tr('Ver ranking', 'View ranking')} · {type ? orgTypeLabel(type) : tr('todos os tipos', 'all types')} <Icon name="next" size={18} />
             </Link>
             {type && (
               <button type="button" className="btn btn-ghost" style={{ fontSize: 15 }} onClick={() => setType(null)}>
-                Mostrar todos os tipos
+                {tr('Mostrar todos os tipos', 'Show all types')}
               </button>
             )}
           </div>
@@ -101,18 +103,18 @@ export default function Setores() {
           <div className="row wrap between" style={{ gap: 16, paddingBottom: 8 }}>
             <div className="row wrap" style={{ alignItems: 'baseline', gap: 14 }}>
               <h2 id="t-setores" className="h2" style={{ fontSize: 22 }}>
-                Setores
+                {tr('Setores', 'Sectors')}
               </h2>
               <span aria-live="polite" className="small muted">
-                {type ? `${sectors.length} com ${type}` : plural(sectors.length, 'setor', 'setores')}
+                {type ? tr(`${sectors.length} com ${type}`, `${sectors.length} with ${orgTypeLabel(type)}`) : plural(sectors.length, tr('setor', 'sector'), tr('setores', 'sectors'))}
               </span>
             </div>
-            <div className="segmented" role="group" aria-label="Ordenar setores" style={desktop ? undefined : { width: '100%' }}>
+            <div className="segmented" role="group" aria-label={tr('Ordenar setores', 'Sort sectors')} style={desktop ? undefined : { width: '100%' }}>
               {(
                 [
-                  ['nota', 'Melhor nota'],
-                  ['resp', 'Mais respeito'],
-                  ['n', desktop ? 'Mais organizações' : 'Mais org.'],
+                  ['nota', tr('Melhor nota', 'Top score')],
+                  ['resp', tr('Mais respeito', 'Most respect')],
+                  ['n', desktop ? tr('Mais organizações', 'Most organisations') : tr('Mais org.', 'Most orgs')],
                 ] as const
               ).map(([k, l]) => (
                 <button key={k} type="button" aria-pressed={sort === k} onClick={() => setSort(k)} style={desktop ? undefined : { padding: '0 8px', fontSize: 13 }}>
@@ -124,7 +126,7 @@ export default function Setores() {
 
           {sectors.length === 0 ? (
             <div className="body" style={{ padding: '20px 0', borderTop: '1px solid var(--line)' }}>
-              Ainda não há organizações deste tipo com avaliações.
+              {tr('Ainda não há organizações deste tipo com avaliações.', 'No organisations of this type have reviews yet.')}
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: desktop ? 'repeat(auto-fill, minmax(min(480px, 100%), 1fr))' : '1fr', columnGap: 48 }}>
@@ -135,16 +137,16 @@ export default function Setores() {
                   className="plain row st-row"
                   style={{ gap: desktop ? 16 : 12, padding: desktop ? '12px 10px' : '12px 0', borderTop: '1px solid var(--line)', borderRadius: 4, minHeight: 72 }}
                 >
-                  <Ring value={s.score} size={52} fontSize={16} ariaLabel={`Nota média ${fmt(s.score)} de 5`} />
+                  <Ring value={s.score} size={52} fontSize={16} ariaLabel={tr(`Nota média ${fmt(s.score)} de 5`, `Average score ${fmt(s.score)} out of 5`)} />
                   <span className="grow stack" style={{ gap: 3 }}>
                     <span className="ellipsis" style={{ fontSize: 16, fontWeight: 600 }}>
-                      {s.name}
+                      {sectorLabel(s.name)}
                     </span>
-                    <span className="small muted">{plural(s.n, 'organização', 'organizações')}</span>
+                    <span className="small muted">{plural(s.n, tr('organização', 'organisation'), tr('organizações', 'organisations'))}</span>
                   </span>
-                  <span className="row small" aria-label={`Respeito e inclusão ${fmt(s.resp)} de 5`} style={{ flex: 'none', gap: 6, color: 'var(--purple-text)' }}>
+                  <span className="row small" aria-label={tr(`Respeito e inclusão ${fmt(s.resp)} de 5`, `Respect and inclusion ${fmt(s.resp)} out of 5`)} style={{ flex: 'none', gap: 6, color: 'var(--purple-text)' }}>
                     <span aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 5, background: 'var(--purple)' }} />
-                    <span aria-hidden="true">Respeito</span>
+                    <span aria-hidden="true">{tr('Respeito', 'Respect')}</span>
                     <span className="mono" aria-hidden="true" style={{ fontWeight: 500 }}>
                       {fmt(s.resp)}
                     </span>

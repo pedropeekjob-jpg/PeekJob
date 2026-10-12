@@ -1,5 +1,6 @@
 import type { OrgLocation } from '../data/orgs';
 import { Icon } from './Icon';
+import { tr } from '../i18n';
 
 /**
  * Mapa ilustrado (sem dependências nem chaves de API).
@@ -23,7 +24,7 @@ export function MapView({
   const H = 180;
   return (
     <div className="stack" style={{ gap: 8 }}>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={height} preserveAspectRatio="xMidYMid slice" role="img" aria-label={`Mapa: ${cur?.address ?? ''}`} style={{ borderRadius: 18, background: '#E9EEEF' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={height} preserveAspectRatio="xMidYMid slice" role="img" aria-label={tr(`Mapa: ${cur?.address ?? ''}`, `Map: ${cur?.address ?? ''}`)} style={{ borderRadius: 18, background: '#E9EEEF' }}>
         <path d="M0 150 C 90 132, 170 170, 270 154 S 380 136, 400 146 L 400 180 L 0 180 Z" fill="#CFE3E6" />
         <rect x="18" y="14" width="90" height="48" rx="8" fill="#ECEFEF" />
         <rect x="126" y="14" width="74" height="48" rx="8" fill="#ECEFEF" />
@@ -41,7 +42,7 @@ export function MapView({
               onClick={onPick ? () => onPick(l.id) : undefined}
               style={{ cursor: onPick ? 'pointer' : 'default' }}
               role={onPick ? 'button' : undefined}
-              aria-label={onPick ? `Escolher ${l.label}` : undefined}
+              aria-label={onPick ? tr(`Escolher ${l.label}`, `Choose ${l.label}`) : undefined}
               tabIndex={onPick ? 0 : undefined}
               onKeyDown={onPick ? (e) => (e.key === 'Enter' || e.key === ' ') && onPick(l.id) : undefined}
             >
@@ -60,7 +61,7 @@ export function MapView({
           target="_blank"
           rel="noreferrer"
         >
-          Abrir no mapa <Icon name="external" size={14} />
+          {tr('Abrir no mapa', 'Open in map')} <Icon name="external" size={14} />
         </a>
       )}
     </div>

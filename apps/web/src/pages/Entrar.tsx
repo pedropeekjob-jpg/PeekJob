@@ -6,6 +6,7 @@ import { Logo } from '../components/Brand';
 import { Icon } from '../components/Icon';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { tr } from '../i18n';
 
 const DISPLAY = { fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0 } as const;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,7 +47,7 @@ export default function Entrar() {
   const send = async (e: FormEvent) => {
     e.preventDefault();
     if (!EMAIL_RE.test(email.trim())) {
-      setError('Escreve um email válido, por exemplo nome@gmail.com.');
+      setError(tr('Escreve um email válido, por exemplo nome@gmail.com.', 'Enter a valid email, for example name@gmail.com.'));
       return;
     }
     setError('');
@@ -72,13 +73,13 @@ export default function Entrar() {
         <div className="page no-nav" style={{ minHeight: '100dvh', justifyContent: 'center', alignItems: 'flex-start' }}>
           <Logo height={48} />
           {linkState === 'checking' ? (
-            <p className="lead" role="status">A entrar…</p>
+            <p className="lead" role="status">{tr('A entrar…', 'Signing in…')}</p>
           ) : (
             <div className="stack" style={{ gap: 12 }} role="alert">
-              <h1 style={{ ...DISPLAY, fontSize: 30 }}>Este link já não funciona.</h1>
-              <p className="lead">Os links valem 15 minutos e só podem ser usados uma vez.</p>
+              <h1 style={{ ...DISPLAY, fontSize: 30 }}>{tr('Este link já não funciona.', 'This link no longer works.')}</h1>
+              <p className="lead">{tr('Os links valem 15 minutos e só podem ser usados uma vez.', 'Links last 15 minutes and can only be used once.')}</p>
               <Link to="/entrar" className="btn btn-primary" onClick={() => setLinkState('idle')}>
-                Pedir um novo link
+                {tr('Pedir um novo link', 'Ask for a new link')}
               </Link>
             </div>
           )}
@@ -103,17 +104,17 @@ export default function Entrar() {
     <form className="stack fade-up" style={{ gap: desktop ? 24 : 20, flex: desktop ? undefined : 1 }} onSubmit={send} noValidate>
       {desktop ? (
         <div className="stack" style={{ gap: 10 }}>
-          <h1 style={{ ...DISPLAY, fontSize: 40, lineHeight: 1 }}>Entrar</h1>
+          <h1 style={{ ...DISPLAY, fontSize: 40, lineHeight: 1 }}>{tr('Entrar', 'Sign in')}</h1>
           <p className="lead" style={{ fontSize: 16 }}>
-            Sem palavra-passe. Enviamos-te um link de acesso.
+            {tr('Sem palavra-passe. Enviamos-te um link de acesso.', 'No password. We’ll send you a sign-in link.')}
           </p>
         </div>
       ) : (
-        <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>Como é trabalhar lá dentro, contado por quem sabe.</h1>
+        <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>{tr('Como é trabalhar lá dentro, contado por quem sabe.', 'What it’s like to work there, from people who know.')}</h1>
       )}
       <div className="field">
         <label htmlFor="le" style={desktop ? { fontSize: 15 } : { fontSize: 13, fontWeight: 500, color: 'var(--body)' }}>
-          O teu email
+          {tr('O teu email', 'Your email')}
         </label>
         <input
           className="input"
@@ -122,7 +123,7 @@ export default function Entrar() {
           autoComplete="email"
           inputMode="email"
           value={email}
-          placeholder="nome@gmail.com"
+          placeholder={tr('nome@gmail.com', 'name@gmail.com')}
           aria-invalid={!!error}
           aria-describedby={error ? 'le-err' : undefined}
           onChange={(e) => setEmail(e.target.value)}
@@ -137,18 +138,18 @@ export default function Entrar() {
       {desktop ? (
         <>
           <button type="submit" className="btn btn-primary btn-block lift" style={{ height: 56 }} disabled={busy}>
-            Receber link de acesso
+            {tr('Receber link de acesso', 'Get sign-in link')}
           </button>
           <span className="row small muted" style={{ gap: 8 }}>
             <Icon name="lock" size={14} />
-            O teu email nunca aparece nas avaliações.
+            {tr('O teu email nunca aparece nas avaliações.', 'Your email never appears in reviews.')}
           </span>
         </>
       ) : (
         <>
-          <div className="small muted">Sem palavra-passe nem nome. Enviamos-te um link.</div>
+          <div className="small muted">{tr('Sem palavra-passe nem nome. Enviamos-te um link.', 'No password, no name. We’ll send you a link.')}</div>
           <button type="submit" className="btn btn-primary btn-block" style={{ height: 56, marginTop: "auto" }} disabled={busy}>
-            Receber link de acesso
+            {tr('Receber link de acesso', 'Get sign-in link')}
           </button>
         </>
       )}
@@ -163,27 +164,27 @@ export default function Entrar() {
         </div>
       )}
       <div className="stack" style={{ gap: desktop ? 10 : 12 }}>
-        <h1 style={{ ...DISPLAY, fontSize: desktop ? 40 : 32, lineHeight: desktop ? 1 : 1.05 }}>Vê o teu email.</h1>
+        <h1 style={{ ...DISPLAY, fontSize: desktop ? 40 : 32, lineHeight: desktop ? 1 : 1.05 }}>{tr('Vê o teu email.', 'Check your email.')}</h1>
         <p className="lead" role="status" style={{ fontSize: desktop ? 16 : 15 }}>
-          {desktop ? 'Link enviado para ' : 'Enviámos um link para '}
-          <strong style={{ color: 'var(--ink)' }}>{email.trim()}</strong>. {desktop ? 'Válido 15 minutos.' : 'Vale 15 minutos.'}
+          {desktop ? tr('Link enviado para ', 'Link sent to ') : tr('Enviámos um link para ', 'We sent a link to ')}
+          <strong style={{ color: 'var(--ink)' }}>{email.trim()}</strong>. {desktop ? tr('Válido 15 minutos.', 'Valid for 15 minutes.') : tr('Vale 15 minutos.', 'Lasts 15 minutes.')}
         </p>
       </div>
       {desktop && !apiMode && (
         <button type="button" className="btn btn-dark btn-block lift" style={{ height: 56 }} onClick={open}>
-          Abri o link · continuar
+          {tr('Abri o link · continuar', 'I opened the link · continue')}
         </button>
       )}
-      {apiMode && <p className="small muted">Abre o link nesse email para entrar. Podes fechar esta página.</p>}
+      {apiMode && <p className="small muted">{tr('Abre o link nesse email para entrar. Podes fechar esta página.', 'Open the link in that email to sign in. You can close this page.')}</p>}
       <button type="button" className="link" style={{ alignSelf: 'flex-start', fontSize: desktop ? 15 : 14 }} onClick={() => setSent(false)}>
-        Usar outro email
+        {tr('Usar outro email', 'Use another email')}
       </button>
     </div>
   );
 
   const explore = (
     <Link to="/" className="link" style={{ alignSelf: 'center', color: 'var(--body)', fontSize: desktop ? 15 : 14, fontWeight: desktop ? 600 : 500 }}>
-      Explorar sem conta
+      {tr('Explorar sem conta', 'Explore without an account')}
     </Link>
   );
 
@@ -193,13 +194,13 @@ export default function Entrar() {
       <Shell chrome="none">
         <div className="row wrap" style={{ minHeight: '100vh', alignItems: 'stretch' }}>
           <div className="stack between" style={{ position: 'relative', overflow: 'hidden', flex: '1 1 520px', minHeight: '100vh', background: 'var(--ink)', color: '#fff', padding: '40px clamp(24px, 4vw, 64px)' }}>
-            <Link to="/" aria-label="PeekJob, início" style={{ position: 'relative', zIndex: 1, alignSelf: 'flex-start' }}>
+            <Link to="/" aria-label={tr('PeekJob, início', 'PeekJob, home')} style={{ position: 'relative', zIndex: 1, alignSelf: 'flex-start' }}>
               <Logo height={72} dark />
             </Link>
             <div aria-hidden="true" style={{ position: 'absolute', inset: '150px 0 220px 0' }}>
               {rings(RINGS_D, true)}
             </div>
-            <p style={{ position: 'relative', zIndex: 1, ...DISPLAY, maxWidth: 480, fontSize: 40, lineHeight: 1.08 }}>Como é trabalhar lá dentro, contado por quem sabe.</p>
+            <p style={{ position: 'relative', zIndex: 1, ...DISPLAY, maxWidth: 480, fontSize: 40, lineHeight: 1.08 }}>{tr('Como é trabalhar lá dentro, contado por quem sabe.', 'What it’s like to work there, from people who know.')}</p>
           </div>
           <div className="row" style={{ flex: '1 1 480px', minHeight: '100vh', justifyContent: 'center', padding: '48px clamp(16px, 4vw, 64px)' }}>
             <div className="stack" style={{ width: '100%', maxWidth: 420, gap: 32 }}>
@@ -217,7 +218,7 @@ export default function Entrar() {
     <Shell chrome="none">
       <div className="stack" style={{ minHeight: '100dvh', background: 'var(--ink)' }}>
         <div style={{ position: 'relative', height: 300, padding: '28px 24px 0', overflow: 'hidden' }}>
-          <Link to="/" aria-label="PeekJob, início" style={{ display: 'inline-block' }}>
+          <Link to="/" aria-label={tr('PeekJob, início', 'PeekJob, home')} style={{ display: 'inline-block' }}>
             <Logo height={64} dark />
           </Link>
           <div aria-hidden="true" style={{ position: 'absolute', left: '50%', width: 390, marginLeft: -195, top: 110, bottom: 0 }}>
@@ -231,7 +232,7 @@ export default function Entrar() {
                 {sentBlock}
                 {!apiMode && (
                   <button type="button" className="btn btn-dark btn-block" style={{ height: 56, marginTop: 'auto' }} onClick={open}>
-                    Abri o link · continuar
+                    {tr('Abri o link · continuar', 'I opened the link · continue')}
                   </button>
                 )}
               </>

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
+import { tr } from '../i18n';
 
 /** Secção que abre e fecha (revelação progressiva) */
 export function Disclosure({
@@ -21,7 +22,7 @@ export function Disclosure({
     <div className={className}>
       {open && <div className="fade-up">{children}</div>}
       <button type="button" className="link" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {open ? openLabel ?? 'Mostrar menos' : label}
+        {open ? openLabel ?? tr('Mostrar menos', 'Show less') : label}
         <Icon name="down" size={16} style={{ transform: open ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }} />
       </button>
     </div>
@@ -59,7 +60,7 @@ export function Accordion({ items }: { items: { title: ReactNode; body: ReactNod
 /** Indicador de passos (3 barras) */
 export function Steps({ current, total = 3, label }: { current: number; total?: number; label?: string }) {
   return (
-    <div className="row" style={{ gap: 10 }} aria-label={label ?? `Passo ${current} de ${total}`}>
+    <div className="row" style={{ gap: 10 }} aria-label={label ?? tr(`Passo ${current} de ${total}`, `Step ${current} of ${total}`)}>
       <div className="row" style={{ gap: 4, flex: 1 }}>
         {Array.from({ length: total }, (_, i) => (
           <span key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i < current ? 'var(--teal)' : 'var(--line)' }} />
@@ -82,7 +83,7 @@ export function TopBar({ back, title, right, onBack }: { back?: string | -1; tit
   };
   return (
     <div className="row between" style={{ gap: 12, minHeight: 44 }}>
-      <button type="button" className="icon-btn bare" aria-label="Voltar" onClick={goBack} style={{ marginLeft: -10 }}>
+      <button type="button" className="icon-btn bare" aria-label={tr('Voltar', 'Back')} onClick={goBack} style={{ marginLeft: -10 }}>
         <Icon name="back" />
       </button>
       {title ? <div style={{ fontWeight: 600, fontSize: 16 }} className="ellipsis grow">{title}</div> : <span className="grow" />}
@@ -110,7 +111,7 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
       <div role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} className="sheet fade-up" onClick={(e) => e.stopPropagation()}>
         <div className="row between" style={{ gap: 12, padding: '14px 20px 6px' }}>
           <h2 className="h2" style={{ fontSize: 22 }}>{title}</h2>
-          <button type="button" className="icon-btn bare" aria-label="Fechar" onClick={onClose}>
+          <button type="button" className="icon-btn bare" aria-label={tr('Fechar', 'Close')} onClick={onClose}>
             <Icon name="close" />
           </button>
         </div>

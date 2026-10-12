@@ -10,6 +10,8 @@ import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { DeskSteps, DISPLAY, FlowHead, LockLine } from './Avaliar.parts';
 import { useSearchTracking } from '../analytics/useSearchTracking';
+import { tr } from '../i18n';
+import { orgTypeLabel } from '../i18n/labels';
 
 type Step = 'pick' | 'confirm' | 'add';
 
@@ -71,32 +73,32 @@ export default function AvaliarEscolher() {
       nav('/avaliar/verificar');
     } else if (step === 'add') {
       if (!addName.trim() || !addCity.trim()) {
-        setAddError(!addName.trim() ? 'Escreve o nome da organização.' : 'Escreve a localidade.');
+        setAddError(!addName.trim() ? tr('Escreve o nome da organização.', 'Enter the organisation’s name.') : tr('Escreve a localidade.', 'Enter the town or city.'));
         return;
       }
       setBusy(true);
       const r = await addOrg({ name: addName.trim(), type: addType, city: addCity.trim() });
       setBusy(false);
       if (!r.ok) {
-        setAddError(r.status === 401 ? 'Entra primeiro para adicionar uma organização.' : r.message);
+        setAddError(r.status === 401 ? tr('Entra primeiro para adicionar uma organização.', 'Sign in first to add an organisation.') : r.message);
         return;
       }
       updateDraft({ locationId: 'sede' });
       nav('/avaliar/verificar');
     }
   };
-  const nextLabel = step === 'add' ? 'Adicionar e continuar' : 'Continuar';
+  const nextLabel = step === 'add' ? tr('Adicionar e continuar', 'Add and continue') : tr('Continuar', 'Continue');
 
   /* ---------- Blocos ---------- */
 
   const searchBox = (
     <>
       <label htmlFor="eq" className="sr-only">
-        Nome da organização
+        {tr('Nome da organização', 'Organisation name')}
       </label>
       <div className="search" style={desktop ? { height: 58, padding: '0 18px', borderColor: 'var(--field)' } : { height: 56 }}>
         <Icon name="search" size={18} style={{ color: 'var(--muted)', flex: 'none' }} />
-        <input id="eq" type="search" autoComplete="off" value={q} onChange={(e) => onQ(e.target.value)} placeholder="Empresa, associação, projeto…" />
+        <input id="eq" type="search" autoComplete="off" value={q} onChange={(e) => onQ(e.target.value)} placeholder={tr('Empresa, associação, projeto…', 'Company, association, project…')} />
       </div>
     </>
   );
@@ -105,7 +107,7 @@ export default function AvaliarEscolher() {
     <div className="stack">
       {desktop && (
         <span role="status" className="small muted" style={{ paddingBottom: 6 }}>
-          {nq ? `${results.length} resultado${results.length === 1 ? '' : 's'}` : 'Mais procuradas'}
+          {nq ? tr(`${results.length} resultado${results.length === 1 ? '' : 's'}`, `${results.length} result${results.length === 1 ? '' : 's'}`) : tr('Mais procuradas', 'Most searched')}
         </span>
       )}
       {list.map((o) => {
@@ -122,11 +124,11 @@ export default function AvaliarEscolher() {
               background: on ? 'var(--teal-tint)' : 'transparent', textAlign: 'left',
             }}
           >
-            <Ring value={o.score} size={44} thickness={5} muted={!o.reviewsCount} label={o.reviewsCount ? undefined : 'nova'} fontSize={o.reviewsCount ? 14 : 11} ariaLabel={o.reviewsCount ? undefined : 'Ainda sem avaliações'} />
+            <Ring value={o.score} size={44} thickness={5} muted={!o.reviewsCount} label={o.reviewsCount ? undefined : tr('nova', 'new')} fontSize={o.reviewsCount ? 14 : 11} ariaLabel={o.reviewsCount ? undefined : tr('Ainda sem avaliações', 'No reviews yet')} />
             <span className="grow stack" style={{ gap: 2 }}>
               <span style={{ fontSize: 16, fontWeight: 600 }}>{o.name}</span>
               <span className="small muted">
-                {o.type} · {o.city}
+                {orgTypeLabel(o.type)} · {o.city}
               </span>
             </span>
             <Icon name={on ? 'check' : 'next'} size={18} style={{ color: on ? 'var(--teal-dark)' : 'var(--grey)', flex: 'none' }} />
@@ -148,7 +150,7 @@ export default function AvaliarEscolher() {
             <span className="grow stack" style={{ gap: 2 }}>
               <span style={{ fontSize: 16, fontWeight: 600 }}>{o.name}</span>
               <span className="small muted">
-                {o.type} · {o.city}
+                {orgTypeLabel(o.type)} · {o.city}
               </span>
             </span>
             <Icon name="next" size={18} style={{ color: 'var(--grey)', flex: 'none' }} />
@@ -156,7 +158,7 @@ export default function AvaliarEscolher() {
         );
       })}
       {nq && results.length === 0 && (
-        <div style={{ padding: '12px 0', fontSize: 15, lineHeight: 1.5, color: 'var(--body)' }}>Não encontrámos «{nq}». Podes adicioná-la abaixo.</div>
+        <div style={{ padding: '12px 0', fontSize: 15, lineHeight: 1.5, color: 'var(--body)' }}>{tr(<>Não encontrámos «{nq}». Podes adicioná-la abaixo.</>, <>We couldn’t find “{nq}”. You can add it below.</>)}</div>
       )}
     </div>
   );
@@ -165,12 +167,12 @@ export default function AvaliarEscolher() {
     <div className="stack fade-up" style={{ gap: 20 }}>
       <div className="stack" style={{ gap: desktop ? 6 : 8 }}>
         {desktop ? (
-          <h2 style={{ ...DISPLAY, fontSize: 24, lineHeight: 1.1 }}>Em que local trabalhas?</h2>
+          <h2 style={{ ...DISPLAY, fontSize: 24, lineHeight: 1.1 }}>{tr('Em que local trabalhas?', 'Which location do you work at?')}</h2>
         ) : (
-          <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>Em que local?</h1>
+          <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>{tr('Em que local?', 'Which location?')}</h1>
         )}
         <span className="small muted">
-          {desktop ? `${chosen.name} · ${chosen.locations.length === 1 ? '1 local' : `${chosen.locations.length} locais`}` : 'A avaliação fica ligada ao local, não a ti.'}
+          {desktop ? `${chosen.name} · ${chosen.locations.length === 1 ? tr('1 local', '1 location') : tr(`${chosen.locations.length} locais`, `${chosen.locations.length} locations`)}` : tr('A avaliação fica ligada ao local, não a ti.', 'The review is linked to the location, not to you.')}
         </span>
       </div>
       <div style={desktop ? { background: 'var(--surface)', borderRadius: 24, padding: 8 } : undefined}>
@@ -178,7 +180,7 @@ export default function AvaliarEscolher() {
       </div>
       <div
         role="radiogroup"
-        aria-label="Local de trabalho"
+        aria-label={tr('Local de trabalho', 'Workplace')}
         style={desktop ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(250px, 100%), 1fr))', gap: 12 } : { display: 'flex', flexDirection: 'column' }}
       >
         {chosen.locations.map((l) => {
@@ -210,7 +212,7 @@ export default function AvaliarEscolher() {
       </div>
       {!desktop && (
         <button type="button" className="link" style={{ alignSelf: 'flex-start', fontWeight: 500, fontSize: 15 }} onClick={() => setStep('pick')}>
-          Escolher outra organização
+          {tr('Escolher outra organização', 'Choose another organisation')}
         </button>
       )}
     </div>
@@ -219,31 +221,31 @@ export default function AvaliarEscolher() {
   const addForm = (
     <form className="stack fade-up" style={{ gap: desktop ? 18 : 20 }} onSubmit={next} noValidate>
       <div className="stack" style={{ gap: desktop ? 6 : 8 }}>
-        {desktop ? <h2 style={{ ...DISPLAY, fontSize: 24, lineHeight: 1.1 }}>Adicionar organização</h2> : <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>Adicionar organização</h1>}
-        <span className="small muted">{desktop ? 'Confirmamos os dados antes de aparecer no ranking.' : 'Também associações, voluntariado e conta própria.'}</span>
+        {desktop ? <h2 style={{ ...DISPLAY, fontSize: 24, lineHeight: 1.1 }}>{tr('Adicionar organização', 'Add organisation')}</h2> : <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>{tr('Adicionar organização', 'Add organisation')}</h1>}
+        <span className="small muted">{desktop ? tr('Confirmamos os dados antes de aparecer no ranking.', 'We check the details before it appears in the ranking.') : tr('Também associações, voluntariado e conta própria.', 'Associations, volunteering and self-employed too.')}</span>
       </div>
       <div className="field">
         <label htmlFor="nn" style={{ fontSize: 13, color: 'var(--body)' }}>
-          Nome
+          {tr('Nome', 'Name')}
         </label>
-        <input className="input" id="nn" type="text" value={addName} onChange={(e) => setAddName(e.target.value)} placeholder="Ex.: Horta Comunitária da Sé" required aria-invalid={!!addError && !addName.trim()} />
+        <input className="input" id="nn" type="text" value={addName} onChange={(e) => setAddName(e.target.value)} placeholder={tr('Ex.: Horta Comunitária da Sé', 'E.g. Horta Comunitária da Sé')} required aria-invalid={!!addError && !addName.trim()} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: desktop ? 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))' : '1fr', gap: desktop ? 16 : 20 }}>
         <div className="field">
           <label htmlFor="nt" style={{ fontSize: 13, color: 'var(--body)' }}>
-            Tipo
+            {tr('Tipo', 'Type')}
           </label>
           <select id="nt" className="input" value={addType} onChange={(e) => setAddType(e.target.value as OrgType)} style={{ paddingLeft: 12 }}>
             {ORG_TYPES.map((t) => (
-              <option key={t}>{t}</option>
+              <option key={t} value={t}>{orgTypeLabel(t)}</option>
             ))}
           </select>
         </div>
         <div className="field">
           <label htmlFor="na" style={{ fontSize: 13, color: 'var(--body)' }}>
-            {desktop ? 'Localidade' : 'Morada ou localidade'}
+            {desktop ? tr('Localidade', 'Town or city') : tr('Morada ou localidade', 'Address or town')}
           </label>
-          <input className="input" id="na" type="text" value={addCity} onChange={(e) => setAddCity(e.target.value)} placeholder="Ex.: Porto" required aria-invalid={!!addError && !addCity.trim()} />
+          <input className="input" id="na" type="text" value={addCity} onChange={(e) => setAddCity(e.target.value)} placeholder={tr('Ex.: Porto', 'E.g. Porto')} required aria-invalid={!!addError && !addCity.trim()} />
         </div>
       </div>
       {addError && (
@@ -252,7 +254,7 @@ export default function AvaliarEscolher() {
         </div>
       )}
       <button type="button" className="link" style={{ alignSelf: 'flex-start', fontWeight: desktop ? 600 : 500, fontSize: 15 }} onClick={() => setStep('pick')}>
-        Voltar à pesquisa
+        {tr('Voltar à pesquisa', 'Back to search')}
       </button>
       <button type="submit" hidden />
     </form>
@@ -271,16 +273,16 @@ export default function AvaliarEscolher() {
             right={
               <button type="button" className="row" onClick={() => nav('/')} style={{ height: 44, gap: 8, border: 0, background: 'none', fontSize: 15, fontWeight: 500, color: 'var(--body)' }}>
                 <Icon name="close" size={18} />
-                Cancelar
+                {tr('Cancelar', 'Cancel')}
               </button>
             }
           />
           <div className="row wrap" style={{ gap: 64, alignItems: 'flex-start', paddingTop: 48 }}>
-            <section aria-label="Pesquisar organização" className="stack" style={{ flex: '1 1 380px', minWidth: 0, gap: 20 }}>
+            <section aria-label={tr('Pesquisar organização', 'Search organisations')} className="stack" style={{ flex: '1 1 380px', minWidth: 0, gap: 20 }}>
               <div className="stack" style={{ gap: 12 }}>
-                <h1 style={{ ...DISPLAY, fontSize: 52, lineHeight: 1, letterSpacing: '-0.01em' }}>Onde trabalhas?</h1>
+                <h1 style={{ ...DISPLAY, fontSize: 52, lineHeight: 1, letterSpacing: '-0.01em' }}>{tr('Onde trabalhas?', 'Where do you work?')}</h1>
                 <p className="lead" style={{ fontSize: 16 }}>
-                  Ninguém fica a saber que foste tu.
+                  {tr('Ninguém fica a saber que foste tu.', 'No one will know it was you.')}
                 </p>
               </div>
               {searchBox}
@@ -289,7 +291,7 @@ export default function AvaliarEscolher() {
                 <span style={{ flex: 'none', width: 28, height: 28, borderRadius: 14, border: '3px solid var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon name="plus" size={14} stroke={2.4} />
                 </span>
-                Adicionar organização que não está cá
+                {tr('Adicionar organização que não está cá', 'Add an organisation that isn’t listed')}
               </button>
             </section>
 
@@ -297,16 +299,16 @@ export default function AvaliarEscolher() {
               {step === 'pick' && (
                 <div className="fade-up stack" style={{ minHeight: 380, alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center' }}>
                   <PickIllustration />
-                  <h2 style={{ ...DISPLAY, fontSize: 24, lineHeight: 1.15 }}>Escolhe a organização à esquerda</h2>
+                  <h2 style={{ ...DISPLAY, fontSize: 24, lineHeight: 1.15 }}>{tr('Escolhe a organização à esquerda', 'Choose the organisation on the left')}</h2>
                 </div>
               )}
               {step === 'confirm' && locPicker}
               {step === 'add' && addForm}
               <div className="row wrap between" style={{ gap: 16, paddingTop: 20, borderTop: '1px solid var(--line)' }}>
-                <LockLine>A avaliação fica ligada ao local, não a ti.</LockLine>
+                <LockLine>{tr('A avaliação fica ligada ao local, não a ti.', 'The review is linked to the location, not to you.')}</LockLine>
                 {step === 'pick' ? (
                   <button type="button" className="btn" disabled style={{ height: 56, padding: '0 28px' }}>
-                    Escolhe uma organização
+                    {tr('Escolhe uma organização', 'Choose an organisation')}
                   </button>
                 ) : (
                   <button type="button" className="btn btn-primary lift" onClick={() => next()} style={{ height: 56, padding: '0 28px' }}>
@@ -326,15 +328,15 @@ export default function AvaliarEscolher() {
     <Shell>
       {rowHover}
       <div className="page no-nav" style={{ minHeight: '100dvh', paddingBottom: 0 }}>
-        <FlowHead icon="close" label="Fechar" onClick={() => nav('/')} right={<span className="small muted">Antes de começar</span>} />
+        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => nav('/')} right={<span className="small muted">{tr('Antes de começar', 'Before you start')}</span>} />
 
         {step === 'pick' && (
           <div className="stack fade-up" style={{ gap: 20 }}>
-            <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>Onde trabalhas ou trabalhaste?</h1>
+            <h1 style={{ ...DISPLAY, fontSize: 32, lineHeight: 1.05 }}>{tr('Onde trabalhas ou trabalhaste?', 'Where do you or did you work?')}</h1>
             {searchBox}
             {resultsList}
             <button type="button" className="link" style={{ alignSelf: 'flex-start', fontSize: 15 }} onClick={startAdd}>
-              Não encontras? Adicionar organização
+              {tr('Não encontras? Adicionar organização', 'Can’t find it? Add organisation')}
             </button>
           </div>
         )}

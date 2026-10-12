@@ -12,6 +12,8 @@ import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { fmt, plural } from '../lib/format';
 import { useSearchTracking } from '../analytics/useSearchTracking';
+import { tr } from '../i18n';
+import { orgTypeLabel } from '../i18n/labels';
 
 const SEARCH_MS = 900;
 const LIMIT = 6;
@@ -117,7 +119,7 @@ function MobilePesquisa({ text, onText, clear, type, pickType, loading, results,
   return (
     <div className="page no-nav" style={{ minHeight: '100dvh', gap: 0, paddingBottom: 0 }}>
       <div className="row" style={{ gap: 10, paddingBottom: 16 }}>
-        <button type="button" className="icon-btn bare" aria-label="Voltar" onClick={back} style={{ marginLeft: -8 }}>
+        <button type="button" className="icon-btn bare" aria-label={tr('Voltar', 'Back')} onClick={back} style={{ marginLeft: -8 }}>
           <Icon name="back" />
         </button>
         <SearchBox id="mq" text={text} onText={onText} clear={clear} height={52} />
@@ -130,24 +132,24 @@ function MobilePesquisa({ text, onText, clear, type, pickType, loading, results,
       ) : (
         <div className="stack fade-up" style={{ paddingTop: 20 }}>
           <div aria-live="polite" className="small muted" style={{ paddingBottom: 8 }}>
-            {n === 1 ? '1 resultado, ordenado para ti' : `${n} resultados, ordenados para ti`}
+            {n === 1 ? tr('1 resultado, ordenado para ti', '1 result, sorted for you') : tr(`${n} resultados, ordenados para ti`, `${n} results, sorted for you`)}
           </div>
           {results.map((r) => (
             <ResultRow key={r.org.id} r={r} />
           ))}
           {n === 0 && (
             <div className="stack" style={{ gap: 6, padding: '20px 0', borderTop: '1px solid var(--line)' }}>
-              <div style={{ fontSize: 16, fontWeight: 600 }}>{applied.trim() ? `Nada encontrado para “${applied.trim()}”` : 'Nada encontrado com este filtro'}</div>
-              <div className="small body">Confirma o nome ou adiciona-a ao avaliar.</div>
+              <div style={{ fontSize: 16, fontWeight: 600 }}>{applied.trim() ? tr(`Nada encontrado para “${applied.trim()}”`, `Nothing found for “${applied.trim()}”`) : tr('Nada encontrado com este filtro', 'Nothing found with this filter')}</div>
+              <div className="small body">{tr('Confirma o nome ou adiciona-a ao avaliar.', 'Check the name, or add it when you review.')}</div>
             </div>
           )}
         </div>
       )}
 
       <div className="row between" style={{ marginTop: 'auto', gap: 12, padding: '16px 0 calc(24px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--line)' }}>
-        <span className="small body">Não encontras a tua?</span>
+        <span className="small body">{tr('Não encontras a tua?', 'Can’t find yours?')}</span>
         <Link to="/avaliar" className="link" style={{ fontSize: 15 }}>
-          Adicionar e avaliar
+          {tr('Adicionar e avaliar', 'Add and review')}
         </Link>
       </div>
     </div>
@@ -170,30 +172,30 @@ function ResultRow({ r, desktop = false }: { r: Result; desktop?: boolean }) {
         fontSize={desktop ? 16 : 15}
         inner={desktop ? 'var(--surface)' : 'var(--ground)'}
         muted={!org.reviewsCount}
-        ariaLabel={org.reviewsCount ? `Nota ${fmt(org.score)} de 5, ${plural(org.reviewsCount, 'avaliação', 'avaliações')}` : 'Ainda sem avaliações'}
+        ariaLabel={org.reviewsCount ? tr(`Nota ${fmt(org.score)} de 5, ${plural(org.reviewsCount, 'avaliação', 'avaliações')}`, `Score ${fmt(org.score)} out of 5, ${plural(org.reviewsCount, 'review', 'reviews')}`) : tr('Ainda sem avaliações', 'No reviews yet')}
       />
       <span className="grow stack" style={{ gap: desktop ? 3 : 2 }}>
         <span className="ellipsis" style={{ fontSize: desktop ? 16 : 15, fontWeight: 600 }}>
           {org.name}
         </span>
         <span className="small muted ellipsis">
-          {org.type} · {org.city}
+          {orgTypeLabel(org.type)} · {org.city}
         </span>
       </span>
       {r.match == null ? (
         <span className="small muted" style={{ flex: 'none' }}>
-          Sem avaliações
+          {tr('Sem avaliações', 'No reviews')}
         </span>
       ) : desktop ? (
         <span className="pill pill-match" style={{ fontSize: 13, padding: '7px 11px' }}>
-          {r.match}% para ti
+          {tr(`${r.match}% para ti`, `${r.match}% for you`)}
         </span>
       ) : (
         <span className="stack" style={{ flex: 'none', alignItems: 'flex-end', lineHeight: 1.1, color: 'var(--teal-dark)' }}>
           <span className="num" style={{ fontSize: 17 }}>
             {r.match}%
           </span>
-          <span style={{ fontSize: 11 }}>para ti</span>
+          <span style={{ fontSize: 11 }}>{tr('para ti', 'for you')}</span>
         </span>
       )}
     </Link>
@@ -206,7 +208,7 @@ function SearchBox({ id, text, onText, clear, height, large = false }: { id: str
     <div className="search grow pj-sbox" style={{ height, borderRadius: large ? 20 : 18, padding: large ? '0 10px 0 22px' : '0 8px 0 14px', gap: large ? 14 : 8 }}>
       <Icon name="search" size={large ? 22 : 18} style={{ color: large ? 'var(--body)' : 'var(--muted)', flex: 'none' }} />
       <label htmlFor={id} className="sr-only">
-        Pesquisar organização
+        {tr('Pesquisar organização', 'Search organisations')}
       </label>
       <input
         ref={ref}
@@ -214,7 +216,7 @@ function SearchBox({ id, text, onText, clear, height, large = false }: { id: str
         type="search"
         value={text}
         onChange={(e) => onText(e.target.value)}
-        placeholder="Nome, setor ou cidade"
+        placeholder={tr('Nome, setor ou cidade', 'Name, sector or city')}
         autoComplete="off"
         enterKeyHint="search"
         style={{ fontSize: large ? 18 : 16 }}
@@ -222,7 +224,7 @@ function SearchBox({ id, text, onText, clear, height, large = false }: { id: str
       {text && (
         <button
           type="button"
-          aria-label="Limpar pesquisa"
+          aria-label={tr('Limpar pesquisa', 'Clear search')}
           onClick={() => {
             clear();
             ref.current?.focus();
@@ -241,7 +243,7 @@ function SearchBox({ id, text, onText, clear, height, large = false }: { id: str
 
 function TypeChips({ type, pickType, small = false }: { type: TypeFilter; pickType: (t: TypeFilter) => void; small?: boolean }) {
   return (
-    <div role="group" aria-label="Tipo de organização" className="chips">
+    <div role="group" aria-label={tr('Tipo de organização', 'Type of organisation')} className="chips">
       {TYPES.map((t) => (
         <button
           key={t}
@@ -251,7 +253,7 @@ function TypeChips({ type, pickType, small = false }: { type: TypeFilter; pickTy
           onClick={() => pickType(t)}
           style={{ height: 44, padding: small ? '0 14px' : '0 18px', fontSize: small ? 13 : 15, borderWidth: small ? 1 : 1.5, cursor: 'pointer' }}
         >
-          {t}
+          {orgTypeLabel(t)}
         </button>
       ))}
     </div>
@@ -270,11 +272,11 @@ function Searching({ total, desktop = false }: { total: number; desktop?: boolea
   return (
     <div className="stack fade-up" style={{ gap: 18 }}>
       <div role="status" className="stack" style={{ alignItems: 'center', gap: 10, padding: desktop ? '20px 0 8px' : '26px 0 8px', textAlign: 'center' }}>
-        <LogoAnimated width={170} label="A procurar" />
+        <LogoAnimated width={170} label={tr('A procurar', 'Searching')} />
         <div className="num" style={{ fontSize: 19 }}>
-          A espreitar {total} organizações…
+          {tr(`A espreitar ${total} organizações…`, `Peeking at ${total} organisations…`)}
         </div>
-        <div className="small muted">Ordenadas pelo que valorizas</div>
+        <div className="small muted">{tr('Ordenadas pelo que valorizas', 'Sorted by what you value')}</div>
       </div>
       <div className="stack" aria-hidden="true" style={{ gap: 10 }}>
         {widths.map(([a, b], i) => (
@@ -301,7 +303,7 @@ function DesktopPesquisa({ text, onText, clear, type, pickType, reset, loading, 
     <div className="container" style={{ paddingBottom: 64 }}>
       <section className="stack" style={{ paddingTop: 32, gap: 20, maxWidth: 860 }}>
         <h1 className="display" style={{ fontSize: 'clamp(36px, 3.6vw, 48px)', lineHeight: 1, letterSpacing: '-0.01em' }}>
-          Procurar uma organização
+          {tr('Procurar uma organização', 'Find an organisation')}
         </h1>
         <div className="row">
           <SearchBox id="dq" text={text} onText={onText} clear={clear} height={64} large />
@@ -310,36 +312,36 @@ function DesktopPesquisa({ text, onText, clear, type, pickType, reset, loading, 
       </section>
 
       <div className="row wrap" style={{ gap: 64, alignItems: 'flex-start', paddingTop: 40 }}>
-        <section aria-label="Resultados" className="stack" style={{ flex: '2.3 1 560px', minWidth: 0 }}>
+        <section aria-label={tr('Resultados', 'Results')} className="stack" style={{ flex: '2.3 1 560px', minWidth: 0 }}>
           {loading ? (
             <Searching total={total} desktop />
           ) : (
             <div className="stack fade-up">
               <div aria-live="polite" className="small muted" style={{ paddingBottom: 8 }}>
-                {n === 1 ? '1 resultado' : `${n} resultados`}, por compatibilidade
+                {n === 1 ? tr('1 resultado', '1 result') : tr(`${n} resultados`, `${n} results`)}{tr(', por compatibilidade', ', by match')}
               </div>
               {shown.map((r) => (
                 <ResultRow key={r.org.id} r={r} desktop />
               ))}
               {!more && n > LIMIT && (
                 <button type="button" className="btn btn-ghost" onClick={() => setMore(true)} style={{ alignSelf: 'flex-start', marginTop: 12, height: 48, borderRadius: 16, fontSize: 15 }}>
-                  Ver mais {n - LIMIT}
+                  {tr(`Ver mais ${n - LIMIT}`, `Show ${n - LIMIT} more`)}
                 </button>
               )}
               {n === 0 && (
                 <div className="stack" style={{ borderTop: '1px solid var(--line)', padding: '32px 0', alignItems: 'flex-start', gap: 12 }}>
                   <div className="num" style={{ fontSize: 24 }}>
-                    {applied.trim() ? `Nada encontrado para “${applied.trim()}”` : 'Nada encontrado com este filtro'}
+                    {applied.trim() ? tr(`Nada encontrado para “${applied.trim()}”`, `Nothing found for “${applied.trim()}”`) : tr('Nada encontrado com este filtro', 'Nothing found with this filter')}
                   </div>
                   <div className="body" style={{ fontSize: 15 }}>
-                    Experimenta outro nome ou tipo de organização.
+                    {tr('Experimenta outro nome ou tipo de organização.', 'Try another name or type of organisation.')}
                   </div>
                   <div className="row wrap" style={{ gap: 10, paddingTop: 6 }}>
                     <button type="button" className="btn btn-ghost" onClick={reset} style={{ borderRadius: 16, fontSize: 15 }}>
-                      Limpar filtros
+                      {tr('Limpar filtros', 'Clear filters')}
                     </button>
                     <Link to="/avaliar" className="btn btn-primary" style={{ borderRadius: 16, fontSize: 15 }}>
-                      Adicionar e avaliar
+                      {tr('Adicionar e avaliar', 'Add and review')}
                     </Link>
                   </div>
                 </div>
@@ -351,7 +353,7 @@ function DesktopPesquisa({ text, onText, clear, type, pickType, reset, loading, 
         <aside className="stack" style={{ flex: '1 1 280px', minWidth: 0, position: 'sticky', top: 24, gap: 32, paddingTop: 28 }}>
           <div className="stack" style={{ gap: 12 }}>
             <h2 className="small muted" style={{ margin: 0, fontWeight: 600 }}>
-              {prefs.length ? 'Ordenado pelo que valorizas' : 'Ordenado pela nota'}
+              {prefs.length ? tr('Ordenado pelo que valorizas', 'Sorted by what you value') : tr('Ordenado pela nota', 'Sorted by score')}
             </h2>
             {prefs.map((k, i) => (
               <span key={k} className="row" style={{ gap: 10, fontSize: 15, fontWeight: 500 }}>
@@ -365,18 +367,18 @@ function DesktopPesquisa({ text, onText, clear, type, pickType, reset, loading, 
               </span>
             ))}
             <Link to="/preferencias" className="link" style={{ fontSize: 14 }}>
-              Mudar o que valorizo →
+              {tr('Mudar o que valorizo →', 'Change what I value →')}
             </Link>
           </div>
           <div className="stack" style={{ gap: 12, paddingTop: 24, borderTop: '1px solid var(--line)' }}>
             <h2 className="display" style={{ fontSize: 22, lineHeight: 1.1 }}>
-              Não encontras?
+              {tr('Não encontras?', 'Can’t find it?')}
             </h2>
             <p className="body" style={{ margin: 0, fontSize: 15 }}>
-              Adiciona-a quando a avaliares.
+              {tr('Adiciona-a quando a avaliares.', 'Add it when you review it.')}
             </p>
             <Link to="/avaliar" className="btn btn-dark" style={{ alignSelf: 'flex-start', borderRadius: 16, fontSize: 15 }}>
-              Adicionar e avaliar
+              {tr('Adicionar e avaliar', 'Add and review')}
             </Link>
           </div>
         </aside>

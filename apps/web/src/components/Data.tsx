@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { CRITERION, type CriterionKey } from '../data/criteria';
 import type { Org } from '../data/orgs';
 import { deg, fmt } from '../lib/format';
+import { tr } from '../i18n';
+import { orgTypeLabel } from '../i18n/labels';
 
 /** Anel de nota: o arco mostra o valor de 0 a 5 (ou 0–100 com `pct`) */
 export function Ring({
@@ -35,7 +37,7 @@ export function Ring({
   return (
     <span
       role="img"
-      aria-label={ariaLabel ?? (muted ? 'Ainda sem nota' : pct ? `${Math.round(value)}%` : `Nota ${fmt(value)} de 5`)}
+      aria-label={ariaLabel ?? (muted ? tr('Ainda sem nota', 'No score yet') : pct ? `${Math.round(value)}%` : tr(`Nota ${fmt(value)} de 5`, `Score ${fmt(value)} out of 5`))}
       style={{
         flex: 'none',
         width: size,
@@ -103,7 +105,7 @@ export function CriterionRow({ k, value, priority, labelWidth = 120 }: { k: Crit
       <span style={{ fontSize: 14, color: 'var(--body)', display: 'flex', alignItems: 'center', gap: 6 }}>
         {priority ? (
           <span
-            title={`Prioridade ${priority}`}
+            title={tr(`Prioridade ${priority}`, `Priority ${priority}`)}
             style={{ width: 18, height: 18, borderRadius: 9, border: `2px solid ${c.color}`, fontSize: 10, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink)' }}
           >
             {priority}
@@ -122,13 +124,13 @@ export function CriterionRow({ k, value, priority, labelWidth = 120 }: { k: Crit
 export function MatchPill({ value, large = false }: { value: number; large?: boolean }) {
   return (
     <span className="pill pill-match" style={large ? { fontSize: 15, padding: '7px 14px' } : undefined}>
-      {value}% para ti
+      {tr(`${value}% para ti`, `${value}% for you`)}
     </span>
   );
 }
 
 export function Trend({ v }: { v: number | 'novo' }) {
-  if (v === 'novo') return <span className="mono small muted">novo</span>;
+  if (v === 'novo') return <span className="mono small muted">{tr('novo', 'new')}</span>;
   if (v === 0) return <span className="mono small muted">—</span>;
   return (
     <span className="mono small" style={{ color: v > 0 ? 'var(--up)' : 'var(--down)' }}>
@@ -146,7 +148,7 @@ export function OrgRow({ org, match, right, to, meta }: { org: Org; match?: numb
         <span className="ellipsis" style={{ fontWeight: 600 }}>
           {org.name}
         </span>
-        <span className="small muted ellipsis">{meta ?? `${org.type} · ${org.city}`}</span>
+        <span className="small muted ellipsis">{meta ?? `${orgTypeLabel(org.type)} · ${org.city}`}</span>
       </span>
       {right ?? (match != null ? <span className="pill pill-match">{match}%</span> : null)}
     </Link>
@@ -163,7 +165,7 @@ export function OrgCard({ org, match }: { org: Org; match: number }) {
           {org.name}
         </span>
         <span className="small muted ellipsis">
-          {org.type} · {org.city}
+          {orgTypeLabel(org.type)} · {org.city}
         </span>
       </span>
       <span className="pill pill-match">{match}%</span>

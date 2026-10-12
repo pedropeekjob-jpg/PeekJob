@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { analytics, useAnalyticsConsent } from '../analytics';
 import { Switch } from './UI';
+import { tr } from '../i18n';
 
 const OPEN_EVENT = 'pj:consent-open';
 /** Volta a mostrar a escolha (rodapé, Como calculamos) */
@@ -29,19 +30,21 @@ export function ConsentBanner() {
   return (
     <div role="dialog" aria-modal="false" aria-labelledby="pj-consent-t" className="consent">
       <div className="stack" style={{ gap: 6 }}>
-        <strong id="pj-consent-t" style={{ fontSize: 16 }}>Ajudas-nos a melhorar a PeekJob?</strong>
+        <strong id="pj-consent-t" style={{ fontSize: 16 }}>{tr('Ajudas-nos a melhorar a PeekJob?', 'Will you help us improve PeekJob?')}</strong>
         <span className="small body">
-          Com a tua autorização usamos o Google Analytics para perceber que páginas e passos funcionam melhor.
-          Nunca enviamos o que escreves, onde trabalhas, o teu email ou o NIF, e não há publicidade.{' '}
-          <Link to="/metodologia#privacidade">Saber mais</Link>
+          {tr(
+            'Com a tua autorização usamos o Google Analytics para perceber que páginas e passos funcionam melhor. Nunca enviamos o que escreves, onde trabalhas, o teu email ou o NIF, e não há publicidade.',
+            'With your permission we use Google Analytics to see which pages and steps work best. We never send what you write, where you work, your email or your NIF (Portuguese tax number), and there are no ads.',
+          )}{' '}
+          <Link to="/metodologia#privacidade">{tr('Saber mais', 'Learn more')}</Link>
         </span>
       </div>
       <div className="row" style={{ gap: 10 }}>
         <button type="button" className="btn btn-ghost" onClick={() => choose(false)}>
-          Recusar
+          {tr('Recusar', 'Decline')}
         </button>
         <button type="button" className="btn btn-primary" onClick={() => choose(true)}>
-          Aceitar
+          {tr('Aceitar', 'Accept')}
         </button>
       </div>
     </div>
@@ -56,8 +59,8 @@ export function AnalyticsSwitch() {
     <Switch
       checked={value === 'granted'}
       onChange={(v) => (v ? analytics.grant() : analytics.revoke())}
-      label="Estatísticas de utilização"
-      hint="Google Analytics, sem textos, emails nem organizações avaliadas."
+      label={tr('Estatísticas de utilização', 'Usage statistics')}
+      hint={tr('Google Analytics, sem textos, emails nem organizações avaliadas.', 'Google Analytics, without your texts, emails or the organisations you review.')}
     />
   );
 }

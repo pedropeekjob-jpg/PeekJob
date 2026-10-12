@@ -5,6 +5,7 @@ import { Logo } from '../components/Brand';
 import { CRITERIA, CRITERION, type CriterionKey } from '../data/criteria';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { tr } from '../i18n';
 
 const tintOf = (k: CriterionKey) => (k === 'respeito' ? 'var(--purple-tint)' : 'var(--teal-tint)');
 
@@ -45,19 +46,19 @@ function MobilePrefs({ picks, pick, confirm, skip, n }: ViewProps) {
         <div className="row between">
           <Logo height={44} />
           <button type="button" onClick={skip} className="link" style={{ color: 'var(--muted)', fontWeight: 500, fontSize: 15, padding: '12px 4px' }}>
-            Saltar
+            {tr('Saltar', 'Skip')}
           </button>
         </div>
         <div className="stack" style={{ gap: 8 }}>
           <h1 className="h1" style={{ letterSpacing: '-0.02em' }}>
-            O que mais valorizas num trabalho?
+            {tr('O que mais valorizas num trabalho?', 'What do you value most in a job?')}
           </h1>
           <p className="body" style={{ margin: 0, fontSize: 15 }}>
-            Escolhe 3, por ordem.
+            {tr('Escolhe 3, por ordem.', 'Choose 3, in order.')}
           </p>
         </div>
 
-        <div role="group" aria-label="Escolhe 3 prioridades" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+        <div role="group" aria-label={tr('Escolhe 3 prioridades', 'Choose 3 priorities')} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
           {CRITERIA.map((c) => {
             const i = picks.indexOf(c.key);
             const on = i !== -1;
@@ -87,7 +88,7 @@ function MobilePrefs({ picks, pick, confirm, skip, n }: ViewProps) {
                 {c.label}
                 {on && (
                   <>
-                    <span className="sr-only">, prioridade {i + 1}</span>
+                    <span className="sr-only">{tr(`, prioridade ${i + 1}`, `, priority ${i + 1}`)}</span>
                     <RankBadge n={i + 1} color="var(--teal)" size={26} style={{ position: 'absolute', top: '50%', right: 12, marginTop: -13 }} />
                   </>
                 )}
@@ -99,7 +100,7 @@ function MobilePrefs({ picks, pick, confirm, skip, n }: ViewProps) {
 
       <div className="stack" style={{ position: 'sticky', bottom: 0, gap: 8, padding: '14px 20px calc(22px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--line)', background: 'var(--ground)' }}>
         <div aria-live="polite" className="small muted" style={{ textAlign: 'center' }}>
-          {n === 3 ? picks.map((k) => CRITERION[k].label).join(' · ') : `${n} de 3 · toca de novo para tirar`}
+          {n === 3 ? picks.map((k) => CRITERION[k].label).join(' · ') : tr(`${n} de 3 · toca de novo para tirar`, `${n} of 3 · tap again to remove`)}
         </div>
         <CTA n={n} onConfirm={confirm} block />
       </div>
@@ -112,30 +113,30 @@ function DesktopPrefs({ picks, pick, confirm, skip, n }: ViewProps) {
   return (
     <div className="container" style={{ paddingBottom: 64 }}>
       <header className="row between" style={{ gap: 16, paddingTop: 22, paddingBottom: 22 }}>
-        <Link to="/" aria-label="PeekJob, início" onClick={(e) => { e.preventDefault(); skip(); }}>
+        <Link to="/" aria-label={tr('PeekJob, início', 'PeekJob, home')} onClick={(e) => { e.preventDefault(); skip(); }}>
           <Logo height={52} />
         </Link>
         <button type="button" onClick={skip} className="link" style={{ color: 'var(--body)', fontWeight: 500, fontSize: 15 }}>
-          Saltar por agora
+          {tr('Saltar por agora', 'Skip for now')}
         </button>
       </header>
 
       <div className="row wrap" style={{ gap: 64, alignItems: 'flex-start', paddingTop: 48 }}>
         <div className="stack" style={{ flex: '1 1 340px', minWidth: 0, gap: 16 }}>
           <h1 className="display" style={{ fontSize: 'clamp(40px, 4vw, 56px)', letterSpacing: '-0.01em' }}>
-            O que mais valorizas num trabalho?
+            {tr('O que mais valorizas num trabalho?', 'What do you value most in a job?')}
           </h1>
           <p className="body" style={{ margin: 0, fontSize: 16 }}>
-            Escolhe 3, por ordem. Ordenamos tudo por isso.
+            {tr('Escolhe 3, por ordem. Ordenamos tudo por isso.', 'Choose 3, in order. We sort everything by them.')}
           </p>
-          <ol aria-label="As tuas escolhas" className="stack" style={{ margin: 0, padding: '16px 0 0', listStyle: 'none' }}>
+          <ol aria-label={tr('As tuas escolhas', 'Your choices')} className="stack" style={{ margin: 0, padding: '16px 0 0', listStyle: 'none' }}>
             {[0, 1, 2].map((i) => {
               const k = picks[i];
               const c = k ? CRITERION[k] : null;
               return (
                 <li key={i} className="row" style={{ gap: 14, height: 52, borderBottom: '1px solid var(--line)' }}>
                   <RankBadge n={i + 1} color={c ? c.color : '#C9CDD0'} size={30} border={4} />
-                  <span style={{ fontSize: 16, fontWeight: c ? 600 : 400, color: c ? 'var(--ink)' : 'var(--muted)' }}>{c ? c.label : 'Por escolher'}</span>
+                  <span style={{ fontSize: 16, fontWeight: c ? 600 : 400, color: c ? 'var(--ink)' : 'var(--muted)' }}>{c ? c.label : tr('Por escolher', 'Not chosen yet')}</span>
                 </li>
               );
             })}
@@ -143,7 +144,7 @@ function DesktopPrefs({ picks, pick, confirm, skip, n }: ViewProps) {
         </div>
 
         <div className="stack" style={{ flex: '1.4 1 520px', minWidth: 0, gap: 24 }}>
-          <div role="group" aria-label="Escolhe 3 prioridades" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 12 }}>
+          <div role="group" aria-label={tr('Escolhe 3 prioridades', 'Choose 3 priorities')} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 12 }}>
             {CRITERIA.map((c) => {
               const i = picks.indexOf(c.key);
               const on = i !== -1;
@@ -175,7 +176,7 @@ function DesktopPrefs({ picks, pick, confirm, skip, n }: ViewProps) {
                   <span style={{ fontSize: 13, lineHeight: 1.4, color: 'var(--body)', paddingRight: 30 }}>{c.hint}</span>
                   {on && (
                     <>
-                      <span className="sr-only">, prioridade {i + 1}</span>
+                      <span className="sr-only">{tr(`, prioridade ${i + 1}`, `, priority ${i + 1}`)}</span>
                       <RankBadge n={i + 1} color={c.color} size={30} border={4} style={{ position: 'absolute', top: 14, right: 14 }} />
                     </>
                   )}
@@ -185,7 +186,7 @@ function DesktopPrefs({ picks, pick, confirm, skip, n }: ViewProps) {
           </div>
           <div className="row wrap between" style={{ gap: 16 }}>
             <span aria-live="polite" className="small muted">
-              {n} de 3 · clica de novo para tirar
+              {tr(`${n} de 3 · clica de novo para tirar`, `${n} of 3 · click again to remove`)}
             </span>
             <CTA n={n} onConfirm={confirm} />
           </div>
@@ -206,7 +207,7 @@ function CTA({ n, onConfirm, block = false }: { n: number; onConfirm: () => void
       onClick={onConfirm}
       style={{ height: block ? 56 : 58, padding: block ? undefined : '0 28px' }}
     >
-      {ready ? 'Ver organizações para mim' : `Escolhe mais ${3 - n}`}
+      {ready ? tr('Ver organizações para mim', 'Show organisations for me') : tr(`Escolhe mais ${3 - n}`, `Choose ${3 - n} more`)}
     </button>
   );
 }

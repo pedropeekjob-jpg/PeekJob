@@ -5,6 +5,7 @@ import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
 import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
 import { detectRedFlags } from './moderation';
+import { tr } from '../i18n';
 
 /**
  * Estado da aplicação.
@@ -392,7 +393,7 @@ function useAppState() {
           return { ok: true };
         }
         const d = stRef.current.draft;
-        if (!d.orgId) return { ok: false, status: 0, message: 'Escolhe a organização.', body: null };
+        if (!d.orgId) return { ok: false, status: 0, message: tr('Escolhe a organização.', 'Choose the organisation.'), body: null };
         try {
           const loc = d.locationId && /^[0-9a-f-]{36}$/i.test(d.locationId) ? d.locationId : undefined;
           const r = await api<{ review: ApiReview }>(`/orgs/${d.orgId}/reviews`, {

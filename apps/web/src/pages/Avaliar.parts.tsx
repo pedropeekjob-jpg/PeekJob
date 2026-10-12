@@ -6,6 +6,8 @@ import { CRITERIA, CRITERION, type CriterionKey } from '../data/criteria';
 import { BAD_TAGS, REVIEW_TAGS } from '../data/content';
 import type { Scores } from '../data/orgs';
 import { fmt } from '../lib/format';
+import { tr } from '../i18n';
+import { tagLabel } from '../i18n/labels';
 
 /** Partes partilhadas entre os ecrãs do fluxo de avaliar (só usadas pelas páginas Avaliar*). */
 
@@ -37,7 +39,7 @@ export function FlowHead({ icon, label, onClick, right }: { icon: 'close' | 'bac
 /** Indicador de passos mobile (3 barras de 24px + 1/3) */
 export function MiniSteps({ current, done = false }: { current: number; done?: boolean }) {
   return (
-    <div role="img" aria-label={`Passo ${current} de 3${done ? ', concluído' : ''}`} className="row" style={{ gap: 10 }}>
+    <div role="img" aria-label={tr(`Passo ${current} de 3${done ? ', concluído' : ''}`, `Step ${current} of 3${done ? ', done' : ''}`)} className="row" style={{ gap: 10 }}>
       <span className="row" style={{ gap: 4 }}>
         {[1, 2, 3].map((i) => (
           <span key={i} style={{ width: 24, height: 4, borderRadius: 2, background: i <= current ? 'var(--teal)' : 'var(--field)' }} />
@@ -48,7 +50,7 @@ export function MiniSteps({ current, done = false }: { current: number; done?: b
   );
 }
 
-const STEP_LABELS = ['Organização', 'Verificação', 'Avaliação'];
+const STEP_LABELS = () => [tr('Organização', 'Organisation'), tr('Verificação', 'Verification'), tr('Avaliação', 'Review')];
 const STEP_ROUTES = ['/avaliar', '/avaliar/verificar', '/avaliar/notas'];
 
 /** Indicador de passos desktop: passos feitos são ligações, o actual a teal, os seguintes a cinzento */
@@ -59,8 +61,8 @@ export function DeskSteps({ current, right }: { current: 1 | 2 | 3; right?: Reac
   };
   return (
     <div className="row wrap between" style={{ gap: 16, paddingTop: 16 }}>
-      <ol aria-label={`Passo ${current} de 3`} className="row wrap" style={{ listStyle: 'none', margin: 0, padding: 0, gap: 12 }}>
-        {STEP_LABELS.map((label, i) => {
+      <ol aria-label={tr(`Passo ${current} de 3`, `Step ${current} of 3`)} className="row wrap" style={{ listStyle: 'none', margin: 0, padding: 0, gap: 12 }}>
+        {STEP_LABELS().map((label, i) => {
           const n = i + 1;
           const isDone = n < current;
           const isCur = n === current;
@@ -68,7 +70,7 @@ export function DeskSteps({ current, right }: { current: 1 | 2 | 3; right?: Reac
             <li key={label} aria-current={isCur ? 'step' : undefined} className="row" style={{ gap: 10 }}>
               {i > 0 && <span aria-hidden="true" style={{ width: 32, height: 2, background: n <= current ? 'var(--teal)' : 'var(--field)' }} />}
               {isDone ? (
-                <Link to={STEP_ROUTES[i]} aria-label={`Passo ${n}, ${label}, feito`} style={{ ...circle, border: '3px solid var(--teal)', background: 'var(--surface)', color: 'var(--ink)', width: 44, height: 44, borderRadius: 22 }}>
+                <Link to={STEP_ROUTES[i]} aria-label={tr(`Passo ${n}, ${label}, feito`, `Step ${n}, ${label}, done`)} style={{ ...circle, border: '3px solid var(--teal)', background: 'var(--surface)', color: 'var(--ink)', width: 44, height: 44, borderRadius: 22 }}>
                   <Icon name="check" size={16} stroke={2.4} />
                 </Link>
               ) : (
@@ -120,7 +122,7 @@ export function ScoreRow({
               type="button"
               onClick={help.toggle}
               aria-expanded={help.open}
-              aria-label={`O que conta em ${c.label}`}
+              aria-label={tr(`O que conta em ${c.label}`, `What counts in ${c.label}`)}
               style={{ flex: 'none', width: 32, height: 44, border: 0, background: 'transparent', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <span
@@ -144,7 +146,7 @@ export function ScoreRow({
                 className="score-dot"
                 role="radio"
                 aria-checked={n === value}
-                aria-label={`${c.label}, ${n} de 5`}
+                aria-label={tr(`${c.label}, ${n} de 5`, `${c.label}, ${n} of 5`)}
                 onClick={() => onPick(n === value ? 0 : n)}
                 style={{ width: desktop ? 44 : 42, height: 44, border: 0, background: 'transparent', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
@@ -174,10 +176,10 @@ export function ScoreRow({
 /** Botões Sim / Não de "Recomendavas a um amigo?" */
 export function RecommendButtons({ value, onChange, desktop = false }: { value: boolean | null; onChange: (v: boolean | null) => void; desktop?: boolean }) {
   return (
-    <div role="group" aria-label="Recomendavas a um amigo?" className="row" style={{ gap: desktop ? 8 : 6 }}>
+    <div role="group" aria-label={tr('Recomendavas a um amigo?', 'Would you recommend it to a friend?')} className="row" style={{ gap: desktop ? 8 : 6 }}>
       {[
-        { l: 'Sim', v: true },
-        { l: 'Não', v: false },
+        { l: tr('Sim', 'Yes'), v: true },
+        { l: tr('Não', 'No'), v: false },
       ].map((r) => {
         const on = value === r.v;
         return (
@@ -206,7 +208,7 @@ export function TagPicker({ tags, onToggle, visible, badFirst = false, desktop =
   const shown = all.filter((t, i) => more || i < visible || tags.includes(t));
   const hidden = all.length - shown.length;
   return (
-    <div role="group" aria-label="O que se destaca?" className="chips" style={{ gap: desktop ? 8 : 6 }}>
+    <div role="group" aria-label={tr('O que se destaca?', 'What stands out?')} className="chips" style={{ gap: desktop ? 8 : 6 }}>
       {shown.map((t) => (
         <button
           key={t}
@@ -216,7 +218,7 @@ export function TagPicker({ tags, onToggle, visible, badFirst = false, desktop =
           onClick={() => onToggle(t)}
           style={{ height: 44, fontSize: desktop ? 14 : 13, padding: desktop ? '0 16px' : '0 14px' }}
         >
-          {t}
+          {tagLabel(t)}
         </button>
       ))}
       {(hidden > 0 || more) && (
@@ -224,11 +226,11 @@ export function TagPicker({ tags, onToggle, visible, badFirst = false, desktop =
           type="button"
           className="chip"
           aria-expanded={more}
-          aria-label={more ? 'Mostrar menos etiquetas' : `Ver mais ${hidden} etiquetas`}
+          aria-label={more ? tr('Mostrar menos etiquetas', 'Show fewer tags') : tr(`Ver mais ${hidden} etiquetas`, `Show ${hidden} more tags`)}
           onClick={() => setMore(!more)}
           style={{ height: 44, border: desktop ? '1px dashed var(--grey)' : 0, background: 'transparent', color: desktop ? 'var(--body)' : 'var(--teal-text)', fontWeight: 600, fontSize: desktop ? 14 : 13 }}
         >
-          {more ? 'Menos' : `+${hidden}`}
+          {more ? tr('Menos', 'Less') : `+${hidden}`}
         </button>
       )}
     </div>
@@ -255,7 +257,7 @@ export function NotesGrid({ scores, desktop = false }: { scores: Partial<Scores>
               <span className="row" style={{ gap: 6 }}>
                 <Dots value={v} color={CRITERION[k].color} size={desktop ? 13 : 12} gap={desktop ? 4 : 3} />
                 <span className="mono" style={{ fontSize: 13 }}>{v ? fmt(v) : '—'}</span>
-                <span className="sr-only">{CRITERION[k].label}: {v ? `${v} de 5` : 'sem nota'}</span>
+                <span className="sr-only">{CRITERION[k].label}: {v ? tr(`${v} de 5`, `${v} of 5`) : tr('sem nota', 'no score')}</span>
               </span>
             </div>
           </Fragment>

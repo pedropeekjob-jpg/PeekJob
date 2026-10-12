@@ -9,6 +9,7 @@ import { match } from '../lib/match';
 import { fmt, plural } from '../lib/format';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { tr } from '../i18n';
 
 /**
  * Dados de exemplo do POC: organizações cuja mudança da semana vem do critério Respeito e inclusão
@@ -20,12 +21,16 @@ const RESPEITO_MOVES = new Set(['rede-vizinha']);
 function changeNote(o: Org, short = false): { text: string; color: string; aria?: string } {
   const d = o.weekDelta;
   if (d > 0 && RESPEITO_MOVES.has(o.id) && o.scores.respeito != null) {
-    return { text: `▲ ${short ? 'Respeito' : 'Respeito e inclusão'} subiu para ${fmt(o.scores.respeito)}`, color: 'var(--purple-text)', aria: `Respeito e inclusão subiu para ${fmt(o.scores.respeito)}` };
+    return {
+      text: tr(`▲ ${short ? 'Respeito' : 'Respeito e inclusão'} subiu para ${fmt(o.scores.respeito)}`, `▲ ${short ? 'Respect' : 'Respect and inclusion'} up to ${fmt(o.scores.respeito)}`),
+      color: 'var(--purple-text)',
+      aria: tr(`Respeito e inclusão subiu para ${fmt(o.scores.respeito)}`, `Respect and inclusion up to ${fmt(o.scores.respeito)}`),
+    };
   }
-  if (d > 0) return { text: `▲ ${fmt(d)} desde que guardaste`, color: 'var(--up)', aria: `Subiu ${fmt(d)} desde que guardaste` };
-  if (d < 0) return { text: `▼ ${fmt(Math.abs(d))} desde que guardaste`, color: 'var(--down)', aria: `Desceu ${fmt(Math.abs(d))} desde que guardaste` };
-  if (o.trend === 'novo') return { text: 'Nova no ranking', color: 'var(--body)' };
-  return { text: 'Sem mudanças desde que guardaste', color: 'var(--muted)' };
+  if (d > 0) return { text: tr(`▲ ${fmt(d)} desde que guardaste`, `▲ ${fmt(d)} since you saved it`), color: 'var(--up)', aria: tr(`Subiu ${fmt(d)} desde que guardaste`, `Up ${fmt(d)} since you saved it`) };
+  if (d < 0) return { text: tr(`▼ ${fmt(Math.abs(d))} desde que guardaste`, `▼ ${fmt(Math.abs(d))} since you saved it`), color: 'var(--down)', aria: tr(`Desceu ${fmt(Math.abs(d))} desde que guardaste`, `Down ${fmt(Math.abs(d))} since you saved it`) };
+  if (o.trend === 'novo') return { text: tr('Nova no ranking', 'New in the ranking'), color: 'var(--body)' };
+  return { text: tr('Sem mudanças desde que guardaste', 'No changes since you saved it'), color: 'var(--muted)' };
 }
 
 export default function Guardadas() {
@@ -62,10 +67,10 @@ export default function Guardadas() {
       }}
     >
       <span style={{ fontSize: 15 }}>
-        Deixaste de guardar <strong>{last.name}</strong>.
+        {tr(<>Deixaste de guardar <strong>{last.name}</strong>.</>, <>Removed <strong>{last.name}</strong> from Saved.</>)}
       </span>
       <button type="button" className="btn btn-primary btn-sm" style={{ height: 44 }} onClick={undo}>
-        Desfazer
+        {tr('Desfazer', 'Undo')}
       </button>
     </div>
   );
@@ -93,16 +98,16 @@ export default function Guardadas() {
           </span>
           {desktop ? (
             <span className="pill pill-match" style={{ fontSize: 13, padding: '5px 11px' }}>
-              {m}% para ti
+              {tr(`${m}% para ti`, `${m}% for you`)}
             </span>
           ) : (
             <span className="stack" style={{ flex: 'none', alignItems: 'flex-end', color: 'var(--teal-dark)', lineHeight: 1.15 }}>
               <span style={{ fontSize: 15, fontWeight: 600 }}>{m}%</span>
-              <span style={{ fontSize: 13 }}>para ti</span>
+              <span style={{ fontSize: 13 }}>{tr('para ti', 'for you')}</span>
             </span>
           )}
         </Link>
-        <button type="button" className="icon-btn bare" aria-label={`Deixar de guardar ${o.name}`} title="Deixar de guardar" onClick={() => remove(o)}>
+        <button type="button" className="icon-btn bare" aria-label={tr(`Deixar de guardar ${o.name}`, `Remove ${o.name} from Saved`)} title={tr('Deixar de guardar', 'Remove from Saved')} onClick={() => remove(o)}>
           <Icon name="bookmark" size={18} filled />
         </button>
       </article>
@@ -116,14 +121,14 @@ export default function Guardadas() {
           <div className="row wrap between" style={{ alignItems: 'flex-end', gap: 24, paddingTop: 48 }}>
             <div className="stack" style={{ gap: 12 }}>
               <h1 className="h1" style={{ fontSize: 56, lineHeight: 1 }}>
-                Guardadas
+                {tr('Guardadas', 'Saved')}
               </h1>
               <p className="lead" style={{ fontSize: 16 }}>
-                {plural(items.length, 'organização', 'organizações')} · avisamos-te quando algo muda.
+                {plural(items.length, tr('organização', 'organisation'), tr('organizações', 'organisations'))} · {tr('avisamos-te quando algo muda.', 'we’ll let you know when something changes.')}
               </p>
             </div>
             <Link to="/ranking" className="btn btn-dark">
-              Descobrir mais <Icon name="next" size={18} />
+              {tr('Descobrir mais', 'Discover more')} <Icon name="next" size={18} />
             </Link>
           </div>
           {undoBar}
@@ -137,13 +142,13 @@ export default function Guardadas() {
               </div>
               <div className="stack" style={{ flex: '1 1 320px', gap: 12 }}>
                 <h2 className="h2" style={{ fontSize: 24 }}>
-                  Ainda não guardaste nenhuma organização
+                  {tr('Ainda não guardaste nenhuma organização', 'You haven’t saved any organisations yet')}
                 </h2>
                 <p className="lead" style={{ fontSize: 16 }}>
-                  Carrega em Guardar na página de uma organização.
+                  {tr('Carrega em Guardar na página de uma organização.', 'Click Save on an organisation’s page.')}
                 </p>
                 <Link to="/ranking" className="btn btn-primary" style={{ alignSelf: 'flex-start', marginTop: 8, height: 54 }}>
-                  Ver o ranking
+                  {tr('Ver o ranking', 'View the ranking')}
                 </Link>
               </div>
             </div>
@@ -159,27 +164,27 @@ export default function Guardadas() {
       <div className="page" style={{ paddingTop: 28 }}>
         <div className="stack" style={{ gap: 6 }}>
           <h1 className="h1" style={{ fontSize: 36, lineHeight: 1 }}>
-            Guardadas
+            {tr('Guardadas', 'Saved')}
           </h1>
           <div className="small muted">
-            {items.length > 0 ? `${plural(items.length, 'organização', 'organizações')} · ` : ''}Avisamos-te quando algo muda.
+            {items.length > 0 ? `${plural(items.length, tr('organização', 'organisation'), tr('organizações', 'organisations'))} · ` : ''}{tr('Avisamos-te quando algo muda.', 'We’ll let you know when something changes.')}
           </div>
         </div>
         <div className="stack">
           {rows}
           {items.length === 0 && (
             <div className="fade-up stack" style={{ padding: '24px 0', gap: 6 }}>
-              <div style={{ fontSize: 17, fontWeight: 600 }}>Ainda não guardaste nenhuma</div>
-              <div className="small muted">Toca em Guardar na página de uma organização.</div>
+              <div style={{ fontSize: 17, fontWeight: 600 }}>{tr('Ainda não guardaste nenhuma', 'You haven’t saved any yet')}</div>
+              <div className="small muted">{tr('Toca em Guardar na página de uma organização.', 'Tap Save on an organisation’s page.')}</div>
               <Link to="/ranking" className="btn btn-primary" style={{ alignSelf: 'flex-start', marginTop: 14 }}>
-                Ver o ranking
+                {tr('Ver o ranking', 'View the ranking')}
               </Link>
             </div>
           )}
         </div>
         {items.length > 0 && (
           <Link to="/ranking" className="link" style={{ alignSelf: 'flex-start', fontSize: 15 }}>
-            Descobrir mais organizações <Icon name="next" size={16} />
+            {tr('Descobrir mais organizações', 'Discover more organisations')} <Icon name="next" size={16} />
           </Link>
         )}
       </div>

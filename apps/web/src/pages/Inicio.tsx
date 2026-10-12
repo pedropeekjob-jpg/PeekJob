@@ -11,6 +11,8 @@ import { useOrgs, useRankedOrgs } from '../api/orgs';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { fmt } from '../lib/format';
+import { tr } from '../i18n';
+import { orgTypeLabel, tagLabel } from '../i18n/labels';
 
 /* ---------- dados derivados ---------- */
 
@@ -98,31 +100,31 @@ function MobileInicio() {
     <div className="page">
       <div className="row between">
         <Link to="/" aria-label="PeekJob"><Logo height={44} /></Link>
-        <Link to="/perfil" className="icon-btn" aria-label="Perfil">
+        <Link to="/perfil" className="icon-btn" aria-label={tr('Perfil', 'Profile')}>
           <Icon name="user" size={18} />
         </Link>
       </div>
 
       <h1 className="display" style={{ fontSize: 36, letterSpacing: '-0.02em' }}>
-        Como é trabalhar lá dentro?
+        {tr('Como é trabalhar lá dentro?', 'What’s it like to work there?')}
       </h1>
 
       <div className="stack" style={{ gap: 10 }}>
-        <BigAction to="/pesquisa" icon="search" title="Procurar uma organização" sub="PME, associações, voluntariado" />
-        <BigAction to="/avaliar" icon="plus" title="Avaliar onde trabalho" sub="2 minutos · anónimo" primary />
+        <BigAction to="/pesquisa" icon="search" title={tr('Procurar uma organização', 'Find an organisation')} sub={tr('PME, associações, voluntariado', 'SMEs, associations, volunteering')} />
+        <BigAction to="/avaliar" icon="plus" title={tr('Avaliar onde trabalho', 'Review where I work')} sub={tr('2 minutos · anónimo', '2 minutes · anonymous')} primary />
       </div>
 
       <section className="stack" style={{ gap: 10 }} aria-labelledby="para-ti-m">
         <div className="row between" style={{ alignItems: 'baseline' }}>
           <h2 id="para-ti-m" className="h2">
-            Para ti
+            {tr('Para ti', 'For you')}
           </h2>
           <Link to="/preferencias" className="link small" style={{ fontWeight: 500 }}>
-            Mudar prioridades
+            {tr('Mudar prioridades', 'Change priorities')}
           </Link>
         </div>
         <div className="small muted" style={{ marginTop: -8 }}>
-          {prefs.length ? `Pela tua ordem: ${prefs.map((k) => CRITERION[k].short).join(', ')}` : 'Sem prioridades: ordenado pela nota'}
+          {prefs.length ? tr(`Pela tua ordem: ${prefs.map((k) => CRITERION[k].short).join(', ')}`, `In your order: ${prefs.map((k) => CRITERION[k].short).join(', ')}`) : tr('Sem prioridades: ordenado pela nota', 'No priorities: sorted by score')}
         </div>
         <div className="stack" style={{ gap: 8 }}>
           {list.map(({ org, match }) => (
@@ -138,23 +140,23 @@ function MobileInicio() {
                   {org.name}
                 </span>
                 <span className="small muted ellipsis">
-                  {org.type} · {org.city}
+                  {orgTypeLabel(org.type)} · {org.city}
                 </span>
               </span>
               <span className="stack" style={{ alignItems: 'flex-end', lineHeight: 1.1, color: 'var(--teal-dark)', flex: 'none' }}>
                 <span className="num" style={{ fontSize: 18 }}>
                   {match}%
                 </span>
-                <span style={{ fontSize: 11 }}>para ti</span>
+                <span style={{ fontSize: 11 }}>{tr('para ti', 'for you')}</span>
               </span>
             </Link>
           ))}
         </div>
       </section>
 
-      <section aria-label="Pulso da semana" className="row" style={{ gap: 12, minHeight: 44, borderTop: '1px solid var(--line)', paddingTop: 6 }}>
+      <section aria-label={tr('Pulso da semana', 'This week’s pulse')} className="row" style={{ gap: 12, minHeight: 44, borderTop: '1px solid var(--line)', paddingTop: 6 }}>
         <Link to="/ranking" className="label" style={{ textDecoration: 'none', padding: '12px 0', flex: 'none' }}>
-          Pulso
+          {tr('Pulso', 'Pulse')}
         </Link>
         <div className="grow row pj-strip" style={{ gap: 16, overflowX: 'auto', whiteSpace: 'nowrap' }}>
           {movers.map((o) => (
@@ -167,7 +169,7 @@ function MobileInicio() {
           ))}
           {WEEK_TAGS.map((t) => (
             <span key={t.label} className="row" style={{ flex: 'none', alignItems: 'baseline', gap: 6, padding: '12px 0', fontSize: 13, color: 'var(--body)' }}>
-              «{t.label}»
+              «{tagLabel(t.label)}»
               <span className="mono" style={{ fontSize: 12, color: t.up ? 'var(--up)' : 'var(--down)' }}>
                 {t.up ? '▲' : '▼'} {t.n}
               </span>
@@ -209,18 +211,18 @@ function BigAction({ to, icon, title, sub, primary = false }: { to: string; icon
 
 /* ---------- desktop ---------- */
 
-const STARS: { id: string; label?: string; value: (o: Org) => number; size: number; x: string; y: string; delay: string; purple?: boolean }[] = [
+const STARS: { id: string; label?: () => string; value: (o: Org) => number; size: number; x: string; y: string; delay: string; purple?: boolean }[] = [
   { id: 'padaria-ribeira', value: (o) => o.score, size: 168, x: '24%', y: '10%', delay: '0s' },
-  { id: 'padaria-ribeira', label: 'Respeito e inclusão', value: (o) => o.scores.respeito ?? 0, size: 104, x: '64%', y: '2%', delay: '-1.4s', purple: true },
+  { id: 'padaria-ribeira', label: () => tr('Respeito e inclusão', 'Respect and inclusion'), value: (o) => o.scores.respeito ?? 0, size: 104, x: '64%', y: '2%', delay: '-1.4s', purple: true },
   { id: 'maos-dadas', value: (o) => o.score, size: 116, x: '56%', y: '46%', delay: '-3s' },
   { id: 'rede-vizinha', value: (o) => o.score, size: 90, x: '6%', y: '58%', delay: '-4.2s' },
   { id: 'estudio-lume', value: (o) => o.score, size: 70, x: '32%', y: '70%', delay: '-2.1s' },
 ];
 
-const PROMISES = [
-  { purple: false, t: 'Ninguém paga para subir', d: 'nem para esconder avaliações.' },
-  { purple: false, t: 'Verificação anónima', d: 'confirmamos sem guardar o teu nome.' },
-  { purple: true, t: 'Sem insultos', d: 'críticas duras sim, ataques a pessoas não.' },
+const PROMISES = () => [
+  { purple: false, t: tr('Ninguém paga para subir', 'No one pays to rank higher'), d: tr('nem para esconder avaliações.', 'or to hide reviews.') },
+  { purple: false, t: tr('Verificação anónima', 'Anonymous verification'), d: tr('confirmamos sem guardar o teu nome.', 'we confirm without keeping your name.') },
+  { purple: true, t: tr('Sem insultos', 'No insults'), d: tr('críticas duras sim, ataques a pessoas não.', 'tough criticism yes, personal attacks no.') },
 ];
 
 function DesktopInicio() {
@@ -246,10 +248,10 @@ function DesktopInicio() {
     else mixed.push(ups[u++]);
   }
   mixed.forEach((o) => tick.push({ key: o.id, label: o.name, d: deltaText(o), up: o.weekDelta > 0, to: `/org/${o.id}` }));
-  WEEK_TAGS.forEach((t) => tick.push({ key: 'tag-' + t.label, label: `«${t.label}» em avaliações`, d: `${t.up ? '▲' : '▼'} ${t.n}`, up: t.up }));
+  WEEK_TAGS.forEach((t) => tick.push({ key: 'tag-' + t.label, label: tr(`«${t.label}» em avaliações`, `«${tagLabel(t.label)}» in reviews`), d: `${t.up ? '▲' : '▼'} ${t.n}`, up: t.up }));
 
   const n = prefs.length;
-  const status = n === 0 ? 'Sem escolhas: ordenado pela nota' : n === 3 ? '3 de 3 · clica de novo para tirar' : `${n} de 3`;
+  const status = n === 0 ? tr('Sem escolhas: ordenado pela nota', 'Nothing picked: sorted by score') : n === 3 ? tr('3 de 3 · clica de novo para tirar', '3 of 3 · click again to remove') : tr(`${n} de 3`, `${n} of 3`);
 
   return (
     <div className="container" style={{ paddingBottom: 48 }}>
@@ -259,26 +261,26 @@ function DesktopInicio() {
       <section className="row wrap" style={{ gap: 48, paddingTop: 32 }}>
         <div className="stack" style={{ flex: '1.1 1 460px', minWidth: 0, gap: 24 }}>
           <h1 className="display" style={{ fontSize: 'clamp(40px, 4.2vw, 56px)', letterSpacing: '-0.015em', maxWidth: 560 }}>
-            Como é trabalhar lá dentro, contado por quem lá trabalha.
+            {tr('Como é trabalhar lá dentro, contado por quem lá trabalha.', 'What it’s like to work there, told by the people who do.')}
           </h1>
           <p className="body" style={{ margin: 0, fontSize: 16 }}>
-            Avaliações anónimas de PME, associações e voluntariado.
+            {tr('Avaliações anónimas de PME, associações e voluntariado.', 'Anonymous reviews of SMEs, associations and volunteering.')}
           </p>
           <form role="search" onSubmit={onSearch} className="search" style={{ height: 64, borderRadius: 20, padding: '0 8px 0 20px', maxWidth: 580, marginTop: 8 }}>
             <Icon name="search" size={20} style={{ color: 'var(--body)', flex: 'none' }} />
             <label htmlFor="hero-q" className="sr-only">
-              Pesquisar organização
+              {tr('Pesquisar organização', 'Search organisations')}
             </label>
-            <input id="hero-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome, setor ou cidade" autoComplete="off" style={{ fontSize: 17 }} />
+            <input id="hero-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('Nome, setor ou cidade', 'Name, sector or city')} autoComplete="off" style={{ fontSize: 17 }} />
             <button type="submit" className="btn btn-dark" style={{ height: 48, borderRadius: 14, padding: '0 20px', fontSize: 15 }}>
-              Procurar
+              {tr('Procurar', 'Search')}
             </button>
           </form>
           <div className="row wrap" style={{ gap: 14 }}>
             <Link to="/avaliar" className="btn btn-primary lift" style={{ height: 52 }}>
-              Avaliar onde trabalho
+              {tr('Avaliar onde trabalho', 'Review where I work')}
             </Link>
-            <span className="small muted">2 minutos · anónimo</span>
+            <span className="small muted">{tr('2 minutos · anónimo', '2 minutes · anonymous')}</span>
           </div>
         </div>
         <div aria-hidden="true" style={{ flex: '1 1 420px', minWidth: 0, position: 'relative', height: 420 }}>
@@ -293,7 +295,7 @@ function DesktopInicio() {
                 <span style={{ borderRadius: '50%', boxShadow: '0 12px 40px rgba(1,11,19,.06)' }}>
                   <Ring value={v} size={s.size} thickness={t} fontSize={Math.round(s.size * 0.24)} color={s.purple ? 'var(--purple)' : 'var(--teal)'} />
                 </span>
-                <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', color: s.purple ? 'var(--purple-text)' : 'var(--ink)' }}>{s.label ?? org.name}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', color: s.purple ? 'var(--purple-text)' : 'var(--ink)' }}>{s.label?.() ?? org.name}</span>
               </span>
             );
           })}
@@ -301,8 +303,8 @@ function DesktopInicio() {
       </section>
 
       {/* PULSO */}
-      <section aria-label="Pulso da semana" className="row" style={{ marginTop: 40, gap: 20, borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-        <span style={{ flex: 'none', fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>Esta semana</span>
+      <section aria-label={tr('Pulso da semana', 'This week’s pulse')} className="row" style={{ marginTop: 40, gap: 20, borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+        <span style={{ flex: 'none', fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>{tr('Esta semana', 'This week')}</span>
         <div className="pj-tickwrap grow" style={{ overflow: 'hidden' }}>
           <div className="pj-tick">
             {[0, 1].map((copy) =>
@@ -338,13 +340,13 @@ function DesktopInicio() {
       <section className="stack" style={{ paddingTop: 56, gap: 20 }} aria-labelledby="para-ti-d">
         <div className="row wrap between" style={{ alignItems: 'baseline', gap: 16 }}>
           <h2 id="para-ti-d" className="display" style={{ fontSize: 32, lineHeight: 1 }}>
-            Para ti
+            {tr('Para ti', 'For you')}
           </h2>
           <Link to="/preferencias" className="link" style={{ fontSize: 15 }}>
-            Mudar o que valorizo →
+            {tr('Mudar o que valorizo →', 'Change what I value →')}
           </Link>
         </div>
-        <div role="group" aria-label="O que valorizas, até 3" className="row wrap" style={{ gap: 8 }}>
+        <div role="group" aria-label={tr('O que valorizas, até 3', 'What you value, up to 3')} className="row wrap" style={{ gap: 8 }}>
           {CRITERIA.map((c) => {
             const i = prefs.indexOf(c.key);
             const on = i !== -1;
@@ -355,7 +357,7 @@ function DesktopInicio() {
                 type="button"
                 aria-pressed={on}
                 aria-disabled={full || undefined}
-                title={full ? 'Já escolheste 3. Tira uma para trocar.' : c.hint}
+                title={full ? tr('Já escolheste 3. Tira uma para trocar.', 'You’ve picked 3. Remove one to swap.') : c.hint}
                 onClick={() => togglePref(c.key)}
                 className="row pj-pref"
                 style={{
@@ -378,7 +380,7 @@ function DesktopInicio() {
                   {on ? i + 1 : ''}
                 </span>
                 {c.label}
-                {on && <span className="sr-only">, prioridade {i + 1}</span>}
+                {on && <span className="sr-only">{tr(`, prioridade ${i + 1}`, `, priority ${i + 1}`)}</span>}
               </button>
             );
           })}
@@ -401,17 +403,17 @@ function DesktopInicio() {
                   {org.name}
                 </span>
                 <span className="small muted">
-                  {org.type} · {org.city}
+                  {orgTypeLabel(org.type)} · {org.city}
                 </span>
               </span>
               <span className="pill pill-match" style={{ fontSize: 13, padding: '7px 11px' }}>
-                {match}% para ti
+                {tr(`${match}% para ti`, `${match}% for you`)}
               </span>
             </Link>
           ))}
         </div>
         <Link to="/pesquisa" className="link" style={{ alignSelf: 'flex-start', fontSize: 15 }}>
-          Ver mais organizações →
+          {tr('Ver mais organizações →', 'Show more organisations →')}
         </Link>
       </section>
 
@@ -419,14 +421,14 @@ function DesktopInicio() {
       <section className="row wrap" style={{ marginTop: 48, background: 'var(--ink)', color: '#fff', borderRadius: 28, padding: '40px 48px', gap: '32px 48px' }}>
         <div className="stack" style={{ flex: '1 1 320px', minWidth: 0, gap: 20 }}>
           <h2 className="display" style={{ fontSize: 40 }}>
-            A nota não está à venda.
+            {tr('A nota não está à venda.', 'The score is not for sale.')}
           </h2>
           <Link to="/metodologia" className="link" style={{ alignSelf: 'flex-start', color: '#7FD6D9', fontSize: 15 }}>
-            Ver como calculamos →
+            {tr('Ver como calculamos →', 'See how we score →')}
           </Link>
         </div>
         <ul className="stack" style={{ flex: '1.4 1 420px', minWidth: 0, margin: 0, padding: 0, listStyle: 'none' }}>
-          {PROMISES.map((p) => (
+          {PROMISES().map((p) => (
             <li key={p.t} className="row" style={{ gap: 14, padding: '14px 0', borderTop: '1px solid #23303A' }}>
               <span aria-hidden="true" style={{ flex: 'none', width: 22, height: 22, borderRadius: 11, border: `4px solid ${p.purple ? '#B98BDB' : 'var(--teal)'}` }} />
               <span style={{ fontSize: 16, lineHeight: 1.4 }}>

@@ -11,6 +11,8 @@ import { match } from '../lib/match';
 import { fmt, plural } from '../lib/format';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { tr } from '../i18n';
+import { orgTypeLabel, sectorLabel } from '../i18n/labels';
 
 /** Regra do ranking: só entram organizações com pelo menos 5 avaliações */
 const MIN_REVIEWS = 5;
@@ -31,10 +33,10 @@ interface Filters {
   setor: string | null;
 }
 
-const GROUPS: { key: GroupKey; label: string; short: string; opts: string[] }[] = [
-  { key: 'tipo', label: 'Tipo de organização', short: 'Tipo', opts: ORG_TYPES },
-  { key: 'dim', label: 'Dimensão (pessoas)', short: 'Pessoas', opts: SIZES },
-  { key: 'dist', label: 'Distrito', short: 'Distrito', opts: DISTRICTS },
+const GROUPS = (): { key: GroupKey; label: string; short: string; opts: string[]; optLabel?: (v: string) => string }[] => [
+  { key: 'tipo', label: tr('Tipo de organização', 'Type of organisation'), short: tr('Tipo', 'Type'), opts: ORG_TYPES, optLabel: orgTypeLabel },
+  { key: 'dim', label: tr('Dimensão (pessoas)', 'Size (people)'), short: tr('Pessoas', 'People'), opts: SIZES },
+  { key: 'dist', label: tr('Distrito', 'District'), short: tr('Distrito', 'District'), opts: DISTRICTS },
 ];
 
 const list = (v: string | null) => (v ? v.split(',').filter(Boolean) : []);
@@ -84,13 +86,13 @@ function applyFilters(orgs: Org[], f: Filters) {
 }
 
 function trendInfo(t: number | 'novo') {
-  if (t === 'novo') return { text: 'novo', aria: 'Novo no ranking', color: 'var(--muted)' };
-  if (t > 0) return { text: `▲${t}`, aria: `Subiu ${t}`, color: 'var(--up)' };
-  if (t < 0) return { text: `▼${Math.abs(t)}`, aria: `Desceu ${Math.abs(t)}`, color: 'var(--down)' };
-  return { text: '—', aria: 'Sem alteração', color: 'var(--muted)' };
+  if (t === 'novo') return { text: tr('novo', 'new'), aria: tr('Novo no ranking', 'New in the ranking'), color: 'var(--muted)' };
+  if (t > 0) return { text: `▲${t}`, aria: tr(`Subiu ${t}`, `Up ${t}`), color: 'var(--up)' };
+  if (t < 0) return { text: `▼${Math.abs(t)}`, aria: tr(`Desceu ${Math.abs(t)}`, `Down ${Math.abs(t)}`), color: 'var(--down)' };
+  return { text: '—', aria: tr('Sem alteração', 'No change'), color: 'var(--muted)' };
 }
 
-const sizeLabel = (s: string) => (s === '1–9' ? 'Até 9 pessoas' : s === '10–49' ? '10 a 49 pessoas' : '50 a 249 pessoas');
+const sizeLabel = (s: string) => (s === '1–9' ? tr('Até 9 pessoas', 'Up to 9 people') : s === '10–49' ? tr('10 a 49 pessoas', '10 to 49 people') : tr('50 a 249 pessoas', '50 to 249 people'));
 
 export default function Ranking() {
   const desktop = useIsDesktop();
@@ -116,11 +118,11 @@ type FiltersApi = ReturnType<typeof useFilters>;
 
 function SortToggle({ F, big = false }: { F: FiltersApi; big?: boolean }) {
   return (
-    <div className="segmented" role="group" aria-label="Ordenar">
+    <div className="segmented" role="group" aria-label={tr('Ordenar', 'Sort')}>
       {(
         [
-          ['mim', 'Para mim'],
-          ['nota', 'Nota geral'],
+          ['mim', tr('Para mim', 'For me')],
+          ['nota', tr('Nota geral', 'Overall score')],
         ] as const
       ).map(([k, l]) => (
         <button
@@ -142,7 +144,7 @@ function FilterGroups({ F, compact = false }: { F: FiltersApi; compact?: boolean
   const VISIBLE = 3;
   return (
     <>
-      {GROUPS.map((g) => {
+      {GROUPS().map((g) => {
         const cur = F.f[g.key];
         const extra = g.opts.length > VISIBLE + 1 && !compact;
         const open = !!more[g.key];
@@ -162,12 +164,12 @@ function FilterGroups({ F, compact = false }: { F: FiltersApi; compact?: boolean
             <div className="chips">
               {shown.map((o) => (
                 <button key={o} type="button" className="chip" aria-pressed={cur.includes(o)} onClick={() => F.toggle(g.key, o)} style={{ height: 44 }}>
-                  {o}
+                  {g.optLabel ? g.optLabel(o) : o}
                 </button>
               ))}
               {extra && (hidden > 0 || open) && (
                 <button type="button" className="link" aria-expanded={open} onClick={() => setMore({ ...more, [g.key]: !open })} style={{ padding: '0 8px', fontSize: 14 }}>
-                  {open ? 'Menos' : `+${hidden}`}
+                  {open ? tr('Menos', 'Less') : `+${hidden}`}
                 </button>
               )}
             </div>
@@ -181,8 +183,8 @@ function FilterGroups({ F, compact = false }: { F: FiltersApi; compact?: boolean
 function SetorChip({ F }: { F: FiltersApi }) {
   if (!F.f.setor) return null;
   return (
-    <button type="button" className="chip" aria-pressed="true" onClick={() => F.write({ setor: null })} aria-label={`Setor: ${F.f.setor}. Tirar filtro`} style={{ height: 44 }}>
-      Setor: {F.f.setor} <Icon name="close" size={14} />
+    <button type="button" className="chip" aria-pressed="true" onClick={() => F.write({ setor: null })} aria-label={tr(`Setor: ${F.f.setor}. Tirar filtro`, `Sector: ${sectorLabel(F.f.setor)}. Remove filter`)} style={{ height: 44 }}>
+      {tr('Setor:', 'Sector:')} {sectorLabel(F.f.setor)} <Icon name="close" size={14} />
     </button>
   );
 }
@@ -191,10 +193,10 @@ function EmptyFilters({ F }: { F: FiltersApi }) {
   return (
     <div className="stack" style={{ gap: 12, padding: '32px 0', borderTop: '1px solid var(--line)', alignItems: 'flex-start' }}>
       <span className="h2" style={{ fontSize: 22 }}>
-        Nenhuma organização com estes filtros
+        {tr('Nenhuma organização com estes filtros', 'No organisations match these filters')}
       </span>
       <button type="button" className="btn btn-dark btn-sm" style={{ height: 48 }} onClick={F.clear}>
-        Limpar filtros
+        {tr('Limpar filtros', 'Clear filters')}
       </button>
     </div>
   );
@@ -208,19 +210,19 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
   const summary = (vals: string[], all: string, fmtOne = (v: string) => v) =>
     vals.length === 0 ? all : vals.length === 1 ? fmtOne(vals[0]) : `${fmtOne(vals[0])} +${vals.length - 1}`;
   const chips = [
-    { v: summary(f.tipo, 'Todos os tipos'), aria: `Tipo: ${f.tipo.length ? f.tipo.join(', ') : 'todos'}` },
-    { v: summary(f.dist, 'Todos os distritos'), aria: `Distrito: ${f.dist.length ? f.dist.join(', ') : 'todos'}` },
-    { v: summary(f.dim, 'Qualquer dimensão', sizeLabel), aria: `Dimensão: ${f.dim.length ? f.dim.join(', ') : 'qualquer'}` },
+    { v: summary(f.tipo, tr('Todos os tipos', 'All types'), orgTypeLabel), aria: tr(`Tipo: ${f.tipo.length ? f.tipo.join(', ') : 'todos'}`, `Type: ${f.tipo.length ? f.tipo.map(orgTypeLabel).join(', ') : 'all'}`) },
+    { v: summary(f.dist, tr('Todos os distritos', 'All districts')), aria: tr(`Distrito: ${f.dist.length ? f.dist.join(', ') : 'todos'}`, `District: ${f.dist.length ? f.dist.join(', ') : 'all'}`) },
+    { v: summary(f.dim, tr('Qualquer dimensão', 'Any size'), sizeLabel), aria: tr(`Dimensão: ${f.dim.length ? f.dim.join(', ') : 'qualquer'}`, `Size: ${f.dim.length ? f.dim.join(', ') : 'any'}`) },
   ];
-  if (f.resp) chips.push({ v: 'Respeito ≥ 4', aria: 'Respeito e inclusão 4 ou mais' });
-  if (f.ver) chips.push({ v: 'Verificadas', aria: 'Só avaliações verificadas' });
+  if (f.resp) chips.push({ v: tr('Respeito ≥ 4', 'Respect ≥ 4'), aria: tr('Respeito e inclusão 4 ou mais', 'Respect and inclusion 4 or more') });
+  if (f.ver) chips.push({ v: tr('Verificadas', 'Verified'), aria: tr('Só avaliações verificadas', 'Verified reviews only') });
 
   return (
     <div className="page" style={{ gap: 16, paddingTop: 24 }}>
       <div className="row between" style={{ alignItems: 'baseline', gap: 12 }}>
         <h1 className="h1">Ranking</h1>
         <Link to="/metodologia" className="link" style={{ fontSize: 13, fontWeight: 500 }}>
-          Como calculamos
+          {tr('Como calculamos', 'How we score')}
         </Link>
       </div>
 
@@ -228,7 +230,7 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
 
       <div className="chips">
         {chips.map((c) => (
-          <button key={c.aria} type="button" className="chip" aria-label={`${c.aria}. Abrir filtros`} onClick={() => setOpen(true)} style={{ height: 44, fontSize: 13, padding: '0 12px' }}>
+          <button key={c.aria} type="button" className="chip" aria-label={tr(`${c.aria}. Abrir filtros`, `${c.aria}. Open filters`)} onClick={() => setOpen(true)} style={{ height: 44, fontSize: 13, padding: '0 12px' }}>
             {c.v}
           </button>
         ))}
@@ -236,7 +238,7 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
         <button
           type="button"
           className="icon-btn"
-          aria-label={F.active ? `Filtros, ${F.active} activos` : 'Mais filtros'}
+          aria-label={F.active ? tr(`Filtros, ${F.active} activos`, `Filters, ${F.active} active`) : tr('Mais filtros', 'More filters')}
           onClick={() => setOpen(true)}
           style={F.active ? { borderColor: 'var(--teal)' } : undefined}
         >
@@ -246,7 +248,7 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
 
       <div className="stack">
         <span className="small muted" aria-live="polite" style={{ paddingBottom: 6 }}>
-          {plural(ranked.length, 'organização', 'organizações')} · mínimo {MIN_REVIEWS} avaliações
+          {plural(ranked.length, tr('organização', 'organisation'), tr('organizações', 'organisations'))} · {tr(`mínimo ${MIN_REVIEWS} avaliações`, `minimum ${MIN_REVIEWS} reviews`)}
         </span>
         {ranked.length === 0 ? (
           <EmptyFilters F={F} />
@@ -268,20 +270,20 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
                     {t.text}
                   </span>
                 </span>
-                <Ring value={org.score} size={46} inner="var(--ground)" fontSize={14} ariaLabel={`Nota ${fmt(org.score)} de 5, ${org.reviewsCount} avaliações`} />
+                <Ring value={org.score} size={46} inner="var(--ground)" fontSize={14} ariaLabel={tr(`Nota ${fmt(org.score)} de 5, ${org.reviewsCount} avaliações`, `Score ${fmt(org.score)} out of 5, ${org.reviewsCount} reviews`)} />
                 <span className="grow stack" style={{ gap: 2 }}>
                   <span className="ellipsis" style={{ fontSize: 15, fontWeight: 600 }}>
                     {org.name}
                   </span>
                   <span className="small muted ellipsis">
-                    {org.type} · {plural(org.people, 'pessoa', 'pessoas')}
+                    {orgTypeLabel(org.type)} · {plural(org.people, tr('pessoa', 'person'), tr('pessoas', 'people'))}
                   </span>
                 </span>
                 <span className="stack" style={{ flex: 'none', alignItems: 'flex-end', lineHeight: 1.1, color: 'var(--teal-dark)' }}>
                   <span className="num" style={{ fontSize: 17 }}>
                     {m}%
                   </span>
-                  <span style={{ fontSize: 11 }}>para ti</span>
+                  <span style={{ fontSize: 11 }}>{tr('para ti', 'for you')}</span>
                 </span>
               </Link>
             );
@@ -292,15 +294,15 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
       <Sheet
         open={open}
         onClose={() => setOpen(false)}
-        title="Filtros"
+        title={tr('Filtros', 'Filters')}
         footer={
           <div className="stack" style={{ gap: 4 }}>
             <button type="button" className="btn btn-dark btn-block" style={{ height: 56 }} onClick={() => setOpen(false)}>
-              Ver {plural(ranked.length, 'organização', 'organizações')}
+              {tr('Ver', 'Show')} {plural(ranked.length, tr('organização', 'organisation'), tr('organizações', 'organisations'))}
             </button>
             {F.active > 0 && (
               <button type="button" className="link" style={{ alignSelf: 'center' }} onClick={F.clear}>
-                Limpar
+                {tr('Limpar', 'Clear')}
               </button>
             )}
           </div>
@@ -314,8 +316,8 @@ function MobileRanking({ ranked, F }: { ranked: Ranked; F: FiltersApi }) {
           )}
           <FilterGroups F={F} />
           <div className="list" style={{ borderTop: '1px solid var(--line)' }}>
-            <Switch purple checked={F.f.resp} onChange={(v) => F.write({ resp: v })} label="Respeito e inclusão 4 ou mais" hint="Direitos, diversidade, sem assédio" />
-            <Switch checked={F.f.ver} onChange={(v) => F.write({ ver: v })} label="Só avaliações verificadas" hint={`Email, contrato ou recibo (${VERIFIED_MIN}% ou mais)`} />
+            <Switch purple checked={F.f.resp} onChange={(v) => F.write({ resp: v })} label={tr('Respeito e inclusão 4 ou mais', 'Respect and inclusion 4 or more')} hint={tr('Direitos, diversidade, sem assédio', 'Rights, diversity, no harassment')} />
+            <Switch checked={F.f.ver} onChange={(v) => F.write({ ver: v })} label={tr('Só avaliações verificadas', 'Verified reviews only')} hint={tr(`Email, contrato ou recibo (${VERIFIED_MIN}% ou mais)`, `Work email, contract or payslip (${VERIFIED_MIN}% or more)`)} />
           </div>
         </div>
       </Sheet>
@@ -337,7 +339,7 @@ function DesktopRanking({ ranked, F, prefs }: { ranked: Ranked; F: FiltersApi; p
   const sel = ranked[idx];
 
   const prefNames = prefs.map((k) => CRITERION[k].short);
-  const prefText = prefNames.length > 1 ? `${prefNames.slice(0, -1).join(', ')} e ${prefNames[prefNames.length - 1]}` : prefNames[0] ?? '';
+  const prefText = prefNames.length > 1 ? `${prefNames.slice(0, -1).join(', ')} ${tr('e', 'and')} ${prefNames[prefNames.length - 1]}` : prefNames[0] ?? '';
 
   return (
     <div className="container" style={{ paddingBottom: 64 }}>
@@ -347,13 +349,13 @@ function DesktopRanking({ ranked, F, prefs }: { ranked: Ranked; F: FiltersApi; p
             Ranking
           </h1>
           <p className="body" style={{ margin: 0, fontSize: 15 }}>
-            {F.sort === 'mim' ? `Ordenado por ${prefText}` : 'Ordenado pela nota pública'} ·{' '}
+            {F.sort === 'mim' ? tr(`Ordenado por ${prefText}`, `Sorted by ${prefText}`) : tr('Ordenado pela nota pública', 'Sorted by public score')} ·{' '}
             <Link to="/preferencias" style={{ textDecoration: 'none', fontWeight: 600 }}>
-              Mudar
+              {tr('Mudar', 'Change')}
             </Link>{' '}
             ·{' '}
             <Link to="/metodologia" style={{ textDecoration: 'none', fontWeight: 600 }}>
-              Como calculamos
+              {tr('Como calculamos', 'How we score')}
             </Link>
           </p>
         </div>
@@ -371,7 +373,7 @@ function DesktopRanking({ ranked, F, prefs }: { ranked: Ranked; F: FiltersApi; p
             }}
           >
             <Icon name="filter" size={18} />
-            {F.active ? `Filtros · ${F.active}` : 'Filtros'}
+            {F.active ? tr(`Filtros · ${F.active}`, `Filters · ${F.active}`) : tr('Filtros', 'Filters')}
           </button>
         </div>
       </div>
@@ -379,31 +381,31 @@ function DesktopRanking({ ranked, F, prefs }: { ranked: Ranked; F: FiltersApi; p
       {showF && (
         <section
           id="filtros"
-          aria-label="Filtros"
+          aria-label={tr('Filtros', 'Filters')}
           className="fade-up row wrap"
           style={{ gap: '24px 40px', alignItems: 'flex-start', padding: '20px 0 24px', marginBottom: 8, borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}
         >
           <FilterGroups F={F} compact />
           <div className="stack" style={{ gap: 0, minWidth: 260 }}>
-            <Switch purple checked={F.f.resp} onChange={(v) => F.write({ resp: v })} label={<span style={{ color: 'var(--purple-text)' }}>Respeito e inclusão ≥ 4</span>} />
-            <Switch checked={F.f.ver} onChange={(v) => F.write({ ver: v })} label="Só verificadas" />
+            <Switch purple checked={F.f.resp} onChange={(v) => F.write({ resp: v })} label={<span style={{ color: 'var(--purple-text)' }}>{tr('Respeito e inclusão ≥ 4', 'Respect and inclusion ≥ 4')}</span>} />
+            <Switch checked={F.f.ver} onChange={(v) => F.write({ ver: v })} label={tr('Só verificadas', 'Verified only')} />
           </div>
           {F.f.setor && (
             <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
-              <legend style={{ padding: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>Setor</legend>
+              <legend style={{ padding: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>{tr('Setor', 'Sector')}</legend>
               <SetorChip F={F} />
             </fieldset>
           )}
           <button type="button" className="link" style={{ alignSelf: 'flex-end', fontSize: 14 }} onClick={F.clear}>
-            Limpar filtros
+            {tr('Limpar filtros', 'Clear filters')}
           </button>
         </section>
       )}
 
       <div className="row wrap" style={{ gap: 48, alignItems: 'flex-start' }}>
-        <section aria-label="Lista do ranking" className="stack" style={{ flex: '1.6 1 520px', minWidth: 0 }}>
+        <section aria-label={tr('Lista do ranking', 'Ranking list')} className="stack" style={{ flex: '1.6 1 520px', minWidth: 0 }}>
           <span aria-live="polite" className="small muted" style={{ padding: '0 0 8px 4px' }}>
-            {plural(ranked.length, 'organização', 'organizações')} · mínimo {MIN_REVIEWS} avaliações
+            {plural(ranked.length, tr('organização', 'organisation'), tr('organizações', 'organisations'))} · {tr(`mínimo ${MIN_REVIEWS} avaliações`, `minimum ${MIN_REVIEWS} reviews`)}
           </span>
           {ranked.length === 0 && <EmptyFilters F={F} />}
           {shown.map(({ org, match: m }, i) => {
@@ -432,25 +434,25 @@ function DesktopRanking({ ranked, F, prefs }: { ranked: Ranked; F: FiltersApi; p
                     {org.name}
                   </span>
                   <span className="small muted">
-                    {org.type} · {org.district}
+                    {orgTypeLabel(org.type)} · {org.district}
                   </span>
                 </span>
                 <span className="pill pill-match" style={{ fontSize: 13, padding: '6px 10px' }}>
-                  {m}% para ti
+                  {tr(`${m}% para ti`, `${m}% for you`)}
                 </span>
               </button>
             );
           })}
           {shown.length < ranked.length && (
             <button type="button" className="btn btn-ghost" style={{ alignSelf: 'flex-start', marginTop: 12, height: 48, fontSize: 15 }} onClick={() => setMore(true)}>
-              Ver mais {ranked.length - shown.length}
+              {tr(`Ver mais ${ranked.length - shown.length}`, `Show ${ranked.length - shown.length} more`)}
             </button>
           )}
         </section>
 
         {sel && (
           <aside
-            aria-label="Pré-visualização"
+            aria-label={tr('Pré-visualização', 'Preview')}
             aria-live="polite"
             className="card"
             style={{ flex: '1 1 340px', minWidth: 300, position: 'sticky', top: 24, padding: 28, borderRadius: 'var(--r-xl)' }}
@@ -470,7 +472,7 @@ function Preview({ org, m, pos, prefs, all, setAll }: { org: Org; m: number; pos
     <div className="fade-up stack" style={{ gap: 22 }}>
       <div className="stack" style={{ gap: 4 }}>
         <span className="small muted" style={{ fontWeight: 600 }}>
-          #{pos} · {org.type}
+          #{pos} · {orgTypeLabel(org.type)}
         </span>
         <h2 className="h2" style={{ fontSize: 24, lineHeight: 1.1 }}>
           {org.name}
@@ -480,9 +482,9 @@ function Preview({ org, m, pos, prefs, all, setAll }: { org: Org; m: number; pos
         <Ring value={org.score} size={112} thickness={10} fontSize={34} />
         <div className="stack" style={{ gap: 8 }}>
           <span className="pill pill-match" style={{ alignSelf: 'flex-start', fontSize: 14, padding: '6px 12px' }}>
-            {m}% para ti
+            {tr(`${m}% para ti`, `${m}% for you`)}
           </span>
-          <span className="small muted">{plural(org.reviewsCount, 'avaliação', 'avaliações')}</span>
+          <span className="small muted">{plural(org.reviewsCount, tr('avaliação', 'review'), tr('avaliações', 'reviews'))}</span>
         </div>
       </div>
       <div className="stack" style={{ gap: 10 }}>
@@ -491,7 +493,7 @@ function Preview({ org, m, pos, prefs, all, setAll }: { org: Org; m: number; pos
           const v = org.scores[k];
           const r = k === 'respeito';
           return (
-            <div key={k} role="img" aria-label={`${c.label} ${v == null ? 'não se aplica' : `${fmt(v)} de 5`}`} className="row" style={{ gap: 10 }}>
+            <div key={k} role="img" aria-label={`${c.label} ${v == null ? tr('não se aplica', 'not applicable') : tr(`${fmt(v)} de 5`, `${fmt(v)} out of 5`)}`} className="row" style={{ gap: 10 }}>
               <span className="grow" style={{ fontSize: 14, fontWeight: r ? 600 : 400, color: r ? 'var(--purple-text)' : 'var(--body)' }}>
                 {c.label}
               </span>
@@ -503,14 +505,14 @@ function Preview({ org, m, pos, prefs, all, setAll }: { org: Org; m: number; pos
           );
         })}
         <button type="button" className="link" aria-expanded={all} onClick={() => setAll(!all)} style={{ alignSelf: 'flex-start', fontSize: 14 }}>
-          {all ? 'Ver só os 3 que valorizas' : `Ver os ${CRITERIA.length} critérios`}
+          {all ? tr('Ver só os 3 que valorizas', 'Show only the 3 you value') : tr(`Ver os ${CRITERIA.length} critérios`, `Show all ${CRITERIA.length} criteria`)}
         </button>
       </div>
       <Link to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} className="btn btn-primary lift" style={{ height: 54 }}>
-        Ver página <Icon name="next" size={18} />
+        {tr('Ver página', 'View page')} <Icon name="next" size={18} />
       </Link>
       <Link to="/metodologia" className="link" style={{ alignSelf: 'center', fontSize: 13, fontWeight: 500 }}>
-        Como calculamos a nota
+        {tr('Como calculamos a nota', 'How we calculate the score')}
       </Link>
     </div>
   );

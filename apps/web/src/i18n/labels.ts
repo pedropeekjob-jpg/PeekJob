@@ -70,3 +70,12 @@ const FLAG_EN: Record<string, string> = {
   'incumprimento da lei laboral': 'breach of labour law',
 };
 export const flagLabel = (f: string) => tr(f, FLAG_EN[f] ?? FLAG_EN[f.toLowerCase()] ?? f);
+
+/** Datas relativas guardadas em português nos dados ("há 2 meses", "hoje") → idioma atual */
+const UNIT_EN: Record<string, string> = { dia: 'day', dias: 'days', semana: 'week', semanas: 'weeks', mês: 'month', meses: 'months', ano: 'year', anos: 'years' };
+export const whenLabel = (w: string) => {
+  if (w === 'hoje') return tr(w, 'today');
+  if (w === 'ontem') return tr(w, 'yesterday');
+  const m = /^há (\d+) (dias?|semanas?|mês|meses|anos?)$/.exec(w);
+  return m ? tr(w, `${m[1]} ${UNIT_EN[m[2]]} ago`) : w;
+};

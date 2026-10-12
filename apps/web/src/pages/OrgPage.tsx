@@ -9,6 +9,8 @@ import { MapView } from '../components/MapView';
 import { Empty } from '../components/UI';
 import { CRITERIA, CRITERION, type CriterionKey } from '../data/criteria';
 import type { Interview, Org, Review } from '../data/orgs';
+import { tr } from '../i18n';
+import { orgTypeLabel, sectorLabel, tagLabel, whenLabel } from '../i18n/labels';
 import { euros, fmt, plural } from '../lib/format';
 import { match } from '../lib/match';
 import { useStore, type MyReview } from '../lib/store';
@@ -39,12 +41,20 @@ function useOrgMeta(org: Org | undefined, tab: Tab) {
   const count = org?.reviewsCount ?? 0;
   useEffect(() => {
     if (!org || !name) return;
-    const what = tab === 'salarios' ? 'Salários' : tab === 'entrevistas' ? 'Entrevistas' : 'Avaliações';
+    const what =
+      tab === 'salarios' ? tr('Salários', 'Salaries') : tab === 'entrevistas' ? tr('Entrevistas', 'Interviews') : tr('Avaliações', 'Reviews');
+    const type = orgTypeLabel(org.type);
     applyPageMeta(pathname, {
-      title: `${name} · ${what} de quem lá trabalha · PeekJob`,
+      title: tr(`${name} · ${what} de quem lá trabalha · PeekJob`, `${name} · ${what} from people who work there · PeekJob`),
       description: count
-        ? `${org.type} em ${org.city}. Nota ${fmt(score)} em ${plural(count, 'avaliação anónima', 'avaliações anónimas')} de quem lá trabalha.`
-        : `${org.type} em ${org.city}. Ainda sem avaliações: se trabalhas lá, sê a primeira pessoa a avaliar.`,
+        ? tr(
+            `${type} em ${org.city}. Nota ${fmt(score)} em ${plural(count, 'avaliação anónima', 'avaliações anónimas')} de quem lá trabalha.`,
+            `${type} in ${org.city}. Score ${fmt(score)} from ${plural(count, 'anonymous review', 'anonymous reviews')} by people who work there.`,
+          )
+        : tr(
+            `${type} em ${org.city}. Ainda sem avaliações: se trabalhas lá, sê a primeira pessoa a avaliar.`,
+            `${type} in ${org.city}. No reviews yet: if you work there, be the first to review it.`,
+          ),
     });
     setOrgStructuredData(tab === 'avaliacoes' ? { name, score, reviewsCount: count } : null);
     return () => setOrgStructuredData(null);
@@ -62,23 +72,30 @@ function OrgNotFound({ id }: { id?: string }) {
     <Shell nav>
       <div className={desktop ? 'container dpage' : 'page'}>
         <div className="stack fade-up" style={{ gap: 20, maxWidth: 560, paddingTop: desktop ? 40 : 24 }}>
-          <BigRing value={0} size={desktop ? 120 : 96} muted ariaLabel="Organização não encontrada">
+          <BigRing value={0} size={desktop ? 120 : 96} muted ariaLabel={tr('Organização não encontrada', 'Organisation not found')}>
             <span style={{ fontSize: desktop ? 40 : 32 }}>?</span>
           </BigRing>
-          <h1 className="h1">Não encontrámos esta organização.</h1>
+          <h1 className="h1">{tr('Não encontrámos esta organização.', 'We couldn’t find this organisation.')}</h1>
           <p className="lead">
-            Pode ter mudado de nome ou ainda não estar na PeekJob{id ? <> (procurámos por <span className="mono" style={{ fontSize: 15 }}>{id}</span>)</> : null}. Se trabalhas lá, podes ser a primeira pessoa a avaliar.
+            {tr(
+              <>
+                Pode ter mudado de nome ou ainda não estar na PeekJob{id ? <> (procurámos por <span className="mono" style={{ fontSize: 15 }}>{id}</span>)</> : null}. Se trabalhas lá, podes ser a primeira pessoa a avaliar.
+              </>,
+              <>
+                It may have changed its name or not be on PeekJob yet{id ? <> (we searched for <span className="mono" style={{ fontSize: 15 }}>{id}</span>)</> : null}. If you work there, you can be the first to review it.
+              </>,
+            )}
           </p>
           <div className="row wrap" style={{ gap: 12 }}>
             <Link to="/pesquisa" className="btn btn-primary">
-              <Icon name="search" size={18} /> Procurar organizações
+              <Icon name="search" size={18} /> {tr('Procurar organizações', 'Search organisations')}
             </Link>
             <Link to="/avaliar" className="btn btn-ghost">
-              Adicionar e avaliar
+              {tr('Adicionar e avaliar', 'Add and review')}
             </Link>
           </div>
           <Link to="/ranking" className="link">
-            Ver o ranking <Icon name="next" size={16} />
+            {tr('Ver o ranking', 'See the ranking')} <Icon name="next" size={16} />
           </Link>
         </div>
       </div>
@@ -109,7 +126,7 @@ function OrgView({ org, tab }: { org: Org; tab: Tab }) {
 }
 
 const salaryTotal = (org: Org) => org.salaries.reduce((a, s) => a + s.count, 0);
-const meta = (org: Org) => `${org.type} · ${org.city}`;
+const meta = (org: Org) => `${orgTypeLabel(org.type)} · ${org.city}`;
 
 /* ---------- Partes comuns ---------- */
 
@@ -134,19 +151,19 @@ function SaveButton({ org, large = false }: { org: Org; large?: boolean }) {
       }}
     >
       <Icon name="bookmark" size={large ? 18 : 16} filled={on} />
-      {on ? 'Guardada' : 'Guardar'}
+      {on ? tr('Guardada', 'Saved') : tr('Guardar', 'Save')}
     </button>
   );
 }
 
 function OrgTabs({ org, tab, desktop }: { org: Org; tab: Tab; desktop: boolean }) {
   const items: [Tab, string, string, number][] = [
-    ['avaliacoes', 'Avaliações', `/org/${org.id}`, org.reviewsCount],
-    ['entrevistas', 'Entrevistas', `/org/${org.id}/entrevistas`, org.interviews.length],
-    ['salarios', 'Salários', `/org/${org.id}/salarios`, salaryTotal(org)],
+    ['avaliacoes', tr('Avaliações', 'Reviews'), `/org/${org.id}`, org.reviewsCount],
+    ['entrevistas', tr('Entrevistas', 'Interviews'), `/org/${org.id}/entrevistas`, org.interviews.length],
+    ['salarios', tr('Salários', 'Salaries'), `/org/${org.id}/salarios`, salaryTotal(org)],
   ];
   return (
-    <nav aria-label="Secções" className="tabs" style={{ gap: desktop ? 32 : 24 }}>
+    <nav aria-label={tr('Secções', 'Sections')} className="tabs" style={{ gap: desktop ? 32 : 24 }}>
       {items.map(([k, label, to, n]) => (
         <Link
           key={k}
@@ -182,7 +199,7 @@ function LocationPicker({ org, active, onPick }: { org: Org; active: string; onP
     ) : null;
   }
   return (
-    <div role="radiogroup" aria-label="Locais" className="stack">
+    <div role="radiogroup" aria-label={tr('Locais', 'Locations')} className="stack">
       {org.locations.map((l) => {
         const on = l.id === active;
         return (
@@ -219,20 +236,23 @@ function useCriteriaSplit(org: Org) {
 }
 
 function harassmentLine(org: Org) {
-  return `${plural(org.harassmentReports, 'relato', 'relatos')} de assédio em ${plural(org.reviewsCount, 'avaliação', 'avaliações')}.`;
+  return tr(
+    `${plural(org.harassmentReports, 'relato', 'relatos')} de assédio em ${plural(org.reviewsCount, 'avaliação', 'avaliações')}.`,
+    `${plural(org.harassmentReports, 'harassment report', 'harassment reports')} in ${plural(org.reviewsCount, 'review', 'reviews')}.`,
+  );
 }
 
 function RespeitoTags({ org }: { org: Org }) {
-  if (!org.respeitoTags.length) return <span className="small" style={{ color: 'var(--purple-text)' }}>Ainda sem etiquetas de respeito.</span>;
+  if (!org.respeitoTags.length) return <span className="small" style={{ color: 'var(--purple-text)' }}>{tr('Ainda sem etiquetas de respeito.', 'No respect tags yet.')}</span>;
   return (
-    <ul className="chips" style={{ listStyle: 'none', margin: 0, padding: 0, gap: 6 }} aria-label="O que dizem sobre respeito e inclusão">
+    <ul className="chips" style={{ listStyle: 'none', margin: 0, padding: 0, gap: 6 }} aria-label={tr('O que dizem sobre respeito e inclusão', 'What people say about respect and inclusion')}>
       {org.respeitoTags.map((t) => (
         <li
           key={t.label}
           style={{ fontSize: 13, padding: '6px 10px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--purple-line)', color: 'var(--purple-text)' }}
         >
-          {t.label}{' '}
-          <span className="mono" style={{ opacity: 0.75 }} aria-label={`${t.n} pessoas`}>
+          {tagLabel(t.label)}{' '}
+          <span className="mono" style={{ opacity: 0.75 }} aria-label={tr(`${t.n} pessoas`, `${t.n} ${t.n === 1 ? 'person' : 'people'}`)}>
             {t.n}
           </span>
         </li>
@@ -255,7 +275,7 @@ function OrgReply({ org, reviewId }: { org: Org; reviewId: string }) {
   return (
     <div style={{ padding: '4px 0 4px 14px', borderLeft: '3px solid var(--teal)' }} className="stack">
       <span className="small" style={{ fontWeight: 600 }}>
-        Resposta de {org.name}
+        {tr('Resposta de', 'Reply from')} {org.name}
       </span>
       <span className="body" style={{ fontSize: 15, lineHeight: 1.55 }}>
         {text}
@@ -270,19 +290,19 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
     <article
       className="stack"
       style={{ gap: 10, padding: desktop ? '24px 0' : '0 0 16px', borderBottom: '1px solid var(--line)' }}
-      aria-label="A tua avaliação"
+      aria-label={tr('A tua avaliação', 'Your review')}
     >
       <div className="row" style={{ gap: 12 }}>
         {desktop && <Ring value={r.avg} size={44} inner="var(--ground)" fontSize={13} />}
         <span className="row wrap grow" style={{ gap: 8 }}>
-          <span className="pill pill-ink">A tua avaliação</span>
+          <span className="pill pill-ink">{tr('A tua avaliação', 'Your review')}</span>
           <span className="small muted">
             {loc ? `${loc.label} · ` : ''}
-            {r.when}
+            {whenLabel(r.when)}
           </span>
         </span>
         {!desktop && (
-          <span className="num" style={{ fontSize: 16 }} aria-label={`Nota ${fmt(r.avg)} de 5`}>
+          <span className="num" style={{ fontSize: 16 }} aria-label={tr(`Nota ${fmt(r.avg)} de 5`, `Score ${fmt(r.avg)} out of 5`)}>
             {fmt(r.avg)}
           </span>
         )}
@@ -296,13 +316,13 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
         <div className="chips" style={{ gap: 6 }}>
           {r.tags.map((t) => (
             <span key={t} className="pill pill-match">
-              {t}
+              {tagLabel(t)}
             </span>
           ))}
         </div>
       )}
       <span className="small muted row" style={{ gap: 6 }}>
-        <Icon name="lock" size={14} /> Publicada sem o teu nome. Só tu vês esta etiqueta.
+        <Icon name="lock" size={14} /> {tr('Publicada sem o teu nome. Só tu vês esta etiqueta.', 'Published without your name. Only you see this label.')}
       </span>
     </article>
   );
@@ -311,10 +331,10 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
 function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean }) {
   const u = useUsefulCount();
   const on = u.on(r);
-  const metaText = `${r.role} · ${r.when}`;
+  const metaText = `${r.role} · ${whenLabel(r.when)}`;
   const check = r.verified ? (
-    <svg role="img" aria-label="Avaliação verificada" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal-text)" strokeWidth="2.6" strokeLinecap="round" style={{ flex: 'none' }}>
-      <title>Avaliação verificada</title>
+    <svg role="img" aria-label={tr('Avaliação verificada', 'Verified review')} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal-text)" strokeWidth="2.6" strokeLinecap="round" style={{ flex: 'none' }}>
+      <title>{tr('Avaliação verificada', 'Verified review')}</title>
       <path d="M20 6L9 17l-5-5" />
     </svg>
   ) : null;
@@ -324,19 +344,22 @@ function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean
         type="button"
         aria-pressed={on}
         onClick={() => u.toggle(r)}
-        aria-label={`Útil, ${u.count(r)} ${u.count(r) === 1 ? 'pessoa' : 'pessoas'}`}
+        aria-label={tr(
+          `Útil, ${u.count(r)} ${u.count(r) === 1 ? 'pessoa' : 'pessoas'}`,
+          `Helpful, ${u.count(r)} ${u.count(r) === 1 ? 'person' : 'people'}`,
+        )}
         className="row"
         style={{ minHeight: 44, padding: '0 14px 0 0', border: 0, background: 'transparent', gap: 8, fontSize: 13, fontWeight: 600, color: on ? 'var(--teal-dark)' : 'var(--body)' }}
       >
         <Icon name="thumb" size={16} filled={false} style={{ fill: on ? 'var(--teal-tint)' : 'none' }} />
-        Útil <span className="mono">{u.count(r)}</span>
+        {tr('Útil', 'Helpful')} <span className="mono">{u.count(r)}</span>
       </button>
       <Link
         to={`/org/${org.id}/denunciar/${r.id}`}
         className="row"
         style={{ marginLeft: 'auto', minHeight: 44, color: 'var(--muted)', textDecoration: 'none', fontSize: 13, fontWeight: 500, gap: 6 }}
       >
-        <Icon name="flag" size={14} /> Denunciar
+        <Icon name="flag" size={14} /> {tr('Denunciar', 'Report')}
       </Link>
     </div>
   );
@@ -369,7 +392,7 @@ function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean
       <div className="row small muted" style={{ gap: 8 }}>
         {check}
         <span>{metaText}</span>
-        <span className="num" style={{ marginLeft: 'auto', fontSize: 16, color: 'var(--ink)' }} aria-label={`Nota ${fmt(r.score)} de 5`}>
+        <span className="num" style={{ marginLeft: 'auto', fontSize: 16, color: 'var(--ink)' }} aria-label={tr(`Nota ${fmt(r.score)} de 5`, `Score ${fmt(r.score)} out of 5`)}>
           {fmt(r.score)}
         </span>
       </div>
@@ -397,11 +420,14 @@ function ReviewsSection({ org, desktop }: { org: Org; desktop: boolean }) {
   if (!mine.length && !others.length) {
     return (
       <Empty
-        title="Ainda sem avaliações."
-        body="Se trabalhas ou trabalhaste aqui, a tua avaliação ajuda quem procura. É anónima."
+        title={tr('Ainda sem avaliações.', 'No reviews yet.')}
+        body={tr(
+          'Se trabalhas ou trabalhaste aqui, a tua avaliação ajuda quem procura. É anónima.',
+          'If you work or worked here, your review helps people who are looking. It’s anonymous.',
+        )}
         action={
           <button type="button" className="btn btn-primary" style={{ alignSelf: 'flex-start', marginTop: 12 }} onClick={startReview}>
-            Ser a primeira pessoa a avaliar
+            {tr('Ser a primeira pessoa a avaliar', 'Be the first to review')}
           </button>
         }
       />
@@ -423,7 +449,7 @@ function ReviewsSection({ org, desktop }: { org: Org; desktop: boolean }) {
           onClick={() => setAll(!all)}
           style={{ alignSelf: desktop ? 'flex-start' : undefined, marginTop: desktop ? 16 : 0, height: desktop ? 48 : 52, borderRadius: 16, fontSize: 15 }}
         >
-          {all ? 'Mostrar menos' : `Ver todas as ${org.reviewsCount} avaliações`}
+          {all ? tr('Mostrar menos', 'Show less') : tr(`Ver todas as ${org.reviewsCount} avaliações`, `See all ${org.reviewsCount} reviews`)}
         </button>
       )}
     </div>
@@ -442,15 +468,15 @@ function interviewNumbers(org: Org) {
 function InterviewRings({ org, size = 88 }: { org: Org; size?: number }) {
   const s = interviewNumbers(org);
   const rings: { v: number; pct: boolean; label: string; text: string }[] = [];
-  if (s.difficulty != null) rings.push({ v: s.difficulty, pct: false, label: 'Dificuldade', text: fmt(s.difficulty) });
-  rings.push({ v: s.positivePct, pct: true, label: 'Gostaram do processo', text: `${s.positivePct}%` });
-  if (s.answeredPct != null) rings.push({ v: s.answeredPct, pct: true, label: 'Tiveram resposta', text: `${s.answeredPct}%` });
-  else rings.push({ v: s.offerPct, pct: true, label: 'Receberam oferta', text: `${s.offerPct}%` });
+  if (s.difficulty != null) rings.push({ v: s.difficulty, pct: false, label: tr('Dificuldade', 'Difficulty'), text: fmt(s.difficulty) });
+  rings.push({ v: s.positivePct, pct: true, label: tr('Gostaram do processo', 'Liked the process'), text: `${s.positivePct}%` });
+  if (s.answeredPct != null) rings.push({ v: s.answeredPct, pct: true, label: tr('Tiveram resposta', 'Got a reply'), text: `${s.answeredPct}%` });
+  else rings.push({ v: s.offerPct, pct: true, label: tr('Receberam oferta', 'Got an offer'), text: `${s.offerPct}%` });
   return (
     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${rings.length}, 1fr)`, gap: 12 }}>
       {rings.map((r) => (
         <div key={r.label} className="stack" style={{ alignItems: 'center', gap: 8, textAlign: 'center' }}>
-          <BigRing value={r.v} pct={r.pct} size={size} thickness={8} ariaLabel={`${r.label}: ${r.pct ? r.text : r.text + ' de 5'}`}>
+          <BigRing value={r.v} pct={r.pct} size={size} thickness={8} ariaLabel={`${r.label}: ${r.pct ? r.text : r.text + tr(' de 5', ' out of 5')}`}>
             <span style={{ fontSize: Math.round(size * 0.23) }}>{r.text}</span>
           </BigRing>
           <span className="small body" style={{ lineHeight: 1.3 }}>
@@ -464,7 +490,7 @@ function InterviewRings({ org, size = 88 }: { org: Org; size?: number }) {
 
 function InterviewItem({ i, org, desktop }: { i: Interview; org: Org; desktop: boolean }) {
   const result = (
-    <span style={{ fontSize: 13, fontWeight: 600, color: i.offer ? 'var(--up)' : 'var(--down)' }}>{i.offer ? 'Oferta recebida' : 'Sem oferta'}</span>
+    <span style={{ fontSize: 13, fontWeight: 600, color: i.offer ? 'var(--up)' : 'var(--down)' }}>{i.offer ? tr('Oferta recebida', 'Got an offer') : tr('Sem oferta', 'No offer')}</span>
   );
   if (desktop) {
     return (
@@ -474,7 +500,7 @@ function InterviewItem({ i, org, desktop }: { i: Interview; org: Org; desktop: b
           {result}
         </div>
         <span className="small muted">
-          {i.when} · {i.positive ? 'Boa experiência' : 'Experiência menos boa'}
+          {whenLabel(i.when)} · {i.positive ? tr('Boa experiência', 'Good experience') : tr('Experiência menos boa', 'Not so good')}
         </span>
         <p className="body" style={{ margin: 0, fontSize: 16, lineHeight: 1.6 }}>
           {i.body}
@@ -486,7 +512,7 @@ function InterviewItem({ i, org, desktop }: { i: Interview; org: Org; desktop: b
             className="row"
             style={{ marginLeft: 'auto', minHeight: 44, color: 'var(--muted)', textDecoration: 'none', fontSize: 13, fontWeight: 500, gap: 6 }}
           >
-            <Icon name="flag" size={14} /> Denunciar
+            <Icon name="flag" size={14} /> {tr('Denunciar', 'Report')}
           </Link>
         </div>
       </article>
@@ -499,7 +525,7 @@ function InterviewItem({ i, org, desktop }: { i: Interview; org: Org; desktop: b
         {result}
       </div>
       <span className="small muted">
-        {i.steps} · {i.when}
+        {i.steps} · {whenLabel(i.when)}
       </span>
       <p className="body" style={{ margin: 0, fontSize: 15 }}>
         {i.body}
@@ -510,7 +536,12 @@ function InterviewItem({ i, org, desktop }: { i: Interview; org: Org; desktop: b
 
 function InterviewList({ org, desktop }: { org: Org; desktop: boolean }) {
   const [all, setAll] = useState(false);
-  if (!org.interviews.length) return <Empty title="Ainda sem entrevistas partilhadas." body="Fizeste uma entrevista aqui? Conta como correu, de forma anónima." />;
+  if (!org.interviews.length) return (
+      <Empty
+        title={tr('Ainda sem entrevistas partilhadas.', 'No interviews shared yet.')}
+        body={tr('Fizeste uma entrevista aqui? Conta como correu, de forma anónima.', 'Had an interview here? Tell us how it went, anonymously.')}
+      />
+    );
   const shown = all ? org.interviews : org.interviews.slice(0, 2);
   return (
     <div className="stack" style={{ gap: desktop ? 0 : 16 }}>
@@ -525,7 +556,7 @@ function InterviewList({ org, desktop }: { org: Org; desktop: boolean }) {
           onClick={() => setAll(!all)}
           style={{ alignSelf: desktop ? 'flex-start' : undefined, marginTop: desktop ? 16 : 0, height: 48, borderRadius: 16, fontSize: 15 }}
         >
-          {all ? 'Mostrar menos' : `Ver todas as ${org.interviews.length} entrevistas`}
+          {all ? tr('Mostrar menos', 'Show less') : tr(`Ver todas as ${org.interviews.length} entrevistas`, `See all ${org.interviews.length} interviews`)}
         </button>
       )}
     </div>
@@ -545,12 +576,22 @@ function salaryScale(org: Org) {
 
 function hiddenExtra(org: Org) {
   const { hidden } = salaryScale(org);
-  return hidden.map((h) => `${h.role} tem ${h.count} — falta${MIN_SALARIES - h.count === 1 ? '' : 'm'} ${MIN_SALARIES - h.count}`).join('; ');
+  return hidden
+    .map((h) =>
+      tr(
+        `${h.role} tem ${h.count} — falta${MIN_SALARIES - h.count === 1 ? '' : 'm'} ${MIN_SALARIES - h.count}`,
+        `${h.role} has ${h.count} — needs ${MIN_SALARIES - h.count} more`,
+      ),
+    )
+    .join('; ');
 }
 
 function hiddenNote(org: Org) {
   const extra = hiddenExtra(org);
-  const base = `Só mostramos uma função com pelo menos ${MIN_SALARIES} salários: numa equipa pequena, menos do que isso podia identificar alguém.`;
+  const base = tr(
+    `Só mostramos uma função com pelo menos ${MIN_SALARIES} salários: numa equipa pequena, menos do que isso podia identificar alguém.`,
+    `We only show a role with at least ${MIN_SALARIES} salaries: in a small team, fewer could identify someone.`,
+  );
   return extra ? `${base} ${extra}.` : base;
 }
 
@@ -560,11 +601,11 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
   if (!shown.length) {
     return (
       <Empty
-        title={org.type === 'Voluntariado' ? 'Aqui o trabalho é voluntário.' : 'Ainda não há salários suficientes.'}
+        title={org.type === 'Voluntariado' ? tr('Aqui o trabalho é voluntário.', 'The work here is voluntary.') : tr('Ainda não há salários suficientes.', 'Not enough salaries yet.')}
         body={
           org.type === 'Voluntariado'
-            ? 'Não há salários para mostrar. Vê as avaliações para saber como é o dia a dia.'
-            : `Mostramos uma função quando houver pelo menos ${MIN_SALARIES} salários partilhados.`
+            ? tr('Não há salários para mostrar. Vê as avaliações para saber como é o dia a dia.', 'There are no salaries to show. Read the reviews to see what day-to-day work is like.')
+            : tr(`Mostramos uma função quando houver pelo menos ${MIN_SALARIES} salários partilhados.`, `We show a role once at least ${MIN_SALARIES} salaries have been shared.`)
         }
       />
     );
@@ -572,7 +613,10 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
   return (
     <div className="stack">
       {shown.map((s) => {
-        const aria = `${s.role}: de ${euros(s.min)} a ${euros(s.max)}, valor do meio ${euros(s.median)}, ${s.count} salários`;
+        const aria = tr(
+          `${s.role}: de ${euros(s.min)} a ${euros(s.max)}, valor do meio ${euros(s.median)}, ${s.count} salários`,
+          `${s.role}: from ${euros(s.min)} to ${euros(s.max)}, median ${euros(s.median)}, ${s.count} ${s.count === 1 ? 'salary' : 'salaries'}`,
+        );
         const l = p(s.min);
         const r = p(s.max);
         const m = p(s.median);
@@ -607,7 +651,7 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
                 <span className="num" style={{ fontSize: 24, lineHeight: 1.15 }}>
                   {euros(s.median)}
                 </span>
-                <span className="small muted">{plural(s.count, 'salário', 'salários')}</span>
+                <span className="small muted">{plural(s.count, tr('salário', 'salary'), tr('salários', 'salaries'))}</span>
               </div>
               <div className="stack" style={{ gap: 8 }}>
                 {bar(24)}
@@ -639,7 +683,7 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
       })}
       {desktop ? (
         <div className="stack" style={{ gap: 8, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-          <MoreToggle open={note} onToggle={() => setNote(!note)} label="Porque não aparecem outras funções?" openLabel="Esconder" controls="sal-note" />
+          <MoreToggle open={note} onToggle={() => setNote(!note)} label={tr('Porque não aparecem outras funções?', 'Why aren’t other roles shown?')} openLabel={tr('Esconder', 'Hide')} controls="sal-note" />
           {note && (
             <p id="sal-note" className="body fade-up" style={{ margin: 0, maxWidth: 560, fontSize: 15, lineHeight: 1.55 }}>
               {hiddenNote(org)}
@@ -648,8 +692,8 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
         </div>
       ) : (
         <p className="small muted" style={{ margin: 0, paddingTop: 16 }}>
-          Valor grande = valor do meio. Só funções com {MIN_SALARIES}+ salários.
-          {hiddenExtra(org) ? ` Ainda não aparece: ${hiddenExtra(org)}.` : ''}
+          {tr(`Valor grande = valor do meio. Só funções com ${MIN_SALARIES}+ salários.`, `Big number = median. Only roles with ${MIN_SALARIES}+ salaries.`)}
+          {hiddenExtra(org) ? tr(` Ainda não aparece: ${hiddenExtra(org)}.`, ` Not shown yet: ${hiddenExtra(org)}.`) : ''}
         </p>
       )}
     </div>
@@ -659,7 +703,7 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
 function PaidOnTime({ org, size }: { org: Org; size: number }) {
   if (org.paidOnTimePct == null) return null;
   return (
-    <BigRing value={org.paidOnTimePct} pct size={size} thickness={Math.round(size * 0.09)} ariaLabel={`${org.paidOnTimePct}% dizem que o salário chega a horas`}>
+    <BigRing value={org.paidOnTimePct} pct size={size} thickness={Math.round(size * 0.09)} ariaLabel={tr(`${org.paidOnTimePct}% dizem que o salário chega a horas`, `${org.paidOnTimePct}% say their pay arrives on time`)}>
       <span style={{ fontSize: Math.round(size * 0.26) }}>{org.paidOnTimePct}%</span>
     </BigRing>
   );
@@ -674,14 +718,19 @@ function MobileOrg({ org, tab }: { org: Org; tab: Tab }) {
   const [active, setActive] = useState(org.locations[0]?.id ?? '');
 
   if (tab !== 'avaliacoes') {
-    const cta = tab === 'entrevistas' ? 'Partilhar a minha entrevista' : org.type === 'Voluntariado' ? 'Avaliar esta organização' : 'Partilhar o meu salário';
+    const cta =
+      tab === 'entrevistas'
+        ? tr('Partilhar a minha entrevista', 'Share my interview')
+        : org.type === 'Voluntariado'
+          ? tr('Avaliar esta organização', 'Review this organisation')
+          : tr('Partilhar o meu salário', 'Share my salary');
     return (
       <div className="page" style={{ gap: 24 }}>
         <div className="row" style={{ gap: 12 }}>
           <BackButton fallback="/ranking" />
           <div className="stack grow">
             <h1 className="h2 ellipsis">{org.name}</h1>
-            <span className="small muted">{has ? `${fmt(org.score)} · ${m}% para ti` : 'Ainda sem avaliações'}</span>
+            <span className="small muted">{has ? tr(`${fmt(org.score)} · ${m}% para ti`, `${fmt(org.score)} · ${m}% for you`) : tr('Ainda sem avaliações', 'No reviews yet')}</span>
           </div>
         </div>
         <OrgTabs org={org} tab={tab} desktop={false} />
@@ -702,20 +751,24 @@ function MobileOrg({ org, tab }: { org: Org; tab: Tab }) {
         <SaveButton org={org} />
       </div>
 
-      <section aria-label="Resumo" className="stack" style={{ gap: 20 }}>
+      <section aria-label={tr('Resumo', 'Summary')} className="stack" style={{ gap: 20 }}>
         <div className="stack" style={{ gap: 6 }}>
           <h1 className="h1" style={{ fontSize: 36 }}>
             {org.name}
           </h1>
           <div className="small muted">
             {meta(org)}
-            {org.locations.length > 1 ? ` · ${org.locations.length} locais` : ''}
+            {org.locations.length > 1 ? tr(` · ${org.locations.length} locais`, ` · ${org.locations.length} locations`) : ''}
           </div>
         </div>
         <div className="row" style={{ gap: 20 }}>
-          <BigRing value={org.score} size={112} thickness={11} muted={!has} ariaLabel={has ? `Nota ${fmt(org.score)} de 5, com ${org.reviewsCount} avaliações` : 'Ainda sem nota'}>
+          <BigRing value={org.score} size={112} thickness={11} muted={!has} ariaLabel={
+            has
+              ? tr(`Nota ${fmt(org.score)} de 5, com ${org.reviewsCount} avaliações`, `Score ${fmt(org.score)} out of 5, from ${plural(org.reviewsCount, 'review', 'reviews')}`)
+              : tr('Ainda sem nota', 'No score yet')
+          }>
             <span style={{ fontSize: 36 }}>{has ? fmt(org.score) : '—'}</span>
-            <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: 13, color: 'var(--muted)' }}>{has ? 'de 5' : 'sem nota'}</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: 13, color: 'var(--muted)' }}>{has ? tr('de 5', 'out of 5') : tr('sem nota', 'no score')}</span>
           </BigRing>
           <div className="stack" style={{ gap: 6 }}>
             {has && (
@@ -723,7 +776,7 @@ function MobileOrg({ org, tab }: { org: Org; tab: Tab }) {
                 <span className="num" style={{ fontSize: 32, lineHeight: 1 }}>
                   {m}%
                 </span>
-                <span style={{ fontSize: 15, fontWeight: 600 }}>para ti</span>
+                <span style={{ fontSize: 15, fontWeight: 600 }}>{tr('para ti', 'for you')}</span>
               </div>
             )}
             <p className="body" style={{ margin: 0, fontSize: 15, lineHeight: 1.4 }}>
@@ -732,7 +785,7 @@ function MobileOrg({ org, tab }: { org: Org; tab: Tab }) {
           </div>
         </div>
         <button type="button" className="btn btn-primary btn-block" style={{ height: 56 }} onClick={startReview}>
-          Avaliar esta organização
+          {tr('Avaliar esta organização', 'Review this organisation')}
         </button>
       </section>
 
@@ -740,7 +793,7 @@ function MobileOrg({ org, tab }: { org: Org; tab: Tab }) {
 
       <MobileMap org={org} active={active} setActive={setActive} />
 
-      <section aria-label="Opiniões" className="stack" style={{ gap: 20 }}>
+      <section aria-label={tr('Opiniões', 'Opinions')} className="stack" style={{ gap: 20 }}>
         <OrgTabs org={org} tab={tab} desktop={false} />
         <ReviewsSection org={org} desktop={false} />
       </section>
@@ -759,7 +812,7 @@ function MobileCriteria({ org }: { org: Org }) {
   return (
     <section aria-labelledby="o-que-importa" className="stack" style={{ gap: 4 }}>
       <h2 id="o-que-importa" className="h2" style={{ marginBottom: 8 }}>
-        O que mais te importa
+        {tr('O que mais te importa', 'What matters most to you')}
       </h2>
 
       <button
@@ -788,7 +841,7 @@ function MobileCriteria({ org }: { org: Org }) {
             );
           })}
         </span>
-        <span className="mono" style={{ fontSize: 13, width: 26, textAlign: 'right' }} aria-label={r == null ? 'sem dados' : `${fmt(r)} de 5`}>
+        <span className="mono" style={{ fontSize: 13, width: 26, textAlign: 'right' }} aria-label={r == null ? tr('sem dados', 'no data') : tr(`${fmt(r)} de 5`, `${fmt(r)} out of 5`)}>
           {r == null ? '—' : fmt(r)}
         </span>
         <Icon name="down" size={16} stroke={2} style={{ transform: resp ? 'rotate(180deg)' : undefined, transition: 'transform .2s' }} />
@@ -812,7 +865,7 @@ function MobileCriteria({ org }: { org: Org }) {
           ))}
         </div>
       )}
-      <MoreToggle open={all} onToggle={() => setAll(!all)} label="Ver os 8 critérios" openLabel="Mostrar menos" controls="crit-rest" />
+      <MoreToggle open={all} onToggle={() => setAll(!all)} label={tr('Ver os 8 critérios', 'See all 8 criteria')} openLabel={tr('Mostrar menos', 'Show less')} controls="crit-rest" />
     </section>
   );
 }
@@ -822,7 +875,7 @@ function MobileMap({ org, active, setActive }: { org: Org; active: string; setAc
   const cur = org.locations.find((l) => l.id === active) ?? org.locations[0];
   if (!cur) return null;
   return (
-    <section aria-label="Localização" className="stack" style={{ gap: 12 }}>
+    <section aria-label={tr('Localização', 'Location')} className="stack" style={{ gap: 12 }}>
       <button
         type="button"
         aria-expanded={open}
@@ -833,9 +886,9 @@ function MobileMap({ org, active, setActive }: { org: Org; active: string; setAc
       >
         <Icon name="pin" size={20} style={{ color: 'var(--teal-text)', flex: 'none' }} />
         <span className="grow ellipsis" style={{ fontSize: 15, fontWeight: 500 }}>
-          {org.locations.length > 1 ? `${org.locations.length} locais · ${org.city}` : cur.address}
+          {org.locations.length > 1 ? tr(`${org.locations.length} locais · ${org.city}`, `${org.locations.length} locations · ${org.city}`) : cur.address}
         </span>
-        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--teal-text)' }}>{open ? 'Fechar' : 'Ver mapa'}</span>
+        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--teal-text)' }}>{open ? tr('Fechar', 'Close') : tr('Ver mapa', 'See map')}</span>
       </button>
       {open && (
         <div id="org-map" className="stack fade-up" style={{ gap: 6 }}>
@@ -853,16 +906,16 @@ function MobileInterviews({ org }: { org: Org }) {
   return (
     <>
       {s.n > 0 && (
-        <section aria-label="Resumo das entrevistas" className="stack" style={{ gap: 8 }}>
+        <section aria-label={tr('Resumo das entrevistas', 'Interview summary')} className="stack" style={{ gap: 8 }}>
           <div className="row" style={{ gap: 18 }}>
-            <BigRing value={s.positivePct} pct size={92} thickness={9} ariaLabel={`${s.positivePct}% tiveram boa experiência`}>
+            <BigRing value={s.positivePct} pct size={92} thickness={9} ariaLabel={tr(`${s.positivePct}% tiveram boa experiência`, `${s.positivePct}% had a good experience`)}>
               <span style={{ fontSize: 24 }}>{s.positivePct}%</span>
             </BigRing>
             <div className="stack" style={{ gap: 4 }}>
               <span className="h2" style={{ lineHeight: 1.15 }}>
-                tiveram boa experiência
+                {tr('tiveram boa experiência', 'had a good experience')}
               </span>
-              <span className="small muted">{plural(s.n, 'entrevista partilhada', 'entrevistas partilhadas')}</span>
+              <span className="small muted">{plural(s.n, tr('entrevista partilhada', 'interview shared'), tr('entrevistas partilhadas', 'interviews shared'))}</span>
             </div>
           </div>
           {more && (
@@ -870,16 +923,16 @@ function MobileInterviews({ org }: { org: Org }) {
               <InterviewRings org={org} size={80} />
               {s.usualSteps && (
                 <div className="stack" style={{ gap: 2, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
-                  <span className="small muted">Processo mais comum</span>
+                  <span className="small muted">{tr('Processo mais comum', 'Most common process')}</span>
                   <span style={{ fontSize: 15, fontWeight: 600 }}>{s.usualSteps}</span>
                 </div>
               )}
             </div>
           )}
-          <MoreToggle open={more} onToggle={() => setMore(!more)} label="Ver mais números" openLabel="Mostrar menos" controls="int-more" />
+          <MoreToggle open={more} onToggle={() => setMore(!more)} label={tr('Ver mais números', 'See more numbers')} openLabel={tr('Mostrar menos', 'Show less')} controls="int-more" />
         </section>
       )}
-      <section aria-label="Entrevistas partilhadas">
+      <section aria-label={tr('Entrevistas partilhadas', 'Shared interviews')}>
         <InterviewList org={org} desktop={false} />
       </section>
     </>
@@ -891,17 +944,17 @@ function MobileSalaries({ org }: { org: Org }) {
   return (
     <>
       {org.paidOnTimePct != null && n > 0 && (
-        <section aria-label="Pontualidade" className="row" style={{ gap: 18 }}>
+        <section aria-label={tr('Pontualidade', 'Paid on time')} className="row" style={{ gap: 18 }}>
           <PaidOnTime org={org} size={92} />
           <div className="stack" style={{ gap: 4 }}>
             <span className="h2" style={{ lineHeight: 1.15 }}>
-              recebem a horas
+              {tr('recebem a horas', 'get paid on time')}
             </span>
-            <span className="small muted">{plural(n, 'salário', 'salários')} · bruto mensal</span>
+            <span className="small muted">{plural(n, tr('salário', 'salary'), tr('salários', 'salaries'))} · {tr('bruto mensal', 'gross per month')}</span>
           </div>
         </section>
       )}
-      <section aria-label="Salários por função">
+      <section aria-label={tr('Salários por função', 'Salaries by role')}>
         <SalaryBands org={org} desktop={false} />
       </section>
     </>
@@ -934,16 +987,20 @@ function DesktopOrg({ org, tab }: { org: Org; tab: Tab }) {
     return (
       <div className="container" style={{ paddingTop: 8, paddingBottom: 80 }}>
         {back}
-        <section aria-label="Organização" className="row wrap" style={{ gap: 24, padding: '16px 0 40px' }}>
+        <section aria-label={tr('Organização', 'Organisation')} className="row wrap" style={{ gap: 24, padding: '16px 0 40px' }}>
           <Ring value={org.score} size={80} inner="var(--ground)" fontSize={24} muted={!has} />
           <div className="row wrap" style={{ flex: '1 1 360px', minWidth: 0, gap: 16 }}>
             <h1 className="h1" style={{ fontSize: 40, lineHeight: 1 }}>
               {org.name}
             </h1>
-            {has && <span className="pill pill-match" style={{ fontSize: 15, padding: '6px 14px' }}>{m}% para ti</span>}
+            {has && <span className="pill pill-match" style={{ fontSize: 15, padding: '6px 14px' }}>{tr(`${m}% para ti`, `${m}% for you`)}</span>}
           </div>
           <button type="button" className="btn btn-primary lift" style={{ height: 56, padding: '0 24px' }} onClick={startReview}>
-            {tab === 'entrevistas' ? 'Partilhar a minha entrevista' : org.type === 'Voluntariado' ? 'Avaliar esta organização' : 'Partilhar o meu salário'}
+            {tab === 'entrevistas'
+              ? tr('Partilhar a minha entrevista', 'Share my interview')
+              : org.type === 'Voluntariado'
+                ? tr('Avaliar esta organização', 'Review this organisation')
+                : tr('Partilhar o meu salário', 'Share my salary')}
           </button>
         </section>
         <OrgTabs org={org} tab={tab} desktop />
@@ -955,35 +1012,41 @@ function DesktopOrg({ org, tab }: { org: Org; tab: Tab }) {
   return (
     <div className="container" style={{ paddingTop: 8, paddingBottom: 80 }}>
       {back}
-      <section aria-label="Resumo" className="row wrap between" style={{ gap: 48, padding: '24px 0 56px' }}>
+      <section aria-label={tr('Resumo', 'Summary')} className="row wrap between" style={{ gap: 48, padding: '24px 0 56px' }}>
         <div className="stack" style={{ flex: '1 1 520px', minWidth: 0, gap: 16 }}>
           <h1 className="h1" style={{ fontSize: 56, lineHeight: 1 }}>
             {org.name}
           </h1>
           <span className="muted" style={{ fontSize: 16 }}>
-            {org.type} · {org.sector} · {org.city}
-            {org.locations.length > 1 ? ` · ${org.locations.length} locais` : ''}
+            {orgTypeLabel(org.type)} · {sectorLabel(org.sector)} · {org.city}
+            {org.locations.length > 1 ? tr(` · ${org.locations.length} locais`, ` · ${org.locations.length} locations`) : ''}
           </span>
           <p className="body" style={{ margin: 0, maxWidth: 520, fontSize: 22, lineHeight: 1.4 }}>
             {org.summary}
           </p>
           <div className="row wrap" style={{ gap: 12, paddingTop: 12 }}>
             <button type="button" className="btn btn-primary lift" style={{ height: 56, padding: '0 26px' }} onClick={startReview}>
-              Avaliar esta organização
+              {tr('Avaliar esta organização', 'Review this organisation')}
             </button>
             <SaveButton org={org} large />
           </div>
         </div>
         <div className="stack" style={{ flex: 'none', alignItems: 'center', gap: 16 }}>
-          <BigRing value={org.score} size={208} thickness={17} muted={!has} ariaLabel={has ? `Nota ${fmt(org.score)} de 5, com ${org.reviewsCount} avaliações` : 'Ainda sem nota'}>
+          <BigRing value={org.score} size={208} thickness={17} muted={!has} ariaLabel={
+            has
+              ? tr(`Nota ${fmt(org.score)} de 5, com ${org.reviewsCount} avaliações`, `Score ${fmt(org.score)} out of 5, from ${plural(org.reviewsCount, 'review', 'reviews')}`)
+              : tr('Ainda sem nota', 'No score yet')
+          }>
             <span style={{ fontSize: 56 }}>{has ? fmt(org.score) : '—'}</span>
             <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: 13, color: 'var(--muted)' }}>
-              {has ? `de 5 · ${plural(org.reviewsCount, 'avaliação', 'avaliações')}` : 'sem avaliações'}
+              {has
+                ? tr(`de 5 · ${plural(org.reviewsCount, 'avaliação', 'avaliações')}`, `out of 5 · ${plural(org.reviewsCount, 'review', 'reviews')}`)
+                : tr('sem avaliações', 'no reviews')}
             </span>
           </BigRing>
           {has && (
             <span className="pill pill-match" style={{ fontSize: 16, padding: '8px 16px' }}>
-              {m}% para ti
+              {tr(`${m}% para ti`, `${m}% for you`)}
             </span>
           )}
         </div>
@@ -992,7 +1055,7 @@ function DesktopOrg({ org, tab }: { org: Org; tab: Tab }) {
       <OrgTabs org={org} tab={tab} desktop />
 
       <div style={{ ...twoCols, paddingTop: 40 }}>
-        <section aria-label="Avaliações" className="stack">
+        <section aria-label={tr('Avaliações', 'Reviews')} className="stack">
           <ReviewsSection org={org} desktop />
         </section>
         <aside className="stack" style={{ gap: 48 }}>
@@ -1000,7 +1063,7 @@ function DesktopOrg({ org, tab }: { org: Org; tab: Tab }) {
           {has && <DesktopCriteria org={org} />}
           <section aria-labelledby="onde-fica" className="stack" style={{ gap: 12 }}>
             <h2 id="onde-fica" className="h2" style={{ fontSize: 20 }}>
-              Onde fica
+              {tr('Onde fica', 'Where it is')}
             </h2>
             <MapView locations={org.locations} active={active} onPick={org.locations.length > 1 ? setActive : undefined} height={190} showLink={false} />
             <LocationPicker org={org} active={active} onPick={setActive} />
@@ -1014,7 +1077,7 @@ function DesktopOrg({ org, tab }: { org: Org; tab: Tab }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Abrir no mapa <Icon name="external" size={14} />
+                  {tr('Abrir no mapa', 'Open in map')} <Icon name="external" size={14} />
                 </a>
               ) : null;
             })()}
@@ -1031,10 +1094,10 @@ function DesktopRespeito({ org }: { org: Org }) {
   return (
     <section aria-labelledby="resp-h" style={{ background: 'var(--purple-tint)', borderRadius: 24, padding: 22 }} className="stack">
       <div className="row" style={{ gap: 16 }}>
-        <Ring value={r} size={64} color="var(--purple)" track="var(--purple-line)" inner="var(--purple-tint)" fontSize={20} ariaLabel={`Respeito e inclusão ${fmt(r)} de 5`} />
+        <Ring value={r} size={64} color="var(--purple)" track="var(--purple-line)" inner="var(--purple-tint)" fontSize={20} ariaLabel={tr(`Respeito e inclusão ${fmt(r)} de 5`, `Respect and inclusion ${fmt(r)} out of 5`)} />
         <span className="stack" style={{ gap: 4 }}>
           <h2 id="resp-h" className="h2" style={{ fontSize: 20, color: 'var(--purple-text)' }}>
-            Respeito e inclusão
+            {tr('Respeito e inclusão', 'Respect and inclusion')}
           </h2>
           <span className="small" style={{ lineHeight: 1.4, color: 'var(--purple-text)' }}>
             {harassmentLine(org)}
@@ -1049,7 +1112,7 @@ function DesktopRespeito({ org }: { org: Org }) {
         onClick={() => setTags(!tags)}
         style={{ color: 'var(--purple-text)', alignSelf: 'flex-start', paddingBottom: tags ? 6 : 0 }}
       >
-        {tags ? 'Esconder o que dizem' : 'Ver o que dizem'}
+        {tags ? tr('Esconder o que dizem', 'Hide what people say') : tr('Ver o que dizem', 'See what people say')}
         <Icon name="down" size={16} style={{ transform: tags ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }} />
       </button>
       {tags && (
@@ -1067,7 +1130,7 @@ function DesktopCriteria({ org }: { org: Org }) {
   return (
     <section aria-labelledby="prio-h" className="stack" style={{ gap: 12 }}>
       <h2 id="prio-h" className="h2" style={{ fontSize: 20, marginBottom: 4 }}>
-        As tuas prioridades
+        {tr('As tuas prioridades', 'Your priorities')}
       </h2>
       {prefs.map((k) => (
         <CritLine key={k} k={k} value={v(k)} priority={prio(k)} bold />
@@ -1079,9 +1142,9 @@ function DesktopCriteria({ org }: { org: Org }) {
           ))}
         </div>
       )}
-      <MoreToggle open={all} onToggle={() => setAll(!all)} label="Ver os 8 critérios" openLabel="Mostrar só as prioridades" controls="crit-rest-d" />
+      <MoreToggle open={all} onToggle={() => setAll(!all)} label={tr('Ver os 8 critérios', 'See all 8 criteria')} openLabel={tr('Mostrar só as prioridades', 'Show only priorities')} controls="crit-rest-d" />
       <Link to="/preferencias" className="small" style={{ alignSelf: 'flex-start', minHeight: 32, display: 'inline-flex', alignItems: 'center', color: 'var(--muted)' }}>
-        Mudar as minhas prioridades
+        {tr('Mudar as minhas prioridades', 'Change my priorities')}
       </Link>
     </section>
   );
@@ -1093,24 +1156,24 @@ function DesktopInterviews({ org }: { org: Org }) {
     <>
       <section aria-labelledby="como-correram" className="stack">
         <h2 id="como-correram" className="h2" style={{ fontSize: 24, marginBottom: 8 }}>
-          Como correram
+          {tr('Como correram', 'How they went')}
         </h2>
         <InterviewList org={org} desktop />
       </section>
       <aside aria-labelledby="em-resumo" className="stack" style={{ gap: 24 }}>
         <h2 id="em-resumo" className="h2" style={{ fontSize: 20 }}>
-          Em resumo
+          {tr('Em resumo', 'In short')}
         </h2>
-        {s.n > 0 ? <InterviewRings org={org} /> : <span className="body">Ainda sem números.</span>}
+        {s.n > 0 ? <InterviewRings org={org} /> : <span className="body">{tr('Ainda sem números.', 'No numbers yet.')}</span>}
         {s.usualSteps && (
           <div className="stack" style={{ gap: 6, paddingTop: 20, borderTop: '1px solid var(--line)' }}>
-            <span className="small muted">Processo mais comum</span>
+            <span className="small muted">{tr('Processo mais comum', 'Most common process')}</span>
             <span style={{ fontSize: 16, fontWeight: 600 }}>{s.usualSteps}</span>
           </div>
         )}
         {s.n > 0 && (
           <div className="stack" style={{ gap: 6, paddingTop: 20, borderTop: '1px solid var(--line)' }}>
-            <span className="small muted">Receberam oferta</span>
+            <span className="small muted">{tr('Receberam oferta', 'Got an offer')}</span>
             <span className="num" style={{ fontSize: 24 }}>
               {s.offerPct}%
             </span>
@@ -1128,10 +1191,10 @@ function DesktopSalaries({ org }: { org: Org }) {
     <>
       <section aria-labelledby="quanto" className="stack">
         <h2 id="quanto" className="h2" style={{ fontSize: 24 }}>
-          Quanto se ganha
+          {tr('Quanto se ganha', 'What people earn')}
         </h2>
         <span className="small muted" style={{ padding: '6px 0 16px' }}>
-          Bruto mensal · o ponto é o valor do meio
+          {tr('Bruto mensal · o ponto é o valor do meio', 'Gross per month · the dot is the median')}
         </span>
         <SalaryBands org={org} desktop />
       </section>
@@ -1139,10 +1202,10 @@ function DesktopSalaries({ org }: { org: Org }) {
         <aside aria-labelledby="a-horas" className="stack" style={{ alignItems: 'flex-start', gap: 16 }}>
           <PaidOnTime org={org} size={160} />
           <h2 id="a-horas" className="h2" style={{ fontSize: 20 }}>
-            Salário pago a horas
+            {tr('Salário pago a horas', 'Pay on time')}
           </h2>
           <span className="small muted">
-            Segundo {yes} de {plural(n, 'pessoa', 'pessoas')}.
+            {tr(`Segundo ${yes} de ${plural(n, 'pessoa', 'pessoas')}.`, `According to ${yes} of ${plural(n, 'person', 'people')}.`)}
           </span>
         </aside>
       )}
