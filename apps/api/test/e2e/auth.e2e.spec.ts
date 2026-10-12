@@ -22,6 +22,22 @@ describe('Entrar com link mágico', () => {
     expect(mail.link).toMatch(/#\/entrar\?token=[A-Za-z0-9_-]{40,}/);
   });
 
+  it('envia o email em inglês quando lang=en (o link mantém o idioma)', async () => {
+    await t.http().post('/auth/magic-link').send({ email: 'ana@gmail.com', lang: 'en' }).expect(202);
+    const mail = t.mailer.outbox.at(-1)!;
+    expect(mail.subject).toBe('Your PeekJob sign-in link');
+    expect(mail.text).toMatch(/^Hi! Open this link to sign in to PeekJob \(valid for 15 minutes\)/);
+    expect(mail.text).toContain("If you didn't ask for this email");
+    expect(mail.link).toMatch(/#\/entrar\?token=[A-Za-z0-9_-]{40,}&lang=en$/);
+  });
+
+  it('por omissão o email vai em português; idiomas desconhecidos são recusados (400)', async () => {
+    await askLink('rui@gmail.com').expect(202);
+    expect(t.mailer.outbox.at(-1)!.subject).toBe('O teu link de acesso à PeekJob');
+    expect(t.mailer.outbox.at(-1)!.link).not.toContain('lang=');
+    await t.http().post('/auth/magic-link').send({ email: 'rui@gmail.com', lang: 'fr' }).expect(400);
+  });
+
   it('recusa emails inválidos (400)', async () => {
     await askLink('nao-e-email').expect(400);
   });

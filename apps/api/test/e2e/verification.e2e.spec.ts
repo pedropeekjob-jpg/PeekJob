@@ -33,7 +33,17 @@ describe('Verificação anónima', () => {
       await t.http().post('/verifications/email').send({ orgId, email: work }).expect(401);
     });
 
-    it('envia um código de 6 dígitos para o email de trabalho e confirma', async () => {
+    it('envia o código em inglês quando lang=en', async () => {
+    const me = await t.login('ines');
+    const orgId = await insertOrg(t.pool, { name: 'Oficina Sete' });
+    await t.http().post('/verifications/email').set(me).send({ orgId, email: 'ines@oficina7.pt', lang: 'en' }).expect(202);
+    const mail = t.mailer.outbox.at(-1)!;
+    expect(mail.subject).toBe('Your PeekJob verification code');
+    expect(mail.text).toMatch(/^Your code is \d{6}\. It confirms that you work at Oficina Sete and is valid for 10 minutes\./);
+    expect(mail.text).toContain("We don't store this email.");
+  });
+
+  it('envia um código de 6 dígitos para o email de trabalho e confirma', async () => {
       const me = await t.login('u1');
       await t.http().post('/verifications/email').set(me).send({ orgId, email: work }).expect(202);
       const code = t.mailer.lastCodeFor(work);
