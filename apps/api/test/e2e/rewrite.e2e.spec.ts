@@ -1,5 +1,4 @@
 import { findPersonalAttacks } from '@peekjob/shared';
-import { RewriteLimiter } from '../../src/rewrite/rewrite.controller';
 import { REWRITER, type Rewriter } from '../../src/rewrite/rewriter';
 import { createTestApp, insertOrg, resetDb, TestCtx } from '../helpers';
 
@@ -17,10 +16,7 @@ describe('POST /reviews/rewrite', () => {
     await t.pool.end();
     await t.app.close();
   });
-  beforeEach(async () => {
-    await resetDb(t);
-    t.app.get(RewriteLimiter).clear();
-  });
+  beforeEach(() => resetDb(t));
 
   const rewrite = (body: Record<string, unknown>, headers: Record<string, string> = {}) => t.http().post('/reviews/rewrite').set(headers).send(body);
 

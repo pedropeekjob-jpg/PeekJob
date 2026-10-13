@@ -14,7 +14,7 @@
     "@peekjob/shared": "*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.28.0",
+    "react-router-dom": "6.30.6",
     "web-vitals": "4.2.4"
   },
   "devDependencies": {

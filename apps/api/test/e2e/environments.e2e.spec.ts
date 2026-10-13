@@ -49,8 +49,9 @@ describe('Ambientes', () => {
 
     it('com a palavra-passe certa funciona normalmente', async () => {
       await t.http().get('/orgs').set('authorization', auth).expect(200).expect('content-type', /json/);
-      const res = await t.http().get('/').set('accept', 'text/html').set('authorization', auth).expect(200);
-      expect(res.text).toContain('"env":"uat"');
+      await t.http().get('/').set('accept', 'text/html').set('authorization', auth).expect(200);
+      const cfg = await t.http().get('/pj-config.js').set('authorization', auth).expect(200);
+      expect(cfg.text).toContain('"env":"uat"');
     });
 
     it('o health check do alojamento não precisa de palavra-passe', async () => {

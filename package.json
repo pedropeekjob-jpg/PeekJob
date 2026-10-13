@@ -2,7 +2,10 @@
   "name": "peekjob",
   "private": true,
   "version": "0.2.0",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "build": "npm run build -w @peekjob/shared && npm run build -w @peekjob/web && npm run build -w @peekjob/api",
     "test": "npm run test -w @peekjob/shared && npm run test -w @peekjob/api",
@@ -10,5 +13,13 @@
     "dev:api": "npm run start:dev -w @peekjob/api",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "multer": "2.4.0",
+    "express": "4.22.3",
+    "body-parser": "1.20.8",
+    "qs": "6.16.0"
+  }
 }

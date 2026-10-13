@@ -5,6 +5,7 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { InMemoryMailer, MAILER } from '../src/auth/mailer';
 import { configureApp } from '../src/main';
+import { RateLimiter } from '../src/security/rate-limit';
 
 export const TEST_DB = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@localhost:5544/peekjob_test';
 
@@ -60,6 +61,7 @@ export async function resetDb(t: TestCtx) {
   );
   t.sessions.clear();
   t.mailer.clear();
+  t.app.get(RateLimiter).clear();
 }
 
 export async function insertOrg(

@@ -6,14 +6,17 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { AppModule } from './app.module';
-import { corsOrigins } from './common/config';
+import { appEnv, corsOrigins } from './common/config';
+import { htmlCsp } from './security/headers';
+import { applySecurity } from './security/security';
 import { protectEnvironment } from './web/environment';
-import { renderIndex } from './web/index-html';
+import { configScript, renderIndex } from './web/index-html';
 
 export function configureApp(app: INestApplication) {
   // Atrás do proxy do alojamento: o IP real vem em X-Forwarded-For (limites por IP nas denúncias)
   if (process.env.APP_ENV) (app.getHttpAdapter().getInstance() as { set: (k: string, v: unknown) => void }).set('trust proxy', 1);
   protectEnvironment(app);
+  applySecurity(app);
   app.enableCors({ origin: corsOrigins(), credentials: true });
   serveWeb(app, process.env.WEB_DIST);
   app.enableShutdownHooks();
@@ -32,11 +35,16 @@ function serveWeb(app: INestApplication, dir: string | undefined) {
     res
       .status(status)
       .setHeader('cache-control', 'no-cache')
+      .setHeader('content-security-policy', htmlCsp(appEnv()))
       .type('html')
       .send(renderIndex(template, process.env, req.query.lang === 'en' ? 'en' : 'pt'));
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'GET' && (req.path === '/' || req.path === '/index.html')) return sendIndex(req, res);
+    // Configuração da web (GA, ambiente) num ficheiro e não inline: permite uma CSP sem 'unsafe-inline'
+    if (req.method === 'GET' && req.path === '/pj-config.js') {
+      return res.status(200).setHeader('cache-control', 'no-cache').type('application/javascript').send(configScript(process.env));
+    }
     next();
   });
   app.use(

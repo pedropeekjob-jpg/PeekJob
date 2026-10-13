@@ -115,6 +115,42 @@ Quem escreve com raiva recebe uma proposta publicável e decide se a usa. Pode s
 - Falta: um canal para quem escreveu contestar a decisão.
 - **Dar o papel de moderador** (por agora na base de dados): `UPDATE users SET role = 'moderator' WHERE id = '…'`.
 
+## Segurança
+
+**Cabeçalhos em todas as respostas:**
+- `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` e `Cross-Origin-Opener-Policy: same-origin`;
+- `Permissions-Policy` sem câmara, microfone, localização nem pagamentos;
+- sem `X-Powered-By`;
+- HSTS de um ano só em produção (o domínio da UAT pode mudar).
+
+**CSP:**
+- **Web:** scripts só do próprio site e do Google Analytics, sem `unsafe-inline` nos scripts. Por isso a configuração (`window.__PJ__`) vem de `/pj-config.js` e não de um script inline. Estilos inline são permitidos, por causa dos atributos `style` do React. Fontes vêm do Google Fonts. Ninguém pode pôr o site num iframe (`frame-ancestors 'none'`).
+- **API:** as respostas JSON levam `default-src 'none'`.
+
+**Pedidos de outros sites:** um POST, PUT, PATCH ou DELETE com `Origin` de outro domínio recebe 403. É uma defesa extra além do cookie `SameSite=Lax`. Os GET continuam abertos.
+
+**Tamanho:** pedidos JSON e de formulário até 64 KB (413 acima disso). Os PDFs de verificação têm o seu próprio limite.
+
+**Limites por IP** (429 com `Retry-After`):
+
+| Rota | Limite | Contra |
+|---|---|---|
+| `POST /auth/magic-link` | 10 / hora | Enviar links para caixas de correio de outras pessoas |
+| `POST /auth/verify` | 30 / 15 min | Adivinhar tokens |
+| `POST /verifications/email[/confirm]` | 20 / hora | Abuso dos códigos |
+| `GET /orgs/nif/:nif` | 30 / 10 min | Usar o VIES através de nós |
+| `GET /orgs/search` | 120 / minuto | Recolha automática do catálogo |
+| Tudo o resto | 600 / minuto | Abuso geral |
+
+Somam-se aos limites que já existiam por pessoa: 3 links por email, 5 tentativas por código, 5 organizações por dia, 10 denúncias por dia e 20 reescritas em 10 minutos. O `/health`, os ficheiros da web e o `/pj-config.js` não têm limite.
+
+Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca em disco. Chega para uma instância; com várias, passar para Redis ou PostgreSQL. Atrás do proxy do Render o IP real vem de `X-Forwarded-For` (`trust proxy`).
+
+**Dependências:** `npm audit --omit=dev`. Corrigido o que tinha correção na mesma versão principal: Nest 10.4.22, Express 4.22.3, Multer 2.4.0, qs, body-parser e React Router 6.30.6. Fica para uma tarefa à parte, porque exige mudar de versão principal:
+- **Nest 11:** aviso moderado sobre saída não escapada.
+- **pdfjs 4+:** a falha de execução de JavaScript já está mitigada com `isEvalSupported: false`, a mitigação oficial. O `canvas` e o `tar` são opcionais e não são instalados.
+- **React Router 7:** redirecionamento aberto através de `<Link>` com valores vindos do utilizador. A web não usa valores do utilizador em navegações.
+
 ## RGPD
 - **Acesso:** `GET /me/export` e o ecrã *Perfil → Privacidade e dados → Descarregar*.
 - **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
@@ -144,7 +180,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 - **Domínio partilhado:** 46 testes (vitest).
 - **Web:** 27 testes (medição, privacidade e morada do VIES).
-- **API:** 164 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **API:** 180 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia
