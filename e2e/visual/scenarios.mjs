@@ -109,6 +109,9 @@ export const SCENARIOS = [
       await tap(p, 'button', /^Receber link de acesso/);
     },
   },
+  { name: 'guardadas', path: '/guardadas', full: true },
+  { name: 'guardadas-vazia', path: '/guardadas', state: { saved: [] } },
+  { name: 'guardadas-desfazer', path: '/guardadas', run: (p) => tap(p, 'button', /^Deixar de guardar Padaria Ribeira$/) },
   { name: 'perfil', path: '/perfil', full: true },
   { name: 'perfil-sem-sessao', path: '/perfil', full: true, state: { user: null } },
   {

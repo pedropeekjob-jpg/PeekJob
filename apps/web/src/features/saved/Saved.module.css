@@ -1,0 +1,200 @@
+/* Guardadas: telemóvel por omissão, computador a partir de 900 px */
+
+/* Aviso de "Desfazer": fixo por cima da navegação no telemóvel, na página no computador */
+.undo {
+  gap: 12px;
+  padding: 10px 10px 10px 20px;
+  border-radius: 18px;
+  background: var(--ink);
+  color: #fff;
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--nav-h) + 12px);
+  z-index: 30;
+  max-width: 528px;
+  margin: 0 auto;
+}
+.undoText {
+  font-size: 15px;
+}
+.undoButton {
+  height: 44px;
+}
+
+/* Uma guardada */
+.row {
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.link {
+  gap: 12px;
+  transition: opacity 0.15s;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.name {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.link:hover :global(.num) {
+  text-decoration: underline;
+}
+.note {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.note[data-kind='respeito'] {
+  color: var(--purple-text);
+}
+.note[data-kind='up'] {
+  color: var(--up);
+}
+.note[data-kind='down'] {
+  color: var(--down);
+}
+.note[data-kind='new'] {
+  color: var(--body);
+}
+.pill {
+  font-size: 13px;
+  padding: 5px 11px;
+}
+.match {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  align-items: flex-end;
+  color: var(--teal-dark);
+  line-height: 1.15;
+}
+.matchNum {
+  font-size: 15px;
+  font-weight: 600;
+}
+.matchLabel {
+  font-size: 13px;
+}
+
+/* Telemóvel */
+.page {
+  padding-top: 28px;
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.title {
+  font-size: 36px;
+  line-height: 1;
+}
+.emptyMobile {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  gap: 6px;
+}
+.emptyMobileTitle {
+  font-size: 17px;
+  font-weight: 600;
+}
+.emptyMobileButton {
+  align-self: flex-start;
+  margin-top: 14px;
+}
+.more {
+  align-self: flex-start;
+  font-size: 15px;
+}
+
+/* Computador */
+.container {
+  padding-bottom: 64px;
+}
+.desktopHead {
+  align-items: flex-end;
+  gap: 24px;
+  padding-top: 48px;
+}
+.desktopTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.desktopTitle {
+  font-size: 56px;
+  line-height: 1;
+}
+.lead {
+  font-size: 16px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(480px, 100%), 1fr));
+  column-gap: 64px;
+  padding-top: 32px;
+}
+.emptyDesktop {
+  gap: 40px;
+  padding: 48px 0;
+}
+.emptyArt {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex: none;
+}
+.emptyOuter {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 12px solid var(--teal-tint);
+}
+.emptyInner {
+  position: absolute;
+  inset: 28px;
+  border-radius: 50%;
+  border: 8px solid var(--teal);
+}
+.emptyText {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 320px;
+  gap: 12px;
+}
+.emptyTitle {
+  font-size: 24px;
+}
+.emptyButton {
+  align-self: flex-start;
+  margin-top: 8px;
+  height: 54px;
+}
+
+@media (min-width: 900px) {
+  .undo {
+    position: static;
+    max-width: none;
+    margin: 24px 0 0;
+  }
+  .row {
+    gap: 16px;
+    padding: 20px 0;
+  }
+  .link {
+    gap: 18px;
+  }
+  .text {
+    gap: 4px;
+  }
+  .name {
+    font-size: 20px;
+  }
+}
