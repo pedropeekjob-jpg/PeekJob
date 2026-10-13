@@ -7,7 +7,7 @@ import type { Org } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { orgTypeLabel, sectorLabel } from '../../i18n/labels';
 import { fmt, plural } from '../../lib/format';
-import { BigRing } from '../../pages/OrgPage.parts';
+import { BigRing } from '../../components/Score';
 import { DesktopCriteria, DesktopRespeito } from './Criteria';
 import { DesktopInterviews } from './Interviews';
 import { locationsSuffix, osmLink, scoreAria, shareCta, type OrgTab } from './org';

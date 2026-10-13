@@ -1,10 +1,10 @@
 import { useMemo, type CSSProperties } from 'react';
-import { Empty } from '../../components/UI';
+import { Empty, MoreToggle } from '../../components/UI';
 import type { Org } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { euros, plural } from '../../lib/format';
 import { useToggle } from '../../lib/useToggle';
-import { BigRing, MoreToggle } from '../../pages/OrgPage.parts';
+import { BigRing } from '../../components/Score';
 import { hiddenExtra, hiddenNote, MIN_SALARIES, paidOnTimeCount, salaryAria, salaryScale, salaryTotal } from './org';
 import styles from './Salaries.module.css';
 

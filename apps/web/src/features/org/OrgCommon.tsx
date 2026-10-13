@@ -4,7 +4,7 @@ import type { Org } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { useStore } from '../../lib/store';
-import { BigRing } from '../../pages/OrgPage.parts';
+import { BigRing } from '../../components/Score';
 import { salaryTotal, type OrgTab } from './org';
 import styles from './OrgCommon.module.css';
 

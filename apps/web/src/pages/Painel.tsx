@@ -10,7 +10,8 @@ import { ORG_BY_ID, type Review } from '../data/orgs';
 import { fmt } from '../lib/format';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
-import { BigRing, CritLine } from './OrgPage.parts';
+import { BigRing, CritLine } from '../components/Score';
+import styles from './Painel.module.css';
 import { tr } from '../i18n';
 import { tagLabel, whenLabel } from '../i18n/labels';
 
@@ -69,7 +70,7 @@ export default function Painel() {
   const ring = (
     <div style={{ position: 'relative', flex: 'none', width: desktop ? 168 : 112, height: desktop ? 168 : 112 }}>
       <div className="pulse" aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid var(--teal)' }} />
-      <BigRing value={ORG.score} size={desktop ? 168 : 112} thickness={desktop ? 14 : 10} ariaLabel={tr(`Nota ${fmt(ORG.score)} de 5`, `Score ${fmt(ORG.score)} out of 5`)} style={{ position: 'absolute', inset: 0 }}>
+      <BigRing value={ORG.score} size={desktop ? 168 : 112} thickness={desktop ? 14 : 10} ariaLabel={tr(`Nota ${fmt(ORG.score)} de 5`, `Score ${fmt(ORG.score)} out of 5`)} className={styles.ring}>
         <span style={{ fontSize: desktop ? 56 : 36 }}>{fmt(ORG.score)}</span>
       </BigRing>
     </div>

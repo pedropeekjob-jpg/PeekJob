@@ -50,6 +50,7 @@ export const SCENARIOS = [
   { name: 'organizacao-voluntariado-salarios', path: '/org/rede-vizinha/salarios', full: true },
   { name: 'organizacao-voluntariado-entrevistas', path: '/org/rede-vizinha/entrevistas', full: true },
   { name: 'organizacao-nao-encontrada', path: '/org/nao-existe' },
+  { name: 'painel', path: '/painel', full: true },
   { name: 'sobre', path: '/sobre' },
   { name: 'contacto', path: '/contacto' },
   { name: 'metodologia', path: '/metodologia' },

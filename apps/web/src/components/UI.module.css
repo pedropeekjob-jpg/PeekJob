@@ -1,0 +1,7 @@
+/* Componentes genéricos de UI */
+
+/* "Mostrar mais/menos" em texto */
+.moreToggle {
+  align-self: flex-start;
+  font-size: 15px;
+}

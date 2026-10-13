@@ -1,11 +1,11 @@
 import type { CSSProperties } from 'react';
-import { Empty } from '../../components/UI';
+import { Empty, MoreToggle } from '../../components/UI';
 import type { Interview, Org } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { whenLabel } from '../../i18n/labels';
 import { plural } from '../../lib/format';
 import { useToggle } from '../../lib/useToggle';
-import { BigRing, MoreToggle } from '../../pages/OrgPage.parts';
+import { BigRing } from '../../components/Score';
 import { interviewNumbers, interviewRings } from './org';
 import { ReportLink } from './Reviews';
 import styles from './Interviews.module.css';
