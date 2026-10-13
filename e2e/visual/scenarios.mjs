@@ -28,7 +28,7 @@ async function openOrg(p) {
   await tap(p, 'button', /^Guardar$/);
 }
 
-/** { name, path, mobileOnly?, full?, run?(page) } — `run` prepara um estado depois de abrir a página; `full` fotografa a página toda */
+/** { name, path, mobileOnly?, full?, state?, run?(page) } — `state` junta-se ao estado inicial da loja; — `run` prepara um estado depois de abrir a página; `full` fotografa a página toda */
 export const SCENARIOS = [
   { name: 'inicio', path: '/' },
   { name: 'explorar', path: '/explorar' },
@@ -109,7 +109,18 @@ export const SCENARIOS = [
       await tap(p, 'button', /^Receber link de acesso/);
     },
   },
-  { name: 'perfil', path: '/perfil' },
+  { name: 'perfil', path: '/perfil', full: true },
+  { name: 'perfil-sem-sessao', path: '/perfil', full: true, state: { user: null } },
+  {
+    name: 'perfil-mensagens',
+    path: '/perfil',
+    full: true,
+    state: { messages: [{ id: 'm1', orgId: 'padaria-ribeira', kinds: ['assedio'], found: [], when: 'há 2 dias', read: false }] },
+    run: async (p) => {
+      await tap(p, 'button', /^As minhas avaliações/);
+      await tap(p, 'button', /^Repor dados de demonstração/);
+    },
+  },
   { name: 'apoio', path: '/apoio' },
   { name: '404', path: '/nao-existe' },
   { name: 'avaliar-escolher', path: '/avaliar' },

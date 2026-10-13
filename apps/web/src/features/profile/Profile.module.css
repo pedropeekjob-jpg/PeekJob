@@ -1,0 +1,355 @@
+/* A tua conta: telemóvel por omissão, computador a partir de 900 px */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Mensagens por ler: --size é o diâmetro */
+.badge {
+  min-width: var(--size);
+  height: var(--size);
+  padding: 0 6px;
+  border-radius: calc(var(--size) / 2);
+  background: var(--purple);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Repor demonstração */
+.reset {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.resetButton {
+  color: var(--body);
+  font-weight: 500;
+  font-size: 15px;
+}
+.resetDone {
+  color: var(--teal-dark);
+}
+.resetWrap {
+  padding-top: 8px;
+}
+
+/* Sem sessão */
+.invitePage {
+  padding-top: 28px;
+}
+.invite {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 520px;
+}
+.inviteHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.inviteTitle {
+  composes: display;
+  font-size: 36px;
+  line-height: 1;
+}
+.inviteCard {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  gap: 8px;
+  padding: 24px 110px 24px 24px;
+  border-radius: 26px;
+}
+.inviteDeco {
+  position: absolute;
+  top: -50px;
+  right: -40px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 14px solid var(--teal);
+}
+.inviteCardTitle {
+  composes: display;
+  font-size: 22px;
+  line-height: 1.15;
+  position: relative;
+}
+.inviteCardText {
+  font-size: 15px;
+  color: #c9cdd0;
+  position: relative;
+}
+.inviteButton {
+  height: 56px;
+  align-self: stretch;
+}
+.start {
+  align-self: flex-start;
+}
+
+/* Telemóvel */
+.mobilePage {
+  padding-top: 28px;
+}
+.mobileHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mobileTitle {
+  composes: display;
+  font-size: 36px;
+  line-height: 1;
+}
+.anonLine {
+  gap: 6px;
+}
+.mrow {
+  gap: 12px;
+  min-height: 52px;
+  border-top: 1px solid var(--line);
+}
+.mrowButton {
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+  width: 100%;
+}
+.mrow[data-last] {
+  border-bottom: 1px solid var(--line);
+}
+.mrowLabel {
+  font-size: 15px;
+}
+.arrow {
+  color: var(--grey);
+  flex: none;
+}
+.turn {
+  transition: transform 0.2s;
+}
+.mrowButton[aria-expanded='true'] .turn {
+  transform: rotate(90deg);
+}
+.prefsSummary {
+  max-width: 190px;
+}
+.mine {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 8px 16px;
+}
+.mineEmpty {
+  padding: 12px 0;
+}
+.mineItem {
+  gap: 12px;
+  min-height: 48px;
+}
+.signOut {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--down);
+}
+.signOutEmail {
+  font-weight: 400;
+}
+
+/* Computador */
+.desktop {
+  padding-bottom: 80px;
+}
+.desktopTitle {
+  composes: display;
+  padding-top: 48px;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.columns {
+  gap: 64px;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+.left {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 360px;
+  min-width: 0;
+  max-width: 440px;
+  gap: 40px;
+}
+.right {
+  display: flex;
+  flex-direction: column;
+  flex: 1.3 1 480px;
+  min-width: 0;
+  max-width: 640px;
+  gap: 48px;
+}
+.anonCard {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 26px;
+  padding: 28px 120px 28px 28px;
+  gap: 8px;
+}
+.anonDeco {
+  composes: inviteDeco;
+  opacity: 0.9;
+}
+.anonTitle {
+  composes: display;
+  position: relative;
+  font-size: 24px;
+  line-height: 1.15;
+  padding-top: 8px;
+}
+.anonText {
+  position: relative;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #c9cdd0;
+}
+.messages {
+  gap: 16px;
+  background: var(--purple-tint);
+  border-radius: 22px;
+  padding: 18px 20px;
+}
+.messagesIcon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  border: 4px solid var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--purple);
+}
+.messagesText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.purple {
+  color: var(--purple-text);
+}
+.values {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.h2 {
+  composes: display;
+  font-size: 20px;
+}
+.h2Spaced {
+  margin-bottom: 8px;
+}
+.change {
+  font-size: 15px;
+}
+.pref {
+  gap: 8px;
+  font-size: 15px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+/* --c é a cor do critério */
+.prefNum {
+  composes: display;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  border: 3px solid var(--c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+/* Linhas com fundo ao passar o rato */
+.hover {
+  transition: background 0.15s;
+}
+.hover:hover {
+  background: var(--surface);
+}
+.reviewRow {
+  gap: 16px;
+  padding: 14px 10px;
+  margin: 0 -10px;
+  border-radius: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.published {
+  color: var(--up);
+  font-weight: 500;
+}
+.settingRow {
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 10px;
+  margin: 0 -10px;
+  border-radius: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.settingLabel {
+  font-size: 16px;
+}
+.settingValue {
+  gap: 8px;
+}
+.langRow {
+  gap: 12px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--line);
+}
+.signOutDesktop {
+  width: calc(100% + 20px);
+  min-height: 56px;
+  padding: 0 10px;
+  margin: 0 -10px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--down);
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  .invitePage {
+    padding-top: 48px;
+  }
+  .inviteTitle {
+    font-size: 56px;
+  }
+  .inviteButton {
+    align-self: flex-start;
+  }
+}

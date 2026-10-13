@@ -52,7 +52,7 @@ async function shoot(port, dir, only) {
       if (s.mobileOnly && tag === 'd') continue;
       if (only && !only.has(`${tag}-${s.name}.png`)) continue;
       const page = await ctx.newPage();
-      await page.addInitScript(([k, v]) => localStorage.setItem(k, JSON.stringify(v)), [STORAGE_KEY, STATE]);
+      await page.addInitScript(([k, v]) => localStorage.setItem(k, JSON.stringify(v)), [STORAGE_KEY, { ...STATE, ...(s.state ?? {}) }]);
       await page.goto(`http://localhost:${port}/#${s.path}`, { waitUntil: 'networkidle' });
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(300);
