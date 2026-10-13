@@ -38,6 +38,19 @@ async function openOrg(p) {
 export const SCENARIOS = [
   { name: 'inicio', path: '/' },
   { name: 'explorar', path: '/explorar' },
+  { name: 'explorar-inicio', path: '/explorar', full: true, state: { onboarded: true } },
+  {
+    name: 'explorar-prioridades',
+    path: '/explorar',
+    full: true,
+    state: { onboarded: true, prefs: [] },
+    run: async (p) => {
+      await tap(p, 'button', /^Salário justo/);
+      await tap(p, 'button', /^Respeito e inclusão/);
+      await tap(p, 'button', /^Ambiente/);
+      await p.waitForTimeout(500); // reordenação animada
+    },
+  },
   { name: 'ranking', path: '/ranking', full: true },
   {
     name: 'ranking-escolhida',
