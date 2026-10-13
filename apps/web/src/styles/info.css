@@ -166,3 +166,17 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Variações pontuais (antes em estilos inline) */
+.info-lead.is-compact {
+  font-size: 16px;
+}
+.info-links {
+  gap: 18px;
+}
+.info-support .info-actions {
+  gap: 14px;
+}
+.info-section {
+  gap: 18px;
+}

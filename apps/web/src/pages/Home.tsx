@@ -108,7 +108,7 @@ function HomeMark({ width }: { width: number }) {
     return () => cancelAnimationFrame(t);
   }, []);
   return (
-    <span ref={ref} className={'home-mark' + (ready ? ' is-ready' : '')} style={{ width }} aria-hidden>
+    <span ref={ref} className={'home-mark' + (ready ? ' is-ready' : '')} aria-hidden>
       <span className="mk mk-top">
         <LogoAnimated width={width} label={label} />
       </span>

@@ -60,7 +60,7 @@ export default function Sobre() {
           </p>
         </section>
 
-        <section aria-labelledby="t-princ" className="stack" style={{ gap: 18 }}>
+        <section aria-labelledby="t-princ" className="stack info-section">
           <h2 id="t-princ" className="info-h2">{tr('O que nos guia', 'What guides us')}</h2>
           <div className="info-grid">
             {principles.map((p) => (

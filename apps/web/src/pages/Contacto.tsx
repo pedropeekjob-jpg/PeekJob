@@ -36,7 +36,7 @@ export default function Contacto() {
           <div className="info-card">
             <span className="info-icon"><Icon name="heart" size={22} /></span>
             <h3>{tr('Segue a PeekJob', 'Follow PeekJob')}</h3>
-            <p className="row" style={{ gap: 18 }}>
+            <p className="row info-links">
               <a className="link" href={SOCIAL.facebook} target="_blank" rel="noopener noreferrer"><Icon name="facebook" size={18} /> Facebook</a>
               <a className="link" href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={18} /> Instagram</a>
             </p>
@@ -45,7 +45,7 @@ export default function Contacto() {
 
         <section aria-labelledby="t-help" className="info-help">
           <h2 id="t-help" className="info-h2">{tr('Precisas de ajuda com uma situação no trabalho?', 'Need help with a situation at work?')}</h2>
-          <p className="info-lead" style={{ fontSize: 16 }}>
+          <p className="info-lead is-compact">
             {tr(
               'A PeekJob não faz denúncias nem acompanha casos. Estas entidades podem ajudar, de forma confidencial. Em perigo, liga 112.',
               'PeekJob doesn’t file complaints or follow up on cases. These organisations can help, confidentially. If you are in danger, call 112.',
@@ -56,7 +56,7 @@ export default function Contacto() {
               <li key={o.short}>
                 <strong>{o.short}</strong>
                 <span>{o.full}</span>
-                <span className="row wrap" style={{ gap: 14 }}>
+                <span className="row wrap info-actions">
                   {o.phone && <a className="link" href={o.tel}>{o.phone}</a>}
                   <a className="link" href={o.url} target="_blank" rel="noopener noreferrer">{o.site}</a>
                 </span>
