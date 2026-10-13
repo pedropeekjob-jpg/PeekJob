@@ -61,6 +61,7 @@ A comparação visual apanhou regressões que os testes não viam: uma ligação
 ## Qualidade (SonarQube)
 
 - **No CI, em cada envio:** cobertura dos unitários (web, API e shared) mais a cobertura dos testes no browser (build instrumentada com istanbul), juntas por linha.
-- **Quality Gate:** cobertura ≥ 80%, fiabilidade, segurança e manutenção com nota A, duplicação ≤ 3%.
+- **Quality Gate (bloqueia):** cobertura ≥ 80%, fiabilidade, segurança e manutenção com nota A, duplicação ≤ 3%. Se falhar, o CI fica vermelho, a demo não é publicada e a promoção para produção recusa esse commit.
 - **Resultado:** o resumo e os problemas (com ficheiro e linha) aparecem como anotações no run do GitHub, mais a lista dos ficheiros com mais linhas por cobrir.
-- **Localmente:** `npm run test:coverage -w @peekjob/web` (e o mesmo para api e shared). No editor, o SonarLint (VS Code ou IntelliJ) aplica as mesmas regras antes do commit.
+- **Antes de enviar:** `npm run sonar:local` corre o mesmo que o CI (testes com cobertura, testes no browser, SonarQube e Quality Gate) em contentores Docker temporários e termina com erro se o Quality Gate falhar. `SONAR_SKIP_E2E=1` salta os testes no browser (mais rápido, mas a cobertura da web fica mais baixa do que no CI).
+- **Só os testes:** `npm run test:coverage -w @peekjob/web` (e o mesmo para api e shared). No editor, o SonarLint (VS Code ou IntelliJ) aplica as mesmas regras enquanto se escreve.

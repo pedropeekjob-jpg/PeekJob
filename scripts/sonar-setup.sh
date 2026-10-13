@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Prepara um SonarQube efémero (serviço do CI): palavra-passe, token de análise e o Quality Gate "PeekJob".
-# Escreve SONAR_TOKEN em $GITHUB_ENV.
+# Escreve SONAR_TOKEN e SONAR_READ_TOKEN em $GITHUB_ENV (no CI) ou no ficheiro indicado em SONAR_ENV_FILE (localmente).
 set -euo pipefail
+ENV_FILE=${GITHUB_ENV:-${SONAR_ENV_FILE:?Indica GITHUB_ENV ou SONAR_ENV_FILE}}
 HOST=${SONAR_HOST_URL:-http://localhost:9000}
 PASS=${SONAR_ADMIN_PASSWORD:-PeekJob-ci-$(date +%s)-Aa1!}
 
@@ -15,11 +16,11 @@ api() { curl -sf -u "admin:$PASS" -X POST "$HOST/api/$1" "${@:2}"; }
 
 TOKEN=$(api user_tokens/generate -d name=ci -d type=GLOBAL_ANALYSIS_TOKEN | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 echo "::add-mask::$TOKEN"
-echo "SONAR_TOKEN=$TOKEN" >> "$GITHUB_ENV"
-# token de leitura para o resumo (o de análise não pode ler medidas por ficheiro); servidor efémero do CI
+echo "SONAR_TOKEN=$TOKEN" >> "$ENV_FILE"
+# token de leitura para o resumo (o de análise não pode ler medidas por ficheiro); o servidor é efémero
 READ=$(api user_tokens/generate -d name=ci-read -d type=USER_TOKEN | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 echo "::add-mask::$READ"
-echo "SONAR_READ_TOKEN=$READ" >> "$GITHUB_ENV"
+echo "SONAR_READ_TOKEN=$READ" >> "$ENV_FILE"
 
 # Quality Gate (sobre todo o código, porque o servidor é novo em cada análise):
 #  cobertura ≥ 80%, fiabilidade A (sem bugs), segurança A (sem vulnerabilidades), manutenção A, duplicação ≤ 3%

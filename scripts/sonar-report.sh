@@ -2,6 +2,9 @@
 # Resumo da análise: no sumário do run e como anotações (visíveis no topo do run e pela API).
 set -uo pipefail
 HOST=${SONAR_HOST_URL:-http://localhost:9000}
+# fora do GitHub Actions o sumário não existe: as linhas "::notice"/"::error" ficam só no terminal
+SUMMARY=${GITHUB_STEP_SUMMARY:-/dev/null}
+ISSUES=$(mktemp)
 q() { curl -s -u "${SONAR_READ_TOKEN:-$SONAR_TOKEN}:" "$HOST/api/$1"; }
 # a análise é processada em segundo plano: espera que termine
 for i in $(seq 1 60); do
@@ -15,7 +18,7 @@ GATE=$(q "qualitygates/project_status?projectKey=peekjob" | node -e "let d='';pr
 LINE="Quality Gate: $GATE · cobertura $(val coverage)% · bugs $(val bugs) · vulnerabilidades $(val vulnerabilities) · code smells $(val code_smells) · hotspots $(val security_hotspots) · duplicação $(val duplicated_lines_density)% · $(val ncloc) linhas"
 echo "$LINE"
 echo "::notice title=SonarQube::$LINE"
-{ echo "### SonarQube"; echo; echo "$LINE"; echo; echo "| Tipo | Gravidade | Ficheiro | Linha | Regra | Mensagem |"; echo "|---|---|---|---|---|---|"; } >> "$GITHUB_STEP_SUMMARY"
+{ echo "### SonarQube"; echo; echo "$LINE"; echo; echo "| Tipo | Gravidade | Ficheiro | Linha | Regra | Mensagem |"; echo "|---|---|---|---|---|---|"; } >> "$SUMMARY"
 # principais problemas (bugs, vulnerabilidades e code smells graves)
 q "issues/search?componentKeys=peekjob&resolved=false&ps=100&s=SEVERITY&asc=false" | node -e "
 let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
@@ -23,9 +26,10 @@ let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
   console.log(rows.join('\n'));
   const byRule={}; j.issues.forEach(i=>{byRule[i.rule]=(byRule[i.rule]||0)+1});
   console.error('Total de problemas: '+j.total+' · por regra: '+Object.entries(byRule).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([r,n])=>r+'×'+n).join(', '));
-})" >> "$GITHUB_STEP_SUMMARY" 2> issues.txt
-cat issues.txt
-echo "::notice title=SonarQube problemas::$(cat issues.txt)"
+})" >> "$SUMMARY" 2> "$ISSUES"
+cat "$ISSUES"
+echo "::notice title=SonarQube problemas::$(cat "$ISSUES")"
+rm -f "$ISSUES"
 
 # Bugs e vulnerabilidades (todos) e um exemplo por regra dos restantes, como anotações no ficheiro e linha
 q "issues/search?componentKeys=peekjob&resolved=false&ps=500" | node -e "
