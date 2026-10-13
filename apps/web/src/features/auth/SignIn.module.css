@@ -1,0 +1,244 @@
+/* Entrar: telemóvel por omissão, computador a partir de 900 px */
+
+/* Títulos com a letra de destaque */
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+}
+.title {
+  composes: display;
+  font-size: 32px;
+  line-height: 1.05;
+}
+
+/* Anel decorativo: --x, --y, --s (tamanho), --b (espessura), --c (cor), --o (opacidade), --delay */
+.ring {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  border: var(--b) solid var(--c);
+  opacity: var(--o);
+  animation-delay: var(--delay);
+}
+
+/* Link do email: a validar ou expirado */
+.status {
+  min-height: 100dvh;
+  justify-content: center;
+  align-items: flex-start;
+}
+.expired {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.expiredTitle {
+  composes: display;
+  font-size: 30px;
+}
+
+/* Formulário */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+.formHead {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lead {
+  font-size: 15px;
+}
+/* .field > label (global) tem especificidade 0,1,1 */
+.field > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--body);
+}
+.input {
+  height: 54px;
+  border-radius: 16px;
+}
+.error {
+  font-size: 13px;
+  color: var(--warn-text);
+}
+.submit {
+  height: 56px;
+}
+.bottom {
+  margin-top: auto;
+}
+.lock {
+  gap: 8px;
+}
+
+/* Link enviado */
+.sent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mailIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 8px solid var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sentText {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.email {
+  color: var(--ink);
+}
+.other {
+  align-self: flex-start;
+  font-size: 14px;
+}
+.explore {
+  align-self: center;
+  color: var(--body);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Telemóvel: cabeçalho escuro com anéis e folha clara por baixo */
+.mobile {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--ink);
+}
+.mobileTop {
+  position: relative;
+  height: 300px;
+  padding: 28px 24px 0;
+  overflow: hidden;
+}
+.mobileLogo {
+  display: inline-block;
+}
+.mobileRings {
+  position: absolute;
+  left: 50%;
+  width: 390px;
+  margin-left: -195px;
+  top: 110px;
+  bottom: 0;
+}
+.sheet {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  background: var(--ground);
+  border-radius: 30px 30px 0 0;
+  padding: 32px 20px 22px;
+  gap: 24px;
+}
+.sheetInner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.grow {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Computador: painel escuro à esquerda, formulário à direita */
+.desktop {
+  min-height: 100vh;
+  align-items: stretch;
+}
+.brand {
+  position: relative;
+  overflow: hidden;
+  flex: 1 1 520px;
+  min-height: 100vh;
+  background: var(--ink);
+  color: #fff;
+  padding: 40px clamp(24px, 4vw, 64px);
+}
+.brandLogo {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+}
+.brandRings {
+  position: absolute;
+  inset: 150px 0 220px 0;
+}
+.tagline {
+  composes: display;
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  font-size: 40px;
+  line-height: 1.08;
+}
+.formSide {
+  flex: 1 1 480px;
+  min-height: 100vh;
+  justify-content: center;
+  padding: 48px clamp(16px, 4vw, 64px);
+}
+.formBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  gap: 32px;
+}
+
+@media (min-width: 900px) {
+  .title {
+    font-size: 40px;
+    line-height: 1;
+  }
+  .form {
+    gap: 24px;
+    flex: 0 1 auto;
+  }
+  .lead {
+    font-size: 16px;
+  }
+  .field > label {
+    font-size: 15px;
+    font-weight: 600;
+    color: inherit;
+  }
+  .input {
+    height: 56px;
+  }
+  .sent {
+    gap: 24px;
+  }
+  .sentText {
+    gap: 10px;
+  }
+  .other {
+    font-size: 15px;
+  }
+  .explore {
+    font-size: 15px;
+    font-weight: 600;
+  }
+}

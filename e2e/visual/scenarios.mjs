@@ -93,6 +93,22 @@ export const SCENARIOS = [
   { name: 'setores', path: '/setores' },
   { name: 'para-organizacoes', path: '/para-organizacoes' },
   { name: 'entrar', path: '/entrar' },
+  {
+    name: 'entrar-erro',
+    path: '/entrar',
+    run: async (p) => {
+      await p.locator('#le').fill('ana@');
+      await tap(p, 'button', /^Receber link de acesso/);
+    },
+  },
+  {
+    name: 'entrar-enviado',
+    path: '/entrar',
+    run: async (p) => {
+      await p.locator('#le').fill('ana@gmail.com');
+      await tap(p, 'button', /^Receber link de acesso/);
+    },
+  },
   { name: 'perfil', path: '/perfil' },
   { name: 'apoio', path: '/apoio' },
   { name: '404', path: '/nao-existe' },
