@@ -54,7 +54,7 @@ export function sessionCookie(setCookie: string | string[] | undefined): string 
 
 export async function resetDb(t: TestCtx) {
   await t.pool.query(
-    'TRUNCATE verification_codes, verifications, org_domains, support_messages, reviews, org_locations, org_aliases, org_sources, organizations, sessions, login_tokens, users RESTART IDENTITY CASCADE',
+    'TRUNCATE reports, verification_codes, verifications, org_domains, support_messages, reviews, org_locations, org_aliases, org_sources, organizations, sessions, login_tokens, users RESTART IDENTITY CASCADE',
   );
   t.sessions.clear();
   t.mailer.clear();
