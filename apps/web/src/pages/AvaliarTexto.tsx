@@ -5,7 +5,8 @@ import { Icon } from '../components/Icon';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { useStore } from '../lib/store';
-import { detectRedFlags, hasInsultOrName, softenText } from '../lib/moderation';
+import { detectRedFlags, hasInsultOrName } from '../lib/moderation';
+import { RewriteHelper } from '../components/RewriteHelper';
 import { useIsDesktop } from '../lib/useMedia';
 import { tr } from '../i18n';
 import { flagLabel } from '../i18n/labels';
@@ -94,15 +95,7 @@ export default function AvaliarTexto() {
           </section>
         )}
 
-        {insult && (
-          <section role="alert" className="stack fade-up" style={{ borderLeft: '3px solid var(--down)', padding: '2px 0 2px 14px', gap: 8 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--warn-text)' }}>{tr('Sem nomes nem insultos', 'No names or insults')}</div>
-            <div className="small body">{tr('Descreve o que acontece, não quem é.', 'Describe what happens, not who.')}</div>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', height: 44, borderColor: 'var(--ink)', borderRadius: 12, fontSize: 15 }} onClick={() => updateDraft({ text: softenText(text) })}>
-              {tr('Usar versão sem nome', 'Use version without names')}
-            </button>
-          </section>
-        )}
+        <RewriteHelper text={text} desktop={false} onUse={(t) => { updateDraft({ text: t }); setPubErr(null); }} />
 
         {!rf.flagged && !insult && text.trim().length > 0 && (
           <div role="status" className="row" style={{ gap: 8, fontSize: 15, color: 'var(--teal-dark)' }}>

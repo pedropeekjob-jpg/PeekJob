@@ -878,3 +878,11 @@ a.plain {
   text-align: center;
   padding: 6px 16px;
 }
+
+/* Reescrever com IA */
+.rewrite-box { display: flex; flex-direction: column; gap: 10px; border-radius: 20px; padding: 16px 18px; background: var(--surface); border: 1.5px solid var(--line); }
+.rewrite-box.is-blocked { background: var(--warn-bg); border-color: var(--warn-line); }
+.rewrite-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+.rewrite-box.is-blocked .rewrite-title { color: var(--warn-text); }
+.rewrite-proposal { margin: 0; padding: 12px 14px; border-left: 3px solid var(--teal); background: var(--ground); border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rewrite-link { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 0; min-height: 36px; font-size: 14px; }

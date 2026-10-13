@@ -24,6 +24,7 @@ export interface EventMap {
   review_org_created: { org_type: string; result: 'created' | 'existing' | string };
   verification: { method: 'email' | 'document'; step: 'code_sent' | 'confirmed' | 'skipped' | string };
   review_submit: { result: string; verified?: boolean; criteria_count?: number; tags_count?: number; text_length?: string; org_type?: string };
+  review_rewrite: { step: 'requested' | 'accepted' | 'dismissed' | 'failed'; trigger: 'blocked' | 'tone' | 'manual'; source?: 'ai' | 'rules' };
   save_org: { saved: boolean; source?: string };
   mark_helpful: { helpful: boolean };
   web_vitals: { metric_name: string; value: number; rating: string; page_path: string };

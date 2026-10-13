@@ -7,7 +7,8 @@ import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import type { CriterionKey } from '../data/criteria';
 import { avgOf, useStore } from '../lib/store';
-import { detectRedFlags, hasInsultOrName, softenText } from '../lib/moderation';
+import { detectRedFlags, hasInsultOrName } from '../lib/moderation';
+import { RewriteHelper } from '../components/RewriteHelper';
 import { fmt } from '../lib/format';
 import { useIsDesktop } from '../lib/useMedia';
 import { tr } from '../i18n';
@@ -145,15 +146,7 @@ export default function AvaliarNotas() {
                 </section>
               )}
 
-              {insult && (
-                <section role="alert" className="stack fade-up" style={{ background: 'var(--warn-bg)', borderRadius: 22, padding: 20, gap: 10 }}>
-                  <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--warn-text)' }}>{tr('Tira o nome ou insulto antes de publicar', 'Remove the name or insult before publishing')}</span>
-                  <span className="small body">{tr('Descreve o que acontece, não quem é.', 'Describe what happens, not who.')}</span>
-                  <button type="button" className="btn btn-dark btn-sm lift" style={{ alignSelf: 'flex-start', height: 44 }} onClick={() => updateDraft({ text: softenText(text) })}>
-                    {tr('Usar versão sem nome', 'Use version without names')}
-                  </button>
-                </section>
-              )}
+              <RewriteHelper text={text} desktop={true} onUse={(t) => { updateDraft({ text: t }); setPubErr(null); }} />
 
               {!rf.flagged && !insult && done > 0 && (
                 <div role="status" className="row" style={{ gap: 8, fontSize: 15, color: 'var(--teal-dark)' }}>

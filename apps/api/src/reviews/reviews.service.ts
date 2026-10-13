@@ -23,6 +23,7 @@ export class ReviewsService {
         names: attack.names,
         insults: attack.insults,
         suggestion: softenText(input.text),
+        rewriteAvailable: true,
       });
     }
 

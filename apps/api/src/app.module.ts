@@ -9,11 +9,12 @@ import { ModerationController } from './moderation/moderation.controller';
 import { ReportsModule } from './reports/reports.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { RewriteModule } from './rewrite/rewrite.module';
 import { VerificationModule } from './verification/verification.module';
 import { SeoController } from './web/seo.controller';
 
 @Module({
-  imports: [DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule],
+  imports: [DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, RewriteModule],
   controllers: [HealthController, MessagesController, MyReviewsController, AccountController, ModerationController, SeoController],
 })
 export class AppModule {}
