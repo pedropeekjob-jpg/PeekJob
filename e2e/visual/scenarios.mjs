@@ -95,7 +95,29 @@ export const SCENARIOS = [
   },
   { name: 'sobre', path: '/sobre' },
   { name: 'contacto', path: '/contacto' },
-  { name: 'metodologia', path: '/metodologia' },
+  { name: 'metodologia', path: '/metodologia', full: true },
+  {
+    name: 'metodologia-aberta',
+    path: '/metodologia',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Más · 2,4/);
+      await tap(p, 'button', /^0$/);
+      await tap(p, 'button', /^Como nasce a tua/);
+      await tap(p, 'button', /^Norte Logística$/);
+      await p.waitForTimeout(700); // transição do anel
+    },
+  },
+  {
+    name: 'metodologia-moderacao',
+    path: '/metodologia',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Moderação com critério/);
+      await tap(p, 'button', /^25$/);
+      await p.waitForTimeout(700);
+    },
+  },
   { name: 'setores', path: '/setores', full: true },
   {
     name: 'setores-tipo',

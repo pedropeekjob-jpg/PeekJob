@@ -1,0 +1,507 @@
+/* Como calculamos: telemóvel por omissão, computador a partir de 900 px */
+
+.p {
+  margin: 0;
+}
+.ink {
+  color: var(--ink);
+}
+.start {
+  align-self: flex-start;
+}
+.small14 {
+  font-size: 14px;
+}
+.mono13 {
+  font-size: 13px;
+}
+
+/* Cabeçalho (telemóvel) */
+.mobileHead {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobileTitle {
+  font-size: 36px;
+  line-height: 1;
+}
+.mobileLead {
+  margin: 0;
+  font-size: 15px;
+}
+.back {
+  height: 56px;
+}
+
+/* Cabeçalho (computador) */
+.container {
+  padding-bottom: 64px;
+}
+.top {
+  gap: 48px 64px;
+  align-items: center;
+  padding-top: 32px;
+}
+.intro {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 400px;
+  min-width: 0;
+  gap: 18px;
+}
+.title {
+  font-size: clamp(40px, 4.2vw, 56px);
+  line-height: 1;
+}
+.lead {
+  font-size: 16px;
+}
+.demoCol {
+  flex: 1.2 1 520px;
+  min-width: 0;
+}
+.bottom {
+  gap: 48px 64px;
+  align-items: flex-start;
+  padding-top: 64px;
+}
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  flex: 1.2 1 520px;
+  min-width: 0;
+  gap: 40px;
+}
+.sideCol {
+  flex: 1 1 400px;
+  min-width: 0;
+}
+
+/* Fórmula */
+.formula {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 18px;
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.formulaText {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.formulaNote {
+  line-height: 1.5;
+}
+.formulaCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 20px;
+  padding: 16px;
+}
+.formulaCardText {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.formulaTerms {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--grey);
+}
+
+/* Ideias principais */
+.ideas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.idea {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.ideaNum {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  border: 3px solid var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.ideaNum[data-purple] {
+  border-color: var(--purple);
+}
+.ideaText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 4px;
+}
+.ideaTitle {
+  font-size: 20px;
+  line-height: 1.15;
+}
+.ideaBody {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* Experimenta */
+.demo {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 22px;
+  border-radius: var(--r-xl);
+}
+.demoHead {
+  gap: 12px;
+}
+.demoTitle {
+  font-size: 24px;
+  line-height: 1.1;
+}
+.demoBody {
+  gap: 20px;
+}
+/* --size: 140 px no telemóvel, 168 px no computador */
+.dial {
+  position: relative;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+}
+.dialSvg {
+  transform: rotate(-90deg);
+}
+/* --offset: parte do anel por preencher */
+.dialValue {
+  stroke: var(--grey);
+  stroke-dashoffset: var(--offset);
+  transition:
+    stroke-dashoffset 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+    stroke 0.3s;
+}
+.dialValue[data-shown] {
+  stroke: var(--teal);
+}
+.dialText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.dialValueText {
+  font-size: 38px;
+  line-height: 1;
+  color: var(--muted);
+}
+.dialValueText[data-shown] {
+  color: var(--ink);
+}
+.demoInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 200px;
+  min-width: 0;
+  gap: 10px;
+}
+.status {
+  align-self: flex-start;
+  font-size: 13px;
+  padding: 6px 12px;
+  background: var(--soft);
+  color: var(--body);
+}
+.status[data-shown] {
+  background: var(--teal-tint);
+  color: var(--teal-dark);
+}
+.demoLine {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sliderLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
+.sliderValue {
+  color: var(--teal-dark);
+}
+.range {
+  width: 100%;
+  height: 44px;
+  accent-color: var(--teal);
+  margin: 0;
+}
+.quick {
+  gap: 6px;
+}
+.quickButton {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 8px;
+  border-radius: 14px;
+  font-size: 14px;
+  border: 1px solid var(--field);
+  background: var(--surface);
+}
+.quickButton[aria-pressed='true'] {
+  border-color: var(--teal);
+  background: var(--teal-tint);
+}
+
+/* Regras */
+.rulesTitle {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+.flush {
+  margin-bottom: 0;
+}
+.accItem {
+  border-top: 1px solid var(--line);
+}
+.accHeading {
+  margin: 0;
+}
+.accButton {
+  width: 100%;
+  gap: 16px;
+  min-height: 54px;
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-weight: 600;
+  font-size: 16px;
+}
+.accIcon {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.accButton[aria-expanded='true'] .accIcon {
+  transform: rotate(45deg);
+}
+.accBody {
+  padding: 0 4px 20px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.accEnd {
+  border-top: 1px solid var(--line);
+}
+.ruleText {
+  max-width: 560px;
+}
+.moderation {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stays {
+  font-weight: 600;
+  color: var(--teal-dark);
+}
+.goes {
+  font-weight: 600;
+  color: var(--down);
+}
+
+/* % para ti */
+.pct {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.chip {
+  height: 44px;
+}
+.pctRow {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+/* --c é a cor do critério */
+.rank {
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  border: 3px solid var(--c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.pctName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.pctName[data-respeito] {
+  color: var(--purple-text);
+}
+.pctTotal {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: right;
+  color: var(--ink);
+}
+.pctFoot {
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.pctSum {
+  font-size: 13px;
+  gap: 6px;
+}
+.pctPill {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+/* Respeito e inclusão */
+.resp {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border-radius: var(--r-xl);
+}
+.respHead {
+  gap: 18px;
+}
+.respTitle {
+  font-size: 21px;
+  line-height: 1.1;
+  color: var(--purple-text);
+}
+.respText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.contact {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-top: 1px solid var(--purple-line);
+}
+.contactShort {
+  font-size: 18px;
+  color: var(--purple-text);
+}
+.contactText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.contactName {
+  font-size: 14px;
+  font-weight: 600;
+}
+.contactNote {
+  line-height: 1.45;
+}
+.purpleLink {
+  color: var(--purple-text);
+}
+.site {
+  font-weight: 500;
+}
+.danger {
+  padding-top: 12px;
+  border-top: 1px solid var(--purple-line);
+  line-height: 1.5;
+}
+.respLinks {
+  gap: 4px 24px;
+}
+.respLink {
+  font-size: 14px;
+  color: var(--purple-text);
+}
+
+/* Privacidade */
+.privacy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-margin-top: 24px;
+}
+.privacyHead {
+  gap: 10px;
+}
+.privacyList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.consent {
+  align-self: flex-start;
+  font-size: 14px;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+@media (min-width: 900px) {
+  .demo {
+    padding: 32px;
+  }
+  .demoBody {
+    gap: 28px;
+  }
+  .dialValueText {
+    font-size: 46px;
+  }
+  .quick {
+    gap: 8px;
+  }
+  .quickButton {
+    min-width: 52px;
+    padding: 0 12px;
+  }
+  .rulesTitle {
+    font-size: 24px;
+  }
+  .accButton {
+    min-height: 60px;
+    font-family: var(--font-display);
+    font-size: 18px;
+  }
+  .resp {
+    padding: 32px;
+  }
+  .respTitle {
+    font-size: 24px;
+  }
+}
