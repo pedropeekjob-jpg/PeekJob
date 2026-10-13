@@ -2,7 +2,8 @@
 # Prepara um SonarQube efémero (serviço do CI): palavra-passe, token de análise e o Quality Gate "PeekJob".
 # Escreve SONAR_TOKEN e SONAR_READ_TOKEN em $GITHUB_ENV (no CI) ou no ficheiro indicado em SONAR_ENV_FILE (localmente).
 set -euo pipefail
-ENV_FILE=${GITHUB_ENV:-${SONAR_ENV_FILE:?Indica GITHUB_ENV ou SONAR_ENV_FILE}}
+# SONAR_ENV_FILE primeiro: o sonar:local também pode correr dentro do GitHub Actions (onde GITHUB_ENV existe)
+ENV_FILE=${SONAR_ENV_FILE:-${GITHUB_ENV:?Indica SONAR_ENV_FILE ou GITHUB_ENV}}
 HOST=${SONAR_HOST_URL:-http://localhost:9000}
 PASS=${SONAR_ADMIN_PASSWORD:-PeekJob-ci-$(date +%s)-Aa1!}
 

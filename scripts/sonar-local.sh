@@ -14,13 +14,10 @@ command -v docker >/dev/null || { echo "Precisa de Docker."; exit 1; }
 SQ=peekjob-sonar-local
 PG=peekjob-sonar-pg
 PG_PORT=${SONAR_PG_PORT:-55432}
+remove_containers() { docker rm -f "$SQ" "$PG" >/dev/null 2>&1 || true; }
+remove_containers # de uma corrida anterior interrompida
 ENV_FILE=$(mktemp)
-cleanup() {
-  docker rm -f "$SQ" "$PG" >/dev/null 2>&1 || true
-  rm -f "$ENV_FILE"
-}
-trap cleanup EXIT
-cleanup
+trap 'remove_containers; rm -f "$ENV_FILE"' EXIT
 
 echo "▶ A arrancar o SonarQube e o PostgreSQL (contentores temporários)…"
 docker run -d --name "$SQ" -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:community >/dev/null
@@ -54,7 +51,8 @@ set +a
 # host.docker.internal funciona no Docker Desktop (macOS/Windows) e, com host-gateway, no Linux
 docker run --rm --add-host=host.docker.internal:host-gateway \
   -e SONAR_HOST_URL=http://host.docker.internal:9000 -e SONAR_TOKEN="$SONAR_TOKEN" \
-  -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli >/dev/null
+  -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli -Dsonar.working.directory=/tmp/scannerwork >/dev/null
+# (pasta de trabalho dentro do contentor: o utilizador do scanner pode não poder escrever na pasta do projeto)
 
 echo "▶ Resultado"
 bash scripts/sonar-report.sh | grep -E "^Quality Gate|^Total de problemas|title=Mais linhas" | sed 's/^::notice title=\([^:]*\)::/\1: /'
