@@ -8,6 +8,7 @@ describe('Denúncias e moderação', () => {
   let t: TestCtx;
   let orgId: string;
   let reviewId: string;
+  let mod: { Cookie: string };
 
   beforeAll(async () => {
     t = await createTestApp();
@@ -21,12 +22,12 @@ describe('Denúncias e moderação', () => {
     orgId = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
     const res = await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('autora')).send(goodReview).expect(201);
     reviewId = res.body.review.id;
+    mod = await t.login('mod', 'moderator');
   });
 
   const report = (body: Record<string, unknown>, headers: Record<string, string> = {}) =>
     t.http().post(`/reviews/${reviewId}/reports`).set(headers).send(body);
-  const decide = async (body: Record<string, unknown>) =>
-    t.http().post(`/moderation/reviews/${reviewId}/decision`).set(await t.login('mod', 'moderator')).send(body);
+  const decide = (body: Record<string, unknown>) => t.http().post(`/moderation/reviews/${reviewId}/decision`).set(mod).send(body);
 
   describe('denunciar', () => {
     it('qualquer pessoa pode denunciar, sem conta (201 com referência)', async () => {
@@ -77,7 +78,7 @@ describe('Denúncias e moderação', () => {
     it('agrupa as denúncias em aberto por avaliação, com o texto e a organização', async () => {
       await report({ reason: 'nome', details: 'Nome da gerente' }).expect(201);
       await report({ reason: 'ofensa' }, await t.login('leitor')).expect(201);
-      const res = await t.http().get('/moderation/reports').set(await t.login('mod', 'moderator')).expect(200);
+      const res = await t.http().get('/moderation/reports').set(mod).expect(200);
       expect(res.body.items).toHaveLength(1);
       expect(res.body.items[0]).toMatchObject({
         reviewId,

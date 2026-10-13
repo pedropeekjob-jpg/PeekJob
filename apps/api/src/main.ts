@@ -11,6 +11,8 @@ import { protectEnvironment } from './web/environment';
 import { renderIndex } from './web/index-html';
 
 export function configureApp(app: INestApplication) {
+  // Atrás do proxy do alojamento: o IP real vem em X-Forwarded-For (limites por IP nas denúncias)
+  if (process.env.APP_ENV) (app.getHttpAdapter().getInstance() as { set: (k: string, v: unknown) => void }).set('trust proxy', 1);
   protectEnvironment(app);
   app.enableCors({ origin: corsOrigins(), credentials: true });
   serveWeb(app, process.env.WEB_DIST);

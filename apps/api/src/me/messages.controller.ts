@@ -6,7 +6,7 @@ import { privacySecret, userRef } from '../common/privacy';
 import { isUuid } from '../common/zod';
 import { PG_POOL } from '../db/db.module';
 
-/** Mensagens privadas de apoio: só a própria pessoa as vê. */
+/** Mensagens privadas (apoio e avisos de moderação): só a própria pessoa as vê. */
 @Controller('me/messages')
 @UseGuards(AuthGuard)
 export class MessagesController {
@@ -15,7 +15,7 @@ export class MessagesController {
   @Get()
   async list(@CurrentUser() user: AuthUser) {
     const { rows } = await this.pool.query(
-      `SELECT m.id, m.kinds, m.created_at, m.read_at, o.name AS org_name
+      `SELECT m.id, m.type, m.kinds, m.details, m.created_at, m.read_at, o.name AS org_name
          FROM support_messages m
          LEFT JOIN reviews r ON r.id = m.review_id
          LEFT JOIN organizations o ON o.id = r.org_id
@@ -25,7 +25,9 @@ export class MessagesController {
     return {
       items: rows.map((m) => ({
         id: m.id,
+        type: m.type,
         kinds: m.kinds,
+        details: m.details,
         orgName: m.org_name,
         createdAt: m.created_at,
         read: m.read_at != null,
