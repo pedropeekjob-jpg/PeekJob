@@ -26,7 +26,7 @@ export function Disclosure({
       {open && <div className="fade-up">{children}</div>}
       <button type="button" className="link" aria-expanded={open} onClick={() => setOpen(!open)}>
         {open ? openLabel ?? tr('Mostrar menos', 'Show less') : label}
-        <Icon name="down" size={16} style={{ transform: open ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }} />
+        <Icon name="down" size={16} className={styles.chevron} />
       </button>
     </div>
   );
@@ -43,14 +43,13 @@ export function Accordion({ items }: { items: { title: ReactNode; body: ReactNod
             type="button"
             aria-expanded={open === i}
             onClick={() => setOpen(open === i ? null : i)}
-            className="row between"
-            style={{ width: '100%', minHeight: 56, background: 'none', border: 0, padding: '12px 0', textAlign: 'left', fontWeight: 600, fontSize: 16, gap: 16 }}
+            className={`row between ${styles.accordionButton}`}
           >
             <span>{it.title}</span>
-            <Icon name="down" size={18} style={{ flex: 'none', transform: open === i ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }} />
+            <Icon name="down" size={18} className={styles.chevron} />
           </button>
           {open === i && (
-            <div className="fade-up body" style={{ paddingBottom: 16, fontSize: 15, lineHeight: 1.55 }}>
+            <div className={`fade-up body ${styles.accordionBody}`}>
               {it.body}
             </div>
           )}
@@ -63,10 +62,10 @@ export function Accordion({ items }: { items: { title: ReactNode; body: ReactNod
 /** Indicador de passos (3 barras) */
 export function Steps({ current, total = 3, label }: { current: number; total?: number; label?: string }) {
   return (
-    <div className="row" style={{ gap: 10 }} aria-label={label ?? tr(`Passo ${current} de ${total}`, `Step ${current} of ${total}`)}>
-      <div className="row" style={{ gap: 4, flex: 1 }}>
+    <div className={`row ${styles.steps}`} aria-label={label ?? tr(`Passo ${current} de ${total}`, `Step ${current} of ${total}`)}>
+      <div className={`row ${styles.stepBars}`}>
         {Array.from({ length: total }, (_, i) => (
-          <span key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i < current ? 'var(--teal)' : 'var(--line)' }} />
+          <span key={i} className={styles.stepBar} data-on={i < current || undefined} />
         ))}
       </div>
       <span className="mono small muted">
@@ -85,12 +84,12 @@ export function TopBar({ back, title, right, onBack }: { back?: string | -1; tit
     else nav(back);
   };
   return (
-    <div className="row between" style={{ gap: 12, minHeight: 44 }}>
-      <button type="button" className="icon-btn bare" aria-label={tr('Voltar', 'Back')} onClick={goBack} style={{ marginLeft: -10 }}>
+    <div className={`row between ${styles.topBar}`}>
+      <button type="button" className={`icon-btn bare ${styles.topBack}`} aria-label={tr('Voltar', 'Back')} onClick={goBack}>
         <Icon name="back" />
       </button>
-      {title ? <div style={{ fontWeight: 600, fontSize: 16 }} className="ellipsis grow">{title}</div> : <span className="grow" />}
-      {right ?? <span style={{ width: 44 }} />}
+      {title ? <div className={`ellipsis grow ${styles.topTitle}`}>{title}</div> : <span className="grow" />}
+      {right ?? <span className={styles.topSpacer} />}
     </div>
   );
 }
@@ -141,11 +140,10 @@ export function Switch({ checked, onChange, label, hint, purple = false }: { che
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="row between"
-      style={{ width: '100%', gap: 16, background: 'none', border: 0, padding: '14px 0', textAlign: 'left' }}
+      className={`row between ${styles.switchRow}`}
     >
-      <span className="stack" style={{ gap: 2 }}>
-        <span style={{ fontWeight: 600, fontSize: 15 }}>{label}</span>
+      <span className={`stack ${styles.switchText}`}>
+        <span className={styles.switchLabel}>{label}</span>
         {hint && <span className="small body">{hint}</span>}
       </span>
       <span className={'switch' + (purple ? ' purple' : '')} />
@@ -165,8 +163,8 @@ export function MoreLink({ to, children }: { to: string; children: ReactNode }) 
 /** Estado vazio simples */
 export function Empty({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
   return (
-    <div className="stack" style={{ gap: 6, padding: '28px 0' }}>
-      <div style={{ fontWeight: 600, fontSize: 17 }}>{title}</div>
+    <div className={`stack ${styles.empty}`}>
+      <div className={styles.emptyTitle}>{title}</div>
       {body && <div className="body">{body}</div>}
       {action}
     </div>
