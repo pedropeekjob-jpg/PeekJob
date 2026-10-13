@@ -1,0 +1,17 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API (fixture PeekJob)",
+  "osm3s": { "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL." },
+  "elements": [
+    { "type": "node", "id": 101, "lat": 41.1496, "lon": -8.6109, "tags": { "name": "Padaria Ribeira", "shop": "bakery", "addr:street": "Rua de Cima", "addr:housenumber": "12", "addr:postcode": "4050-123", "addr:city": "Porto" } },
+    { "type": "way", "id": 202, "center": { "lat": 41.158, "lon": -8.629 }, "tags": { "name": "Associação Mãos Dadas", "office": "association", "addr:city": "Porto" } },
+    { "type": "node", "id": 303, "lat": 41.16, "lon": -8.62, "tags": { "name": "Oficina Sete", "craft": "carpenter", "ref:vatin": "PT513000003" } },
+    { "type": "node", "id": 404, "lat": 41.15, "lon": -8.61, "tags": { "name": "Continente Bom Dia", "shop": "supermarket", "brand": "Continente", "brand:wikidata": "Q2995683" } },
+    { "type": "node", "id": 505, "lat": 41.15, "lon": -8.61, "tags": { "shop": "clothes" } },
+    { "type": "node", "id": 606, "lat": 41.147, "lon": -8.612, "tags": { "name": "Café Majestic", "amenity": "cafe", "website": "https://cafemajestic.com" } },
+    { "type": "relation", "id": 707, "center": { "lat": 41.17, "lon": -8.6 }, "tags": { "name": "Lar da Boa Vontade", "amenity": "social_facility", "social_facility": "nursing_home" } },
+    { "type": "node", "id": 808, "lat": 41.15, "lon": -8.61, "tags": { "name": "Câmara Municipal do Porto", "office": "government" } },
+    { "type": "node", "id": 909, "lat": 41.152, "lon": -8.615, "tags": { "name": "Banco Alimentar do Porto", "office": "ngo" } },
+    { "type": "node", "id": 1001, "lat": 41.15, "lon": -8.61, "tags": { "name": "Hotel Infante Sagres", "tourism": "hotel" } }
+  ]
+}
