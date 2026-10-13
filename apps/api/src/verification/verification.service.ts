@@ -8,6 +8,7 @@ import { PG_POOL, tx } from '../db/db.module';
 import { shouldActivate } from '../domain/activation';
 import { extractNifs } from './nif-extract';
 import { pick, type Lang } from '../common/lang';
+import { mailSubject } from '../common/config';
 
 export const CODE_MINUTES = 10;
 export const MAX_CODE_ATTEMPTS = 5;
@@ -44,7 +45,7 @@ export class VerificationService {
     try {
       await this.mailer.send({
         to: workEmail,
-        subject: pick(lang, 'Código de verificação PeekJob', 'Your PeekJob verification code'),
+        subject: mailSubject(pick(lang, 'Código de verificação PeekJob', 'Your PeekJob verification code')),
         text: pick(
           lang,
           `O teu código é ${code}. Serve para confirmar que trabalhas em ${org.name} e é válido durante ${CODE_MINUTES} minutos.\nNão guardamos este email.`,

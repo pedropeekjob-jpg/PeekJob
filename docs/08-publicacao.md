@@ -4,6 +4,21 @@ Em produção a API serve também a web, no mesmo endereço. Assim o cookie de s
 
 A demo no GitHub Pages continua em **modo demonstração** (dados de exemplo no browser).
 
+## Ambientes
+
+| | UAT (testes com o cliente) | Produção |
+|---|---|---|
+| Serviço no Render | `peekjob-uat` (plano gratuito) | `peekjob-prod` (plano pago, não adormece) |
+| Publica quando | há um push para `main` (depois do CI) | o ramo `production` avança (workflow **Promover para produção**) |
+| Base de dados | ramo `uat` do projeto Neon | ramo `main` do projeto Neon (com cópias de segurança) |
+| Acesso | palavra-passe (`BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`); sem ela não arranca | público |
+| Google | fora (`noindex`, robots fechado, sem sitemap) | indexado, Search Console |
+| Emails | assunto com `[UAT]` | normais |
+| Dados de demonstração | sim (`SEED_DEMO=true`) | não; lista curada real |
+| Na web | faixa "UAT · ambiente de testes" | — |
+
+**Promover para produção:** GitHub → Actions → *Promover para produção* → *Run workflow*. Sem indicar um commit, promove o último de `main`. Só avança se o CI tiver passado nesse commit e nunca reescreve o histórico de produção.
+
 ## Serviços (todos com plano gratuito, na UE)
 
 | Peça | Serviço sugerido | Notas do plano gratuito |
@@ -18,7 +33,7 @@ Para o cliente testar à vontade convém um domínio (ex.: `peekjob.pt`): serve 
 
 1. **Neon:** criar o projeto (região *AWS Europe Central 1 – Frankfurt*) e copiar a *connection string* (termina em `?sslmode=require`).
 2. **Resend:** criar uma chave de API (*API Keys → Create*). Para enviar a qualquer pessoa, adicionar e verificar o domínio (*Domains*, registos DNS). Para um primeiro teste, usar `MAIL_FROM="PeekJob <onboarding@resend.dev>"`; nesse caso os emails só chegam ao email da conta Resend.
-3. **Render:** *New → Blueprint*, escolher o repositório `pedropeekjob-jpg/PeekJob`. O `render.yaml` cria o serviço `peekjob` e pede:
+3. **Render:** *New → Blueprint*, escolher o repositório `pedropeekjob-jpg/PeekJob`. O `render.yaml` cria os serviços `peekjob-uat` e `peekjob-prod` e pede a cada um:
    - `DATABASE_URL`: a connection string do Neon;
    - `RESEND_API_KEY`: a chave do Resend;
    - `MAIL_FROM`: por exemplo `PeekJob <ola@peekjob.pt>`.
@@ -39,6 +54,8 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `WEB_ORIGIN` | não | Endereço público (por omissão o do Render) |
 | `WEB_DIST` | já na imagem | Pasta da build da web servida pela API |
 | `SEED_DEMO` | não | `true` carrega as organizações de demonstração |
+| `APP_ENV` | sim | `uat` ou `production` |
+| `BASIC_AUTH_USER`, `BASIC_AUTH_PASSWORD` | só UAT | Palavra-passe de acesso à UAT |
 | `GA_MEASUREMENT_ID` | não | Google Analytics 4 (`G-…`), ver [09 · Medição](09-medicao.md) |
 | `GSC_VERIFICATION` | não | Código da etiqueta HTML do Search Console |
 | `COOKIE_SAMESITE` | não | Só se a web ficar noutro domínio (`none`); não é o caso desta configuração |

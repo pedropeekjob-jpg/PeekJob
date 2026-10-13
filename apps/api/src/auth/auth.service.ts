@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable, Logger, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { Pool } from 'pg';
-import { webOrigin } from '../common/config';
+import { mailSubject, webOrigin } from '../common/config';
 import { pick, type Lang } from '../common/lang';
 import { PG_POOL, tx } from '../db/db.module';
 import { emailHash, normalizeEmail, randomToken, sha256 } from './crypto';
@@ -42,7 +42,7 @@ export class AuthService {
     try {
       await this.mailer.send({
       to: email,
-        subject: pick(lang, 'O teu link de acesso à PeekJob', 'Your PeekJob sign-in link'),
+        subject: mailSubject(pick(lang, 'O teu link de acesso à PeekJob', 'Your PeekJob sign-in link')),
         text: pick(
           lang,
           `Olá! Abre este link para entrar na PeekJob (válido durante ${LOGIN_TOKEN_MINUTES} minutos):\n${link}\n\nSe não pediste este email, podes ignorá-lo.`,

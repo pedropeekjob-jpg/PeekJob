@@ -1,0 +1,44 @@
+name: Promover para produção
+
+# Manual: Actions → "Promover para produção" → Run workflow.
+# Avança o ramo "production" para um commit de "main" que já passou no CI; o Render publica a produção a seguir.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit (SHA) de main a promover; vazio = último commit de main
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Escolher o commit
+        id: pick
+        run: |
+          SHA="${{ github.event.inputs.ref }}"
+          [ -z "$SHA" ] && SHA="$(git rev-parse origin/main)"
+          SHA="$(git rev-parse "$SHA")"
+          git merge-base --is-ancestor "$SHA" origin/main || { echo "O commit $SHA não está em main"; exit 1; }
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+      - name: Confirmar que o CI passou nesse commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          OK=$(gh run list --repo "${{ github.repository }}" --workflow CI --commit "${{ steps.pick.outputs.sha }}" --json conclusion -q '[.[] | select(.conclusion=="success")] | length')
+          [ "$OK" -gt 0 ] || { echo "O CI ainda não passou neste commit"; exit 1; }
+      - name: Avançar o ramo production (só fast-forward)
+        run: |
+          if git show-ref --verify --quiet refs/remotes/origin/production; then
+            git merge-base --is-ancestor origin/production "${{ steps.pick.outputs.sha }}" || { echo "production tem commits que não estão em main"; exit 1; }
+          fi
+          git push origin "${{ steps.pick.outputs.sha }}:refs/heads/production"
+          echo "Produção vai publicar o commit ${{ steps.pick.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"

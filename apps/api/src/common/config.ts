@@ -14,3 +14,14 @@ export function webOrigin(env: Env = process.env): string {
 export function corsOrigins(env: Env = process.env): string[] {
   return (env.WEB_ORIGIN ?? webOrigin(env)).split(',').map((s) => s.trim().replace(/\/$/, '')).filter(Boolean);
 }
+
+export type AppEnv = 'production' | 'uat' | 'development';
+
+/** Ambiente: production, uat (testes com o cliente) ou development (local) */
+export function appEnv(env: Env = process.env): AppEnv {
+  const v = env.APP_ENV?.trim().toLowerCase();
+  return v === 'production' || v === 'uat' ? v : 'development';
+}
+
+/** Assunto dos emails: na UAT leva [UAT] para não se confundir com produção */
+export const mailSubject = (subject: string, env: Env = process.env) => (appEnv(env) === 'uat' ? `[UAT] ${subject}` : subject);

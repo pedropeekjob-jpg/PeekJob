@@ -3,6 +3,7 @@ import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-rou
 import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
 import { ConsentBanner } from './components/ConsentBanner';
+import { EnvRibbon } from './components/EnvRibbon';
 import { StoreProvider } from './lib/store';
 import { LangRoot } from './i18n';
 import Inicio from './pages/Inicio';
@@ -63,6 +64,7 @@ export default function App() {
     <StoreProvider>
       <LangRoot>
       <Router>
+        <EnvRibbon />
         <ScrollTop />
         <PageTracking />
         <ConsentBanner />

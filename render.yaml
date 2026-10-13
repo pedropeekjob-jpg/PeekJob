@@ -1,14 +1,48 @@
-# Render Blueprint: um serviço com a API e a web (mesma origem), na região de Frankfurt (UE).
-# A base de dados é externa (ex.: Neon, PostgreSQL gerido na UE): colar o DATABASE_URL no painel.
+# Render Blueprint: dois ambientes a partir da mesma imagem (API + web na mesma origem), na UE (Frankfurt).
+# - peekjob-uat: testes com o cliente. Publica a cada push para "main". Fechado com palavra-passe e fora do Google.
+# - peekjob-prod: produção. Publica só quando o ramo "production" avança (workflow "Promover para produção").
+# Bases de dados externas (Neon): um projeto com dois ramos, "uat" e "main" (produção). Colar cada DATABASE_URL no painel.
 services:
   - type: web
-    name: peekjob
+    name: peekjob-uat
     runtime: docker
     region: frankfurt
     plan: free
-    healthCheckPath: /health
+    branch: main
     autoDeploy: true
+    healthCheckPath: /health
     envVars:
+      - key: APP_ENV
+        value: uat
+      - key: DATABASE_URL
+        sync: false
+      - key: PRIVACY_SECRET
+        generateValue: true
+      - key: BASIC_AUTH_USER
+        sync: false
+      - key: BASIC_AUTH_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # Opcional: propriedade GA só para a UAT (não misturar com produção)
+      - key: GA_MEASUREMENT_ID
+        sync: false
+      - key: SEED_DEMO
+        value: "true"
+
+  - type: web
+    name: peekjob-prod
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    branch: production
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
       - key: DATABASE_URL
         sync: false
       - key: PRIVACY_SECRET
@@ -17,10 +51,12 @@ services:
         sync: false
       - key: MAIL_FROM
         sync: false
-      # Google Analytics 4 (ex.: G-ABC123) e Search Console (só o código da etiqueta HTML); opcionais
+      # Domínio próprio (ex.: https://peekjob.pt); sem ele usa o endereço do Render
+      - key: WEB_ORIGIN
+        sync: false
       - key: GA_MEASUREMENT_ID
         sync: false
       - key: GSC_VERIFICATION
         sync: false
       - key: SEED_DEMO
-        value: "true"
+        value: "false"

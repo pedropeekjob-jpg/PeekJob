@@ -7,9 +7,11 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { corsOrigins } from './common/config';
+import { protectEnvironment } from './web/environment';
 import { renderIndex } from './web/index-html';
 
 export function configureApp(app: INestApplication) {
+  protectEnvironment(app);
   app.enableCors({ origin: corsOrigins(), credentials: true });
   serveWeb(app, process.env.WEB_DIST);
   app.enableShutdownHooks();

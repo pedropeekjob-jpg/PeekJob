@@ -1,7 +1,7 @@
-import { Controller, Get, Header, Inject } from '@nestjs/common';
+import { Controller, Get, Header, Inject, NotFoundException } from '@nestjs/common';
 import { PRIVATE_WEB_PREFIXES, SITEMAP_STATIC } from '@peekjob/shared';
 import { Pool } from 'pg';
-import { webOrigin } from '../common/config';
+import { appEnv, webOrigin } from '../common/config';
 import { PG_POOL } from '../db/db.module';
 
 const xml = (s: string) => s.replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]!);
@@ -15,6 +15,8 @@ export class SeoController {
   @Header('content-type', 'text/plain; charset=utf-8')
   @Header('cache-control', 'public, max-age=3600')
   robots() {
+    // UAT: nada é rastreado
+    if (appEnv() === 'uat') return 'User-agent: *\nDisallow: /\n';
     // Também aplica às versões em inglês (?lang=en)
     const lines = ['User-agent: *', 'Allow: /', ...PRIVATE_WEB_PREFIXES.map((p) => `Disallow: ${p}`), 'Disallow: /org/*/denunciar/', '', `Sitemap: ${webOrigin()}/sitemap.xml`, ''];
     return lines.join('\n');
@@ -24,6 +26,7 @@ export class SeoController {
   @Header('content-type', 'application/xml; charset=utf-8')
   @Header('cache-control', 'public, max-age=3600')
   async sitemap() {
+    if (appEnv() === 'uat') throw new NotFoundException();
     const origin = webOrigin();
     const { rows } = await this.pool.query<{ id: string; lastmod: Date }>(
       `SELECT o.id, GREATEST(COALESCE(o.activated_at, o.created_at), COALESCE(MAX(r.created_at), o.created_at)) AS lastmod
