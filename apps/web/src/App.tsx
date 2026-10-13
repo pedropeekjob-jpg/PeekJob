@@ -4,6 +4,7 @@ import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
 import { ConsentBanner } from './components/ConsentBanner';
 import { EnvRibbon } from './components/EnvRibbon';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { StoreProvider } from './lib/store';
 import { LangRoot } from './i18n';
 import Inicio from './pages/Inicio';
@@ -55,6 +56,12 @@ function PageTracking() {
   return null;
 }
 
+/** Erros de um ecrã ficam nesse ecrã: mudar de caminho volta a tentar */
+function ScreenBoundary({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>;
+}
+
 /**
  * Produção (VITE_ROUTER=browser): URLs reais, indexáveis pelo Google.
  * Demo (GitHub Pages): HashRouter, funciona em qualquer alojamento estático sem configurar o servidor.
@@ -70,6 +77,7 @@ export default function App() {
         <ScrollTop />
         <PageTracking />
         <ConsentBanner />
+        <ScreenBoundary>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explorar" element={<Inicio />} />
@@ -100,6 +108,7 @@ export default function App() {
           <Route path="/painel" element={<Painel />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </ScreenBoundary>
       </Router>
       </LangRoot>
     </StoreProvider>

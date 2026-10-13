@@ -151,6 +151,28 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - **pdfjs 4+:** a falha de execução de JavaScript já está mitigada com `isEvalSupported: false`, a mitigação oficial. O `canvas` e o `tar` são opcionais e não são instalados.
 - **React Router 7:** redirecionamento aberto através de `<Link>` com valores vindos do utilizador. A web não usa valores do utilizador em navegações.
 
+## Monitorização
+
+**Erros:**
+- Cada resposta leva `X-Request-Id`. Um erro inesperado responde 500 com "Algo correu mal" e o `requestId`, que a pessoa pode indicar ao suporte.
+- Só os erros 5xx são reportados. Os 4xx são esperados.
+- O relatório leva a rota-modelo (`GET /orgs/:id`), o tipo, a mensagem, a stack e a versão (`RENDER_GIT_COMMIT`). Não leva cookies nem query strings.
+- `scrubText` troca emails, NIFs/telefones e tokens por `[email]`, `[nif]` e `[token]`.
+- **Destino:** sempre uma linha JSON nos logs do Render (`"level":"error"`). Com `SENTRY_DSN`, também no Sentry, enviado pela API de envelopes, sem SDK, para controlarmos o que sai. Usar a região UE (`de.sentry.io`); os alertas por email configuram-se no Sentry.
+- **Web:**
+  - erros não apanhados e promessas rejeitadas vão para `POST /client-errors`, só com o caminho, no máximo 5 por página e sem ruído de extensões;
+  - limite de 20 por 10 minutos por IP;
+  - um ecrã que rebente mostra "Algo correu mal neste ecrã" em vez de ficar em branco, e o rascunho continua guardado;
+  - a web não carrega nenhum SDK de terceiros, por isso a CSP fica igual.
+
+**Disponibilidade:**
+- `/health` responde 200 com `{ ok, db: "up", release, uptimeSec }`, ou 503 com `db: "down"` se a base de dados não responder em 3 s.
+- O workflow "Disponibilidade" corre de 10 em 10 minutos e verifica `UAT_URL` e `PROD_URL`, que são variáveis do repositório.
+- Se um ambiente for abaixo, abre um issue "🔴 … em baixo" com a etiqueta `incident`. O GitHub avisa por email quem acompanha o repositório.
+- Quando o ambiente volta, comenta e fecha o issue.
+- O plano gratuito do Render adormece ao fim de 15 minutos: a verificação espera até 70 s e tenta 3 vezes.
+- O GitHub desliga os workflows agendados ao fim de 60 dias sem atividade no repositório. Para produção, juntar o UptimeRobot ou o Better Stack (gratuitos) a avisar por SMS.
+
 ## RGPD
 - **Acesso:** `GET /me/export` e o ecrã *Perfil → Privacidade e dados → Descarregar*.
 - **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
@@ -179,8 +201,8 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 ```
 
 - **Domínio partilhado:** 46 testes (vitest).
-- **Web:** 27 testes (medição, privacidade e morada do VIES).
-- **API:** 180 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **Web:** 30 testes (medição, privacidade, morada do VIES e envio de erros).
+- **API:** 195 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia

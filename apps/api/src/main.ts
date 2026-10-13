@@ -1,5 +1,9 @@
 import 'reflect-metadata';
 import { INestApplication } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import { randomUUID } from 'crypto';
+import { ErrorsFilter } from './monitoring/errors.filter';
+import { REPORTER } from './monitoring/reporter';
 import { NestFactory } from '@nestjs/core';
 import { routeTemplate } from '@peekjob/shared';
 import express, { type NextFunction, type Request, type Response } from 'express';
@@ -15,6 +19,13 @@ import { configScript, renderIndex } from './web/index-html';
 export function configureApp(app: INestApplication) {
   // Atrás do proxy do alojamento: o IP real vem em X-Forwarded-For (limites por IP nas denúncias)
   if (process.env.APP_ENV) (app.getHttpAdapter().getInstance() as { set: (k: string, v: unknown) => void }).set('trust proxy', 1);
+  // Código de cada pedido: vai nas respostas e nos relatórios de erro (a pessoa pode indicá-lo ao suporte)
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.locals.requestId = randomUUID();
+    res.setHeader('x-request-id', res.locals.requestId);
+    next();
+  });
+  app.useGlobalFilters(new ErrorsFilter(app.get(HttpAdapterHost).httpAdapter, app.get(REPORTER)));
   protectEnvironment(app);
   applySecurity(app);
   app.enableCors({ origin: corsOrigins(), credentials: true });

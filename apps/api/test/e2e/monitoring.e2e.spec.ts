@@ -64,7 +64,7 @@ describe('Monitorização', () => {
 
     it('valida e limita (400 sem mensagem; 20 por 10 minutos por IP)', async () => {
       await send({}).expect(400);
-      for (let i = 0; i < 20; i++) await send({ message: 'e' + i, path: '/' }).expect(204);
+      for (let i = 0; i < 19; i++) await send({ message: 'e' + i, path: '/' }).expect(204); // o pedido inválido também conta
       await send({ message: 'mais', path: '/' }).expect(429);
     });
   });

@@ -54,6 +54,7 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `ANTHROPIC_API_KEY` | não (recomendada) | Reescrever com IA. Sem ela usa só as regras. Pôr um limite de gastos na consola da Anthropic |
 | `REWRITE_MODEL` | não | Modelo da reescrita (por omissão `claude-haiku-5-5`) |
 | `VIES_URL` | não | `off` desliga a confirmação de NIF no VIES (por omissão, o endpoint oficial) |
+| `SENTRY_DSN` | não (recomendada) | Erros no Sentry, com alertas por email. Sem ela os erros ficam só nos logs |
 | `WEB_ORIGIN` | não | Endereço público (por omissão o do Render) |
 | `WEB_DIST` | já na imagem | Pasta da build da web servida pela API |
 | `SEED_DEMO` | não | `true` carrega as organizações de demonstração |
@@ -62,6 +63,12 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `GA_MEASUREMENT_ID` | não | Google Analytics 4 (`G-…`), ver [09 · Medição](09-medicao.md) |
 | `GSC_VERIFICATION` | não | Código da etiqueta HTML do Search Console |
 | `COOKIE_SAMESITE` | não | Só se a web ficar noutro domínio (`none`); não é o caso desta configuração |
+
+## Monitorização (depois de publicar)
+
+1. No GitHub, em Settings → Secrets and variables → Actions → **Variables**, criar `UAT_URL` (ex.: `https://peekjob-uat.onrender.com`) e, mais tarde, `PROD_URL`.
+2. No GitHub, carregar em "Watch" no repositório (Custom → Issues) em quem deve receber os alertas por email.
+3. Opcional: criar um projeto no Sentry (região UE), copiar o DSN para `SENTRY_DSN` no Render e configurar o alerta por email para "novo problema".
 
 ## Verificado antes de publicar
 

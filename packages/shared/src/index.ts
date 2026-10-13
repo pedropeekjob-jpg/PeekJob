@@ -5,3 +5,4 @@ export * from './moderation';
 export * from './schemas';
 export * from './support';
 export * from './routes';
+export * from './scrub';

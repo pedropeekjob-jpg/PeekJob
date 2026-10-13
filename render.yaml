@@ -28,6 +28,8 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: SENTRY_DSN
+        sync: false
       # Opcional: propriedade GA só para a UAT (não misturar com produção)
       - key: GA_MEASUREMENT_ID
         sync: false
@@ -54,6 +56,8 @@ services:
       - key: MAIL_FROM
         sync: false
       - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SENTRY_DSN
         sync: false
       # Domínio próprio (ex.: https://peekjob.pt); sem ele usa o endereço do Render
       - key: WEB_ORIGIN

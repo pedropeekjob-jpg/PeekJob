@@ -16,6 +16,7 @@ const RULES: { method: string; path: RegExp; rule: RateRule }[] = [
   { method: 'POST', path: /^\/auth\/verify$/, rule: { name: 'verify', max: 30, windowMs: 15 * MIN } },
   { method: 'POST', path: /^\/verifications\/email(\/confirm)?$/, rule: { name: 'work-email', max: 20, windowMs: 60 * MIN } },
   { method: 'GET', path: /^\/orgs\/nif\//, rule: { name: 'nif-lookup', max: 30, windowMs: 10 * MIN } },
+  { method: 'POST', path: /^\/client-errors$/, rule: { name: 'client-errors', max: 20, windowMs: 10 * MIN } },
   // recolha automática do catálogo
   { method: 'GET', path: /^\/orgs\/search$/, rule: { name: 'search', max: 120, windowMs: MIN } },
 ];

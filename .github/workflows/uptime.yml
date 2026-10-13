@@ -1,0 +1,80 @@
+name: Disponibilidade
+
+# De 10 em 10 minutos verifica o /health da UAT e da produção (variáveis do repositório UAT_URL e PROD_URL).
+# Em baixo: abre um issue "🔴 … em baixo" (o GitHub avisa por email quem acompanha o repositório) e o run falha.
+# De volta: comenta e fecha o issue. Manual: Actions → Disponibilidade → Run workflow (opcional: um URL completo).
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      url:
+        description: URL completo a verificar (vazio = UAT_URL e PROD_URL, com /health)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verificar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          INPUT_URL: ${{ github.event.inputs.url }}
+          UAT_URL: ${{ vars.UAT_URL }}
+          PROD_URL: ${{ vars.PROD_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          targets=()
+          if [ -n "$INPUT_URL" ]; then targets+=("manual|$INPUT_URL")
+          else
+            [ -n "$UAT_URL" ] && targets+=("UAT|${UAT_URL%/}/health")
+            [ -n "$PROD_URL" ] && targets+=("Produção|${PROD_URL%/}/health")
+          fi
+          if [ ${#targets[@]} -eq 0 ]; then echo "Sem UAT_URL nem PROD_URL (Settings → Secrets and variables → Actions → Variables)."; exit 0; fi
+
+          gh api -X POST "repos/$REPO/labels" -f name=incident -f color=d73a4a -f description="Serviço em baixo (verificação automática)" >/dev/null 2>&1 || true
+          failed=0
+          for t in "${targets[@]}"; do
+            name="${t%%|*}"; url="${t#*|}"; title="🔴 $name em baixo"
+            # o plano gratuito do Render adormece: o primeiro pedido pode demorar ~50 s
+            code=$(curl -s -o body.txt -w '%{http_code}' --max-time 70 --retry 2 --retry-delay 15 --retry-all-errors "$url" || echo 000)
+            open=$(gh api "repos/$REPO/issues?state=open&labels=incident&per_page=50" --jq ".[] | select(.title == \"$title\") | .number" | head -1)
+            if [ "$code" = 200 ]; then
+              echo "✅ $name ($url): 200 $(head -c 200 body.txt)"
+              if [ -n "$open" ]; then
+                gh api -X POST "repos/$REPO/issues/$open/comments" -f body="✅ Voltou a responder ($(date -u +'%Y-%m-%d %H:%M UTC')). [Verificação]($RUN_URL)" >/dev/null
+                gh api -X PATCH "repos/$REPO/issues/$open" -f state=closed >/dev/null
+                echo "Issue #$open fechado."
+              fi
+            else
+              failed=1
+              echo "::error title=$name em baixo::$url respondeu $code"
+              if [ -z "$open" ]; then
+                body="**$name** não está a responder.
+
+          - Endereço: $url
+          - Resposta: HTTP $code
+          - Desde: $(date -u +'%Y-%m-%d %H:%M UTC')
+          - Verificação: $RUN_URL
+
+          Primeiros passos: ver os logs e o estado do serviço no Render; se for a base de dados, o /health responde 503 com \`\"db\":\"down\"\`. Este issue fecha sozinho quando o serviço voltar."
+                n=$(gh api -X POST "repos/$REPO/issues" -f title="$title" -f body="$body" -f 'labels[]=incident' --jq .number)
+                echo "Aberto o issue #$n."
+              else
+                echo "Issue #$open já aberto."
+              fi
+            fi
+          done
+          exit $failed
