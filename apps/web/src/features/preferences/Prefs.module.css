@@ -1,0 +1,234 @@
+/* Preferências: telemóvel por omissão, computador a partir de 900 px */
+
+/* Anel com o número da prioridade */
+.badge,
+.badgeLarge {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  border: 3px solid var(--c);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+.badgeLarge {
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  border-width: 4px;
+  font-size: 14px;
+}
+
+/* Botão de confirmar */
+.ctaBlock {
+  height: 56px;
+}
+.cta {
+  height: 58px;
+  padding: 0 28px;
+}
+
+/* Opções */
+.option,
+.card {
+  position: relative;
+  display: flex;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.option:active,
+.card:active {
+  transform: scale(0.98);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.option {
+  align-items: center;
+  min-height: 60px;
+  padding: 0 44px 0 16px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.option[aria-pressed='true'] {
+  border-color: var(--teal);
+  background: var(--teal-tint);
+}
+.option .rank {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  margin-top: -13px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: 12px;
+}
+.card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 88px;
+  padding: 16px 18px;
+  border-radius: 22px;
+}
+.card:hover {
+  transform: translateY(-2px);
+}
+.card[aria-pressed='true'] {
+  border-color: var(--c);
+  background: var(--tint);
+}
+.card .rank {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+.cardTitle {
+  gap: 8px;
+  font-size: 20px;
+}
+.cardDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--c);
+}
+.cardHint {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--body);
+  padding-right: 30px;
+}
+
+/* ---------- Telemóvel ---------- */
+.mobile {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.mobileBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 28px;
+  padding: 24px 20px;
+}
+.skip {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 15px;
+  padding: 12px 4px;
+}
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.title {
+  letter-spacing: -0.02em;
+}
+.lead {
+  margin: 0;
+  font-size: 15px;
+}
+.bar {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  bottom: 0;
+  gap: 8px;
+  padding: 14px 20px calc(22px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--ground);
+}
+.center {
+  text-align: center;
+}
+
+/* ---------- Computador ---------- */
+.desktop {
+  padding-bottom: 64px;
+}
+.header {
+  gap: 16px;
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+.skipWide {
+  color: var(--body);
+  font-weight: 500;
+  font-size: 15px;
+}
+.columns {
+  gap: 64px;
+  align-items: flex-start;
+  padding-top: 48px;
+}
+.summary {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 340px;
+  min-width: 0;
+  gap: 16px;
+}
+.titleWide {
+  font-size: clamp(40px, 4vw, 56px);
+  letter-spacing: -0.01em;
+}
+.leadWide {
+  margin: 0;
+  font-size: 16px;
+}
+.chosen {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 16px 0 0;
+  list-style: none;
+}
+.slot {
+  gap: 14px;
+  height: 52px;
+  border-bottom: 1px solid var(--line);
+}
+.slotLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.slotLabel[data-empty] {
+  font-weight: 400;
+  color: var(--muted);
+}
+.choices {
+  display: flex;
+  flex-direction: column;
+  flex: 1.4 1 520px;
+  min-width: 0;
+  gap: 24px;
+}
+.footer {
+  gap: 16px;
+}

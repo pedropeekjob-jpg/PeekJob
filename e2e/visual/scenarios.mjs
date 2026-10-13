@@ -155,6 +155,9 @@ export const SCENARIOS = [
       await p.getByRole('link', { name: /Comunidade/ }).first().hover().catch(() => {});
     },
   },
+  { name: 'preferencias', path: '/preferencias', full: true },
+  { name: 'preferencias-vazias', path: '/preferencias', full: true, state: { prefs: [] } },
+  { name: 'preferencias-tirar', path: '/preferencias', full: true, run: (p) => tap(p, 'button', /^Respeito e inclusão/) },
   { name: 'para-organizacoes', path: '/para-organizacoes', full: true },
   { name: 'para-organizacoes-pergunta', path: '/para-organizacoes', full: true, run: (p) => tap(p, 'button', /^Pagar o Pro melhora/) },
   { name: 'entrar', path: '/entrar' },
