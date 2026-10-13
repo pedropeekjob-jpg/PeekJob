@@ -1,0 +1,42 @@
+/* Cabeçalho, rodapé e barra inferior (as regras partilhadas vivem em global.css: .site-header, .site-footer, .bottom-nav) */
+
+.header {
+  gap: 28px;
+}
+.mainNav {
+  gap: 30px;
+  justify-content: flex-end;
+}
+.tools {
+  gap: 10px;
+}
+/* .btn global: a classe do módulo ganha no empate */
+.cta {
+  height: 46px;
+  border-radius: 14px;
+}
+
+.mobileHeader {
+  gap: 12px;
+}
+.mobileNav {
+  gap: 14px;
+}
+
+.social {
+  gap: 28px;
+  justify-content: center;
+}
+.footer {
+  gap: 18px;
+  align-items: center;
+}
+.footerMeta {
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+}
+
+.navBadge {
+  right: 8px;
+}

@@ -898,15 +898,16 @@ main h1:focus,
   top: 8px;
 }
 
-/* Ecrãs muito estreitos (320–359 px, ex.: iPhone SE com zoom): o cabeçalho da página inicial cabe sem scroll horizontal */
+/* Ecrãs muito estreitos (320–359 px, ex.: iPhone SE com zoom): o cabeçalho da página inicial cabe sem scroll horizontal
+   (estas regras têm mais especificidade do que as classes do Layout.module.css: dispensam !important) */
 @media (max-width: 359px) {
   .site-header.is-home .page-x {
-    gap: 8px !important;
+    gap: 8px;
     padding-left: 12px;
     padding-right: 12px;
   }
   .site-header.is-home nav {
-    gap: 10px !important;
+    gap: 10px;
   }
   .site-header.is-home .caps-link {
     font-size: 11px;

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { analytics } from '../analytics';
 import { SOCIAL } from '../config';
@@ -8,6 +8,7 @@ import { useIsDesktop } from '../lib/useMedia';
 import { Logo } from './Brand';
 import { openConsent } from './ConsentBanner';
 import { Icon } from './Icon';
+import styles from './Layout.module.css';
 
 const nav = (area: string, item: string) => ({ 'data-ev': 'nav_click', 'data-ev-area': area, 'data-ev-item': item });
 
@@ -22,9 +23,14 @@ function MainLinks({ area }: { area: string }) {
   );
 }
 
-function ProfileButton({ area }: { area: string }) {
+/** Mensagens por ler (perfil) */
+function useUnread() {
   const { messages } = useStore();
-  const unread = messages.filter((m) => !m.read).length;
+  return useMemo(() => messages.filter((m) => !m.read).length, [messages]);
+}
+
+function ProfileButton({ area }: { area: string }) {
+  const unread = useUnread();
   return (
     <NavLink
       to="/perfil"
@@ -41,14 +47,14 @@ function ProfileButton({ area }: { area: string }) {
 export function DesktopHeader({ home = false }: { home?: boolean }) {
   return (
     <header className={'site-header' + (home ? ' is-home' : '')}>
-      <div className="container row" style={{ gap: 28 }}>
+      <div className={`container row ${styles.header}`}>
         <Link to="/" aria-label={tr('PeekJob, início', 'PeekJob, home')} {...nav('header', 'logo')}>
           <Logo height={46} />
         </Link>
-        <nav aria-label={tr('Principal', 'Main')} className="row grow" style={{ gap: 30, justifyContent: 'flex-end' }}>
+        <nav aria-label={tr('Principal', 'Main')} className={`row grow ${styles.mainNav}`}>
           <MainLinks area="header" />
         </nav>
-        <span className="row" style={{ gap: 10 }}>
+        <span className={`row ${styles.tools}`}>
           <LangSwitch />
           {!home && (
             <NavLink to="/pesquisa" {...nav('header', 'pesquisa')} className={({ isActive }) => 'icon-btn' + (isActive ? ' on' : '')} aria-label={tr('Pesquisar', 'Search')}>
@@ -63,7 +69,7 @@ export function DesktopHeader({ home = false }: { home?: boolean }) {
           <ProfileButton area="header" />
         </span>
         {!home && (
-          <Link to="/avaliar" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="header" className="btn btn-primary" style={{ height: 46, borderRadius: 14 }}>
+          <Link to="/avaliar" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="header" className={`btn btn-primary ${styles.cta}`}>
             {tr('Avaliar onde trabalho', 'Review where I work')}
           </Link>
         )}
@@ -76,11 +82,11 @@ export function DesktopHeader({ home = false }: { home?: boolean }) {
 export function MobileHomeHeader() {
   return (
     <header className="site-header is-home">
-      <div className="page-x row between" style={{ gap: 12 }}>
+      <div className={`page-x row between ${styles.mobileHeader}`}>
         <Link to="/" aria-label={tr('PeekJob, início', 'PeekJob, home')} {...nav('header', 'logo')}>
           <Logo height={34} />
         </Link>
-        <nav aria-label={tr('Principal', 'Main')} className="row" style={{ gap: 14 }}>
+        <nav aria-label={tr('Principal', 'Main')} className={`row ${styles.mobileNav}`}>
           <MainLinks area="header" />
         </nav>
         <ProfileButton area="header" />
@@ -91,7 +97,7 @@ export function MobileHomeHeader() {
 
 function SocialLinks() {
   return (
-    <div className="row social" style={{ gap: 28, justifyContent: 'center' }}>
+    <div className={`row social ${styles.social}`}>
       <a href={SOCIAL.facebook} target="_blank" rel="noopener noreferrer" {...nav('footer', 'facebook')}>
         <Icon name="facebook" size={22} />
         <span>Facebook</span>
@@ -124,10 +130,10 @@ function FooterLinks() {
 export function SiteFooter({ compact = false }: { compact?: boolean }) {
   return (
     <footer className={'site-footer' + (compact ? ' is-compact' : '')}>
-      <div className="container stack" style={{ gap: 18, alignItems: 'center' }}>
+      <div className={`container stack ${styles.footer}`}>
         <SocialLinks />
         <FooterLinks />
-        <div className="row wrap" style={{ gap: 14, justifyContent: 'center', alignItems: 'center' }}>
+        <div className={`row wrap ${styles.footerMeta}`}>
           <LangSwitch />
           <span className="small muted">{tr('Avaliações anónimas de quem trabalha em pequenas organizações.', 'Anonymous reviews from people who work at small organisations.')}</span>
         </div>
@@ -141,8 +147,7 @@ export function SiteFooter({ compact = false }: { compact?: boolean }) {
 
 export function BottomNav() {
   const { pathname } = useLocation();
-  const { messages } = useStore();
-  const unread = messages.filter((m) => !m.read).length;
+  const unread = useUnread();
   const cur = (p: string) => (pathname.startsWith(p) ? 'page' : undefined);
   return (
     <nav aria-label={tr('Navegação principal', 'Main navigation')} className="bottom-nav">
@@ -164,7 +169,7 @@ export function BottomNav() {
       <Link to="/perfil" aria-current={cur('/perfil')} {...nav('tabbar', 'perfil')}>
         <Icon name="user" size={22} />
         {tr('Perfil', 'Profile')}
-        {unread > 0 && <span className="badge" style={{ right: 8 }}>{unread}</span>}
+        {unread > 0 && <span className={`badge ${styles.navBadge}`}>{unread}</span>}
       </Link>
     </nav>
   );
