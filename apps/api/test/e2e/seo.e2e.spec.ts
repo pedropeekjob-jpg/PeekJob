@@ -30,14 +30,18 @@ describe('SEO e medição', () => {
   it('injeta a verificação do Search Console e o ID do Analytics no index', async () => {
     const res = await html('/').expect(200);
     expect(res.text).toContain('<meta name="google-site-verification" content="abc_DEF-123">');
-    expect(res.text).toContain('"gaId":"G-TEST123"');
+    expect(res.text).toContain('<script src="/pj-config.js"></script>');
     expect(res.headers['cache-control']).toMatch(/no-cache/);
+    const cfg = await t.http().get('/pj-config.js').expect(200);
+    expect(cfg.text).toContain('"gaId":"G-TEST123"');
   });
 
   it('recusa valores inválidos (não injeta nada estranho no HTML)', async () => {
     process.env.GA_MEASUREMENT_ID = 'G-X"></script><script>alert(1)';
     process.env.GSC_VERIFICATION = '"><b>';
     const res = await html('/').expect(200);
+    const cfg = await t.http().get('/pj-config.js').expect(200);
+    expect(cfg.text).not.toContain('alert(1)');
     expect(res.text).not.toContain('alert(1)');
     expect(res.text).not.toContain('<b>');
     expect(res.text).not.toContain('google-site-verification');
@@ -46,7 +50,7 @@ describe('SEO e medição', () => {
   it('URLs da web sem # abrem a aplicação (navegação do browser)', async () => {
     const res = await html('/org/3f2a/salarios').expect(200);
     expect(res.text).toContain('<div id="root">');
-    expect(res.text).toContain('"gaId":"G-TEST123"');
+    expect(res.text).toContain('<script src="/pj-config.js"></script>');
   });
 
   it('caminhos que não existem: a aplicação com 404 (sem "soft 404" no Search Console)', async () => {
