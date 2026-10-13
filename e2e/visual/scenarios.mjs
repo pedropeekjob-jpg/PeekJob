@@ -74,7 +74,20 @@ export const SCENARIOS = [
       await p.waitForTimeout(400);
     },
   },
-  { name: 'pesquisa', path: '/pesquisa' },
+  { name: 'pesquisa', path: '/pesquisa', full: true },
+  { name: 'pesquisa-sem-prioridades', path: '/pesquisa', full: true, state: { prefs: [] } },
+  {
+    name: 'pesquisa-escrever',
+    path: '/pesquisa',
+    full: true,
+    run: async (p) => {
+      await p.getByRole('searchbox').first().fill('porto'); // foco, botão de limpar e resultados depois da espera
+      await p.waitForTimeout(1300);
+    },
+  },
+  { name: 'pesquisa-vazia', path: '/pesquisa?q=zzz', full: true, run: (p) => p.waitForTimeout(1300) },
+  { name: 'pesquisa-tipo', path: '/pesquisa', full: true, run: (p) => tap(p, 'button', /^Voluntariado$/) },
+  { name: 'pesquisa-ver-mais', path: '/pesquisa', full: true, run: (p) => tap(p, 'button', /^Ver mais \d+$/) },
   { name: 'organizacao', path: '/org/padaria-ribeira', full: true },
   { name: 'organizacao-aberta', path: '/org/padaria-ribeira', full: true, run: openOrg },
   {
