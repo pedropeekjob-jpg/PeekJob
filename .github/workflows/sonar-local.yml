@@ -38,4 +38,5 @@ jobs:
         if: failure()
         run: |
           { echo '### sonar:local falhou'; echo '```'; tail -n 80 sonar-local.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          tail -n 25 sonar-local.log | sed 's/%/%25/g' | while IFS= read -r l; do echo "::error title=sonar:local::$l"; done
+          # uma só anotação (o GitHub mostra no máximo 10 por passo), com as linhas separadas por ⏎
+          echo "::error title=sonar:local::$(tail -n 30 sonar-local.log | cut -c1-160 | sed 's/%/%25/g' | awk '{printf "%s ⏎ ", $0}')"
