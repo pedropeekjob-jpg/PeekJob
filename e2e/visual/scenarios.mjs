@@ -11,7 +11,9 @@ export const STATE = draft;
 /** Carrega no primeiro elemento com este nome acessível, se existir neste tamanho de ecrã */
 async function tap(p, role, name) {
   const el = p.getByRole(role, { name }).first();
-  if (await el.count()) await el.click();
+  if (!(await el.count())) return;
+  await el.click();
+  await p.waitForTimeout(120); // deixa o React aplicar o estado antes do passo seguinte
 }
 
 /** Página da organização com tudo aberto: critérios, respeito, mapa, todas as avaliações, útil */
@@ -30,7 +32,29 @@ async function openOrg(p) {
 export const SCENARIOS = [
   { name: 'inicio', path: '/' },
   { name: 'explorar', path: '/explorar' },
-  { name: 'ranking', path: '/ranking' },
+  { name: 'ranking', path: '/ranking', full: true },
+  {
+    name: 'ranking-escolhida',
+    path: '/ranking?ordem=nota',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /Clínica Foz/);
+      await tap(p, 'button', /^Ver os 8 critérios/);
+      await tap(p, 'button', /^Ver mais \d+/);
+      await p.getByRole('button', { name: /Lavandaria Sol/ }).first().hover().catch(() => {});
+    },
+  },
+  { name: 'ranking-filtros', path: '/ranking?setor=Comunidade&tipo=Voluntariado&resp=1', full: true },
+  { name: 'ranking-vazio', path: '/ranking?dist=Braga&ver=1' },
+  {
+    name: 'ranking-folha',
+    path: '/ranking?tipo=PME&ver=1',
+    mobileOnly: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Filtros, \d+ activos/);
+      await p.waitForTimeout(400);
+    },
+  },
   { name: 'pesquisa', path: '/pesquisa' },
   { name: 'organizacao', path: '/org/padaria-ribeira', full: true },
   { name: 'organizacao-aberta', path: '/org/padaria-ribeira', full: true, run: openOrg },

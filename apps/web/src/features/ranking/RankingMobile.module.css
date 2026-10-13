@@ -1,0 +1,103 @@
+/* Ranking no telemóvel */
+
+.page {
+  gap: 16px;
+  padding-top: 24px;
+}
+.head {
+  align-items: baseline;
+  gap: 12px;
+}
+.how {
+  font-size: 13px;
+  font-weight: 500;
+}
+.chip {
+  height: 44px;
+  font-size: 13px;
+  padding: 0 12px;
+}
+.filters[data-active] {
+  border-color: var(--teal);
+}
+.count {
+  padding-bottom: 6px;
+}
+
+/* Uma linha do ranking */
+.item {
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  min-height: 70px;
+}
+.position {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 28px;
+  align-items: center;
+  line-height: 1.1;
+}
+.positionNum {
+  font-size: 18px;
+  color: var(--muted);
+}
+.positionNum[data-top] {
+  color: var(--ink);
+}
+.trend {
+  font-size: 10px;
+  color: var(--muted);
+}
+.trend[data-trend='up'] {
+  color: var(--up);
+}
+.trend[data-trend='down'] {
+  color: var(--down);
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.match {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  align-items: flex-end;
+  line-height: 1.1;
+  color: var(--teal-dark);
+}
+.matchNum {
+  font-size: 17px;
+}
+.matchLabel {
+  font-size: 11px;
+}
+
+/* Folha de filtros */
+.sheetFoot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sheetShow {
+  height: 56px;
+}
+.sheetClear {
+  align-self: center;
+}
+.sheetBody {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 8px;
+}
+.switches {
+  border-top: 1px solid var(--line);
+}

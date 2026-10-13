@@ -41,7 +41,8 @@ function serve(dir) {
   });
 }
 
-async function shoot(port, dir) {
+/** Fotografa os cenários (ou só os de `only`, nomes `m-x.png`) */
+async function shoot(port, dir, only) {
   mkdirSync(dir, { recursive: true });
   const browser = await chromium.launch();
   for (const [tag, viewport, isMobile] of [['m', { width: 390, height: 844 }, true], ['d', { width: 1440, height: 900 }, false]]) {
@@ -49,10 +50,12 @@ async function shoot(port, dir) {
     await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
     for (const s of SCENARIOS) {
       if (s.mobileOnly && tag === 'd') continue;
+      if (only && !only.has(`${tag}-${s.name}.png`)) continue;
       const page = await ctx.newPage();
       await page.addInitScript(([k, v]) => localStorage.setItem(k, JSON.stringify(v)), [STORAGE_KEY, STATE]);
-      await page.goto(`http://localhost:${port}/#${s.path}`);
-      await page.waitForTimeout(600);
+      await page.goto(`http://localhost:${port}/#${s.path}`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(300);
       if (s.run) await s.run(page);
       await page.waitForTimeout(400);
       await page.mouse.move(0, 0);
@@ -62,6 +65,32 @@ async function shoot(port, dir) {
     await ctx.close();
   }
   await browser.close();
+}
+
+/** Compara referência e atual; escreve as imagens de diferenças */
+function compareAll() {
+  rmSync(join(out, 'diferencas'), { recursive: true, force: true });
+  mkdirSync(join(out, 'diferencas'), { recursive: true });
+  const changed = [];
+  for (const s of SCENARIOS) {
+    for (const tag of ['m', 'd']) {
+      if (s.mobileOnly && tag === 'd') continue;
+      const file = `${tag}-${s.name}.png`;
+      const a = PNG.sync.read(readFileSync(join(out, 'referencia', file)));
+      const b = PNG.sync.read(readFileSync(join(out, 'atual', file)));
+      if (a.width !== b.width || a.height !== b.height) {
+        changed.push({ file, text: `${file} (tamanho ${a.width}×${a.height} → ${b.width}×${b.height})` });
+        continue;
+      }
+      const diff = new PNG({ width: a.width, height: a.height });
+      const n = pixelmatch(a.data, b.data, diff.data, a.width, a.height, { threshold: 0.1 });
+      if (n > 0) {
+        writeFileSync(join(out, 'diferencas', file), PNG.sync.write(diff));
+        changed.push({ file, text: `${file} (${n} px)` });
+      }
+    }
+  }
+  return changed;
 }
 
 try {
@@ -83,29 +112,19 @@ try {
   console.log('A fotografar…');
   await shoot(refSrv.port, join(out, 'referencia'));
   await shoot(curSrv.port, join(out, 'atual'));
+
+  // um cenário que muda volta a ser fotografado (nas duas versões) até 2 vezes: só conta se a diferença se repetir
+  let changed = compareAll();
+  for (let attempt = 1; attempt <= 2 && changed.length; attempt++) {
+    const again = new Set(changed.map((c) => c.file));
+    console.log(`A repetir ${again.size} ecrã(s) que mudaram (tentativa ${attempt})…`);
+    await shoot(refSrv.port, join(out, 'referencia'), again);
+    await shoot(curSrv.port, join(out, 'atual'), again);
+    changed = compareAll();
+  }
   refSrv.server.close();
   curSrv.server.close();
-
-  mkdirSync(join(out, 'diferencas'), { recursive: true });
-  const changed = [];
-  for (const s of SCENARIOS) {
-    for (const tag of ['m', 'd']) {
-      if (s.mobileOnly && tag === 'd') continue;
-      const f = `${tag}-${s.name}.png`;
-      const a = PNG.sync.read(readFileSync(join(out, 'referencia', f)));
-      const b = PNG.sync.read(readFileSync(join(out, 'atual', f)));
-      if (a.width !== b.width || a.height !== b.height) {
-        changed.push(`${f} (tamanho ${a.width}×${a.height} → ${b.width}×${b.height})`);
-        continue;
-      }
-      const diff = new PNG({ width: a.width, height: a.height });
-      const n = pixelmatch(a.data, b.data, diff.data, a.width, a.height, { threshold: 0.1 });
-      if (n > 0) {
-        writeFileSync(join(out, 'diferencas', f), PNG.sync.write(diff));
-        changed.push(`${f} (${n} px)`);
-      }
-    }
-  }
+  changed = changed.map((c) => c.text);
   const total = SCENARIOS.reduce((n, s) => n + (s.mobileOnly ? 1 : 2), 0);
   console.log(changed.length ? `\n${changed.length} de ${total} ecrãs mudaram:\n  ${changed.join('\n  ')}\nVer ${out}/diferencas` : `\n${total} ecrãs iguais à referência.`);
   process.exitCode = changed.length ? 1 : 0;

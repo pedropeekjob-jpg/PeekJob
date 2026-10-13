@@ -1,0 +1,207 @@
+/* Ranking no computador */
+
+.container {
+  padding-bottom: 64px;
+}
+.head {
+  align-items: flex-end;
+  gap: 24px;
+  padding: 32px 0 24px;
+}
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.title {
+  font-size: clamp(36px, 4vw, 52px);
+  line-height: 1;
+}
+.sub {
+  margin: 0;
+  font-size: 15px;
+}
+.subLink {
+  text-decoration: none;
+  font-weight: 600;
+}
+.tools {
+  gap: 10px;
+}
+.filtersButton {
+  gap: 8px;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--field);
+}
+.filtersButton[data-active] {
+  border-color: var(--teal);
+}
+
+/* Painel de filtros */
+.filters {
+  gap: 24px 40px;
+  align-items: flex-start;
+  padding: 20px 0 24px;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.switches {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 260px;
+}
+.purple {
+  color: var(--purple-text);
+}
+.clear {
+  align-self: flex-end;
+  font-size: 14px;
+}
+
+/* Lista */
+.columns {
+  gap: 48px;
+  align-items: flex-start;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  flex: 1.6 1 520px;
+  min-width: 0;
+}
+.count {
+  padding: 0 0 8px 4px;
+}
+.row {
+  gap: 16px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  background: transparent;
+  text-align: left;
+  min-height: 70px;
+  transition: background 0.15s;
+}
+.row:hover,
+.row[aria-pressed='true'] {
+  background: var(--surface);
+}
+.row[aria-pressed='true'] {
+  border-left-color: var(--teal);
+}
+.position {
+  flex: none;
+  width: 26px;
+  font-size: 18px;
+  color: var(--muted);
+}
+.position[data-top] {
+  color: var(--ink);
+}
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rowName {
+  font-size: 16px;
+  font-weight: 600;
+}
+.rowMatch {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+.more {
+  align-self: flex-start;
+  margin-top: 12px;
+  height: 48px;
+  font-size: 15px;
+}
+
+/* Pré-visualização */
+.aside {
+  flex: 1 1 340px;
+  min-width: 300px;
+  position: sticky;
+  top: 24px;
+  padding: 28px;
+  border-radius: var(--r-xl);
+}
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.previewHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.previewPos {
+  font-weight: 600;
+}
+.previewName {
+  font-size: 24px;
+  line-height: 1.1;
+}
+.previewScore {
+  gap: 18px;
+}
+.previewMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.previewMatch {
+  align-self: flex-start;
+  font-size: 14px;
+  padding: 6px 12px;
+}
+.criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.crit {
+  gap: 10px;
+}
+.critName {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--body);
+}
+.critValue {
+  width: 28px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--body);
+}
+.crit[data-respeito] .critName {
+  font-weight: 600;
+}
+.crit[data-respeito] .critName,
+.crit[data-respeito] .critValue {
+  color: var(--purple-text);
+}
+.criteriaToggle {
+  align-self: flex-start;
+  font-size: 14px;
+}
+.open {
+  height: 54px;
+}
+.how {
+  align-self: center;
+  font-size: 13px;
+  font-weight: 500;
+}

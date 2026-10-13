@@ -1,0 +1,52 @@
+/* Controlos do ranking: ordem, grupos de filtros, setor e "sem resultados" */
+
+/* .segmented button (global) tem especificidade 0,1,1: aqui também */
+.sortBig button {
+  height: 44px;
+  min-width: 120px;
+  font-size: 15px;
+  padding: 0 18px;
+}
+
+.groupPlain {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.group {
+  composes: groupPlain;
+  min-width: 0;
+}
+.legend {
+  padding: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.legendCompact {
+  padding: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.chip {
+  height: 44px;
+}
+.moreOptions {
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+  align-items: flex-start;
+}
+.emptyTitle {
+  font-size: 22px;
+}
+.emptyClear {
+  height: 48px;
+}
