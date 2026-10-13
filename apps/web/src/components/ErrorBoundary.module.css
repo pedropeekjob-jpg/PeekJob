@@ -1,0 +1,17 @@
+.page {
+  min-height: 80dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.box {
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  max-width: 480px;
+}
+.actions {
+  gap: 10px;
+  justify-content: center;
+  padding-top: 6px;
+}

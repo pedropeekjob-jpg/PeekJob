@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { tr } from '../i18n';
 import { reportError } from '../lib/monitoring';
 import { Icon } from './Icon';
+import styles from './ErrorBoundary.module.css';
 
 /**
  * Se um ecrã rebentar, mostra uma página simples em vez de um ecrã branco e reporta o erro.
@@ -26,14 +27,14 @@ export class ErrorBoundary extends Component<{ children: ReactNode; resetKey: st
   render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <main className="page" style={{ minHeight: '80dvh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <section role="alert" className="stack fade-up" style={{ alignItems: 'center', textAlign: 'center', gap: 14, maxWidth: 480 }}>
+      <main className={`page ${styles.page}`}>
+        <section role="alert" className={`stack fade-up ${styles.box}`}>
           <p className="label">{tr('Erro', 'Error')}</p>
           <h1 className="h1">{tr('Algo correu mal neste ecrã', 'Something went wrong on this screen')}</h1>
           <p className="lead">
             {tr('Já fomos avisados. Tenta outra vez; o que escreveste no rascunho continua guardado.', 'We’ve been notified. Please try again; your draft is still saved.')}
           </p>
-          <div className="row wrap" style={{ gap: 10, justifyContent: 'center', paddingTop: 6 }}>
+          <div className={`row wrap ${styles.actions}`}>
             <button type="button" className="btn btn-primary" onClick={() => location.reload()}>
               {tr('Tentar outra vez', 'Try again')}
             </button>

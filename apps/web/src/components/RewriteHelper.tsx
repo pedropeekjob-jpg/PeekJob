@@ -4,6 +4,7 @@ import { track } from '../analytics';
 import { getLang, tr } from '../i18n';
 import { softenText, toneIssues } from '../lib/moderation';
 import { Icon } from './Icon';
+import styles from './RewriteHelper.module.css';
 
 type Proposal = { text: string; source: 'ai' | 'rules' };
 
@@ -66,7 +67,7 @@ export function RewriteHelper({ text, onUse, desktop = false }: { text: string; 
   };
 
   const button = (
-    <button type="button" className={'btn btn-sm lift ' + (desktop ? 'btn-dark' : 'btn-ghost')} data-ev="cta_click" data-ev-cta="rewrite" style={{ alignSelf: 'flex-start', height: 44, borderRadius: 12, fontSize: 15, gap: 8, ...(desktop ? {} : { borderColor: 'var(--ink)' }) }} onClick={run} disabled={busy} aria-busy={busy}>
+    <button type="button" className={`btn btn-sm lift ${desktop ? 'btn-dark' : `btn-ghost ${styles.ghost}`} ${styles.run}`} data-ev="cta_click" data-ev-cta="rewrite" onClick={run} disabled={busy} aria-busy={busy}>
       <Icon name="sparkle" size={18} />
       {busy ? tr('A reescrever…', 'Rewriting…') : proposal ? tr('Outra versão', 'Another version') : tr('Reescrever com IA', 'Rewrite with AI')}
     </button>
@@ -96,7 +97,7 @@ export function RewriteHelper({ text, onUse, desktop = false }: { text: string; 
         </>
       )}
       {proposal && (
-        <div className="stack" style={{ gap: 10 }}>
+        <div className={`stack ${styles.proposal}`}>
           <span className="rewrite-title">{tr('Proposta', 'Suggestion')}</span>
           <blockquote className="rewrite-proposal">{proposal.text}</blockquote>
           <span className="small muted">
@@ -104,17 +105,17 @@ export function RewriteHelper({ text, onUse, desktop = false }: { text: string; 
               ? tr('Escrita por IA a partir do teu texto. Revê antes de publicar: os factos têm de continuar a ser teus.', 'Written by AI from your text. Check it before publishing: the facts must still be yours.')
               : tr('Sugestão automática (sem IA): tira nomes e insultos. Revê a frase antes de publicar.', 'Automatic suggestion (no AI): removes names and insults. Check the sentence before publishing.')}
           </span>
-          <div className="row wrap" style={{ gap: 10 }}>
-            <button type="button" className="btn btn-primary btn-sm" style={{ height: 44, borderRadius: 12 }} onClick={accept}>
+          <div className={`row wrap ${styles.actions}`}>
+            <button type="button" className={`btn btn-primary btn-sm ${styles.choice}`} onClick={accept}>
               {tr('Usar esta versão', 'Use this version')}
             </button>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ height: 44, borderRadius: 12 }} onClick={dismiss}>
+            <button type="button" className={`btn btn-ghost btn-sm ${styles.choice}`} onClick={dismiss}>
               {tr('Manter o meu texto', 'Keep my text')}
             </button>
           </div>
         </div>
       )}
-      {error && <span className="small" style={{ color: 'var(--warn-text)' }}>{error}</span>}
+      {error && <span className={`small ${styles.error}`}>{error}</span>}
       {(!proposal || proposal.source === 'ai') && button}
     </section>
   );

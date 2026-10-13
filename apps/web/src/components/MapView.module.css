@@ -1,0 +1,14 @@
+.map {
+  gap: 8px;
+}
+.canvas {
+  border-radius: 18px;
+  background: #e9eeef;
+}
+.pick {
+  cursor: pointer;
+}
+.open {
+  padding: 0;
+  min-height: 32px;
+}

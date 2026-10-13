@@ -1,0 +1,26 @@
+/* Botões do reescrever (.btn-sm global: a classe do módulo ganha no empate) */
+.run {
+  align-self: flex-start;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
+  gap: 8px;
+}
+/* no telemóvel o contorno é escuro, também enquanto reescreve (.btn[disabled] mudaria a cor) */
+.ghost,
+.ghost[disabled] {
+  border-color: var(--ink);
+}
+.choice {
+  height: 44px;
+  border-radius: 12px;
+}
+.proposal {
+  gap: 10px;
+}
+.actions {
+  gap: 10px;
+}
+.error {
+  color: var(--warn-text);
+}

@@ -1,6 +1,7 @@
 import type { OrgLocation } from '../data/orgs';
 import { Icon } from './Icon';
 import { tr } from '../i18n';
+import styles from './MapView.module.css';
 
 /**
  * Mapa ilustrado (sem dependências nem chaves de API).
@@ -23,8 +24,8 @@ export function MapView({
   const W = 400;
   const H = 180;
   return (
-    <div className="stack" style={{ gap: 8 }}>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={height} preserveAspectRatio="xMidYMid slice" role={onPick ? 'group' : 'img'} aria-label={tr(`Mapa: ${cur?.address ?? ''}`, `Map: ${cur?.address ?? ''}`)} style={{ borderRadius: 18, background: '#E9EEEF' }}>
+    <div className={`stack ${styles.map}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={height} preserveAspectRatio="xMidYMid slice" role={onPick ? 'group' : 'img'} aria-label={tr(`Mapa: ${cur?.address ?? ''}`, `Map: ${cur?.address ?? ''}`)} className={styles.canvas}>
         <path d="M0 150 C 90 132, 170 170, 270 154 S 380 136, 400 146 L 400 180 L 0 180 Z" fill="#CFE3E6" />
         <rect x="18" y="14" width="90" height="48" rx="8" fill="#ECEFEF" />
         <rect x="126" y="14" width="74" height="48" rx="8" fill="#ECEFEF" />
@@ -40,7 +41,7 @@ export function MapView({
             <g
               key={l.id}
               onClick={onPick ? () => onPick(l.id) : undefined}
-              style={{ cursor: onPick ? 'pointer' : 'default' }}
+              className={onPick ? styles.pick : undefined}
               role={onPick ? 'button' : undefined}
               aria-label={onPick ? tr(`Escolher ${l.label}`, `Choose ${l.label}`) : undefined}
               tabIndex={onPick ? 0 : undefined}
@@ -55,8 +56,7 @@ export function MapView({
       </svg>
       {showLink && cur && (
         <a
-          className="link small"
-          style={{ padding: 0, minHeight: 32 }}
+          className={`link small ${styles.open}`}
           href={`https://www.openstreetmap.org/?mlat=${cur.lat}&mlon=${cur.lng}#map=17/${cur.lat}/${cur.lng}`}
           target="_blank"
           rel="noreferrer"

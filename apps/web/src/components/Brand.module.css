@@ -1,0 +1,16 @@
+/* Logótipo: a altura vem do atributo height; a largura segue a proporção */
+.logo {
+  width: auto;
+}
+
+/* Logótipo animado: --w é a largura; no fundo escuro trocam as cores do SVG */
+.animated {
+  width: var(--w);
+  max-width: 100%;
+}
+.animated[data-dark] {
+  --pj-ink: #ffffff;
+  --pj-node: #010b13;
+  --pj-road: #2a3238;
+  --pj-bg: #010b13;
+}

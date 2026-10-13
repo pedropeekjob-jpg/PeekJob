@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { analytics, useAnalyticsConsent } from '../analytics';
 import { Switch } from './UI';
 import { tr } from '../i18n';
+import styles from './ConsentBanner.module.css';
 
 const OPEN_EVENT = 'pj:consent-open';
 /** Volta a mostrar a escolha (rodapé, Como calculamos) */
@@ -29,8 +30,8 @@ export function ConsentBanner() {
   };
   return (
     <div role="dialog" aria-modal="false" aria-labelledby="pj-consent-t" className="consent">
-      <div className="stack" style={{ gap: 6 }}>
-        <strong id="pj-consent-t" style={{ fontSize: 16 }}>{tr('Ajudas-nos a melhorar a PeekJob?', 'Will you help us improve PeekJob?')}</strong>
+      <div className={`stack ${styles.text}`}>
+        <strong id="pj-consent-t" className={styles.title}>{tr('Ajudas-nos a melhorar a PeekJob?', 'Will you help us improve PeekJob?')}</strong>
         <span className="small body">
           {tr(
             'Com a tua autorização usamos o Google Analytics para perceber que páginas e passos funcionam melhor. Nunca enviamos o que escreves, onde trabalhas, o teu email ou o NIF, e não há publicidade.',
@@ -39,7 +40,7 @@ export function ConsentBanner() {
           <Link to="/metodologia#privacidade">{tr('Saber mais', 'Learn more')}</Link>
         </span>
       </div>
-      <div className="row" style={{ gap: 10 }}>
+      <div className={`row ${styles.actions}`}>
         <button type="button" className="btn btn-ghost" onClick={() => choose(false)}>
           {tr('Recusar', 'Decline')}
         </button>

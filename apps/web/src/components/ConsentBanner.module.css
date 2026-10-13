@@ -1,0 +1,10 @@
+/* O cartão em si é .consent (global.css) */
+.text {
+  gap: 6px;
+}
+.title {
+  font-size: 16px;
+}
+.actions {
+  gap: 10px;
+}

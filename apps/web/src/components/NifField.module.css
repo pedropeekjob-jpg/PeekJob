@@ -1,0 +1,29 @@
+/* .nif > label empata com .field > label (global) e ganha por vir depois */
+.nif > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+}
+.help {
+  min-height: 20px;
+}
+.warn {
+  color: var(--warn-text);
+}
+.found {
+  gap: 6px;
+}
+.ok {
+  gap: 6px;
+  align-items: flex-start;
+  color: var(--teal-dark);
+}
+.okIcon {
+  flex: none;
+  margin-top: 2px;
+}
+.use {
+  align-self: flex-start;
+  padding: 0;
+  min-height: 32px;
+}

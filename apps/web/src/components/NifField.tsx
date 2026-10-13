@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api, apiMode } from '../api/http';
 import { tr } from '../i18n';
 import { Icon } from './Icon';
+import styles from './NifField.module.css';
 
 export interface NifLookup {
   nif: string;
@@ -48,24 +49,24 @@ export function NifField({ value, onChange, required, onOfficial, invalid }: { v
   }, [nif, ok]);
 
   return (
-    <div className="field">
-      <label htmlFor="nnif" style={{ fontSize: 13, color: 'var(--body)' }}>
+    <div className={`field ${styles.nif}`}>
+      <label htmlFor="nnif">
         {required ? 'NIF' : tr('NIF (opcional)', 'Tax number, NIF (optional)')}
       </label>
       <input className="input mono" id="nnif" inputMode="numeric" autoComplete="off" maxLength={14} value={value} onChange={(e) => onChange(e.target.value)} placeholder="500 000 000" aria-invalid={invalid || (value.trim().length >= 9 && !ok)} aria-describedby="nnif-ajuda" />
-      <span id="nnif-ajuda" className="small muted" aria-live="polite" style={{ minHeight: 20 }}>
+      <span id="nnif-ajuda" className={`small muted ${styles.help}`} aria-live="polite">
         {value.trim().length >= 9 && !ok ? (
-          <span style={{ color: 'var(--warn-text)' }}>{tr('Este NIF não é válido. Confirma os 9 dígitos.', 'This NIF isn’t valid. Check the 9 digits.')}</span>
+          <span className={styles.warn}>{tr('Este NIF não é válido. Confirma os 9 dígitos.', 'This NIF isn’t valid. Check the 9 digits.')}</span>
         ) : loading ? (
           tr('A confirmar no registo europeu…', 'Checking the European register…')
         ) : lookup?.status === 'valid' ? (
-          <span className="stack" style={{ gap: 6 }}>
-            <span className="row" style={{ gap: 6, alignItems: 'flex-start', color: 'var(--teal-dark)' }}>
-              <Icon name="check" size={16} stroke={2.2} style={{ flex: 'none', marginTop: 2 }} />
+          <span className={`stack ${styles.found}`}>
+            <span className={`row ${styles.ok}`}>
+              <Icon name="check" size={16} stroke={2.2} className={styles.okIcon} />
               <span>{lookup.name ? tr(<>Registada como <b>{lookup.name}</b></>, <>Registered as <b>{lookup.name}</b></>) : tr('NIF confirmado no registo europeu.', 'Tax number confirmed in the European register.')}</span>
             </span>
             {lookup.name && (
-              <button type="button" className="link" style={{ alignSelf: 'flex-start', padding: 0, minHeight: 32 }} onClick={() => onOfficial({ name: lookup.name, city: cityFromAddress(lookup.address) })}>
+              <button type="button" className={`link ${styles.use}`} onClick={() => onOfficial({ name: lookup.name, city: cityFromAddress(lookup.address) })}>
                 {tr('Usar o nome e a localidade oficiais', 'Use the official name and town')}
               </button>
             )}
