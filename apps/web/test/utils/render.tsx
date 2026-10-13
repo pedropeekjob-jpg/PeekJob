@@ -1,6 +1,6 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useEffect, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { LangRoot } from '../../src/i18n';
 import { StoreProvider, useStore, type Draft } from '../../src/lib/store';
@@ -45,12 +45,14 @@ export function renderScreen(
 /** Começa um rascunho de avaliação antes de mostrar o ecrã (como se a pessoa já tivesse escolhido a organização) */
 export function WithDraft({ orgId = 'padaria-ribeira', patch, children }: { orgId?: string; patch?: Partial<Draft>; children: ReactNode }) {
   const store = useStore();
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     store.startDraft(orgId, null);
     store.updateDraft({ text: '', tags: [], ...patch }); // a demonstração começa com um texto de exemplo
+    setReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return store.draft.orgId === orgId ? <>{children}</> : null;
+  return ready && store.draft.orgId === orgId ? <>{children}</> : null;
 }
 
 /** Providers para renderHook */

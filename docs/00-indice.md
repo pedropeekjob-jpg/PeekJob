@@ -22,3 +22,4 @@ Plataforma *mobile first* onde quem trabalha avalia, de forma anónima, **PME, a
 - **Código:** https://github.com/pedropeekjob-jpg/PeekJob
 
 > As ligações claude.ai são privadas: só abrem para quem tiver acesso partilhado pelo Pedro.
+- [11 · Frontend: arquitetura, estilos e qualidade](11-frontend.md)

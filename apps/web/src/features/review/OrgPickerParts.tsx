@@ -60,7 +60,7 @@ export function OrgResults({ orgs, total, query, selectedId, desktop, onPick }: 
 }
 
 /** Escolha do local de trabalho (mapa + lista de rádio) */
-export function LocationPicker({ org, active, desktop, onPick }: { org: Org; active: string | null; desktop: boolean; onPick: (id: string) => void }) {
+export function LocationPicker({ org, active, desktop, onPick, onOther }: { org: Org; active: string | null; desktop: boolean; onPick: (id: string) => void; onOther: () => void }) {
   const n = org.locations.length;
   return (
     <div className={`fade-up ${styles.locations}`}>
@@ -84,6 +84,11 @@ export function LocationPicker({ org, active, desktop, onPick }: { org: Org; act
           </button>
         ))}
       </div>
+      {!desktop && (
+        <button type="button" className={`link ${styles.back}`} onClick={onOther}>
+          {tr('Escolher outra organização', 'Choose another organisation')}
+        </button>
+      )}
     </div>
   );
 }

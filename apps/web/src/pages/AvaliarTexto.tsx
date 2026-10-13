@@ -34,7 +34,7 @@ export default function AvaliarTexto() {
 
   return (
     <Shell>
-      <div className={`page no-nav ${styles.page}`}>
+      <div className={`page ${styles.page}`}>
         <FlowHead icon="back" label={tr('Voltar às notas', 'Back to scores')} onClick={() => nav('/avaliar/notas')} right={<MiniSteps current={2} />} />
         <h1 className={styles.title}>{tr('Conta como é, em poucas linhas', 'Tell us what it’s like, in a few lines')}</h1>
 

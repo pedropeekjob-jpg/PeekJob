@@ -72,3 +72,12 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(await screen.findByRole('radiogroup', { name: 'Local de trabalho' })).toBeInTheDocument();
   });
 });
+
+describe('Avaliar · escolher organização (telemóvel): trocar de organização', () => {
+  beforeEach(() => localStorage.clear());
+  it('na escolha do local há "Escolher outra organização", que volta à pesquisa', async () => {
+    const { user } = show('mobile', '/avaliar?org=padaria-ribeira');
+    await user.click(await screen.findByRole('button', { name: 'Escolher outra organização' }));
+    expect(screen.getByRole('searchbox', { name: /Nome da organização/ })).toBeInTheDocument();
+  });
+});

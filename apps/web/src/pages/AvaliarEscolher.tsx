@@ -33,7 +33,7 @@ export default function AvaliarEscolher() {
   );
   const detail = (
     <>
-      {step === 'confirm' && chosen && <LocationPicker org={chosen} active={picker.effectiveLocation} desktop={desktop} onPick={picker.setLocationId} />}
+      {step === 'confirm' && chosen && <LocationPicker org={chosen} active={picker.effectiveLocation} desktop={desktop} onPick={picker.setLocationId} onOther={() => picker.setStep('pick')} />}
       {step === 'add' && <AddOrgForm form={add.form} error={add.error} desktop={desktop} onChange={add.set} onSubmit={next} onBack={() => picker.setStep('pick')} />}
     </>
   );
@@ -96,7 +96,7 @@ export default function AvaliarEscolher() {
 
   return (
     <Shell>
-      <div className={`page no-nav ${styles.mobilePage}`}>
+      <div className={`page ${styles.mobilePage}`}>
         <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => nav('/')} right={<span className="small muted">{tr('Antes de começar', 'Before you start')}</span>} />
         {step === 'pick' && (
           <div className={`fade-up ${styles.mobilePick}`}>

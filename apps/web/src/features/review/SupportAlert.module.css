@@ -33,6 +33,9 @@
   font-size: 20px;
   line-height: 1.15;
 }
+.card .body {
+  gap: 12px;
+}
 .card .title {
   font-size: 22px;
 }
@@ -56,4 +59,5 @@
 }
 .card .help {
   align-self: flex-start;
+  padding: 0 22px;
 }

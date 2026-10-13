@@ -50,7 +50,7 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
   const { done } = review;
   return (
     <Shell>
-      <div className={`page no-nav ${styles.mobile}`}>
+      <div className={`page ${styles.mobile}`}>
         <FlowHead icon="close" label={tr('Fechar (o rascunho fica guardado)', 'Close (your draft is saved)')} onClick={() => nav(`/org/${org.id}`)} right={<MiniSteps current={1} />} />
         <div className={styles.titleBlock}>
           <h1 className={styles.title}>{tr('Dá uma nota de 1 a 5', 'Score from 1 to 5')}</h1>
