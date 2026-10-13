@@ -121,13 +121,10 @@ jobs:
       - name: Preparar o SonarQube e o Quality Gate
         run: bash scripts/sonar-setup.sh
       - name: Análise
-        uses: sonarsource/sonarqube-scan-action@v5
+        uses: sonarsource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           SONAR_HOST_URL: http://localhost:9000
-      - name: Resumo
-        if: always()
-        run: bash scripts/sonar-report.sh
       - name: Quality Gate
         # TEMPORÁRIO: só avisa até a web chegar aos 80% de cobertura (refactoring do frontend, fases 2 a 4)
         continue-on-error: true
@@ -136,6 +133,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           SONAR_HOST_URL: http://localhost:9000
+      - name: Resumo
+        if: always()
+        run: bash scripts/sonar-report.sh
 
   docker:
     # Garante que a imagem de produção (API + web) constrói

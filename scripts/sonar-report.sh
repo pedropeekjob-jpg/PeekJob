@@ -3,6 +3,12 @@
 set -uo pipefail
 HOST=${SONAR_HOST_URL:-http://localhost:9000}
 q() { curl -s -u "$SONAR_TOKEN:" "$HOST/api/$1"; }
+# a análise é processada em segundo plano: espera que termine
+for i in $(seq 1 60); do
+  CE=$(q "ce/component?component=peekjob")
+  echo "$CE" | grep -q '"queue":\[\]' && echo "$CE" | grep -q '"current":{[^}]*"status":"SUCCESS"' && break
+  sleep 5
+done
 M=$(q "measures/component?component=peekjob&metricKeys=coverage,bugs,vulnerabilities,code_smells,security_hotspots,duplicated_lines_density,ncloc,reliability_rating,security_rating,sqale_rating")
 val() { echo "$M" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const m=JSON.parse(d).component.measures.find(x=>x.metric==='$1');console.log(m?m.value:'-')})"; }
 GATE=$(q "qualitygates/project_status?projectKey=peekjob" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const s=JSON.parse(d).projectStatus;console.log(s.status+' '+s.conditions.filter(c=>c.status==='ERROR').map(c=>c.metricKey+'='+c.actualValue+' (limite '+c.errorThreshold+')').join(', '))})")
