@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { buildOrgsQuery, buildMunicipalitiesQuery, OverpassClient, parseMunicipalities, parseOverpass } from '../../src/import/osm';
+import { buildOrgsQuery, buildMunicipalitiesQuery, listTargets, OverpassClient, parseMunicipalities, parseOverpass } from '../../src/import/osm';
 
 const fixture = JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'overpass-porto.json'), 'utf8'));
 
@@ -29,7 +29,7 @@ describe('OpenStreetMap (Overpass): organizações de um concelho', () => {
     const orgs = parseOverpass(fixture, 'Porto');
     const by = Object.fromEntries(orgs.map((o) => [o.name, o]));
     expect(by['Padaria Ribeira']).toEqual({
-      externalId: 'node/101', name: 'Padaria Ribeira', type: 'PME', sector: 'Comércio', city: 'Porto',
+      externalId: 'node/101', name: 'Padaria Ribeira', type: 'PME', sector: 'Comércio', city: 'Porto', district: 'Porto',
       address: 'Rua de Cima 12, 4050-123 Porto', lat: 41.1496, lng: -8.6109, nif: null,
     });
     expect(by['Associação Mãos Dadas']).toMatchObject({ externalId: 'way/202', type: 'Associação', sector: 'Ação social', lat: 41.158, lng: -8.629 });
@@ -66,5 +66,50 @@ describe('OpenStreetMap (Overpass): organizações de um concelho', () => {
   it('Overpass: desiste ao fim de algumas tentativas, com erro claro', async () => {
     const fetchFn = (async () => new Response('x', { status: 504 })) as unknown as typeof fetch;
     await expect(new OverpassClient(fetchFn, 'https://o.test', 0, 3).run('q')).rejects.toThrow(/Overpass.*504/);
+  });
+});
+
+describe('OpenStreetMap: concelhos a importar, cada um com o distrito', () => {
+  const fake = (byDistrict: Record<string, string[]>) => {
+    const calls: string[] = [];
+    return {
+      calls,
+      run: async (q: string) => {
+        calls.push(q);
+        const d = Object.keys(byDistrict).find((k) => q.includes(`"${k}"`) || (k === 'Açores' && q.includes('Região Autónoma dos Açores')));
+        return { elements: (d ? byDistrict[d] : []).map((name) => ({ type: 'relation' as const, id: 1, tags: { name } })) };
+      },
+    };
+  };
+
+  it('um concelho: distrito pelo nome, ou o indicado (nomes repetidos como Lagoa)', async () => {
+    const o = fake({});
+    expect(await listTargets(o, { city: 'Matosinhos' })).toEqual([{ municipality: 'Matosinhos', district: 'Porto' }]);
+    expect(await listTargets(o, { city: 'Lagoa' })).toEqual([{ municipality: 'Lagoa', district: null }]);
+    expect(await listTargets(o, { city: 'Lagoa', district: 'Açores' })).toEqual([{ municipality: 'Lagoa', district: 'Açores' }]);
+    expect(o.calls).toHaveLength(0);
+  });
+
+  it('um distrito: os concelhos dele; --all: os 20 distritos e regiões, um a um', async () => {
+    const o = fake({ Faro: ['Lagoa', 'Faro'], Açores: ['Lagoa', 'Ponta Delgada'] });
+    expect(await listTargets(o, { district: 'Faro' })).toEqual([
+      { municipality: 'Faro', district: 'Faro' },
+      { municipality: 'Lagoa', district: 'Faro' },
+    ]);
+    const all = await listTargets(o, { all: true });
+    expect(o.calls).toHaveLength(1 + 20);
+    expect(all).toContainEqual({ municipality: 'Lagoa', district: 'Açores' });
+    expect(all).toContainEqual({ municipality: 'Lagoa', district: 'Faro' });
+  });
+
+  it('distrito desconhecido ou sem opções: erro claro', async () => {
+    await expect(listTargets(fake({}), { district: 'Lisbon' })).rejects.toThrow(/Distrito desconhecido: Lisbon/);
+    await expect(listTargets(fake({}), {})).rejects.toThrow(/--city/);
+  });
+
+  it('as organizações levam o distrito (o indicado ou o do concelho)', () => {
+    expect(parseOverpass(fixture, 'Porto').every((o) => o.district === 'Porto')).toBe(true);
+    expect(parseOverpass(fixture, 'Lagoa').every((o) => o.district === null)).toBe(true);
+    expect(parseOverpass(fixture, 'Lagoa', 'Faro').every((o) => o.district === 'Faro')).toBe(true);
   });
 });

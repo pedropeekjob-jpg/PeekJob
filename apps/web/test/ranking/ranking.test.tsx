@@ -126,9 +126,9 @@ describe('janela do computador', () => {
 
 describe('grupos de filtros com muitas opções', () => {
   it('3 visíveis + escolhidas; "+n" abre o resto e "Menos" fecha', async () => {
-    expect(visibleOptions(['a', 'b', 'c', 'd'], [], false, false)).toEqual({ collapsible: false, shown: ['a', 'b', 'c', 'd'], hidden: 0 });
-    expect(visibleOptions(['a', 'b', 'c', 'd', 'e', 'f'], ['f'], false, false)).toEqual({ collapsible: true, shown: ['a', 'b', 'c', 'f'], hidden: 2 });
-    expect(visibleOptions(['a', 'b', 'c', 'd', 'e'], [], false, true).collapsible).toBe(false);
+    expect(visibleOptions(['a', 'b', 'c', 'd'], [], false)).toEqual({ collapsible: false, shown: ['a', 'b', 'c', 'd'], hidden: 0 });
+    expect(visibleOptions(['a', 'b', 'c', 'd', 'e', 'f'], ['f'], false)).toEqual({ collapsible: true, shown: ['a', 'b', 'c', 'f'], hidden: 2 });
+    expect(visibleOptions(['a', 'b', 'c', 'd', 'e', 'f'], [], true).shown).toHaveLength(6);
 
     const districts = ['Aveiro', 'Beja', 'Braga', 'Bragança', 'Castelo Branco', 'Coimbra'];
     const groups = [{ key: 'dist' as const, label: 'Distrito', short: 'Distrito', opts: districts }];

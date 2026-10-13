@@ -26,7 +26,7 @@ export function SortToggle({ F, big = false }: { F: RankingFilters; big?: boolea
 
 function FilterGroupField({ g, chosen, compact, onToggle }: { g: FilterGroup; chosen: string[]; compact: boolean; onToggle: (k: GroupKey, v: string) => void }) {
   const [open, setOpen] = useState(false);
-  const { collapsible, shown, hidden } = visibleOptions(g.opts, chosen, open, compact);
+  const { collapsible, shown, hidden } = visibleOptions(g.opts, chosen, open);
   return (
     <fieldset className={styles.group}>
       <legend className={compact ? styles.legendCompact : styles.legend}>{compact ? g.short : g.label}</legend>

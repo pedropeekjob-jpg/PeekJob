@@ -84,6 +84,10 @@ describe('Ranking no telemóvel: folha de filtros', () => {
     expect(search()).toBe('?tipo=Voluntariado');
     await user.click(within(sheet).getByRole('button', { name: 'PME' }));
     expect(search()).toBe('?tipo=Voluntariado%2CPME');
+    // os 20 distritos: 3 visíveis e "+17" para os restantes
+    await user.click(within(sheet).getByRole('button', { name: '+17' }));
+    expect(within(sheet).getByRole('button', { name: 'Menos' })).toHaveAttribute('aria-expanded', 'true');
+    expect(within(sheet).getByRole('button', { name: 'Açores' })).toBeInTheDocument();
     await user.click(within(sheet).getByRole('button', { name: 'Porto' }));
     await user.click(within(sheet).getByRole('button', { name: '10–49' }));
     await user.click(within(sheet).getByRole('switch', { name: /Respeito e inclusão 4 ou mais/ }));
@@ -154,6 +158,7 @@ describe('Ranking no computador: lista e pré-visualização', () => {
     const panel = screen.getByRole('region', { name: 'Filtros' });
     await user.click(within(panel).getByRole('button', { name: 'Associação' }));
     await user.click(within(panel).getByRole('button', { name: 'Associação' }));
+    await user.click(within(panel).getByRole('button', { name: '+17' }));
     await user.click(within(panel).getByRole('button', { name: 'Porto' }));
     await user.click(within(panel).getByRole('switch', { name: /Respeito e inclusão ≥ 4/ }));
     await user.click(within(panel).getByRole('switch', { name: /Só verificadas/ }));

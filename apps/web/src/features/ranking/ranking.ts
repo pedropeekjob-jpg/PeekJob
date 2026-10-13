@@ -1,5 +1,6 @@
 import { CRITERIA, CRITERION, type CriterionKey } from '../../data/criteria';
-import { DISTRICTS, ORG_TYPES, type Org, type SizeBand } from '../../data/orgs';
+import { DISTRICTS } from '@peekjob/shared';
+import { ORG_TYPES, type Org, type SizeBand } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { orgTypeLabel } from '../../i18n/labels';
 import { plural } from '../../lib/format';
@@ -37,10 +38,11 @@ export interface FilterGroup {
   optLabel?: (v: string) => string;
 }
 
-export const filterGroups = (districts: string[] = DISTRICTS): FilterGroup[] => [
+/** Os 18 distritos e as 2 regiões autónomas (o filtro serve para todo o país, não só para os dados de exemplo) */
+export const filterGroups = (districts: readonly string[] = DISTRICTS): FilterGroup[] => [
   { key: 'tipo', label: tr('Tipo de organização', 'Type of organisation'), short: tr('Tipo', 'Type'), opts: ORG_TYPES, optLabel: orgTypeLabel },
   { key: 'dim', label: tr('Dimensão (pessoas)', 'Size (people)'), short: tr('Pessoas', 'People'), opts: SIZES },
-  { key: 'dist', label: tr('Distrito', 'District'), short: tr('Distrito', 'District'), opts: districts },
+  { key: 'dist', label: tr('Distrito', 'District'), short: tr('Distrito', 'District'), opts: [...districts] },
 ];
 
 const list = (v: string | null) => (v ? v.split(',').filter(Boolean) : []);
@@ -139,9 +141,9 @@ export function filterChips(f: Filters): { text: string; aria: string }[] {
   return chips;
 }
 
-/** Opções visíveis de um grupo: as primeiras e as escolhidas, a não ser que esteja aberto */
-export function visibleOptions(opts: string[], chosen: string[], open: boolean, compact: boolean) {
-  const collapsible = opts.length > VISIBLE_OPTIONS + 1 && !compact;
+/** Opções visíveis de um grupo: as primeiras e as escolhidas, a não ser que esteja aberto (ex.: os 20 distritos) */
+export function visibleOptions(opts: string[], chosen: string[], open: boolean) {
+  const collapsible = opts.length > VISIBLE_OPTIONS + 1;
   const shown = !collapsible || open ? opts : opts.filter((o, i) => i < VISIBLE_OPTIONS || chosen.includes(o));
   return { collapsible, shown, hidden: opts.length - shown.length };
 }

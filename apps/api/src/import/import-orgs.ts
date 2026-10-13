@@ -60,12 +60,15 @@ async function importOne(c: PoolClient, o: ImportedOrg, source: string, license:
   if (!target) {
     const nifFree = o.nif ? !(await c.query('SELECT 1 FROM organizations WHERE nif = $1', [o.nif])).rowCount : false;
     const ins = await c.query(
-      `INSERT INTO organizations (name, type, city, sector, nif, status, source)
-       VALUES ($1, $2, $3, $4, $5, 'pending', 'import') RETURNING id`,
-      [o.name, o.type, o.city, o.sector, nifFree ? o.nif : null],
+      `INSERT INTO organizations (name, type, city, district, sector, nif, status, source)
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending', 'import') RETURNING id`,
+      [o.name, o.type, o.city, o.district, o.sector, nifFree ? o.nif : null],
     );
     target = ins.rows[0].id as string;
     outcome = 'created';
+  } else if (o.district) {
+    // a organização já existia (criada por alguém, sem distrito conhecido): completa-o
+    await c.query('UPDATE organizations SET district = $2 WHERE id = $1 AND district IS NULL', [target, o.district]);
   }
   if (o.address || o.lat != null) {
     await c.query(`INSERT INTO org_locations (org_id, address, city, lat, lng, status) VALUES ($1, $2, $3, $4, $5, 'active')`, [

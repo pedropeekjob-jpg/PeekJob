@@ -203,4 +203,3 @@ export const ORGS: Org[] = [
 export const ORG_BY_ID: Record<string, Org> = Object.fromEntries(ORGS.map((o) => [o.id, o]));
 
 export const SECTORS = Array.from(new Set(ORGS.map((o) => o.sector))).sort(byPt);
-export const DISTRICTS = Array.from(new Set(ORGS.map((o) => o.district))).sort(byPt);

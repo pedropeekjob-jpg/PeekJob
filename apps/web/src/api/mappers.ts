@@ -8,6 +8,8 @@ export interface ApiOrg {
   name: string;
   type: OrgType;
   city: string;
+  /** distrito ou região autónoma; null se a cidade não for um concelho (ou for ambígua) */
+  district?: string | null;
   sector?: string | null;
   status: 'active' | 'pending';
   reviewsCount?: number;
@@ -64,7 +66,7 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = []): Org {
     type: o.type,
     sector: o.sector ?? '—',
     city: o.city,
-    district: o.city,
+    district: o.district ?? '',
     people: 0,
     size: '1–9',
     score: o.score ?? 0,

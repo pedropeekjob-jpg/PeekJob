@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CRITERION_KEYS, ORG_TYPES, REVIEW_TAGS, REVIEW_TEXT_MAX } from './criteria';
+import { DISTRICTS } from './districts';
 import { isValidNif, normalizeNif } from './nif';
 
 const nifField = z
@@ -12,6 +13,8 @@ export const CreateOrganizationInput = z
     name: z.string().trim().min(2, 'Nome demasiado curto').max(120),
     type: z.enum(ORG_TYPES),
     city: z.string().trim().min(2).max(80),
+    /** opcional: sem ele, o distrito vem da cidade quando é um concelho sem ambiguidade */
+    district: z.enum(DISTRICTS).optional(),
     nif: nifField.optional(),
     address: z.string().trim().max(200).optional(),
   })

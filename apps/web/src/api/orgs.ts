@@ -1,3 +1,4 @@
+import { districtOf } from '@peekjob/shared';
 import { useEffect, useMemo, useState } from 'react';
 import { ORGS, ORG_BY_ID, type Org } from '../data/orgs';
 import { match } from '../lib/match';
@@ -15,7 +16,7 @@ const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,
 
 function fromAdded(a: AddedOrg): Org {
   return {
-    id: a.id, name: a.name, type: a.type, sector: '—', city: a.city, district: a.city, people: 0, size: '1–9',
+    id: a.id, name: a.name, type: a.type, sector: '—', city: a.city, district: districtOf(a.city) ?? '', people: 0, size: '1–9',
     score: 0, reviewsCount: 0, verifiedPct: 0, trend: 'novo', weekDelta: 0,
     scores: { salario: null, equilibrio: 0, respeito: 0, ambiente: 0, lideranca: 0, estabilidade: null, progressao: 0, proposito: 0 },
     summary: 'Organização nova. Ainda sem avaliações públicas.', respeitoTags: [], harassmentReports: 0,

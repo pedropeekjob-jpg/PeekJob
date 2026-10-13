@@ -14,12 +14,22 @@
 | 8 | **Verificação anónima** por código no email de trabalho ou NIF lido de um PDF (recibo/contrato) | Dá peso às avaliações sem guardar o email de trabalho nem o documento: guarda-se só o "sim" | Upload guardado para revisão humana: risco de RGPD desnecessário |
 | 9 | **A API serve a web em produção** (mesma origem) | O cookie de sessão é do próprio site: funciona no Safari/iPhone, que bloqueia cookies entre domínios. Sem CORS em produção | Web e API em domínios diferentes, com cookies `SameSite=None` (falham no Safari) ou tokens no browser (menos seguros) |
 
+## Distrito de cada organização
+
+O ranking filtra por distrito em todo o país (18 distritos e as regiões autónomas dos Açores e da Madeira).
+
+- A lista dos 308 concelhos e do distrito de cada um está em `packages/shared/src/districts.ts` e, igual, na tabela `municipalities` (migração `007_districts.sql`; um teste confirma que coincidem e as contagens oficiais por distrito).
+- `organizations.district` é preenchido por um trigger a partir da cidade quando quem grava não o indica. Fica vazio se a cidade não for um concelho (ex.: uma localidade) ou se o nome existir em duas regiões ("Lagoa", "Calheta").
+- O importador indica sempre o distrito da consulta; ao criar uma organização pode indicar-se `district` (opcional).
+- A API devolve `district` nas organizações e na pesquisa.
+
 ## Como se alimentam as organizações
 
 Não existe em Portugal uma API pública e gratuita com a lista de empresas e associações. A lista faz-se com três fontes abertas e com quem avalia.
 
 1. **OpenStreetMap** (gratuito, licença ODbL), para todo o país:
-   - corre por concelho: `npm run import:osm -w @peekjob/api -- --city Porto`, `--district Braga` (também `Açores` e `Madeira`) ou `--all` (os 308 concelhos, um a um);
+   - corre por concelho: `npm run import:osm -w @peekjob/api -- --city Porto`, `--district Braga` (também `Açores` e `Madeira`) ou `--all` (os 308 concelhos, distrito a distrito);
+   - cada organização fica com o distrito (ou região autónoma) da consulta. "Lagoa" e "Calheta" existem em duas regiões: com `--city` é preciso indicar `--district`;
    - `--dry-run` só conta e não grava;
    - no GitHub há um workflow manual, "Importar organizações (OpenStreetMap)", com as opções simular, UAT e produção. Precisa dos segredos `UAT_DATABASE_URL` / `PROD_DATABASE_URL`;
    - inclui comércio, ofícios, restauração, turismo, saúde privada, escolas privadas, associações, ONG e IPSS;

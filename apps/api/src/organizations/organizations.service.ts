@@ -22,6 +22,7 @@ export interface OrgSummary {
   name: string;
   type: string;
   city: string;
+  district: string | null;
   status: string;
 }
 
@@ -35,7 +36,7 @@ const num = (v: unknown) => (v == null ? null : Number(v));
 const CRITERIA_SQL = `jsonb_build_object(${CRITERION_KEYS.map((k) => `'${k}', round(avg((r.scores ->> '${k}')::numeric), 1)`).join(', ')})`;
 
 const AGG_SELECT = `
-  SELECT o.id, o.name, o.type, o.city, o.sector, o.status, o.nif_verified,
+  SELECT o.id, o.name, o.type, o.city, o.district, o.sector, o.status, o.nif_verified,
          count(r.id)::int AS reviews_count, round(avg(r.avg), 1) AS score, ${CRITERIA_SQL} AS criteria,
          count(r.id) FILTER (WHERE r.flag_kinds && ARRAY['assédio sexual', 'assédio moral'])::int AS harassment_reports
     FROM organizations o
@@ -48,6 +49,8 @@ function toPublicOrg(row: Record<string, any>) {
     name: row.name,
     type: row.type,
     city: row.city,
+    /** distrito ou região autónoma (null se a cidade não for um concelho ou for ambígua) */
+    district: row.district ?? null,
     sector: row.sector,
     status: row.status,
     nifVerified: row.nif_verified,
@@ -83,7 +86,7 @@ export class OrganizationsService {
   async search(q: SearchOrganizationsQuery): Promise<OrgSummary[]> {
     const { rows } = await this.pool.query(
       `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
-       SELECT o.id, o.name, o.type, o.city, o.status,
+       SELECT o.id, o.name, o.type, o.city, o.district, o.status,
               greatest(similarity(o.search_name, input.q),
                        word_similarity(input.q, o.search_name),
                        coalesce(max(similarity(a.search_alias, input.q)), 0)) AS score
@@ -122,7 +125,7 @@ export class OrganizationsService {
         throw new HttpException('Limite diário de novas organizações atingido', HttpStatus.TOO_MANY_REQUESTS);
       }
       const dups = await c.query(
-        `SELECT id, name, type, city, status FROM organizations
+        `SELECT id, name, type, city, district, status FROM organizations
           WHERE status IN ('active', 'pending')
             AND search_city = lower(f_unaccent($2))
             AND similarity(search_name, lower(f_unaccent($1))) > 0.45
@@ -130,10 +133,11 @@ export class OrganizationsService {
         [input.name, input.city],
       );
       const { rows } = await c.query(
-        `INSERT INTO organizations (name, type, city, nif, status, source, created_by)
-         VALUES ($1, $2, $3, $4, 'pending', 'user', $5)
-         RETURNING id, name, type, city, status`,
-        [input.name, input.type, input.city, input.nif ?? null, creatorRef],
+        `INSERT INTO organizations (name, type, city, district, nif, status, source, created_by)
+         VALUES ($1, $2, $3, $4, $5, 'pending', 'user', $6)
+         RETURNING id, name, type, city, district, status`,
+        // sem distrito indicado, o trigger da base de dados tira-o da cidade (se for um concelho sem ambiguidade)
+        [input.name, input.type, input.city, input.district ?? null, input.nif ?? null, creatorRef],
       );
       if (input.address) {
         await c.query(`INSERT INTO org_locations (org_id, address, city) VALUES ($1, $2, $3)`, [rows[0].id, input.address, input.city]);

@@ -1,4 +1,4 @@
-import { isValidNif, normalizeNif } from '@peekjob/shared';
+import { DISTRICTS, districtOf, isDistrict, isValidNif, normalizeNif } from '@peekjob/shared';
 
 /**
  * OpenStreetMap via Overpass API: organizações com nome de um concelho português.
@@ -12,6 +12,8 @@ export interface ImportedOrg {
   type: 'PME' | 'Associação';
   sector: string | null;
   city: string;
+  /** distrito ou região autónoma; null se não se souber (o trigger da base de dados tenta pela cidade) */
+  district: string | null;
   address: string | null;
   lat: number | null;
   lng: number | null;
@@ -63,6 +65,29 @@ export function parseMunicipalities(json: { elements?: { tags?: Record<string, s
   return [...names].sort((a, b) => a.localeCompare(b, 'pt'));
 }
 
+export interface Target {
+  municipality: string;
+  district: string | null;
+}
+
+/**
+ * Concelhos a importar, cada um com o distrito:
+ * - city: um concelho (distrito indicado ou tirado do nome; "Lagoa"/"Calheta" precisam de --district)
+ * - district: os concelhos desse distrito ou região autónoma
+ * - all: os 20 distritos e regiões, um a um (assim o distrito vem da própria consulta)
+ */
+export async function listTargets(overpass: Pick<OverpassClient, 'run'>, opts: { city?: string; district?: string; all?: boolean }): Promise<Target[]> {
+  if (opts.district && !isDistrict(opts.district)) throw new Error(`Distrito desconhecido: ${opts.district} (${DISTRICTS.join(', ')})`);
+  if (opts.city) return [{ municipality: opts.city, district: opts.district ?? districtOf(opts.city) }];
+  const districts = opts.district ? [opts.district] : opts.all ? [...DISTRICTS] : [];
+  if (!districts.length) throw new Error('Indica --city <concelho>, --district <distrito> ou --all');
+  const out: Target[] = [];
+  for (const d of districts) {
+    for (const m of parseMunicipalities(await overpass.run(buildMunicipalitiesQuery(d)))) out.push({ municipality: m, district: d });
+  }
+  return out;
+}
+
 const ASSOC_OFFICE = /^(association|ngo|foundation|charity|non_profit|cooperative)$/;
 function classify(t: Record<string, string>): { type: ImportedOrg['type']; sector: string | null } | null {
   if (t.office && new RegExp(`^(${OFFICE_EXCLUDE})$`).test(t.office)) return null;
@@ -96,8 +121,11 @@ interface OverpassElement {
   tags?: Record<string, string>;
 }
 
-/** Converte a resposta do Overpass. Fica de fora: sem nome, grandes marcas (brand:wikidata) e entidades públicas. */
-export function parseOverpass(json: { elements?: OverpassElement[] }, municipality: string): ImportedOrg[] {
+/**
+ * Converte a resposta do Overpass. Fica de fora: sem nome, grandes marcas (brand:wikidata) e entidades públicas.
+ * O distrito vem de quem pediu o concelho (sabe-o mesmo para "Lagoa" e "Calheta"); senão, do nome do concelho.
+ */
+export function parseOverpass(json: { elements?: OverpassElement[] }, municipality: string, district: string | null = districtOf(municipality)): ImportedOrg[] {
   const out: ImportedOrg[] = [];
   const seen = new Set<string>();
   for (const e of json.elements ?? []) {
@@ -117,6 +145,7 @@ export function parseOverpass(json: { elements?: OverpassElement[] }, municipali
       type: cls.type,
       sector: cls.sector,
       city: municipality,
+      district,
       address: address(t)?.slice(0, 200) ?? null,
       lat: e.lat ?? e.center?.lat ?? null,
       lng: e.lon ?? e.center?.lon ?? null,

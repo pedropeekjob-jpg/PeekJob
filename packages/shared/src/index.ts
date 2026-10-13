@@ -6,3 +6,4 @@ export * from './schemas';
 export * from './support';
 export * from './routes';
 export * from './scrub';
+export * from './districts';
