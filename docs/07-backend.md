@@ -16,15 +16,31 @@
 
 ## Como se alimentam as organizações
 
-1. **Seed curado** da cidade e dos setores de lançamento (`apps/api/seed/`), com origem e licença de cada dado em `org_sources`.
-2. **Quem avalia** pode criar uma organização que falta:
+Não existe em Portugal uma API pública e gratuita com a lista de empresas e associações. A lista faz-se com três fontes abertas e com quem avalia.
+
+1. **OpenStreetMap** (gratuito, licença ODbL), para todo o país:
+   - corre por concelho: `npm run import:osm -w @peekjob/api -- --city Porto`, `--district Braga` (também `Açores` e `Madeira`) ou `--all` (os 308 concelhos, um a um);
+   - `--dry-run` só conta e não grava;
+   - no GitHub há um workflow manual, "Importar organizações (OpenStreetMap)", com as opções simular, UAT e produção. Precisa dos segredos `UAT_DATABASE_URL` / `PROD_DATABASE_URL`;
+   - inclui comércio, ofícios, restauração, turismo, saúde privada, escolas privadas, associações, ONG e IPSS;
+   - deixa de fora entidades públicas, grandes marcas (`brand:wikidata`) e lugares sem nome;
+   - não duplica: guarda o identificador do OpenStreetMap em `org_sources.external_id`, e junta a uma organização existente quando o NIF é o mesmo ou o nome é muito parecido (≥ 0,6) na mesma cidade;
+   - as organizações importadas ficam disponíveis no fluxo de avaliar e passam a públicas com a primeira avaliação. Não entram na fila de moderação.
+   - Atribuição obrigatória: "© contribuidores do OpenStreetMap (ODbL)", no rodapé e na privacidade. A ODbL pede que uma base derivada partilhada seja aberta nos mesmos termos, por isso convém validação jurídica antes da produção.
+2. **VIES** (Comissão Europeia, gratuito): confirma o NIF e devolve o nome e a morada oficiais.
+   - No formulário, `GET /orgs/nif/:nif` preenche o nome e a localidade.
+   - Ao criar, se o nome bater certo, o NIF fica confirmado, o nome oficial fica como alias e a origem fica registada.
+   - Não bloqueia: associações sem IVA intracomunitário não aparecem no VIES, e se o serviço estiver em baixo a organização é criada na mesma.
+   - Para NIFs de pessoas (nome individual) só se diz se o NIF existe; o nome da pessoa nunca é guardado nem mostrado.
+3. **Seed curado** (`apps/api/seed/`), com a origem e a licença de cada dado em `org_sources`.
+4. **Quem avalia** pode criar uma organização que falta:
    - antes de criar, mostra-se "Será alguma destas?";
-   - com NIF, valida-se o dígito de controlo e recusa-se um NIF que já exista (devolve a organização certa);
+   - com NIF, valida-se o dígito de controlo, confirma-se no VIES e recusa-se um NIF que já exista (devolve a organização certa);
    - sem NIF, pedem-se nome, tipo e cidade;
    - as empresas em nome individual têm NIF obrigatório.
-3. **Ativação:** a organização fica pendente até haver NIF confirmado, 3 pessoas diferentes a avaliar ou aprovação de um moderador.
-4. **Duplicados:** são avisados ao criar. Se escaparem, um moderador funde-os; as avaliações passam para a organização certa, o nome antigo fica como alias e o link antigo redireciona (308).
-5. **Limite:** cada pessoa pode criar 5 organizações por dia.
+5. **Ativação:** a organização fica pendente até haver NIF confirmado, 3 pessoas diferentes a avaliar ou aprovação de um moderador. As importadas de fontes abertas ficam ativas com a primeira avaliação.
+6. **Duplicados:** são avisados ao criar. Se escaparem, um moderador funde-os; as avaliações passam para a organização certa, o nome antigo fica como alias e o link antigo redireciona (308).
+7. **Limite:** cada pessoa pode criar 5 organizações por dia.
 
 ## API
 
@@ -36,7 +52,8 @@
 | POST | `/auth/logout` | sessão | Termina a sessão → 204 |
 | GET | `/orgs` | todos | Organizações ativas com nota, médias, locais e nº de relatos de assédio (só o número) |
 | GET | `/orgs/search?q=&type=&includePending=` | todos | Pesquisa tolerante (acentos, maiúsculas, erros, nomes antigos) |
-| POST | `/orgs` | sessão | Cria a organização pendente e devolve os possíveis duplicados |
+| POST | `/orgs` | sessão | Cria a organização pendente e devolve os possíveis duplicados e `nifCheck`: confirmed, name_mismatch, exists, not_found ou unavailable |
+| GET | `/orgs/nif/:nif` | sessão | Nome e morada oficiais (VIES), para preencher o formulário; para NIFs de pessoas só o estado |
 | GET | `/orgs/:id` | todos | Organização ativa com nota, nº de avaliações e média por critério; fundida → 308 |
 | POST | `/orgs/:id/approve` | moderador | Ativa uma organização pendente |
 | POST | `/orgs/:id/merge` | moderador | Funde um duplicado (`{ targetId }`) |
@@ -47,6 +64,7 @@
 | POST | `/verifications/document` | sessão | PDF em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
 | GET | `/me/verifications` | sessão | As minhas verificações |
 | GET | `/me/reviews` | sessão | As minhas avaliações |
+| POST | `/reviews/rewrite` | todos | Reescrever com IA: proposta publicável (sem nomes nem insultos, com os mesmos factos); não guarda o texto; 20 pedidos/10 min por pessoa |
 | POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
 | GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação |
 | POST | `/moderation/reviews/:id/decision` | moderador | `remove` ou `keep`, com justificação; avisa quem escreveu e quem denunciou |
@@ -64,11 +82,28 @@ Ao publicar uma avaliação, a API responde assim:
 
 | Situação | Resposta |
 |---|---|
-| Insultos ou nomes de pessoas | 422, com uma sugestão de texto sem eles |
+| Insultos ou nomes de pessoas (português e inglês) | 422, com uma sugestão de texto sem eles e `rewriteAvailable` |
 | Possível ilegalidade | Publica a avaliação, marca-a e cria uma mensagem privada de apoio |
 | A mesma pessoa avalia a mesma organização uma segunda vez | 409 |
 
 Depois da verificação, as avaliações dessa pessoa nessa organização passam a "verificadas". Um NIF confirmado também ativa uma organização pendente.
+
+## Reescrever com IA
+
+Quem escreve com raiva recebe uma proposta publicável e decide se a usa. Pode sempre editar depois.
+
+- **Quando aparece:** a caixa "Reescrever com IA" surge quando o texto está bloqueado (nomes, insultos) ou tem tom agressivo (MAIÚSCULAS a gritar, "!!!", palavrões), em português e em inglês. Em textos longos e calmos há uma ligação discreta, "Rever o tom com IA".
+- **Modelo:** Anthropic (`claude-haiku-5-5` por omissão, `REWRITE_MODEL`), chamado pela API HTTP sem SDK.
+- **Instruções ao modelo:**
+  - manter os factos e a gravidade, sem suavizar denúncias de salários em atraso, assédio ou falta de contrato;
+  - tirar nomes e detalhes que identifiquem pessoas;
+  - tirar insultos e palavrões;
+  - não inventar nada.
+  O texto vai delimitado e é tratado como dados, nunca como instruções.
+- **Rede de segurança:** se a proposta ainda tiver nomes ou insultos, passa pelas regras (`softenText`). Fica sempre dentro dos 600 caracteres.
+- **Sem chave** (`ANTHROPIC_API_KEY`) ou com a IA em baixo, usa só as regras. A funcionalidade nunca impede o arranque.
+- **Privacidade:** o texto é enviado à Anthropic só para gerar a proposta, e a API não o guarda nem o regista nos logs. O limite de pedidos usa um pseudónimo (HMAC) da pessoa ou do IP.
+- **Medição:** evento `review_rewrite` (requested, accepted, dismissed, failed), com `trigger` (blocked, tone, manual) e `source` (ai, rules).
 
 ## Denúncias e moderação (Regulamento dos Serviços Digitais)
 - Qualquer pessoa denuncia, com ou sem conta. A avaliação só sai do site por decisão de um moderador, sempre com justificação.
@@ -107,13 +142,12 @@ VITE_API_URL=http://localhost:3000 npm run dev:web      # web em modo API
 TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm test
 ```
 
-- **Domínio partilhado:** 42 testes (vitest).
-- **Web:** 22 testes (medição e privacidade).
-- **API:** 123 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **Domínio partilhado:** 46 testes (vitest).
+- **Web:** 27 testes (medição, privacidade e morada do VIES).
+- **API:** 164 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia
-- Moderação: API de moderação + LLM para casos duvidosos e fila humana.
 - Guardadas e "útil" no servidor (hoje ficam no browser).
 - Verificação por fotografia do recibo (OCR); hoje só PDF com texto.
 - Locais e mapa: geocodificação em segundo plano.

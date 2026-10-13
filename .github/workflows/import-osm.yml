@@ -51,4 +51,10 @@ jobs:
           esac
           if [ "$TARGET" != simular ] && [ -z "$DATABASE_URL" ]; then echo "Falta o segredo da base de dados para $TARGET"; exit 1; fi
           if [ "$TARGET" != simular ]; then node dist/db/migrate-cli.js; fi
-          node dist/import/osm-cli.js "${ARGS[@]}"
+          set -o pipefail
+          node dist/import/osm-cli.js "${ARGS[@]}" | tee import.log
+          # Resumo visível no topo do run (e no sumário)
+          echo "::notice title=Importação ${AREA} (${TARGET})::$(grep '^Total' import.log)"
+          FAILS=$(grep -c 'falhou' import.log || true)
+          [ "$FAILS" -gt 0 ] && echo "::warning title=Concelhos com falha::${FAILS} — $(grep 'falhou' import.log | head -5 | tr '\n' ' ')"
+          { echo "### Importação ${AREA} (${TARGET})"; echo '```'; cat import.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

@@ -51,6 +51,9 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `DATABASE_URL` | sim | PostgreSQL |
 | `PRIVACY_SECRET` | sim | Pseudónimos e hashes dos emails (HMAC) |
 | `RESEND_API_KEY`, `MAIL_FROM` | sim em produção | Envio dos links e dos códigos. Sem elas a API recusa arrancar em produção |
+| `ANTHROPIC_API_KEY` | não (recomendada) | Reescrever com IA. Sem ela usa só as regras. Pôr um limite de gastos na consola da Anthropic |
+| `REWRITE_MODEL` | não | Modelo da reescrita (por omissão `claude-haiku-5-5`) |
+| `VIES_URL` | não | `off` desliga a confirmação de NIF no VIES (por omissão, o endpoint oficial) |
 | `WEB_ORIGIN` | não | Endereço público (por omissão o do Render) |
 | `WEB_DIST` | já na imagem | Pasta da build da web servida pela API |
 | `SEED_DEMO` | não | `true` carrega as organizações de demonstração |
