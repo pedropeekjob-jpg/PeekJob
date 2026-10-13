@@ -16,6 +16,10 @@ api() { curl -sf -u "admin:$PASS" -X POST "$HOST/api/$1" "${@:2}"; }
 TOKEN=$(api user_tokens/generate -d name=ci -d type=GLOBAL_ANALYSIS_TOKEN | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 echo "::add-mask::$TOKEN"
 echo "SONAR_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+# token de leitura para o resumo (o de análise não pode ler medidas por ficheiro); servidor efémero do CI
+READ=$(api user_tokens/generate -d name=ci-read -d type=USER_TOKEN | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+echo "::add-mask::$READ"
+echo "SONAR_READ_TOKEN=$READ" >> "$GITHUB_ENV"
 
 # Quality Gate (sobre todo o código, porque o servidor é novo em cada análise):
 #  cobertura ≥ 80%, fiabilidade A (sem bugs), segurança A (sem vulnerabilidades), manutenção A, duplicação ≤ 3%

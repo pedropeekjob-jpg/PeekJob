@@ -2,7 +2,7 @@
 # Resumo da análise: no sumário do run e como anotações (visíveis no topo do run e pela API).
 set -uo pipefail
 HOST=${SONAR_HOST_URL:-http://localhost:9000}
-q() { curl -s -u "$SONAR_TOKEN:" "$HOST/api/$1"; }
+q() { curl -s -u "${SONAR_READ_TOKEN:-$SONAR_TOKEN}:" "$HOST/api/$1"; }
 # a análise é processada em segundo plano: espera que termine
 for i in $(seq 1 60); do
   CE=$(q "ce/component?component=peekjob")
