@@ -5,6 +5,12 @@ const draft = {
   prefs: ['respeito', 'salario', 'equilibrio'],
 };
 
+/** Estado com uma avaliação acabada de publicar (com ou sem relato grave) */
+const published = (flagged) => ({
+  lastPublished: 'novo-1',
+  myReviews: [{ id: 'novo-1', orgId: 'padaria-ribeira', scores: { salario: 3, equilibrio: 3, respeito: 4, ambiente: 4, lideranca: 4, estabilidade: 3, progressao: 3, proposito: 4 }, avg: 3.5, recommend: true, tags: [], text: 'Texto.', when: 'agora', flagged }],
+});
+
 export const STORAGE_KEY = 'peekjob-poc-v1';
 export const STATE = draft;
 
@@ -140,4 +146,8 @@ export const SCENARIOS = [
   { name: 'avaliar-documento', path: '/avaliar/verificar', run: (p) => p.getByRole('tab').nth(1).click() },
   { name: 'avaliar-notas', path: '/avaliar/notas' },
   { name: 'avaliar-texto', path: '/avaliar/texto', mobileOnly: true },
+  { name: 'avaliar-feito-vazio', path: '/avaliar/feito', state: { lastPublished: null } },
+  { name: 'avaliar-feito', path: '/avaliar/feito', full: true, state: published(false), run: (p) => tap(p, 'button', /^Ver as tuas 8 notas/) },
+  { name: 'avaliar-feito-apoio', path: '/avaliar/feito', full: true, state: { ...published(true), user: null } },
+  { name: 'avaliar-feito-mensagem', path: '/avaliar/feito', full: true, state: published(true) },
 ];

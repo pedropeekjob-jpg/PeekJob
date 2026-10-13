@@ -1,0 +1,215 @@
+/* Avaliação publicada: telemóvel por omissão, computador a partir de 900 px */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Entrada da nota (o span é inline: como no original, só a opacidade anima) */
+.doneRing {
+  animation: doneRing 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes doneRing {
+  from {
+    transform: rotate(-90deg) scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Apoio com sessão: mensagem privada (a.plain global tem especificidade 0,1,1) */
+a.messages {
+  gap: 14px;
+  background: var(--purple);
+  color: #fff;
+  border-radius: 20px;
+  padding: 16px;
+}
+.messagesIcon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 22px;
+  border: 4px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.messagesText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.messagesTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+.messagesHint {
+  font-size: 13px;
+  color: #e0ccee;
+}
+
+/* Apoio sem sessão */
+.signIn {
+  display: flex;
+  flex-direction: column;
+  background: var(--purple-tint);
+  border: 1px solid var(--purple-line);
+  border-radius: 20px;
+  padding: 18px;
+  gap: 10px;
+}
+.signInTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--purple-text);
+}
+.signInText {
+  line-height: 1.5;
+}
+.signInActions {
+  gap: 4px 16px;
+}
+.signInButton {
+  height: 44px;
+}
+.helpLink {
+  color: var(--purple-text);
+}
+
+/* Ver as notas */
+.notesLink {
+  font-size: 15px;
+}
+.notesRow {
+  width: 100%;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+}
+.chevron {
+  transition: transform 0.15s;
+}
+[aria-expanded='true'] > .chevron {
+  transform: rotate(180deg);
+}
+
+/* Sem avaliação publicada */
+.emptyAction {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
+/* Telemóvel */
+.mobilePage {
+  min-height: 100dvh;
+  padding-bottom: 0;
+  gap: 28px;
+}
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding-top: 12px;
+}
+.heroTitle {
+  composes: display;
+  font-size: 36px;
+  line-height: 1;
+}
+.heroText {
+  font-size: 15px;
+  color: var(--body);
+}
+.notes {
+  border-top: 1px solid var(--line);
+}
+.cta {
+  gap: 4px;
+}
+.ctaMain {
+  height: 56px;
+}
+.ctaHome {
+  height: 44px;
+  background: none;
+  color: var(--body);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Computador */
+.container {
+  padding-bottom: 80px;
+}
+.columns {
+  gap: 56px;
+  align-items: flex-start;
+  padding-top: 56px;
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1.6 1 560px;
+  min-width: 0;
+  gap: 28px;
+}
+.heroDesktop {
+  gap: 28px;
+}
+.heroDesktopText {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.titleDesktop {
+  composes: display;
+  font-size: 56px;
+  line-height: 1;
+}
+.lead {
+  font-size: 16px;
+}
+.toggleRow {
+  gap: 8px 24px;
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 320px;
+  min-width: 0;
+  gap: 14px;
+}
+.homeDesktop {
+  height: 48px;
+  background: none;
+  color: var(--teal-text);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+@media (min-width: 900px) {
+  a.messages {
+    gap: 16px;
+    border-radius: 24px;
+    padding: 22px;
+  }
+  .messagesIcon {
+    width: 44px;
+    height: 44px;
+  }
+  .signIn {
+    border-radius: 24px;
+    padding: 22px;
+  }
+}

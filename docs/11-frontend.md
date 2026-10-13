@@ -26,7 +26,12 @@ apps/web/src/
 - **Sem estilos inline.** Só se usa `style` para valores realmente dinâmicos, passados como variáveis CSS. Exemplo: a cor de cada critério, `style={{ '--criterion': cor }}` com `border-color: var(--criterion)` no módulo.
 - **Telemóvel por omissão, computador em `@media (min-width: 900px)`.** O `useIsDesktop()` em JavaScript fica só para diferenças de estrutura (layouts diferentes, textos diferentes), nunca para tamanhos, cores ou espaços.
 - **Ordem do CSS:** o `main.tsx` importa o `global.css` primeiro. Os módulos vêm depois e ganham nos empates de especificidade.
-- **Cuidado com regras globais compostas** (`.page.no-nav`, `.segmented button`): têm mais especificidade do que uma classe de módulo. Ou se retira a classe global que não se quer, ou se aumenta a especificidade no módulo (`.tabs .tab`), com um comentário a explicar.
+- **Cuidado com regras globais compostas**: têm mais especificidade do que uma classe de módulo. Ou se retira a classe global que não se quer, ou se iguala a especificidade no módulo, com um comentário a explicar. As que já apareceram:
+  - `.page.no-nav` (padding em baixo) → tirar `no-nav` quando o módulo define o padding;
+  - `.segmented button` → `.minhaClasse button`;
+  - `.field > label` → `.meuCampo > label`;
+  - `a.plain` (`color: inherit`) → `a.minhaClasse` quando a ligação tem cor própria.
+- **Estilos inline antigos com spread** (`{ ...base, border: 0, borderTop: … }`): a chave repetida fica na posição original, por isso o `border: 0` apagava o `borderTop`. Ao passar para CSS, confirmar o que o ecrã realmente mostrava.
 - **Estados por atributos ARIA** quando existem (`[aria-selected='true']`, `[aria-checked='true']`, `[aria-pressed='true']`). O estilo segue o estado acessível e não há classes duplicadas.
 
 ## `useMemo` e `useCallback`: só onde compensa
