@@ -1,6 +1,6 @@
 # 11 · Frontend: arquitetura, estilos e qualidade
 
-Convenções do refactoring de 2026-10, aplicadas ecrã a ecrã. O fluxo de avaliar (escolher, verificar, notas e texto) já segue todas e serve de referência.
+Convenções do refactoring de 2026-10, aplicadas ecrã a ecrã. **Estado: concluído** — todos os ecrãs e componentes partilhados seguem estas regras; o único `style` que resta passa variáveis CSS com valores dinâmicos (cor de um critério, tamanho de um anel, ângulo).
 
 ## Estrutura
 
@@ -12,7 +12,8 @@ apps/web/src/
     XxxParts.tsx        componentes de apresentação (props in, JSX out)
     Xxx.module.css      estilos da área
   pages/Xxx.tsx         ecrã: guardas (redirecionar, esperar dados), escolhe o layout e liga hooks a componentes
-  components/           peças partilhadas por várias áreas (Layout, Sheet, Icon…)
+  components/           peças partilhadas por várias áreas (Layout, Sheet, Icon, Data, UI…), cada uma com o seu .module.css
+  lib/                  regras e hooks transversais (rating, download, useBack, useToggle, useFlip, useHashScroll…)
   styles/global.css     tokens (cores, tipos, espaços) e classes base (.btn, .card, .page…)
 ```
 
@@ -30,9 +31,14 @@ apps/web/src/
   - `.page.no-nav` (padding em baixo) → tirar `no-nav` quando o módulo define o padding;
   - `.segmented button` → `.minhaClasse button`;
   - `.field > label` → `.meuCampo > label`;
-  - `a.plain` (`color: inherit`) → `a.minhaClasse` quando a ligação tem cor própria.
+  - `a.plain` (`color: inherit`) → `a.minhaClasse` quando a ligação tem cor própria;
+  - `.search input` → `.minhaClasse input`;
+  - `.btn[disabled]` (fundo e contorno cinzentos) → `.minhaClasse, .minhaClasse[disabled]` quando o botão tem de manter a cor enquanto espera (ex.: apagar a conta, reescrever).
+- **`composes`** só funciona em seletores de uma classe (`.x { composes: display; }`); em `a.x` repetem-se as declarações.
+- **Setas que rodam:** `[aria-expanded='true'] > .chevron { transform: rotate(180deg) }` (Accordion, Disclosure), sem estado em JavaScript.
 - **Estilos inline antigos com spread** (`{ ...base, border: 0, borderTop: … }`): a chave repetida fica na posição original, por isso o `border: 0` apagava o `borderTop`. Ao passar para CSS, confirmar o que o ecrã realmente mostrava.
-- **Estados por atributos ARIA** quando existem (`[aria-selected='true']`, `[aria-checked='true']`, `[aria-pressed='true']`). O estilo segue o estado acessível e não há classes duplicadas.
+- **Estados por atributos ARIA** quando existem (`[aria-selected='true']`, `[aria-checked='true']`, `[aria-pressed='true']`, `[aria-expanded='true']`). O estilo segue o estado acessível e não há classes duplicadas. Para estados sem ARIA usa-se `data-*` (`data-on`, `data-state`, `data-fill`, `data-muted`).
+- **Sem `<style>` embutido** em componentes: `:hover`, `:focus-within` e pseudo-elementos ficam no módulo.
 
 ## `useMemo` e `useCallback`: só onde compensa
 
@@ -49,6 +55,8 @@ apps/web/src/
 | Ecrãs | Testing Library + user-event (jsdom) | O que a pessoa vê e faz, em telemóvel e computador (`renderScreen`, `WithDraft`, `WithoutDraft`) |
 | Fluxos | Playwright (`e2e/`) | A app real (API + PostgreSQL), acessibilidade (axe) e teclado |
 | Visual | `npm run visual:compare -- <commit>` | Os mesmos ecrãs e estados (`e2e/visual/scenarios.mjs`; `full: true` fotografa a página inteira, `run` abre secções antes da foto), nas duas versões, comparados píxel a píxel |
+
+**Simular erros da API:** um `vi.fn` assíncrono que rejeita faz falhar o teste neste runner, mesmo quando o componente apanha o erro. Usa-se uma função simples por trás do mock (`let impl = async () => …; api: (p) => impl(p)`), como em `test/components/NifField.test.tsx`.
 
 **Antes de refazer um ecrã:**
 1. Testes de caracterização, que têm de passar com o código antigo.
