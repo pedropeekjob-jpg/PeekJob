@@ -60,7 +60,7 @@ export interface AddedOrg {
 interface State {
   prefs: CriterionKey[];
   onboarded: boolean;
-  user: { email: string } | null;
+  user: { email: string; role?: 'user' | 'moderator' } | null;
   saved: string[];
   useful: Record<string, boolean>;
   myReviews: MyReview[];
@@ -113,7 +113,8 @@ const initial = (): State =>
     : {
         prefs: DEFAULT_PREFS,
         onboarded: false,
-        user: { email: 'pessoa@gmail.com' },
+        // Demonstração: a conta de exemplo é moderadora, para se ver o backoffice
+        user: { email: 'pessoa@gmail.com', role: 'moderator' },
         saved: ['padaria-ribeira', 'maos-dadas', 'rede-vizinha', 'lavandaria-sol'],
         useful: {},
         myReviews: [
@@ -222,8 +223,8 @@ function useAppState() {
     if (!apiMode) return;
     (async () => {
       try {
-        await api('/auth/me');
-        set({ user: { email: '' } });
+        const me = await api<{ user: { role: 'user' | 'moderator' } }>('/auth/me');
+        set({ user: { email: '', role: me.user.role } });
         await loadMine();
       } catch {
         set({ user: null });
@@ -267,9 +268,9 @@ function useAppState() {
       },
       verifyLink: async (token: string): Promise<Result> => {
         try {
-          await api('/auth/verify', { body: { token } });
+          const r = await api<{ user: { role: 'user' | 'moderator' } }>('/auth/verify', { body: { token } });
           track('login', { method: 'magic_link', result: 'success' });
-          set({ user: { email: '' } });
+          set({ user: { email: '', role: r.user.role } });
           await loadMine();
           return { ok: true };
         } catch (e) {

@@ -44,6 +44,7 @@ export default function Perfil() {
     { label: tr('Como calculamos', 'How we score'), to: '/metodologia' },
     { label: tr('Privacidade e dados', 'Privacy and data'), value: desktop ? tr('Exportar ou apagar', 'Export or delete') : undefined, to: '/perfil/dados' },
     { label: tr('Gerir a minha organização', 'Manage my organisation'), to: '/painel' },
+    ...(user?.role === 'moderator' ? [{ label: tr('Moderação', 'Moderation'), value: tr('Denúncias e organizações novas', 'Reports and new organisations'), to: '/moderacao' }] : []),
   ];
 
   const resetBtn = (

@@ -50,6 +50,9 @@
 | POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
 | GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação |
 | POST | `/moderation/reviews/:id/decision` | moderador | `remove` ou `keep`, com justificação; avisa quem escreveu e quem denunciou |
+| GET | `/moderation/summary` | moderador | Nº de denúncias em aberto e de organizações pendentes |
+| GET | `/moderation/orgs` | moderador | Organizações novas pendentes, com nº de pessoas que avaliaram e possíveis duplicados |
+| POST | `/orgs/:id/reject` | moderador | Rejeitar uma organização pendente, com justificação |
 | GET | `/me/export` | sessão | Os meus dados (JSON) |
 | DELETE | `/me` | sessão | Apagar a conta (`keepReviews` mantém as avaliações, desligadas da pessoa) |
 | GET | `/me/messages` | sessão | Mensagens privadas de apoio com os contactos |
@@ -71,7 +74,11 @@ Depois da verificação, as avaliações dessa pessoa nessa organização passam
 - Qualquer pessoa denuncia, com ou sem conta. A avaliação só sai do site por decisão de um moderador, sempre com justificação.
 - Quem escreveu recebe o motivo em privado quando a avaliação é removida. Quem denunciou com conta recebe a decisão nas mensagens; sem conta, por email se o deixou. O contacto é apagado logo a seguir.
 - O IP nunca é guardado: só um HMAC, para limitar abusos.
-- Falta: ecrã de backoffice para moderadores (hoje usa-se a API) e um canal para quem escreveu contestar a decisão.
+- **Ecrã de moderação** (`/moderacao`, só para o papel `moderator`; entrada no Perfil):
+  - **Denúncias:** avaliação, motivos e justificações frequentes; remover ou manter.
+  - **Organizações novas:** aprovar, rejeitar com justificação, ou fundir num duplicado sugerido.
+- Falta: um canal para quem escreveu contestar a decisão.
+- **Dar o papel de moderador** (por agora na base de dados): `UPDATE users SET role = 'moderator' WHERE id = '…'`.
 
 ## RGPD
 - **Acesso:** `GET /me/export` e o ecrã *Perfil → Privacidade e dados → Descarregar*.
@@ -102,7 +109,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 - **Domínio partilhado:** 42 testes (vitest).
 - **Web:** 22 testes (medição e privacidade).
-- **API:** 117 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **API:** 123 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia

@@ -5,7 +5,7 @@
 export const STATIC_WEB_ROUTES = [
   '/', '/explorar', '/sobre', '/contacto', '/preferencias', '/a-preparar', '/pesquisa', '/ranking', '/setores', '/metodologia',
   '/avaliar', '/avaliar/verificar', '/avaliar/notas', '/avaliar/texto', '/avaliar/feito',
-  '/apoio', '/guardadas', '/perfil', '/perfil/dados', '/entrar', '/para-organizacoes', '/painel',
+  '/apoio', '/guardadas', '/perfil', '/perfil/dados', '/moderacao', '/entrar', '/para-organizacoes', '/painel',
 ] as const;
 
 const STATIC = new Set<string>(STATIC_WEB_ROUTES);
@@ -23,7 +23,7 @@ export function routeTemplate(pathname: string): string {
 }
 
 /** Páginas que não devem ser rastreadas pelos motores de pesquisa (pessoais ou do fluxo de avaliar) */
-export const PRIVATE_WEB_PREFIXES = ['/avaliar', '/perfil', '/apoio', '/guardadas', '/entrar', '/painel', '/preferencias', '/a-preparar'] as const;
+export const PRIVATE_WEB_PREFIXES = ['/avaliar', '/perfil', '/moderacao', '/apoio', '/guardadas', '/entrar', '/painel', '/preferencias', '/a-preparar'] as const;
 
 /** Páginas públicas fixas para o sitemap */
 export const SITEMAP_STATIC = ['/', '/explorar', '/ranking', '/sobre', '/contacto', '/setores', '/metodologia', '/para-organizacoes'] as const;
