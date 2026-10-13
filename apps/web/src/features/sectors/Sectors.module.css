@@ -1,0 +1,178 @@
+/* Tipos e setores: telemóvel por omissão, computador a partir de 900 px */
+
+.page {
+  gap: 0;
+}
+.container {
+  padding-bottom: 64px;
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0 28px;
+}
+.lead {
+  font-size: 16px;
+}
+.h2 {
+  font-size: 22px;
+}
+
+/* Tipos */
+.types {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.typeGrid {
+  gap: 14px;
+}
+/* telemóvel: duas colunas em vez das colunas automáticas de .grid-auto */
+@media (max-width: 899.98px) {
+  .typeGrid {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.type {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 0;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  border: 2px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+}
+.type[aria-pressed='true'] {
+  border-color: var(--teal);
+  background: var(--teal-tint);
+}
+.typeText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.typeName {
+  font-size: 17px;
+  line-height: 1.1;
+}
+.typeActions {
+  gap: 12px;
+}
+.rankingLink {
+  font-size: 15px;
+  flex: 1 1 auto;
+}
+.allTypes {
+  font-size: 15px;
+}
+
+/* Setores */
+.sectors {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 36px;
+}
+.sectorsHead {
+  gap: 16px;
+  padding-bottom: 8px;
+}
+.sectorsTitle {
+  align-items: baseline;
+  gap: 14px;
+}
+/* Só no telemóvel: ocupa a largura e botões mais compactos (.segmented button global tem especificidade 0,1,1;
+   aqui é um override do global, por isso fica numa media query de largura máxima em vez de se desfazer no computador) */
+@media (max-width: 899.98px) {
+  .sort {
+    width: 100%;
+  }
+  .sort button {
+    padding: 0 8px;
+    font-size: 13px;
+  }
+}
+.empty {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+.list {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 48px;
+}
+.sector {
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-radius: 4px;
+  min-height: 72px;
+  transition: background 0.15s;
+}
+@media (hover: hover) {
+  .sector:hover {
+    background: var(--surface);
+  }
+}
+.sectorText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sectorName {
+  font-size: 16px;
+  font-weight: 600;
+}
+.resp {
+  flex: none;
+  gap: 6px;
+  color: var(--purple-text);
+}
+.respDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--purple);
+}
+.respValue {
+  font-weight: 500;
+}
+
+@media (min-width: 900px) {
+  .head {
+    padding: 32px 0 40px;
+  }
+  .title {
+    font-size: clamp(36px, 4vw, 52px);
+    line-height: 1;
+  }
+  .type {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    min-height: 96px;
+    padding: 16px 20px;
+  }
+  .typeName {
+    font-size: 20px;
+  }
+  .rankingLink {
+    flex: 0 1 auto;
+  }
+  .sectors {
+    padding-top: 56px;
+  }
+  .list {
+    grid-template-columns: repeat(auto-fill, minmax(min(480px, 100%), 1fr));
+  }
+  .sector {
+    gap: 16px;
+    padding: 12px 10px;
+  }
+}

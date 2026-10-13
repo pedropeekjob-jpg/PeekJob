@@ -96,7 +96,17 @@ export const SCENARIOS = [
   { name: 'sobre', path: '/sobre' },
   { name: 'contacto', path: '/contacto' },
   { name: 'metodologia', path: '/metodologia' },
-  { name: 'setores', path: '/setores' },
+  { name: 'setores', path: '/setores', full: true },
+  {
+    name: 'setores-tipo',
+    path: '/setores',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /Voluntariado/);
+      await tap(p, 'button', /^Mais respeito$/);
+      await p.getByRole('link', { name: /Comunidade/ }).first().hover().catch(() => {});
+    },
+  },
   { name: 'para-organizacoes', path: '/para-organizacoes' },
   { name: 'entrar', path: '/entrar' },
   {
