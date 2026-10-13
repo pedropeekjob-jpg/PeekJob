@@ -142,6 +142,26 @@ export const SCENARIOS = [
   },
   { name: 'apoio', path: '/apoio' },
   { name: '404', path: '/nao-existe' },
+  { name: 'moderacao', path: '/moderacao', full: true },
+  {
+    name: 'moderacao-decisao',
+    path: '/moderacao',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Identifica uma pessoa pelo nome/);
+      await tap(p, 'button', /^Remover avaliação$/);
+    },
+  },
+  {
+    name: 'moderacao-organizacoes',
+    path: '/moderacao',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'tab', /Organizações novas/);
+      await p.getByRole('button', { name: 'Rejeitar' }).nth(1).click();
+      await p.waitForTimeout(120);
+    },
+  },
   { name: 'avaliar-escolher', path: '/avaliar' },
   { name: 'avaliar-verificar', path: '/avaliar/verificar' },
   {

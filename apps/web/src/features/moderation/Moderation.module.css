@@ -1,15 +1,29 @@
-/* Backoffice de moderação */
+/* Backoffice de moderação (antes styles/moderation.css, global) */
+
 .mod {
   gap: 22px;
 }
-.container.mod {
+:global(.container).mod {
   display: flex;
   flex-direction: column;
   max-width: 980px;
   padding-top: 28px;
   padding-bottom: 64px;
 }
-.mod-tabs {
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.title {
+  font-size: 44px;
+}
+.lead {
+  margin: 0;
+}
+
+/* Separadores das filas */
+.tabs {
   display: flex;
   gap: 6px;
   padding: 4px;
@@ -19,7 +33,7 @@
   max-width: 100%;
   overflow-x: auto;
 }
-.mod-tabs button {
+.tabs button {
   border: 0;
   background: none;
   border-radius: 999px;
@@ -32,12 +46,12 @@
   gap: 8px;
   align-items: center;
 }
-.mod-tabs button[aria-selected='true'] {
+.tabs button[aria-selected='true'] {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 1px 3px rgba(1, 11, 19, 0.12);
 }
-.mod-count {
+.count {
   min-width: 22px;
   height: 22px;
   padding: 0 7px;
@@ -48,36 +62,59 @@
   display: inline-grid;
   place-items: center;
 }
-.mod-list {
+
+/* A carregar */
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sk {
+  height: 180px;
+  border-radius: 20px;
+}
+
+/* Cartões */
+.list {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.mod-card {
+.card {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 20px;
+  min-width: 0;
 }
-.mod-org {
+.cardHead {
+  gap: 8px;
+}
+.org {
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
   color: var(--ink);
   text-decoration: none;
 }
-.mod-badge {
+.orgTitle {
+  margin: 0;
+}
+.details {
+  margin: 0;
+}
+.badge {
   font-weight: 700;
   color: var(--warn-text);
 }
-.mod-quote {
+.quote {
   margin: 0;
   padding: 2px 0 2px 14px;
   border-left: 3px solid var(--field);
   font-size: 16px;
   line-height: 1.5;
 }
-.mod-reports {
+.reports {
   margin: 0;
   padding: 12px 14px;
   list-style: none;
@@ -88,7 +125,7 @@
   gap: 6px;
   font-size: 14px;
 }
-.mod-dups {
+.dups {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -96,21 +133,52 @@
   border-radius: 14px;
   background: var(--teal-tint);
 }
-.mod-remove {
+
+/* Justificação */
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.noteLabel {
+  font-weight: 600;
+}
+.noteGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* Justificações longas (sobretudo em inglês) quebram linha em vez de alargar o ecrã */
+.mod :global(.chip) {
+  white-space: normal;
+  height: auto;
+  min-height: 40px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: left;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+/* Ações */
+.actions {
+  gap: 10px;
+}
+.remove {
   background: var(--down);
   color: #fff;
 }
-.mod-remove:disabled,
-.mod .btn:disabled {
+.remove:disabled,
+.mod :global(.btn):disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
-.mod-small {
+.small {
   height: 38px;
   font-size: 14px;
   padding: 0 14px;
 }
-.mod-done {
+.done {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -121,22 +189,11 @@
   font-weight: 600;
   font-size: 14px;
 }
-.mod-error {
+.error {
   color: var(--warn-text);
   font-weight: 600;
   font-size: 14px;
 }
-/* Justificações longas (sobretudo em inglês) quebram linha em vez de alargar o ecrã */
-.mod .chip {
-  white-space: normal;
-  height: auto;
-  min-height: 40px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  text-align: left;
-  line-height: 1.3;
-  max-width: 100%;
-}
-.mod-card {
-  min-width: 0;
+.signIn {
+  align-self: flex-start;
 }
