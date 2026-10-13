@@ -1,5 +1,7 @@
 import { test as base, expect, type Page } from '@playwright/test';
-import { createHmac } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import pg from 'pg';
 
 const MAIL = `http://localhost:${process.env.E2E_MAIL_PORT ?? 4610}`;
@@ -57,6 +59,15 @@ export const test = base.extend<{ guard: void }>({
         if (/Content Security Policy|Refused to (load|execute|connect|apply)/.test(t) && !/fonts\.(googleapis|gstatic)/.test(t)) problems.push(`CSP: ${t}`);
       });
       await use();
+      // Cobertura da web nos testes no browser (build com VITE_COVERAGE=true): junta-se à dos testes unitários no SonarQube
+      if (process.env.E2E_COVERAGE) {
+        const cov = await page.evaluate(() => (window as unknown as { __coverage__?: unknown }).__coverage__).catch(() => undefined);
+        if (cov) {
+          const dir = join(__dirname, '..', '.nyc_output');
+          mkdirSync(dir, { recursive: true });
+          writeFileSync(join(dir, `${randomUUID()}.json`), JSON.stringify(cov));
+        }
+      }
       expect(problems, 'erros no browser').toEqual([]);
     },
     { auto: true },

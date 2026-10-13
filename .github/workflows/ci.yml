@@ -25,18 +25,27 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Testes do domínio partilhado
-        run: npm test -w @peekjob/shared
+      - name: Testes do domínio partilhado (com cobertura)
+        run: npm run test:coverage -w @peekjob/shared
       - name: Build do domínio partilhado
         run: npm run build -w @peekjob/shared
-      - name: Testes da web (medição e privacidade)
-        run: npm test -w @peekjob/web
-      - name: Testes da API (unitários + integração com PostgreSQL)
-        run: npm test -w @peekjob/api
+      - name: Testes da web (com cobertura)
+        run: npm run test:coverage -w @peekjob/web
+      - name: Testes da API (unitários + integração com PostgreSQL, com cobertura)
+        run: npm run test:coverage -w @peekjob/api
       - name: Typecheck e build
         run: |
           npm run build -w @peekjob/api
           npm run build -w @peekjob/web
+      - name: Guardar a cobertura (para o SonarQube)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-unitarios
+          path: |
+            apps/web/coverage/unit/lcov.info
+            apps/api/coverage/lcov.info
+            packages/shared/coverage/lcov.info
+          retention-days: 3
 
   browser:
     # Testes no browser (Playwright): a aplicação como em produção (API a servir a web) + PostgreSQL, telemóvel e computador
@@ -59,12 +68,19 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Build (web como em produção)
-        run: npm run build:e2e
+      - name: Build (web como em produção, instrumentada para medir a cobertura)
+        run: npm run build:e2e:coverage
       - name: Instalar o Chromium
         run: npx playwright install --with-deps chromium
-      - name: Testes no browser
-        run: npm run e2e
+      - name: Testes no browser (com cobertura)
+        run: npm run e2e:coverage
+      - name: Guardar a cobertura (para o SonarQube)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-browser
+          path: apps/web/coverage/e2e/lcov.info
+          retention-days: 3
       - name: Relatório (se falhar)
         if: failure()
         uses: actions/upload-artifact@v4
@@ -74,6 +90,52 @@ jobs:
             e2e/playwright-report
             e2e/test-results
           retention-days: 7
+
+  sonar:
+    # SonarQube: bugs, vulnerabilidades, manutenção, duplicação e cobertura (unitários + browser) com Quality Gate
+    needs: [test, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      sonarqube:
+        image: sonarqube:community
+        env:
+          SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: 'true'
+        ports: ["9000:9000"]
+    env:
+      SONAR_HOST_URL: http://localhost:9000
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: cobertura-unitarios
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: cobertura-browser
+          path: apps/web/coverage/e2e
+      - name: Juntar a cobertura com caminhos a partir da raiz
+        run: node scripts/coverage-paths.mjs
+      - name: Preparar o SonarQube e o Quality Gate
+        run: bash scripts/sonar-setup.sh
+      - name: Análise
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
+      - name: Resumo
+        if: always()
+        run: bash scripts/sonar-report.sh
+      - name: Quality Gate
+        # TEMPORÁRIO: só avisa até a web chegar aos 80% de cobertura (refactoring do frontend, fases 2 a 4)
+        continue-on-error: true
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
 
   docker:
     # Garante que a imagem de produção (API + web) constrói

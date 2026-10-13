@@ -13,7 +13,8 @@
     "test:unit": "jest test/unit",
     "test:e2e": "jest --runInBand test/e2e",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "import:osm": "node dist/import/osm-cli.js"
+    "import:osm": "node dist/import/osm-cli.js",
+    "test:coverage": "jest --runInBand --coverage"
   },
   "dependencies": {
     "@nestjs/common": "10.4.22",

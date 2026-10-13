@@ -8,3 +8,7 @@ coverage
 .pgdata
 e2e/test-results
 e2e/playwright-report
+coverage
+.nyc_output
+.scannerwork
+e2e/.nyc_output
