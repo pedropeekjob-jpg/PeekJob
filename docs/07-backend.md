@@ -203,7 +203,21 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - **Domínio partilhado:** 46 testes (vitest).
 - **Web:** 30 testes (medição, privacidade, morada do VIES e envio de erros).
 - **API:** 195 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
-- **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
+- **Browser (Playwright, `e2e/`):** 22 testes, 11 fluxos × telemóvel e computador. Correm no CI em cada envio, contra a aplicação como em produção: a API a servir a web, PostgreSQL e um servidor de email falso no lugar do Resend.
+  - **Fluxos:**
+    - visita pública e 404;
+    - inglês;
+    - entrar com o link do email;
+    - avaliar com texto bloqueado → "Reescrever com IA" → publicar → mensagem de apoio;
+    - nova organização com NIF;
+    - denúncia sem conta → decisão da moderação;
+    - quem não é moderador não entra;
+    - exportar e apagar a conta.
+  - **Em todas as páginas:** nenhum erro de JavaScript, nenhuma violação da CSP e nenhum scroll horizontal. Isto é verificado automaticamente; um teste temporário com um erro de propósito confirmou que falha.
+  - **Correr localmente:** `npm run build:e2e && npm run e2e`. Precisa de PostgreSQL em `E2E_DATABASE_URL`. A base de dados `peekjob_e2e` é recriada em cada execução.
+  - **Limites por IP:** os testes vêm todos do mesmo IP, por isso os limites são multiplicados com `RATE_LIMIT_SCALE`. A API recusa arrancar com esta variável em produção.
+  - **Se falhar no CI:** o relatório, com capturas e trace, fica nos artefactos do run durante 7 dias.
+  - **Promoção:** promover para produção exige o CI todo verde, e isso já inclui estes testes.
 
 ## Próxima fatia
 - Guardadas e "útil" no servidor (hoje ficam no browser).

@@ -11,7 +11,9 @@
     "test": "npm run test -w @peekjob/shared && npm run test -w @peekjob/api",
     "dev:web": "npm run dev -w @peekjob/web",
     "dev:api": "npm run start:dev -w @peekjob/api",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "build:e2e": "npm run build -w @peekjob/shared && npm run build -w @peekjob/api && VITE_API_URL=/ VITE_ROUTER=browser npm run build -w @peekjob/web"
   },
   "engines": {
     "node": ">=20"
@@ -21,5 +23,8 @@
     "express": "4.22.3",
     "body-parser": "1.20.8",
     "qs": "6.16.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
   }
 }

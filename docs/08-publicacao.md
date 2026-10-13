@@ -55,6 +55,7 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `REWRITE_MODEL` | não | Modelo da reescrita (por omissão `claude-haiku-5-5`) |
 | `VIES_URL` | não | `off` desliga a confirmação de NIF no VIES (por omissão, o endpoint oficial) |
 | `SENTRY_DSN` | não (recomendada) | Erros no Sentry, com alertas por email. Sem ela os erros ficam só nos logs |
+| `RATE_LIMIT_SCALE` | nunca em produção | Só para os testes no browser (multiplica os limites por IP); em produção a API recusa arrancar |
 | `WEB_ORIGIN` | não | Endereço público (por omissão o do Render) |
 | `WEB_DIST` | já na imagem | Pasta da build da web servida pela API |
 | `SEED_DEMO` | não | `true` carrega as organizações de demonstração |

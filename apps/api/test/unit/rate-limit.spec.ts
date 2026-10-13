@@ -1,4 +1,4 @@
-import { RateLimiter, ruleFor } from '../../src/security/rate-limit';
+import { RateLimiter, rateLimitScale, ruleFor } from '../../src/security/rate-limit';
 
 describe('RateLimiter (janela deslizante, em memória)', () => {
   it('conta por chave e liberta quando a janela passa', () => {
@@ -19,5 +19,19 @@ describe('RateLimiter (janela deslizante, em memória)', () => {
     expect(ruleFor('GET', '/orgs')?.name).toBe('global');
     expect(ruleFor('GET', '/health')).toBeNull();
     expect(ruleFor('GET', '/assets/app.js')).toBeNull();
+  });
+});
+
+describe('RATE_LIMIT_SCALE (só para testes de browser)', () => {
+  it('multiplica os limites fora de produção', () => {
+    const l = new RateLimiter(rateLimitScale({ RATE_LIMIT_SCALE: '100' }));
+    const rule = { name: 't', max: 1, windowMs: 1000 };
+    for (let i = 0; i < 100; i++) expect(l.take(rule, 'ip', i).ok).toBe(true);
+    expect(l.take(rule, 'ip', 200).ok).toBe(false);
+  });
+  it('em produção recusa arrancar com limites alterados', () => {
+    expect(() => rateLimitScale({ APP_ENV: 'production', RATE_LIMIT_SCALE: '100' })).toThrow(/produção/);
+    expect(rateLimitScale({})).toBe(1);
+    expect(() => rateLimitScale({ RATE_LIMIT_SCALE: 'abc' })).toThrow(/RATE_LIMIT_SCALE/);
   });
 });

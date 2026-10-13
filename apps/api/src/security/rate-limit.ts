@@ -32,14 +32,28 @@ export function ruleFor(method: string, path: string): RateRule | null {
  * Janela deslizante em memória. Chega para uma instância (Render); com várias instâncias passar para Redis/PostgreSQL.
  * Guarda só o IP e as horas dos pedidos, em memória, nunca em disco.
  */
+/**
+ * Multiplicador dos limites, só para os testes automáticos no browser (todos os pedidos vêm do mesmo IP).
+ * Em produção recusa arrancar se estiver definido.
+ */
+export function rateLimitScale(env: Record<string, string | undefined> = process.env): number {
+  const raw = env.RATE_LIMIT_SCALE;
+  if (!raw) return 1;
+  if (env.APP_ENV === 'production') throw new Error('RATE_LIMIT_SCALE não pode ser usado em produção');
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 1) throw new Error('RATE_LIMIT_SCALE tem de ser um número ≥ 1');
+  return n;
+}
+
 @Injectable()
 export class RateLimiter {
   private hits = new Map<string, number[]>();
+  constructor(private readonly scale: number = 1) {}
 
   take(rule: RateRule, key: string, now = Date.now()): Take {
     const k = `${rule.name}:${key}`;
     const recent = (this.hits.get(k) ?? []).filter((t) => now - t < rule.windowMs);
-    if (recent.length >= rule.max) {
+    if (recent.length >= rule.max * this.scale) {
       this.hits.set(k, recent);
       return { ok: false, retryAfterSec: Math.max(1, Math.ceil((recent[0] + rule.windowMs - now) / 1000)) };
     }
