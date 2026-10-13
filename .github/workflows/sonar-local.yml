@@ -31,4 +31,11 @@ jobs:
       - name: npm run sonar:local
         env:
           SONAR_SKIP_E2E: ${{ inputs.skip_e2e && '1' || '' }}
-        run: npm run sonar:local
+        run: |
+          set -o pipefail
+          npm run sonar:local 2>&1 | tee sonar-local.log
+      - name: Mostrar o fim da saída quando falha
+        if: failure()
+        run: |
+          { echo '### sonar:local falhou'; echo '```'; tail -n 80 sonar-local.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          tail -n 25 sonar-local.log | sed 's/%/%25/g' | while IFS= read -r l; do echo "::error title=sonar:local::$l"; done

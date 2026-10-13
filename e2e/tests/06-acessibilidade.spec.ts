@@ -11,7 +11,8 @@ type Found = { page: string; rule: string; impact: string; help: string; targets
 
 async function audit(page: Page, label: string, found: Found[]) {
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(400); // animações de entrada
+  // animações de entrada (fade-up): o contraste só conta no estado final; as infinitas (anéis a flutuar) não acabam
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))));
   const r = await new AxeBuilder({ page }).withTags(TAGS).analyze();
   for (const v of r.violations) {
     found.push({ page: label, rule: v.id, impact: v.impact ?? '?', help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) });
