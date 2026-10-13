@@ -75,6 +75,18 @@ export const SCENARIOS = [
   { name: 'organizacao-voluntariado-entrevistas', path: '/org/rede-vizinha/entrevistas', full: true },
   { name: 'organizacao-nao-encontrada', path: '/org/nao-existe' },
   { name: 'painel', path: '/painel', full: true },
+  {
+    name: 'painel-aberto',
+    path: '/painel',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Ver o pulso da semana/);
+      await tap(p, 'button', /^Ver todos os 8/);
+      await tap(p, 'button', /^Responder$/);
+      await tap(p, 'button', /^Publicar resposta$/);
+      await tap(p, 'button', /^Responder$/);
+    },
+  },
   { name: 'sobre', path: '/sobre' },
   { name: 'contacto', path: '/contacto' },
   { name: 'metodologia', path: '/metodologia' },
