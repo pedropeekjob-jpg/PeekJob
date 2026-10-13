@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, type Type } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
 import request from 'supertest';
@@ -19,11 +19,11 @@ export interface TestCtx {
   sessions: Map<string, { Cookie: string }>;
 }
 
-export async function createTestApp(overrides: Record<string, unknown> = {}): Promise<TestCtx> {
+export async function createTestApp(overrides: Record<string, unknown> = {}, extra: { controllers?: Type<unknown>[] } = {}): Promise<TestCtx> {
   process.env.DATABASE_URL = TEST_DB;
   process.env.PRIVACY_SECRET = 'segredo-de-teste';
   const mailer = new InMemoryMailer();
-  let builder = Test.createTestingModule({ imports: [AppModule] }).overrideProvider(MAILER).useValue(mailer);
+  let builder = Test.createTestingModule({ imports: [AppModule], controllers: extra.controllers ?? [] }).overrideProvider(MAILER).useValue(mailer);
   for (const [token, value] of Object.entries(overrides)) builder = builder.overrideProvider(token).useValue(value);
   const mod = await builder.compile();
   const app = mod.createNestApplication();
