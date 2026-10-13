@@ -19,7 +19,10 @@ export function setViewport(kind: 'mobile' | 'desktop') {
  * Monta um ecrã com os mesmos providers da aplicação (loja em modo demonstração: dados de exemplo, sem rede).
  * `path` é a rota do ecrã (ex.: '/org/:id') e `route` o endereço inicial.
  */
-export function renderScreen(ui: ReactElement, { route = '/', path = '*', viewport = 'mobile', ...opts }: { route?: string; path?: string; viewport?: 'mobile' | 'desktop' } & RenderOptions = {}) {
+export function renderScreen(
+  ui: ReactElement,
+  { route = '/', path = '*', viewport = 'mobile', outside, ...opts }: { route?: string; path?: string; viewport?: 'mobile' | 'desktop'; outside?: ReactElement } & RenderOptions = {},
+) {
   setViewport(viewport);
   const user = userEvent.setup();
   const result = render(
@@ -30,6 +33,7 @@ export function renderScreen(ui: ReactElement, { route = '/', path = '*', viewpo
             <Route path={path} element={ui} />
             <Route path="*" element={<div data-testid="outra-rota" />} />
           </Routes>
+          {outside}
         </MemoryRouter>
       </LangRoot>
     </StoreProvider>,
@@ -58,4 +62,14 @@ export function Providers({ children, route = '/' }: { children: ReactNode; rout
       </LangRoot>
     </StoreProvider>
   );
+}
+
+/** Começa sem organização escolhida (a demonstração traz um rascunho de exemplo) */
+export function WithoutDraft({ children }: { children: ReactNode }) {
+  const store = useStore();
+  useEffect(() => {
+    store.updateDraft({ orgId: null, locationId: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return store.draft.orgId == null ? <>{children}</> : null;
 }

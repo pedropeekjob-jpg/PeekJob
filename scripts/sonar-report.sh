@@ -36,3 +36,11 @@ let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
   for (const i of j.issues.filter(i=>i.type==='CODE_SMELL')) { if (seen.has(i.rule)) continue; seen.add(i.rule); const c=j.issues.filter(x=>x.rule===i.rule);
     console.log('::warning file='+file(i)+',line='+(i.line||1)+',title='+i.rule+' ×'+c.length+'::'+i.message+' | '+c.slice(0,6).map(x=>file(x).split('/').slice(-2).join('/')+':'+(x.line||'')).join(', ')); }
 })"
+
+# Ficheiros com mais linhas por cobrir (para decidir o que testar a seguir)
+q "measures/component_tree?component=peekjob&qualifiers=FIL&metricKeys=uncovered_lines,coverage&s=metric&metricSort=uncovered_lines&asc=false&ps=15" | node -e "
+let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
+  const j=JSON.parse(d); const v=(c,k)=>(c.measures.find(m=>m.metric===k)||{}).value;
+  const list=j.components.map(c=>c.path.replace('apps/','').replace('/src/','/')+' '+v(c,'uncovered_lines')+' ('+v(c,'coverage')+'%)');
+  console.log('::notice title=Mais linhas por cobrir::'+list.join(' · '));
+})"
