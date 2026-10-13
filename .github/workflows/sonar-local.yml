@@ -1,0 +1,34 @@
+name: Verificar sonar:local
+
+# Manual: Actions → "Verificar sonar:local" → Run workflow.
+# Corre exatamente o comando que se usa antes de enviar (npm run sonar:local), numa máquina com Docker,
+# para garantir que o script funciona de ponta a ponta (SonarQube e PostgreSQL em contentores temporários).
+on:
+  workflow_dispatch:
+    inputs:
+      skip_e2e:
+        description: Saltar os testes no browser (mais rápido; a cobertura fica mais baixa e o gate pode falhar)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  sonar-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Instalar o Chromium
+        if: ${{ !inputs.skip_e2e }}
+        run: npx playwright install --with-deps chromium
+      - name: npm run sonar:local
+        env:
+          SONAR_SKIP_E2E: ${{ inputs.skip_e2e && '1' || '' }}
+        run: npm run sonar:local
