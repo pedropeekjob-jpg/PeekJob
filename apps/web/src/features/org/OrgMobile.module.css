@@ -1,0 +1,109 @@
+/* Página da organização no telemóvel */
+
+/* Entrevistas e salários */
+.page {
+  gap: 24px;
+}
+.head {
+  gap: 12px;
+}
+.sticky {
+  bottom: var(--nav-h);
+  margin-bottom: -16px;
+}
+.cta {
+  height: 56px;
+}
+
+/* Avaliações */
+.reviewsPage {
+  gap: 28px;
+}
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.title {
+  font-size: 36px;
+}
+.scoreRow {
+  gap: 20px;
+}
+.score {
+  font-size: 36px;
+}
+.unit {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--muted);
+}
+.matchCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.match {
+  align-items: baseline;
+  gap: 6px;
+  color: var(--teal-dark);
+}
+.matchValue {
+  font-size: 32px;
+  line-height: 1;
+}
+.matchLabel {
+  font-size: 15px;
+  font-weight: 600;
+}
+.summaryText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Localização */
+.map {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mapToggle {
+  gap: 12px;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+}
+.pin {
+  color: var(--teal-text);
+  flex: none;
+}
+.mapLabel {
+  font-size: 15px;
+  font-weight: 500;
+}
+.mapAction {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--teal-text);
+}
+.mapBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

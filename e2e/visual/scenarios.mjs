@@ -8,13 +8,48 @@ const draft = {
 export const STORAGE_KEY = 'peekjob-poc-v1';
 export const STATE = draft;
 
-/** { name, path, mobileOnly?, run?(page) } — `run` prepara um estado depois de abrir a página */
+/** Carrega no primeiro elemento com este nome acessível, se existir neste tamanho de ecrã */
+async function tap(p, role, name) {
+  const el = p.getByRole(role, { name }).first();
+  if (await el.count()) await el.click();
+}
+
+/** Página da organização com tudo aberto: critérios, respeito, mapa, todas as avaliações, útil */
+async function openOrg(p) {
+  await tap(p, 'button', /^Ver os 8 critérios/);
+  await tap(p, 'button', /^Respeito e inclusão/);
+  await tap(p, 'button', /^Ver o que dizem/);
+  await tap(p, 'button', /^Ver mapa|^\d+ locais/);
+  await tap(p, 'radio', /Campanhã/);
+  await tap(p, 'button', /^Ver todas as \d+ avaliações/);
+  await tap(p, 'button', /^Útil/);
+  await tap(p, 'button', /^Guardar$/);
+}
+
+/** { name, path, mobileOnly?, full?, run?(page) } — `run` prepara um estado depois de abrir a página; `full` fotografa a página toda */
 export const SCENARIOS = [
   { name: 'inicio', path: '/' },
   { name: 'explorar', path: '/explorar' },
   { name: 'ranking', path: '/ranking' },
   { name: 'pesquisa', path: '/pesquisa' },
-  { name: 'organizacao', path: '/org/padaria-ribeira' },
+  { name: 'organizacao', path: '/org/padaria-ribeira', full: true },
+  { name: 'organizacao-aberta', path: '/org/padaria-ribeira', full: true, run: openOrg },
+  {
+    name: 'organizacao-entrevistas',
+    path: '/org/padaria-ribeira/entrevistas',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Ver mais números/);
+      await tap(p, 'button', /^Ver todas as \d+ entrevistas/);
+    },
+  },
+  { name: 'organizacao-salarios', path: '/org/padaria-ribeira/salarios', full: true, run: (p) => tap(p, 'button', /^Porque não aparecem/) },
+  { name: 'organizacao-assedio', path: '/org/lavandaria-sol', full: true, run: openOrg },
+  { name: 'organizacao-assedio-salarios', path: '/org/lavandaria-sol/salarios', full: true },
+  { name: 'organizacao-voluntariado', path: '/org/rede-vizinha', full: true, run: openOrg },
+  { name: 'organizacao-voluntariado-salarios', path: '/org/rede-vizinha/salarios', full: true },
+  { name: 'organizacao-voluntariado-entrevistas', path: '/org/rede-vizinha/entrevistas', full: true },
+  { name: 'organizacao-nao-encontrada', path: '/org/nao-existe' },
   { name: 'sobre', path: '/sobre' },
   { name: 'contacto', path: '/contacto' },
   { name: 'metodologia', path: '/metodologia' },

@@ -1,0 +1,124 @@
+/* Página da organização no computador */
+
+.container {
+  padding-top: 8px;
+  padding-bottom: 80px;
+}
+.back {
+  align-self: flex-start;
+  gap: 6px;
+  min-height: 44px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--body);
+}
+
+/* Entrevistas e salários: cabeçalho compacto */
+.head {
+  gap: 24px;
+  padding: 16px 0 40px;
+}
+.nameBlock {
+  flex: 1 1 360px;
+  min-width: 0;
+  gap: 16px;
+}
+.name {
+  font-size: 40px;
+  line-height: 1;
+}
+.matchPill {
+  font-size: 15px;
+  padding: 6px 14px;
+}
+.cta {
+  height: 56px;
+  padding: 0 24px;
+}
+
+/* Duas colunas: conteúdo e lateral */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 720px) minmax(280px, 340px);
+  justify-content: space-between;
+  gap: 64px;
+  align-items: start;
+  padding-top: 48px;
+}
+.columnsReviews {
+  composes: columns;
+  padding-top: 40px;
+}
+
+/* Avaliações: resumo grande */
+.summary {
+  gap: 48px;
+  padding: 24px 0 56px;
+}
+.summaryText {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 520px;
+  min-width: 0;
+  gap: 16px;
+}
+.bigName {
+  font-size: 56px;
+  line-height: 1;
+}
+.meta {
+  font-size: 16px;
+}
+.lead {
+  margin: 0;
+  max-width: 520px;
+  font-size: 22px;
+  line-height: 1.4;
+}
+.actions {
+  gap: 12px;
+  padding-top: 12px;
+}
+.review {
+  height: 56px;
+  padding: 0 26px;
+}
+.scoreCol {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  align-items: center;
+  gap: 16px;
+}
+.score {
+  font-size: 56px;
+}
+.unit {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--muted);
+}
+.matchPillLarge {
+  font-size: 16px;
+  padding: 8px 16px;
+}
+
+/* Lateral */
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.where {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.whereTitle {
+  font-size: 20px;
+}
+.osm {
+  align-self: flex-start;
+}

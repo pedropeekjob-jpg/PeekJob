@@ -43,7 +43,7 @@ apps/web/src/
 | Hooks | Testing Library (`renderHook`) | Estado e ações, com os providers da app em modo demonstração |
 | Ecrãs | Testing Library + user-event (jsdom) | O que a pessoa vê e faz, em telemóvel e computador (`renderScreen`, `WithDraft`, `WithoutDraft`) |
 | Fluxos | Playwright (`e2e/`) | A app real (API + PostgreSQL), acessibilidade (axe) e teclado |
-| Visual | `npm run visual:compare -- <commit>` | Os mesmos 20 ecrãs e estados, nas duas versões, comparados píxel a píxel |
+| Visual | `npm run visual:compare -- <commit>` | Os mesmos ecrãs e estados (`e2e/visual/scenarios.mjs`; `full: true` fotografa a página inteira, `run` abre secções antes da foto), nas duas versões, comparados píxel a píxel |
 
 **Antes de refazer um ecrã:**
 1. Testes de caracterização, que têm de passar com o código antigo.

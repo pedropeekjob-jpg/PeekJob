@@ -1,0 +1,156 @@
+/* Entrevistas da página da organização: telemóvel por omissão, computador a partir de 900 px */
+
+/* Anéis do resumo (número de colunas em --cols) */
+.rings {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), 1fr);
+  gap: 12px;
+}
+.ringItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.ringText {
+  font-size: 20px;
+}
+.ringTextSm {
+  font-size: 18px;
+}
+.ringLabel {
+  line-height: 1.3;
+}
+
+/* Uma entrevista */
+.result {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--down);
+}
+.result[data-offer='true'] {
+  color: var(--up);
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.head {
+  gap: 8px;
+  align-items: baseline;
+}
+.body {
+  margin: 0;
+  font-size: 15px;
+}
+.itemDesktop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.headDesktop {
+  gap: 12px;
+  align-items: baseline;
+}
+.bodyDesktop {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.foot {
+  gap: 12px;
+}
+
+/* Lista */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.more {
+  height: 48px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+
+/* Telemóvel: resumo */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.headline {
+  gap: 18px;
+}
+.headlineValue {
+  font-size: 24px;
+}
+.headlineText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.headlineTitle {
+  line-height: 1.15;
+}
+.moreNumbers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 12px;
+}
+.usual {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.usualValue {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Computador: lista e resumo ao lado */
+.mainTitle {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.asideTitle {
+  font-size: 20px;
+}
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.blockValue {
+  font-size: 16px;
+  font-weight: 600;
+}
+.offer {
+  font-size: 24px;
+}
+
+@media (min-width: 900px) {
+  .list {
+    gap: 0;
+  }
+  .more {
+    align-self: flex-start;
+    margin-top: 16px;
+  }
+}

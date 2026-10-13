@@ -1,0 +1,125 @@
+/* Critérios e respeito e inclusão na página da organização */
+
+/* Telemóvel */
+.mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobileTitle {
+  margin-bottom: 8px;
+}
+.respButton {
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 14px;
+  margin: 0 -14px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--purple-tint);
+  color: var(--purple-text);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+.dots {
+  display: flex;
+  gap: 4px;
+}
+.dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 7px;
+  background: var(--purple-line);
+}
+.dot[data-fill='full'] {
+  background: var(--purple);
+}
+.dot[data-fill='half'] {
+  background: linear-gradient(90deg, var(--purple) 50%, var(--purple-line) 50%);
+}
+.respValue {
+  font-size: 13px;
+  width: 26px;
+  text-align: right;
+}
+.chevron {
+  transition: transform 0.2s;
+}
+.respButton[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+.respTags {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0 6px;
+}
+.harassment {
+  color: var(--purple-text);
+  font-weight: 600;
+}
+
+/* Computador: cartão de respeito */
+.respCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--purple-tint);
+  border-radius: 24px;
+  padding: 22px;
+}
+.respHead {
+  gap: 16px;
+}
+.respHeadText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.respTitle {
+  font-size: 20px;
+  color: var(--purple-text);
+}
+.respLine {
+  line-height: 1.4;
+  color: var(--purple-text);
+}
+.respLink {
+  color: var(--purple-text);
+  align-self: flex-start;
+  padding-bottom: 0;
+}
+.respLink[aria-expanded='true'] {
+  padding-bottom: 6px;
+}
+.chevronFast {
+  transition: transform 0.15s;
+}
+.respLink[aria-expanded='true'] .chevronFast {
+  transform: rotate(180deg);
+}
+
+/* Computador: prioridades */
+.desktop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.desktopTitle {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+.rest {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.prefsLink {
+  align-self: flex-start;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+}

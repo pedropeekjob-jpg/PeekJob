@@ -1,0 +1,164 @@
+/* Salários da página da organização. Posições da barra em variáveis: --l (início), --w (largura), --m (valor do meio) */
+
+/* Barra: --h é a altura (18 px no telemóvel, 24 px no computador) e --b a borda do ponto */
+.bar {
+  --h: 18px;
+  --b: 4px;
+  position: relative;
+  height: var(--h);
+}
+.barLarge {
+  composes: bar;
+  --h: 24px;
+  --b: 5px;
+}
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--h) / 2 - 1px);
+  height: 2px;
+  background: var(--line);
+}
+.range {
+  position: absolute;
+  top: calc(var(--h) / 2 - 2px);
+  height: 4px;
+  border-radius: 2px;
+  background: var(--teal);
+  left: var(--l);
+  width: var(--w);
+}
+.median {
+  position: absolute;
+  top: 0;
+  left: var(--m);
+  width: var(--h);
+  height: var(--h);
+  margin-left: calc(var(--h) / -2);
+  border-radius: calc(var(--h) / 2);
+  background: var(--surface);
+  border: var(--b) solid var(--ink);
+  box-sizing: border-box;
+}
+
+/* Linha de uma função: computador */
+.rowDesktop {
+  display: grid;
+  grid-template-columns: minmax(130px, 170px) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  padding: 22px 0;
+  border-top: 1px solid var(--line);
+}
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.role {
+  font-size: 15px;
+  font-weight: 600;
+}
+.medianDesktop {
+  font-size: 24px;
+  line-height: 1.15;
+}
+.barCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ends {
+  position: relative;
+  height: 18px;
+}
+.endMin,
+.endMax {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.endMin {
+  left: var(--l);
+}
+.endMax {
+  left: var(--r);
+}
+
+/* Linha de uma função: telemóvel */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.rowHead {
+  align-items: baseline;
+}
+.roleMobile {
+  font-size: 16px;
+  font-weight: 600;
+}
+.count {
+  font-weight: 400;
+}
+.medianMobile {
+  font-size: 22px;
+}
+
+/* Nota sobre funções escondidas */
+.noteDesktop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.noteText {
+  margin: 0;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.note {
+  margin: 0;
+  padding-top: 16px;
+}
+
+/* Pago a horas */
+.paid {
+  font-size: 24px;
+}
+.paidLarge {
+  font-size: 42px;
+}
+.headline {
+  gap: 18px;
+}
+.headlineText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.headlineTitle {
+  line-height: 1.15;
+}
+
+/* Computador */
+.mainTitle {
+  font-size: 24px;
+}
+.subtitle {
+  padding: 6px 0 16px;
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.asideTitle {
+  font-size: 20px;
+}

@@ -1,0 +1,166 @@
+/* Partes comuns da página da organização */
+
+/* Guardar */
+.save {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  font-size: 15px;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--field);
+}
+.saveLarge {
+  composes: save;
+  height: 56px;
+  padding: 0 22px;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.save[aria-pressed='true'],
+.saveLarge[aria-pressed='true'] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* Separadores: avaliações, entrevistas, salários */
+.tabs {
+  gap: 24px;
+}
+.tab {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 15px;
+  padding: 0 0 10px;
+}
+.tabCount {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Locais */
+.single {
+  gap: 12px;
+  min-height: 44px;
+}
+.pin {
+  color: var(--teal-text);
+  flex: none;
+}
+.placeText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.placeLabel {
+  font-size: 15px;
+  font-weight: 600;
+}
+.place {
+  gap: 12px;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.place .placeLabel {
+  font-weight: 500;
+}
+.place[aria-checked='true'] .placeLabel {
+  font-weight: 600;
+}
+.radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  border: 2px solid var(--grey);
+  box-sizing: border-box;
+}
+.place[aria-checked='true'] .radio {
+  border: 6px solid var(--teal);
+}
+
+/* Etiquetas de respeito */
+.noTags {
+  color: var(--purple-text);
+}
+.respTags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 6px;
+}
+.respTag {
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--purple-line);
+  color: var(--purple-text);
+}
+.respCount {
+  opacity: 0.75;
+}
+
+/* Resposta da organização */
+.reply {
+  padding: 4px 0 4px 14px;
+  border-left: 3px solid var(--teal);
+}
+.replyFrom {
+  font-weight: 600;
+}
+.replyText {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* Não encontrada */
+.notFound {
+  gap: 20px;
+  max-width: 560px;
+  padding-top: 24px;
+}
+.notFoundMark {
+  font-size: 32px;
+}
+.searched {
+  font-size: 15px;
+}
+.notFoundActions {
+  gap: 12px;
+}
+
+/* A carregar */
+.skHead {
+  height: 120px;
+  border-radius: 24px;
+}
+.skBody {
+  height: 300px;
+  border-radius: 24px;
+}
+
+@media (min-width: 900px) {
+  .tabs {
+    gap: 32px;
+  }
+  .tab {
+    font-size: 16px;
+    padding: 12px 0 14px;
+  }
+  .notFound {
+    padding-top: 40px;
+  }
+  .notFoundMark {
+    font-size: 40px;
+  }
+}

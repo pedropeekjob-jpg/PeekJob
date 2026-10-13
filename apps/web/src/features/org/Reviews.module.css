@@ -1,0 +1,143 @@
+/* Avaliações da página da organização: telemóvel por omissão, computador a partir de 900 px */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.mine {
+  gap: 10px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.mineHead {
+  gap: 12px;
+}
+.mineTags {
+  gap: 8px;
+}
+.mineScore {
+  font-size: 16px;
+}
+.mineText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.chips {
+  gap: 6px;
+}
+.lockLine {
+  gap: 6px;
+}
+
+.review {
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.reviewMeta {
+  gap: 8px;
+}
+.reviewScore {
+  margin-left: auto;
+  font-size: 16px;
+  color: var(--ink);
+}
+.reviewTitle {
+  line-height: 1.3;
+}
+.reviewBody {
+  margin: 0;
+  font-size: 15px;
+}
+.check {
+  flex: none;
+}
+
+.reviewDesktop {
+  gap: 10px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.reviewDesktopHead {
+  gap: 14px;
+}
+.reviewDesktopText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.reviewDesktopTitle {
+  line-height: 1.35;
+}
+.reviewDesktopMeta {
+  gap: 6px;
+}
+.reviewDesktopBody {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Ações: útil e denunciar */
+.actions {
+  gap: 8px;
+}
+.useful {
+  min-height: 44px;
+  padding: 0 14px 0 0;
+  border: 0;
+  background: transparent;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+}
+.useful[aria-pressed='true'] {
+  color: var(--teal-dark);
+}
+.usefulIcon {
+  fill: none;
+}
+.useful[aria-pressed='true'] .usefulIcon {
+  fill: var(--teal-tint);
+}
+.report {
+  margin-left: auto;
+  min-height: 44px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 6px;
+}
+
+/* Ver todas */
+.more {
+  height: 52px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+.firstReview {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
+@media (min-width: 900px) {
+  .list {
+    gap: 0;
+  }
+  .mine {
+    padding: 24px 0;
+  }
+  .mineText {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .more {
+    align-self: flex-start;
+    margin-top: 16px;
+    height: 48px;
+  }
+}

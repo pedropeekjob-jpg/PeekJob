@@ -56,7 +56,7 @@ async function shoot(port, dir) {
       if (s.run) await s.run(page);
       await page.waitForTimeout(400);
       await page.mouse.move(0, 0);
-      await page.screenshot({ path: join(dir, `${tag}-${s.name}.png`), animations: 'disabled' });
+      await page.screenshot({ path: join(dir, `${tag}-${s.name}.png`), animations: 'disabled', fullPage: !!s.full });
       await page.close();
     }
     await ctx.close();
