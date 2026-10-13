@@ -192,6 +192,17 @@ export const SCENARIOS = [
       await tap(p, 'button', /^Repor dados de demonstração/);
     },
   },
+  { name: 'meus-dados', path: '/perfil/dados', full: true },
+  { name: 'meus-dados-confirmar', path: '/perfil/dados', full: true, run: (p) => tap(p, 'button', /^Apagar a minha conta$/) },
+  {
+    name: 'meus-dados-apagada',
+    path: '/perfil/dados',
+    run: async (p) => {
+      await tap(p, 'button', /^Apagar a minha conta$/);
+      await tap(p, 'checkbox', /^Manter as minhas avaliações/);
+      await tap(p, 'button', /^Apagar definitivamente$/);
+    },
+  },
   { name: 'apoio', path: '/apoio', full: true },
   {
     name: 'apoio-mensagem',
