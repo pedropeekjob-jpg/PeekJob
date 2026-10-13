@@ -26,6 +26,7 @@ import AvaliarFeito from './pages/AvaliarFeito';
 import Apoio from './pages/Apoio';
 import Guardadas from './pages/Guardadas';
 import Perfil from './pages/Perfil';
+import MeusDados from './pages/MeusDados';
 import Entrar from './pages/Entrar';
 import ParaOrganizacoes from './pages/ParaOrganizacoes';
 import Painel from './pages/Painel';
@@ -91,6 +92,7 @@ export default function App() {
           <Route path="/apoio" element={<Apoio />} />
           <Route path="/guardadas" element={<Guardadas />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/perfil/dados" element={<MeusDados />} />
           <Route path="/entrar" element={<Entrar />} />
           <Route path="/para-organizacoes" element={<ParaOrganizacoes />} />
           <Route path="/painel" element={<Painel />} />

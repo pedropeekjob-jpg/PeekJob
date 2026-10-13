@@ -42,7 +42,7 @@ export default function Perfil() {
   const settings: { label: string; value?: string; to: string }[] = [
     { label: tr('Verificação', 'Verification'), value: verifValue, to: '/avaliar/verificar' },
     { label: tr('Como calculamos', 'How we score'), to: '/metodologia' },
-    { label: tr('Privacidade e dados', 'Privacy and data'), value: desktop ? tr('Exportar ou apagar', 'Export or delete') : undefined, to: '/metodologia#privacidade' },
+    { label: tr('Privacidade e dados', 'Privacy and data'), value: desktop ? tr('Exportar ou apagar', 'Export or delete') : undefined, to: '/perfil/dados' },
     { label: tr('Gerir a minha organização', 'Manage my organisation'), to: '/painel' },
   ];
 

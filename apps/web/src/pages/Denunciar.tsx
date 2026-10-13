@@ -1,6 +1,8 @@
 import { useId, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
+import { useStore } from '../lib/store';
 import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
 import { REPORT_REASONS } from '../data/content';
@@ -41,18 +43,67 @@ export default function Denunciar() {
   const [tried, setTried] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
   const [steps, setSteps] = useState(false);
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const { user, reportReview } = useStore();
+  const anonymous = apiMode && !user;
 
   const orgPath = org ? `/org/${org.id}` : '/ranking';
   const reasonLabel = REPORT_REASONS.find((r) => r.id === reason)?.label;
 
-  const send = () => {
+  const send = async () => {
     if (!reason) {
       setTried(true);
       return;
     }
-    setSent(makeRef(`${id}/${reviewId}/${reason}`));
+    if (busy) return;
+    if (apiMode && reviewId) {
+      setBusy(true);
+      setError('');
+      const r = await reportReview(reviewId, {
+        reason,
+        details: detail.trim(),
+        contactName: anonymous && contactName.trim() ? contactName.trim() : undefined,
+        contactEmail: anonymous && contactEmail.trim() ? contactEmail.trim() : undefined,
+      });
+      setBusy(false);
+      if (!r.ok) {
+        setError(
+          r.status === 409
+            ? tr('Já denunciaste esta avaliação. A moderação está a analisar.', 'You’ve already reported this review. Moderation is looking at it.')
+            : r.status === 400
+              ? tr('Verifica o email (ou deixa-o em branco).', 'Check the email address (or leave it blank).')
+              : r.message,
+        );
+        return;
+      }
+      setSent(`PJ-${r.value!.reference}`);
+    } else {
+      setSent(makeRef(`${id}/${reviewId}/${reason}`));
+    }
     window.scrollTo(0, 0);
   };
+
+  // Sem conta: contacto opcional para receber a decisão (Regulamento dos Serviços Digitais)
+  const contact = anonymous ? (
+    <fieldset className="stack" style={{ gap: 8, border: 0, padding: 0, margin: 0 }}>
+      <legend className="small" style={{ fontWeight: 600, marginBottom: 6 }}>
+        {tr('Queres saber a decisão? (opcional)', 'Want to know the decision? (optional)')}
+      </legend>
+      <input className="input" type="text" autoComplete="name" placeholder={tr('Nome', 'Name')} value={contactName} onChange={(e) => setContactName(e.target.value)} />
+      <input className="input" type="email" autoComplete="email" placeholder={tr('Email', 'Email')} value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+      <span className="small muted">
+        {tr('Só usamos o email para te dizer a decisão e apagamo-lo a seguir.', 'We only use it to tell you the decision, then delete it.')}
+      </span>
+    </fieldset>
+  ) : null;
+  const sendError = error ? (
+    <span role="alert" className="small" style={{ color: 'var(--warn-text)', fontWeight: 600 }}>
+      {error}
+    </span>
+  ) : null;
 
   if (!org || !target) {
     return (
@@ -194,10 +245,10 @@ export default function Denunciar() {
       <p className="body" style={{ margin: 0, fontSize: desktop ? 16 : 15, lineHeight: 1.55, maxWidth: 520 }}>
         {tr(
           <>
-            Motivo: <strong style={{ color: 'var(--ink)', fontWeight: 600 }}>{reasonLabel}</strong>. Uma pessoa revê-a em até 48 horas. Vês a decisão nas tuas mensagens.
+            Motivo: <strong style={{ color: 'var(--ink)', fontWeight: 600 }}>{reasonLabel}</strong>. Uma pessoa revê-a em até 48 horas. {anonymous ? (contactEmail.trim() ? 'Recebes a decisão por email.' : '') : 'Vês a decisão nas tuas mensagens.'}
           </>,
           <>
-            Reason: <strong style={{ color: 'var(--ink)', fontWeight: 600 }}>{reasonLabel}</strong>. A person reviews it within 48 hours. You’ll see the decision in your messages.
+            Reason: <strong style={{ color: 'var(--ink)', fontWeight: 600 }}>{reasonLabel}</strong>. A person reviews it within 48 hours. {anonymous ? (contactEmail.trim() ? 'We’ll email you the decision.' : '') : 'You’ll see the decision in your messages.'}
           </>,
         )}
       </p>
@@ -244,8 +295,10 @@ export default function Denunciar() {
                     </div>
                     {textarea}
                   </div>
+                  {contact}
+                  {sendError}
                   <div className="row wrap" style={{ gap: 12 }}>
-                    <button type="button" className="btn btn-dark lift" style={{ height: 56, padding: '0 28px' }} onClick={send} aria-disabled={!reason}>
+                    <button type="button" className="btn btn-dark lift" style={{ height: 56, padding: '0 28px' }} onClick={send} aria-disabled={!reason || busy}>
                       {tr('Enviar denúncia', 'Send report')}
                     </button>
                     <button type="button" className="link" style={{ padding: '0 12px', color: 'var(--body)' }} onClick={() => nav(orgPath)}>
@@ -336,7 +389,9 @@ export default function Denunciar() {
                   </button>
                 )}
                 {illegal}
-                <button type="button" className="btn btn-dark btn-block" style={{ marginTop: 'auto', height: 56 }} onClick={send} aria-disabled={!reason}>
+                {contact}
+                {sendError}
+                <button type="button" className="btn btn-dark btn-block" style={{ marginTop: 'auto', height: 56 }} onClick={send} aria-disabled={!reason || busy}>
                   {tr('Enviar denúncia', 'Send report')}
                 </button>
               </>

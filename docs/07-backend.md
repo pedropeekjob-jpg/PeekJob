@@ -47,6 +47,11 @@
 | POST | `/verifications/document` | sessão | PDF em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
 | GET | `/me/verifications` | sessão | As minhas verificações |
 | GET | `/me/reviews` | sessão | As minhas avaliações |
+| POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
+| GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação |
+| POST | `/moderation/reviews/:id/decision` | moderador | `remove` ou `keep`, com justificação; avisa quem escreveu e quem denunciou |
+| GET | `/me/export` | sessão | Os meus dados (JSON) |
+| DELETE | `/me` | sessão | Apagar a conta (`keepReviews` mantém as avaliações, desligadas da pessoa) |
 | GET | `/me/messages` | sessão | Mensagens privadas de apoio com os contactos |
 | POST | `/me/messages/:id/read` | sessão | Marca a mensagem como lida |
 | GET | `/health` | todos | Estado da API e da base de dados |
@@ -61,6 +66,16 @@ Ao publicar uma avaliação, a API responde assim:
 | A mesma pessoa avalia a mesma organização uma segunda vez | 409 |
 
 Depois da verificação, as avaliações dessa pessoa nessa organização passam a "verificadas". Um NIF confirmado também ativa uma organização pendente.
+
+## Denúncias e moderação (Regulamento dos Serviços Digitais)
+- Qualquer pessoa denuncia, com ou sem conta. A avaliação só sai do site por decisão de um moderador, sempre com justificação.
+- Quem escreveu recebe o motivo em privado quando a avaliação é removida. Quem denunciou com conta recebe a decisão nas mensagens; sem conta, por email se o deixou. O contacto é apagado logo a seguir.
+- O IP nunca é guardado: só um HMAC, para limitar abusos.
+- Falta: ecrã de backoffice para moderadores (hoje usa-se a API) e um canal para quem escreveu contestar a decisão.
+
+## RGPD
+- **Acesso:** `GET /me/export` e o ecrã *Perfil → Privacidade e dados → Descarregar*.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
 
 ## Correr localmente
 
@@ -87,7 +102,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 - **Domínio partilhado:** 42 testes (vitest).
 - **Web:** 22 testes (medição e privacidade).
-- **API:** 92 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
+- **API:** 117 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
 - **Web:** fluxos completos verificados no browser (Playwright), em desktop e mobile, contra a API real.
 
 ## Próxima fatia

@@ -577,7 +577,7 @@ function Privacy({ desktop = false }: { desktop?: boolean }) {
           {tr('Gerir estatísticas', 'Manage statistics')} <Icon name="next" size={16} />
         </button>
       )}
-      <Link to="/perfil" className="link" style={{ alignSelf: 'flex-start', fontSize: 14 }}>
+      <Link to="/perfil/dados" className="link" style={{ alignSelf: 'flex-start', fontSize: 14 }}>
         {tr('Exportar ou apagar os meus dados', 'Export or delete my data')} <Icon name="next" size={16} />
       </Link>
     </section>

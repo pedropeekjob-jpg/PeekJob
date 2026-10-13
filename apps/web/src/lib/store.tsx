@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { api, ApiError, apiMode, errorText } from '../api/http';
+import { api, API_URL, ApiError, apiMode, errorText } from '../api/http';
 import { toMessage, toMyReview, toOrg, type ApiOrg, type ApiReview } from '../api/mappers';
 import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
 import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
@@ -34,6 +34,10 @@ export interface SupportMessage {
   found: string[];
   when: string;
   read: boolean;
+  /** 'moderation': aviso de uma decisão da moderação (avaliação removida ou denúncia analisada) */
+  type?: 'support' | 'moderation';
+  orgName?: string;
+  details?: { decision: 'removed' | 'upheld' | 'rejected'; note: string; orgName?: string } | null;
 }
 
 export interface Draft {
@@ -410,6 +414,53 @@ function useAppState() {
           const f = fail(e);
           track('review_submit', { result: failKind(f), ...submitInfo });
           return f;
+        }
+      },
+
+      /** Denunciar uma avaliação (modo API). Contacto opcional para quem não tem sessão. */
+      reportReview: async (
+        reviewId: string,
+        body: { reason: string; details: string; contactName?: string; contactEmail?: string },
+      ): Promise<Result<{ reference: string }>> => {
+        try {
+          const r = await api<{ reference: string }>(`/reviews/${reviewId}/reports`, { body: { ...body, lang: getLang() } });
+          return { ok: true, value: r };
+        } catch (e) {
+          return fail(e);
+        }
+      },
+
+      /** RGPD: descarregar os meus dados (modo API: do servidor; demonstração: o que está no browser) */
+      exportMyData: async (): Promise<Result<{ blob: Blob; filename: string }>> => {
+        const date = new Date().toISOString().slice(0, 10);
+        const filename = `peekjob-os-meus-dados-${date}.json`;
+        if (!apiMode) {
+          const { user, ...rest } = stRef.current;
+          return { ok: true, value: { blob: new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), demo: true, ...rest }, null, 2)], { type: 'application/json' }), filename } };
+        }
+        try {
+          const res = await fetch(`${API_URL}/me/export`, { credentials: 'include' });
+          if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+          return { ok: true, value: { blob: await res.blob(), filename } };
+        } catch (e) {
+          return fail(e);
+        }
+      },
+
+      /** RGPD: apagar a conta (e, por omissão, as avaliações) */
+      deleteAccount: async (keepReviews: boolean): Promise<Result> => {
+        if (!apiMode) {
+          setSt(initial());
+          set({ user: null, myReviews: keepReviews ? stRef.current.myReviews : [], messages: [] });
+          return { ok: true };
+        }
+        try {
+          await api('/me', { method: 'DELETE', body: { keepReviews } });
+          set({ user: null, myReviews: [], messages: [], lastPublished: null });
+          void loadOrgs().catch(() => undefined);
+          return { ok: true };
+        } catch (e) {
+          return fail(e);
         }
       },
 

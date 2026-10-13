@@ -88,6 +88,14 @@ export function toMyReview(r: ApiReview & { orgId: string }): MyReview {
   return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, when: when(r.createdAt), flagged: r.flagged };
 }
 
-export function toMessage(m: { id: string; kinds: string[]; createdAt: string; read: boolean; orgName?: string }): SupportMessage {
-  return { id: m.id, orgId: '', kinds: m.kinds, found: [], when: when(m.createdAt), read: m.read };
+export function toMessage(m: {
+  id: string;
+  kinds: string[];
+  createdAt: string;
+  read: boolean;
+  orgName?: string;
+  type?: 'support' | 'moderation';
+  details?: SupportMessage['details'];
+}): SupportMessage {
+  return { id: m.id, orgId: '', kinds: m.kinds, found: [], when: when(m.createdAt), read: m.read, type: m.type ?? 'support', orgName: m.orgName ?? m.details?.orgName, details: m.details ?? null };
 }

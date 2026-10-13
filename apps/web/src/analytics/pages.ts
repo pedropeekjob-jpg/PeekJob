@@ -35,6 +35,7 @@ const PAGES = (): Record<string, PageMeta> => ({
   '/apoio': { title: tr(`Apoio · ${BRAND}`, `Support · ${BRAND}`), index: false },
   '/guardadas': { title: tr(`Guardadas · ${BRAND}`, `Saved · ${BRAND}`), index: false },
   '/perfil': { title: tr(`Perfil · ${BRAND}`, `Profile · ${BRAND}`), index: false },
+  '/perfil/dados': { title: tr(`Os teus dados · ${BRAND}`, `Your data · ${BRAND}`), index: false },
   '/entrar': { title: tr(`Entrar · ${BRAND}`, `Sign in · ${BRAND}`), index: false },
   '/painel': { title: tr(`Painel da organização · ${BRAND}`, `Organisation dashboard · ${BRAND}`), index: false },
   '/404': { title: tr(`Página não encontrada · ${BRAND}`, `Page not found · ${BRAND}`), index: false },

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { Accordion } from '../components/UI';
 import { SUPPORT, supportTips } from '../data/content';
-import { useStore } from '../lib/store';
+import { useStore, type SupportMessage } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { tr } from '../i18n';
 import { flagLabel } from '../i18n/labels';
@@ -15,12 +15,13 @@ export default function Apoio() {
   const desktop = useIsDesktop();
   const nav = useNavigate();
   const { messages, markMessagesRead } = useStore();
-  // Guarda a mensagem antes de a marcar como lida (para o texto não mudar ao abrir)
-  const [msg] = useState(() => messages[0]);
+  // As mensagens podem chegar do servidor depois de o ecrã abrir: usar sempre as atuais
+  const msg = messages.find((m) => (m.type ?? 'support') === 'support');
+  const notices = messages.filter((m) => m.type === 'moderation');
 
   useEffect(() => {
     markMessagesRead();
-  }, [markMessagesRead]);
+  }, [markMessagesRead, messages.length]);
 
   const back = () => {
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
@@ -144,6 +145,7 @@ export default function Apoio() {
               </span>
             </a>
             <section className="stack" style={{ flex: '1.4 1 420px', minWidth: 0, borderBottom: '1px solid var(--line)' }}>
+              <ModerationNotices notices={notices} />
               {tips}
             </section>
           </div>
@@ -229,6 +231,7 @@ export default function Apoio() {
           </span>
         </div>
 
+        <ModerationNotices notices={notices} />
         <section style={{ borderBottom: '1px solid var(--line)' }}>{tips}</section>
 
         <p className="small muted" style={{ margin: 0, paddingTop: 20, lineHeight: 1.5 }}>
@@ -236,5 +239,36 @@ export default function Apoio() {
         </p>
       </div>
     </Shell>
+  );
+}
+
+/** Avisos da moderação: avaliação removida (com o motivo) ou resultado de uma denúncia */
+function ModerationNotices({ notices }: { notices: SupportMessage[] }) {
+  if (!notices.length) return null;
+  return (
+    <section aria-labelledby="mod-notices" className="stack" style={{ gap: 12 }}>
+      <h2 id="mod-notices" style={{ ...DISPLAY, fontSize: 20 }}>{tr('Avisos da moderação', 'Moderation notices')}</h2>
+      {notices.map((n) => {
+        const org = n.orgName ?? n.details?.orgName ?? tr('uma organização', 'an organisation');
+        const title =
+          n.details?.decision === 'removed'
+            ? tr(`A tua avaliação de ${org} foi removida.`, `Your review of ${org} was removed.`)
+            : n.details?.decision === 'upheld'
+              ? tr(`A tua denúncia sobre ${org} foi aceite: a avaliação foi removida.`, `Your report about ${org} was upheld: the review was removed.`)
+              : tr(`Analisámos a tua denúncia sobre ${org}: a avaliação mantém-se.`, `We reviewed your report about ${org}: the review stays.`);
+        return (
+          <div key={n.id} className="card stack" style={{ gap: 6, padding: 18 }}>
+            <strong style={{ fontSize: 16 }}>{title}</strong>
+            {n.details?.note && (
+              <span className="body" style={{ fontSize: 15 }}>
+                {tr('Motivo: ', 'Reason: ')}
+                {n.details.note}
+              </span>
+            )}
+            <span className="small muted">{n.when}</span>
+          </div>
+        );
+      })}
+    </section>
   );
 }

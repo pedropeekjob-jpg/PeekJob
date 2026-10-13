@@ -5,7 +5,7 @@
 export const STATIC_WEB_ROUTES = [
   '/', '/explorar', '/sobre', '/contacto', '/preferencias', '/a-preparar', '/pesquisa', '/ranking', '/setores', '/metodologia',
   '/avaliar', '/avaliar/verificar', '/avaliar/notas', '/avaliar/texto', '/avaliar/feito',
-  '/apoio', '/guardadas', '/perfil', '/entrar', '/para-organizacoes', '/painel',
+  '/apoio', '/guardadas', '/perfil', '/perfil/dados', '/entrar', '/para-organizacoes', '/painel',
 ] as const;
 
 const STATIC = new Set<string>(STATIC_WEB_ROUTES);
