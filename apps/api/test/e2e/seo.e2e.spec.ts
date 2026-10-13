@@ -59,8 +59,12 @@ describe('SEO e medição', () => {
   });
 
   it('pedidos da API (fetch) continuam a receber JSON', async () => {
-    await t.http().get('/orgs').set('accept', '*/*').expect(200).expect('content-type', /json/);
-    await t.http().get('/org/x').set('accept', 'application/json').expect(404);
+    {
+      const res = await t.http().get('/orgs').set('accept', '*/*');
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toMatch(/json/);
+    }
+    expect((await t.http().get('/org/x').set('accept', 'application/json')).status).toBe(404);
   });
 
   it('robots.txt fecha as páginas pessoais e aponta o sitemap', async () => {

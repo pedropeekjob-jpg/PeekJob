@@ -16,7 +16,7 @@ describe('Avaliações', () => {
   });
 
   it('exige sessão', async () => {
-    await t.http().post(`/orgs/${orgId}/reviews`).send(goodReview).expect(401);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).send(goodReview)).status).toBe(401);
   });
 
   it('publica uma avaliação e calcula a média', async () => {
@@ -26,7 +26,7 @@ describe('Avaliações', () => {
   });
 
   it('nunca expõe quem avaliou', async () => {
-    await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('pessoa@gmail.com')).send(goodReview).expect(201);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('pessoa@gmail.com')).send(goodReview)).status).toBe(201);
     const res = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
     const raw = JSON.stringify(res.body);
     expect(raw).not.toMatch(/pessoa|reviewer|user/i);
@@ -35,8 +35,8 @@ describe('Avaliações', () => {
   });
 
   it('uma avaliação por pessoa por organização (409)', async () => {
-    await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
-    await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(goodReview).expect(409);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(409);
   });
 
   it('bloqueia insultos e nomes de pessoas (422) e sugere uma versão sem eles', async () => {
@@ -73,18 +73,18 @@ describe('Avaliações', () => {
     });
 
     it('a página pública mostra só o número de relatos de assédio (nunca o texto da mensagem)', async () => {
-      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(flaggedReview).expect(201);
-      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u2')).send({ ...goodReview, text: 'Há meses que pagam com atraso.' }).expect(201);
-      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u3')).send(goodReview).expect(201);
+      expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(flaggedReview)).status).toBe(201);
+      expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u2')).send({ ...goodReview, text: 'Há meses que pagam com atraso.' })).status).toBe(201);
+      expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u3')).send(goodReview)).status).toBe(201);
       const res = await t.http().get(`/orgs/${orgId}`).expect(200);
       expect(res.body.harassmentReports).toBe(1);
       expect(JSON.stringify(res.body)).not.toMatch(/incumprimento|kinds/);
     });
 
     it('marca as mensagens como lidas', async () => {
-      await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(flaggedReview).expect(201);
+      expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(flaggedReview)).status).toBe(201);
       const { body } = await t.http().get('/me/messages').set(await t.login('u1'));
-      await t.http().post(`/me/messages/${body.items[0].id}/read`).set(await t.login('u1')).expect(204);
+      expect((await t.http().post(`/me/messages/${body.items[0].id}/read`).set(await t.login('u1'))).status).toBe(204);
       const after = await t.http().get('/me/messages').set(await t.login('u1'));
       expect(after.body.items[0].read).toBe(true);
     });
@@ -94,20 +94,20 @@ describe('Avaliações', () => {
     it('ficam pendentes até 3 pessoas diferentes avaliarem', async () => {
       const created = await t.http().post('/orgs').set(await t.login('u1')).send({ name: 'Café do Largo', type: 'PME', city: 'Porto' }).expect(201);
       const id = created.body.id;
-      await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
-      await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u2')).send(goodReview).expect(201);
-      await t.http().get(`/orgs/${id}`).expect(404);
+      expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
+      expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u2')).send(goodReview)).status).toBe(201);
+      expect((await t.http().get(`/orgs/${id}`)).status).toBe(404);
       const third = await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u3')).send(goodReview).expect(201);
       expect(third.body.orgStatus).toBe('active');
-      await t.http().get(`/orgs/${id}`).expect(200);
+      expect((await t.http().get(`/orgs/${id}`)).status).toBe(200);
     });
   });
 
   it('valida as notas (400)', async () => {
-    await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send({ ...goodReview, scores: { respeito: 9 } }).expect(400);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send({ ...goodReview, scores: { respeito: 9 } })).status).toBe(400);
   });
 
   it('404 para organização inexistente ou fundida', async () => {
-    await t.http().post('/orgs/00000000-0000-0000-0000-000000000000/reviews').set(await t.login('u1')).send(goodReview).expect(404);
+    expect((await t.http().post('/orgs/00000000-0000-0000-0000-000000000000/reviews').set(await t.login('u1')).send(goodReview)).status).toBe(404);
   });
 });

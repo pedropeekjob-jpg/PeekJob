@@ -15,7 +15,7 @@ describe('Listas para a web', () => {
     const a = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
     await insertOrg(t.pool, { name: 'Oficina Sete' });
     await insertOrg(t.pool, { name: 'Pendente', status: 'pending' });
-    await t.http().post(`/orgs/${a}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
+    expect((await t.http().post(`/orgs/${a}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
 
     const res = await t.http().get('/orgs').expect(200);
     expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Padaria Ribeira', 'Oficina Sete']);
@@ -40,11 +40,11 @@ describe('Listas para a web', () => {
   it('GET /me/reviews devolve só as minhas avaliações, com o nome da organização', async () => {
     const a = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
     const b = await insertOrg(t.pool, { name: 'Oficina Sete' });
-    await t.http().post(`/orgs/${a}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
-    await t.http().post(`/orgs/${b}/reviews`).set(await t.login('u2')).send(goodReview).expect(201);
+    expect((await t.http().post(`/orgs/${a}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
+    expect((await t.http().post(`/orgs/${b}/reviews`).set(await t.login('u2')).send(goodReview)).status).toBe(201);
     const res = await t.http().get('/me/reviews').set(await t.login('u1')).expect(200);
     expect(res.body.items).toHaveLength(1);
     expect(res.body.items[0]).toMatchObject({ orgId: a, orgName: 'Padaria Ribeira', avg: 4.3, flagged: false });
-    await t.http().get('/me/reviews').expect(401);
+    expect((await t.http().get('/me/reviews')).status).toBe(401);
   });
 });

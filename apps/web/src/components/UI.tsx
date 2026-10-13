@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 import { tr } from '../i18n';
+import sheetStyles from './Sheet.module.css';
 
 /** Secção que abre e fecha (revelação progressiva) */
 export function Disclosure({
@@ -92,31 +93,39 @@ export function TopBar({ back, title, right, onBack }: { back?: string | -1; tit
   );
 }
 
-/** Folha que sobe de baixo (mobile) ou diálogo central (desktop) */
+/**
+ * Folha que sobe de baixo (telemóvel) ou diálogo central (computador).
+ * Fecha com Escape, com o botão fechar ou no fundo; o foco entra no diálogo e volta a quem o abriu.
+ */
 export function Sheet({ open, onClose, title, children, footer }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', k);
-    const prev = document.body.style.overflow;
+    const opener = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
     return () => {
-      window.removeEventListener('keydown', k);
-      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+      opener?.focus?.();
     };
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="sheet-wrap" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} className="sheet fade-up" onClick={(e) => e.stopPropagation()}>
-        <div className="row between" style={{ gap: 12, padding: '14px 20px 6px' }}>
-          <h2 className="h2" style={{ fontSize: 22 }}>{title}</h2>
+    <div className={sheetStyles.wrap}>
+      <button type="button" className={sheetStyles.backdrop} data-sheet-backdrop tabIndex={-1} aria-hidden="true" onClick={onClose} />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1} className={`${sheetStyles.sheet} fade-up`}>
+        <div className={`row between ${sheetStyles.head}`}>
+          <h2 className={`h2 ${sheetStyles.title}`}>{title}</h2>
           <button type="button" className="icon-btn bare" aria-label={tr('Fechar', 'Close')} onClick={onClose}>
             <Icon name="close" />
           </button>
         </div>
-        <div style={{ padding: '6px 20px 20px', overflowY: 'auto', flex: 1 }}>{children}</div>
-        {footer && <div style={{ padding: '12px 20px 20px', borderTop: '1px solid var(--line)' }}>{footer}</div>}
+        <div className={sheetStyles.body}>{children}</div>
+        {footer && <div className={sheetStyles.foot}>{footer}</div>}
       </div>
     </div>
   );

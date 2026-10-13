@@ -11,8 +11,15 @@ export const STATIC_WEB_ROUTES = [
 const STATIC = new Set<string>(STATIC_WEB_ROUTES);
 
 /** Caminho real → modelo da rota (ex.: /org/3f2a/salarios → /org/:id/salarios); '/404' se não existir */
+/** Tira as barras finais ("/org/x///" → "/org/x"), sem expressões regulares */
+export function stripTrailingSlashes(s: string): string {
+  let end = s.length;
+  while (end > 0 && s[end - 1] === '/') end--;
+  return s.slice(0, end);
+}
+
 export function routeTemplate(pathname: string): string {
-  const p = pathname.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
+  const p = stripTrailingSlashes(pathname.split(/[?#]/)[0]) || '/';
   if (STATIC.has(p)) return p;
   const org = p.match(/^\/org\/[^/]+(\/(entrevistas|salarios)|\/denunciar\/[^/]+)?$/);
   if (org) {

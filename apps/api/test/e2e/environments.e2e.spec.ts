@@ -43,19 +43,23 @@ describe('Ambientes', () => {
     it('pede palavra-passe para a web e para a API (401 com WWW-Authenticate)', async () => {
       const res = await t.http().get('/').set('accept', 'text/html').expect(401);
       expect(res.headers['www-authenticate']).toMatch(/^Basic realm="PeekJob UAT"/);
-      await t.http().get('/orgs').expect(401);
-      await t.http().get('/').set('authorization', basic('cliente', 'errada')).expect(401);
+      expect((await t.http().get('/orgs')).status).toBe(401);
+      expect((await t.http().get('/').set('authorization', basic('cliente', 'errada'))).status).toBe(401);
     });
 
     it('com a palavra-passe certa funciona normalmente', async () => {
-      await t.http().get('/orgs').set('authorization', auth).expect(200).expect('content-type', /json/);
-      await t.http().get('/').set('accept', 'text/html').set('authorization', auth).expect(200);
+      {
+        const res = await t.http().get('/orgs').set('authorization', auth);
+        expect(res.status).toBe(200);
+        expect(res.headers['content-type']).toMatch(/json/);
+      }
+      expect((await t.http().get('/').set('accept', 'text/html').set('authorization', auth)).status).toBe(200);
       const cfg = await t.http().get('/pj-config.js').set('authorization', auth).expect(200);
       expect(cfg.text).toContain('"env":"uat"');
     });
 
     it('o health check do alojamento não precisa de palavra-passe', async () => {
-      await t.http().get('/health').expect(200);
+      expect((await t.http().get('/health')).status).toBe(200);
     });
 
     it('fica fora do Google: X-Robots-Tag, robots.txt fechado e sem sitemap', async () => {
@@ -63,11 +67,11 @@ describe('Ambientes', () => {
       expect(res.headers['x-robots-tag']).toBe('noindex, nofollow');
       const robots = await t.http().get('/robots.txt').set('authorization', auth).expect(200);
       expect(robots.text).toBe('User-agent: *\nDisallow: /\n');
-      await t.http().get('/sitemap.xml').set('authorization', auth).expect(404);
+      expect((await t.http().get('/sitemap.xml').set('authorization', auth)).status).toBe(404);
     });
 
     it('os emails levam [UAT] no assunto', async () => {
-      await t.http().post('/auth/magic-link').set('authorization', auth).send({ email: 'teste@gmail.com' }).expect(202);
+      expect((await t.http().post('/auth/magic-link').set('authorization', auth).send({ email: 'teste@gmail.com' })).status).toBe(202);
       expect(t.mailer.outbox.at(-1)!.subject).toBe('[UAT] O teu link de acesso à PeekJob');
     });
   });
@@ -101,8 +105,8 @@ describe('Ambientes', () => {
       const res = await t.http().get('/').set('accept', 'text/html').expect(200);
       expect(res.headers['x-robots-tag']).toBeUndefined();
       expect(res.text).not.toContain('"env"');
-      await t.http().get('/sitemap.xml').expect(200);
-      await t.http().post('/auth/magic-link').send({ email: 'teste@gmail.com' }).expect(202);
+      expect((await t.http().get('/sitemap.xml')).status).toBe(200);
+      expect((await t.http().post('/auth/magic-link').send({ email: 'teste@gmail.com' })).status).toBe(202);
       expect(t.mailer.outbox.at(-1)!.subject).toBe('O teu link de acesso à PeekJob');
     });
   });

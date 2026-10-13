@@ -19,8 +19,8 @@ describe('Os meus dados (RGPD)', () => {
 
   async function personWithData() {
     const me = await t.login('ana@gmail.com');
-    await t.http().post('/verifications/email').set(me).send({ orgId, email: 'ana@padaria.pt' }).expect(202);
-    await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code: t.mailer.lastCodeFor('ana@padaria.pt') }).expect(200);
+    expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: 'ana@padaria.pt' })).status).toBe(202);
+    expect((await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code: t.mailer.lastCodeFor('ana@padaria.pt') })).status).toBe(200);
     const rf = { ...goodReview, text: 'O salário chega sempre com atraso.' };
     const rev = await t.http().post(`/orgs/${orgId}/reviews`).set(me).send(rf).expect(201);
     return { me, reviewId: rev.body.review.id as string };
@@ -28,7 +28,7 @@ describe('Os meus dados (RGPD)', () => {
 
   describe('exportar', () => {
     it('exige sessão', async () => {
-      await t.http().get('/me/export').expect(401);
+      expect((await t.http().get('/me/export')).status).toBe(401);
     });
 
     it('devolve um ficheiro JSON com tudo o que está ligado à pessoa', async () => {
@@ -54,7 +54,7 @@ describe('Os meus dados (RGPD)', () => {
       const { me } = await personWithData();
       const res = await t.http().delete('/me').set(me).send({}).expect(204);
       expect(String(res.headers['set-cookie'])).toMatch(/pj_session=;/);
-      await t.http().get('/auth/me').set(me).expect(401);
+      expect((await t.http().get('/auth/me').set(me)).status).toBe(401);
       const counts = await t.pool.query(`SELECT
         (SELECT count(*) FROM users)::int AS users, (SELECT count(*) FROM reviews)::int AS reviews,
         (SELECT count(*) FROM verifications)::int AS verifications, (SELECT count(*) FROM support_messages)::int AS messages,
@@ -64,7 +64,7 @@ describe('Os meus dados (RGPD)', () => {
 
     it('pode manter as avaliações, mas deixam de estar ligadas à pessoa', async () => {
       const { me, reviewId } = await personWithData();
-      await t.http().delete('/me').set(me).send({ keepReviews: true }).expect(204);
+      expect((await t.http().delete('/me').set(me).send({ keepReviews: true })).status).toBe(204);
       const { rows } = await t.pool.query('SELECT author_ref FROM reviews WHERE id = $1', [reviewId]);
       expect(rows).toHaveLength(1);
       // voltar a entrar com o mesmo email cria uma conta nova, sem ligação à avaliação antiga
@@ -79,13 +79,13 @@ describe('Os meus dados (RGPD)', () => {
     it('as organizações que a pessoa criou ficam, sem ligação a ela', async () => {
       const me = await t.login('criadora');
       const created = await t.http().post('/orgs').set(me).send({ name: 'Café do Largo', type: 'PME', city: 'Porto' }).expect(201);
-      await t.http().delete('/me').set(me).send({}).expect(204);
+      expect((await t.http().delete('/me').set(me).send({})).status).toBe(204);
       const { rows } = await t.pool.query('SELECT created_by FROM organizations WHERE id = $1', [created.body.id]);
       expect(rows).toEqual([{ created_by: null }]);
     });
 
     it('exige sessão', async () => {
-      await t.http().delete('/me').send({}).expect(401);
+      expect((await t.http().delete('/me').send({})).status).toBe(401);
     });
   });
 });

@@ -221,7 +221,8 @@ function useAppState() {
 
   useEffect(() => {
     if (!apiMode) return;
-    (async () => {
+    // cada passo trata os seus erros (try/catch); a promessa em si não precisa de ser esperada
+    void (async () => {
       try {
         const me = await api<{ user: { role: 'user' | 'moderator' } }>('/auth/me');
         set({ user: { email: '', role: me.user.role } });

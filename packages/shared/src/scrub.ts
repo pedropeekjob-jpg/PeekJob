@@ -5,7 +5,7 @@
 export function scrubText(s: string): string {
   return s
     .replace(/(https?:\/\/[^\s?#'")]+)[?#][^\s'")]*/g, '$1') // query strings e # (tokens, emails em URLs)
-    .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '[email]')
+    .replace(/[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,8}/g, '[email]') // tamanhos limitados: sem backtracking excessivo
     .replace(/[A-Za-z0-9_-]{32,}/g, '[token]')
     .replace(/(?<![\w/.:-])\d{9}(?![\w])/g, '[nif]'); // NIF ou telefone (não números dentro de caminhos/linhas)
 }

@@ -76,25 +76,25 @@ describe('Segurança', () => {
 
   describe('pedidos de outros sites', () => {
     it('recusa POST com Origin de outro site (403), aceita o próprio e clientes sem Origin', async () => {
-      await t.http().post('/auth/magic-link').set('origin', 'https://evil.example').send({ email: 'a@teste.pt' }).expect(403);
-      await t.http().post('/auth/magic-link').set('origin', 'http://localhost:5173').send({ email: 'b@teste.pt' }).expect(202);
-      await t.http().post('/auth/magic-link').send({ email: 'c@teste.pt' }).expect(202);
+      expect((await t.http().post('/auth/magic-link').set('origin', 'https://evil.example').send({ email: 'a@teste.pt' })).status).toBe(403);
+      expect((await t.http().post('/auth/magic-link').set('origin', 'http://localhost:5173').send({ email: 'b@teste.pt' })).status).toBe(202);
+      expect((await t.http().post('/auth/magic-link').send({ email: 'c@teste.pt' })).status).toBe(202);
     });
 
     it('GET de outros sites continua permitido (páginas públicas e partilhas)', async () => {
-      await t.http().get('/orgs').set('origin', 'https://evil.example').expect(200);
+      expect((await t.http().get('/orgs').set('origin', 'https://evil.example')).status).toBe(200);
     });
   });
 
   describe('tamanho dos pedidos', () => {
     it('recusa JSON acima de 64 KB (413)', async () => {
-      await t.http().post('/reviews/rewrite').send({ text: 'a'.repeat(70 * 1024) }).expect(413);
+      expect((await t.http().post('/reviews/rewrite').send({ text: 'a'.repeat(70 * 1024) })).status).toBe(413);
     });
   });
 
   describe('limites por IP', () => {
     it('link de entrada: no máximo 10 por hora a partir do mesmo IP, mesmo para emails diferentes (429 com Retry-After)', async () => {
-      for (let i = 0; i < 10; i++) await t.http().post('/auth/magic-link').send({ email: `p${i}@teste.pt` }).expect(202);
+      for (let i = 0; i < 10; i++) expect((await t.http().post('/auth/magic-link').send({ email: `p${i}@teste.pt` })).status).toBe(202);
       const res = await t.http().post('/auth/magic-link').send({ email: 'p10@teste.pt' }).expect(429);
       expect(Number(res.headers['retry-after'])).toBeGreaterThan(0);
       expect(res.body.message).toMatch(/Demasiados pedidos/);
@@ -102,16 +102,16 @@ describe('Segurança', () => {
 
     it('trocar o token de entrada: no máximo 30 tentativas em 15 minutos', async () => {
       for (let i = 0; i < 30; i++) await t.http().post('/auth/verify').send({ token: 'x'.repeat(43) }).expect((r) => expect(r.status).not.toBe(429));
-      await t.http().post('/auth/verify').send({ token: 'x'.repeat(43) }).expect(429);
+      expect((await t.http().post('/auth/verify').send({ token: 'x'.repeat(43) })).status).toBe(429);
     });
 
     it('pesquisa: no máximo 120 por minuto (contra recolha automática)', async () => {
-      for (let i = 0; i < 120; i++) await t.http().get('/orgs/search').query({ q: 'a' + i }).expect(200);
-      await t.http().get('/orgs/search').query({ q: 'b' }).expect(429);
+      for (let i = 0; i < 120; i++) expect((await t.http().get('/orgs/search').query({ q: 'a' + i })).status).toBe(200);
+      expect((await t.http().get('/orgs/search').query({ q: 'b' })).status).toBe(429);
     });
 
     it('o health check do alojamento nunca é limitado', async () => {
-      for (let i = 0; i < 5; i++) await t.http().get('/health').expect(200);
+      for (let i = 0; i < 5; i++) expect((await t.http().get('/health')).status).toBe(200);
     });
   });
 });

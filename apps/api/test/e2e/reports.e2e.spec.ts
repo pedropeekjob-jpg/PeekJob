@@ -38,32 +38,32 @@ describe('Denúncias e moderação', () => {
     });
 
     it('valida o motivo e o tamanho do texto (400)', async () => {
-      await report({ reason: 'porque-sim' }).expect(400);
-      await report({ reason: 'outro', details: 'x'.repeat(1001) }).expect(400);
-      await report({ reason: 'outro', contactEmail: 'não-é-email' }).expect(400);
+      expect((await report({ reason: 'porque-sim' })).status).toBe(400);
+      expect((await report({ reason: 'outro', details: 'x'.repeat(1001) })).status).toBe(400);
+      expect((await report({ reason: 'outro', contactEmail: 'não-é-email' })).status).toBe(400);
     });
 
     it('avaliação inexistente ou removida: 404', async () => {
-      await t.http().post('/reviews/00000000-0000-0000-0000-000000000000/reports').send({ reason: 'ofensa' }).expect(404);
+      expect((await t.http().post('/reviews/00000000-0000-0000-0000-000000000000/reports').send({ reason: 'ofensa' })).status).toBe(404);
       await t.pool.query(`UPDATE reviews SET status = 'removed' WHERE id = $1`, [reviewId]);
-      await report({ reason: 'ofensa' }).expect(404);
+      expect((await report({ reason: 'ofensa' })).status).toBe(404);
     });
 
     it('com conta, uma denúncia em aberto por pessoa e avaliação (409)', async () => {
       const me = await t.login('leitor');
-      await report({ reason: 'falso' }, me).expect(201);
-      await report({ reason: 'ofensa' }, me).expect(409);
+      expect((await report({ reason: 'falso' }, me)).status).toBe(201);
+      expect((await report({ reason: 'ofensa' }, me)).status).toBe(409);
     });
 
     it('limita abusos: no máximo 10 denúncias por dia a partir do mesmo sítio (429)', async () => {
-      for (let i = 0; i < 10; i++) await report({ reason: 'outro' }).expect(201);
-      await report({ reason: 'outro' }).expect(429);
+      for (let i = 0; i < 10; i++) expect((await report({ reason: 'outro' })).status).toBe(201);
+      expect((await report({ reason: 'outro' })).status).toBe(429);
       const { rows } = await t.pool.query('SELECT reporter_ip_hash FROM reports LIMIT 1');
       expect(rows[0].reporter_ip_hash).toMatch(/^[a-f0-9]{64}$/); // nunca o IP em claro
     });
 
     it('denunciar não esconde a avaliação sozinho: só a moderação decide', async () => {
-      await report({ reason: 'ofensa' }).expect(201);
+      expect((await report({ reason: 'ofensa' })).status).toBe(201);
       const list = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
       expect(list.body.items).toHaveLength(1);
     });
@@ -71,13 +71,13 @@ describe('Denúncias e moderação', () => {
 
   describe('fila de moderação', () => {
     it('só moderadores (401 sem sessão, 403 sem papel)', async () => {
-      await t.http().get('/moderation/reports').expect(401);
-      await t.http().get('/moderation/reports').set(await t.login('curioso')).expect(403);
+      expect((await t.http().get('/moderation/reports')).status).toBe(401);
+      expect((await t.http().get('/moderation/reports').set(await t.login('curioso'))).status).toBe(403);
     });
 
     it('agrupa as denúncias em aberto por avaliação, com o texto e a organização', async () => {
-      await report({ reason: 'nome', details: 'Nome da gerente' }).expect(201);
-      await report({ reason: 'ofensa' }, await t.login('leitor')).expect(201);
+      expect((await report({ reason: 'nome', details: 'Nome da gerente' })).status).toBe(201);
+      expect((await report({ reason: 'ofensa' }, await t.login('leitor'))).status).toBe(201);
       const res = await t.http().get('/moderation/reports').set(mod).expect(200);
       expect(res.body.items).toHaveLength(1);
       expect(res.body.items[0]).toMatchObject({
@@ -93,9 +93,9 @@ describe('Denúncias e moderação', () => {
 
   describe('decisão', () => {
     it('remover: a avaliação sai do site, a autora recebe a explicação e quem denunciou com conta recebe a decisão', async () => {
-      await report({ reason: 'nome' }, await t.login('leitor')).expect(201);
-      await report({ reason: 'nome' }).expect(201);
-      await decide({ action: 'remove', note: 'Identifica uma pessoa pelo nome.' }).expect(200);
+      expect((await report({ reason: 'nome' }, await t.login('leitor'))).status).toBe(201);
+      expect((await report({ reason: 'nome' })).status).toBe(201);
+      expect((await decide({ action: 'remove', note: 'Identifica uma pessoa pelo nome.' })).status).toBe(200);
 
       const list = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
       expect(list.body.items).toHaveLength(0);
@@ -111,8 +111,8 @@ describe('Denúncias e moderação', () => {
     });
 
     it('manter: a avaliação fica e as denúncias são fechadas como rejeitadas', async () => {
-      await report({ reason: 'falso' }).expect(201);
-      await decide({ action: 'keep', note: 'Não viola as regras: é uma crítica ao trabalho.' }).expect(200);
+      expect((await report({ reason: 'falso' })).status).toBe(201);
+      expect((await decide({ action: 'keep', note: 'Não viola as regras: é uma crítica ao trabalho.' })).status).toBe(200);
       const list = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
       expect(list.body.items).toHaveLength(1);
       const { rows } = await t.pool.query(`SELECT status FROM reports`);
@@ -120,8 +120,8 @@ describe('Denúncias e moderação', () => {
     });
 
     it('quem deixou email sem conta recebe a decisão por email, e o contacto é apagado a seguir', async () => {
-      await report({ reason: 'privado', contactName: 'Rita', contactEmail: 'rita@exemplo.pt' }).expect(201);
-      await decide({ action: 'remove', note: 'Contém dados privados.' }).expect(200);
+      expect((await report({ reason: 'privado', contactName: 'Rita', contactEmail: 'rita@exemplo.pt' })).status).toBe(201);
+      expect((await decide({ action: 'remove', note: 'Contém dados privados.' })).status).toBe(200);
       const mail = t.mailer.outbox.at(-1)!;
       expect(mail.to).toBe('rita@exemplo.pt');
       expect(mail.subject).toMatch(/denúncia/i);
@@ -131,9 +131,9 @@ describe('Denúncias e moderação', () => {
     });
 
     it('exige uma justificação (400) e só moderadores (403)', async () => {
-      await report({ reason: 'ofensa' }).expect(201);
-      await decide({ action: 'remove', note: '' }).expect(400);
-      await t.http().post(`/moderation/reviews/${reviewId}/decision`).set(await t.login('leitor')).send({ action: 'remove', note: 'Porque sim e mais nada.' }).expect(403);
+      expect((await report({ reason: 'ofensa' })).status).toBe(201);
+      expect((await decide({ action: 'remove', note: '' })).status).toBe(400);
+      expect((await t.http().post(`/moderation/reviews/${reviewId}/decision`).set(await t.login('leitor')).send({ action: 'remove', note: 'Porque sim e mais nada.' })).status).toBe(403);
     });
   });
 });

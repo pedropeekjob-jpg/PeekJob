@@ -8,7 +8,7 @@ export const VIES = 'VIES';
 
 const clean = (v: unknown) => {
   if (typeof v !== 'string') return null;
-  const s = v.replace(/\s*\n\s*/g, ', ').trim();
+  const s = v.split('\n').map((l) => l.trim()).filter(Boolean).join(', ');
   return !s || /^-+$/.test(s) ? null : s;
 };
 

@@ -311,7 +311,7 @@ function Demo({ desktop = false }: { desktop?: boolean }) {
           max={60}
           step={1}
           value={n}
-          onChange={(e) => setN(parseInt(e.target.value, 10) || 0)}
+          onChange={(e) => setN(Number.parseInt(e.target.value, 10) || 0)}
           style={{ width: '100%', height: 44, accentColor: 'var(--teal)', margin: 0 }}
         />
         <div role="group" aria-label={tr('Atalhos', 'Shortcuts')} className="row wrap" style={{ gap: desktop ? 8 : 6 }}>

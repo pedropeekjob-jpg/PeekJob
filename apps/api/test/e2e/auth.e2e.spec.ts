@@ -23,7 +23,7 @@ describe('Entrar com link mágico', () => {
   });
 
   it('envia o email em inglês quando lang=en (o link mantém o idioma)', async () => {
-    await t.http().post('/auth/magic-link').send({ email: 'ana@gmail.com', lang: 'en' }).expect(202);
+    expect((await t.http().post('/auth/magic-link').send({ email: 'ana@gmail.com', lang: 'en' })).status).toBe(202);
     const mail = t.mailer.outbox.at(-1)!;
     expect(mail.subject).toBe('Your PeekJob sign-in link');
     expect(mail.text).toMatch(/^Hi! Open this link to sign in to PeekJob \(valid for 15 minutes\)/);
@@ -32,20 +32,20 @@ describe('Entrar com link mágico', () => {
   });
 
   it('por omissão o email vai em português; idiomas desconhecidos são recusados (400)', async () => {
-    await askLink('rui@gmail.com').expect(202);
+    expect((await askLink('rui@gmail.com')).status).toBe(202);
     expect(t.mailer.outbox.at(-1)!.subject).toBe('O teu link de acesso à PeekJob');
     expect(t.mailer.outbox.at(-1)!.link).not.toContain('lang=');
-    await t.http().post('/auth/magic-link').send({ email: 'rui@gmail.com', lang: 'fr' }).expect(400);
+    expect((await t.http().post('/auth/magic-link').send({ email: 'rui@gmail.com', lang: 'fr' })).status).toBe(400);
   });
 
   it('recusa emails inválidos (400)', async () => {
-    await askLink('nao-e-email').expect(400);
+    expect((await askLink('nao-e-email')).status).toBe(400);
   });
 
   it('limita a 3 pedidos por email a cada 15 minutos (429)', async () => {
-    for (let i = 0; i < 3; i++) await askLink('a@teste.pt').expect(202);
-    await askLink('a@teste.pt').expect(429);
-    await askLink('b@teste.pt').expect(202);
+    for (let i = 0; i < 3; i++) expect((await askLink('a@teste.pt')).status).toBe(202);
+    expect((await askLink('a@teste.pt')).status).toBe(429);
+    expect((await askLink('b@teste.pt')).status).toBe(202);
   });
 
   it('o link abre uma sessão num cookie httpOnly', async () => {
@@ -64,14 +64,14 @@ describe('Entrar com link mágico', () => {
   it('o link só funciona uma vez', async () => {
     await askLink('pessoa@gmail.com');
     const token = t.mailer.lastTokenFor('pessoa@gmail.com');
-    await verify(token).expect(200);
-    await verify(token).expect(401);
+    expect((await verify(token)).status).toBe(200);
+    expect((await verify(token)).status).toBe(401);
   });
 
   it('o link expira ao fim de 15 minutos', async () => {
     await askLink('pessoa@gmail.com');
     await t.pool.query(`UPDATE login_tokens SET expires_at = now() - interval '1 second'`);
-    await verify(t.mailer.lastTokenFor('pessoa@gmail.com')).expect(401);
+    expect((await verify(t.mailer.lastTokenFor('pessoa@gmail.com'))).status).toBe(401);
   });
 
   it('o mesmo email volta à mesma conta', async () => {
@@ -97,12 +97,12 @@ describe('Entrar com link mágico', () => {
 
   it('terminar sessão invalida o cookie', async () => {
     const cookie = await t.login('pessoa');
-    await t.http().post('/auth/logout').set(cookie).expect(204);
-    await t.http().get('/auth/me').set(cookie).expect(401);
+    expect((await t.http().post('/auth/logout').set(cookie)).status).toBe(204);
+    expect((await t.http().get('/auth/me').set(cookie)).status).toBe(401);
   });
 
   it('sem sessão, as rotas protegidas respondem 401 (os cabeçalhos de desenvolvimento deixaram de contar)', async () => {
-    await t.http().get('/auth/me').expect(401);
-    await t.http().get('/me/messages').set('x-user-id', 'u1').expect(401);
+    expect((await t.http().get('/auth/me')).status).toBe(401);
+    expect((await t.http().get('/me/messages').set('x-user-id', 'u1')).status).toBe(401);
   });
 });

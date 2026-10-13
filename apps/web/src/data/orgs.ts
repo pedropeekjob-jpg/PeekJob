@@ -1,3 +1,4 @@
+import { byPt } from '../lib/format';
 import type { CriterionKey } from './criteria';
 
 export type OrgType = 'PME' | 'Associação' | 'Voluntariado' | 'Nome individual';
@@ -201,5 +202,5 @@ export const ORGS: Org[] = [
 
 export const ORG_BY_ID: Record<string, Org> = Object.fromEntries(ORGS.map((o) => [o.id, o]));
 
-export const SECTORS = Array.from(new Set(ORGS.map((o) => o.sector))).sort();
-export const DISTRICTS = Array.from(new Set(ORGS.map((o) => o.district))).sort();
+export const SECTORS = Array.from(new Set(ORGS.map((o) => o.sector))).sort(byPt);
+export const DISTRICTS = Array.from(new Set(ORGS.map((o) => o.district))).sort(byPt);

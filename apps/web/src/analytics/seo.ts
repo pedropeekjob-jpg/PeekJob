@@ -1,3 +1,4 @@
+import { stripTrailingSlashes } from '@peekjob/shared';
 import { apiMode } from '../api/http';
 import { getLang } from '../i18n';
 import { pageMeta } from './pages';
@@ -48,7 +49,7 @@ export function applyPageMeta(pathname: string, override?: { title?: string; des
   if (desc) meta('description').content = desc;
   const indexable = m.index && apiMode && browserRouting;
   meta('robots').content = indexable ? 'index,follow' : 'noindex,nofollow';
-  const base = indexable ? `${location.origin}${pathname.replace(/\/+$/, '') || '/'}` : null;
+  const base = indexable ? `${location.origin}${stripTrailingSlashes(pathname) || '/'}` : null;
   canonical(base ? (getLang() === 'en' ? `${base}?lang=en` : base) : null);
   alternates(base);
 }

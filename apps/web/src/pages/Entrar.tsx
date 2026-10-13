@@ -6,10 +6,10 @@ import { Logo } from '../components/Brand';
 import { Icon } from '../components/Icon';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
+import { isEmailLike } from '../lib/validation';
 import { tr } from '../i18n';
 
 const DISPLAY = { fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0 } as const;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Anéis decorativos: [x, y, tamanho, espessura, cor, opacidade]
 const RINGS_M: [number, number, number, number, string, number][] = [
@@ -46,7 +46,7 @@ export default function Entrar() {
 
   const send = async (e: FormEvent) => {
     e.preventDefault();
-    if (!EMAIL_RE.test(email.trim())) {
+    if (!isEmailLike(email)) {
       setError(tr('Escreve um email válido, por exemplo nome@gmail.com.', 'Enter a valid email, for example name@gmail.com.'));
       return;
     }

@@ -20,3 +20,6 @@ export const ago = (days: number) => {
   const y = Math.round(days / 365);
   return tr(y === 1 ? 'há 1 ano' : `há ${y} anos`, y === 1 ? '1 year ago' : `${y} years ago`);
 };
+
+/** Comparador para ordenar texto em português (acentos e maiúsculas no sítio certo) */
+export const byPt = (a: string, b: string) => a.localeCompare(b, 'pt');

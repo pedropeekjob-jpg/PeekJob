@@ -33,30 +33,30 @@ describe('POST /reviews/rewrite', () => {
     const blocked = await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('ana')).send({ scores: { respeito: 1 }, recommend: false, tags: [], text: angry }).expect(422);
     expect(blocked.body.rewriteAvailable).toBe(true);
     const { body } = await rewrite({ text: angry }).expect(200);
-    await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('ana')).send({ scores: { respeito: 1 }, recommend: false, tags: [], text: body.text }).expect(201);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('ana')).send({ scores: { respeito: 1 }, recommend: false, tags: [], text: body.text })).status).toBe(201);
   });
 
   it('não guarda o texto em lado nenhum', async () => {
-    await rewrite({ text: 'O Ricardo é um idiota.' }).expect(200);
+    expect((await rewrite({ text: 'O Ricardo é um idiota.' })).status).toBe(200);
     const { rows } = await t.pool.query(`SELECT count(*)::int AS n FROM reviews`);
     expect(rows[0].n).toBe(0);
   });
 
   it('valida o texto (400): vazio ou acima do limite', async () => {
-    await rewrite({ text: '' }).expect(400);
-    await rewrite({ text: 'a'.repeat(601) }).expect(400);
+    expect((await rewrite({ text: '' })).status).toBe(400);
+    expect((await rewrite({ text: 'a'.repeat(601) })).status).toBe(400);
   });
 
   it('limita pedidos por pessoa (429), sem afetar outras', async () => {
     const ana = await t.login('ana');
-    for (let i = 0; i < 20; i++) await rewrite({ text: 'Texto número ' + i }, ana).expect(200);
-    await rewrite({ text: 'mais um' }, ana).expect(429);
-    await rewrite({ text: 'outra pessoa' }, await t.login('rui')).expect(200);
+    for (let i = 0; i < 20; i++) expect((await rewrite({ text: 'Texto número ' + i }, ana)).status).toBe(200);
+    expect((await rewrite({ text: 'mais um' }, ana)).status).toBe(429);
+    expect((await rewrite({ text: 'outra pessoa' }, await t.login('rui'))).status).toBe(200);
   });
 
   it('sem conta, o limite conta por endereço (pseudónimo do IP)', async () => {
-    for (let i = 0; i < 20; i++) await rewrite({ text: 'Texto número ' + i }).expect(200);
-    await rewrite({ text: 'mais um' }).expect(429);
+    for (let i = 0; i < 20; i++) expect((await rewrite({ text: 'Texto número ' + i })).status).toBe(200);
+    expect((await rewrite({ text: 'mais um' })).status).toBe(429);
   });
 });
 

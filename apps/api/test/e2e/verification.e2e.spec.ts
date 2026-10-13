@@ -30,13 +30,13 @@ describe('Verificação anónima', () => {
     const work = 'joana.silva@padariaribeira.pt';
 
     it('exige sessão', async () => {
-      await t.http().post('/verifications/email').send({ orgId, email: work }).expect(401);
+      expect((await t.http().post('/verifications/email').send({ orgId, email: work })).status).toBe(401);
     });
 
     it('envia o código em inglês quando lang=en', async () => {
     const me = await t.login('ines');
     const orgId = await insertOrg(t.pool, { name: 'Oficina Sete' });
-    await t.http().post('/verifications/email').set(me).send({ orgId, email: 'ines@oficina7.pt', lang: 'en' }).expect(202);
+    expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: 'ines@oficina7.pt', lang: 'en' })).status).toBe(202);
     const mail = t.mailer.outbox.at(-1)!;
     expect(mail.subject).toBe('Your PeekJob verification code');
     expect(mail.text).toMatch(/^Your code is \d{6}\. It confirms that you work at Oficina Sete and is valid for 10 minutes\./);
@@ -45,7 +45,7 @@ describe('Verificação anónima', () => {
 
   it('envia um código de 6 dígitos para o email de trabalho e confirma', async () => {
       const me = await t.login('u1');
-      await t.http().post('/verifications/email').set(me).send({ orgId, email: work }).expect(202);
+      expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: work })).status).toBe(202);
       const code = t.mailer.lastCodeFor(work);
       const res = await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code }).expect(200);
       expect(res.body).toEqual({ verified: true, method: 'email' });
@@ -56,30 +56,30 @@ describe('Verificação anónima', () => {
 
     it('não guarda o email de trabalho nem o código em claro', async () => {
       const me = await t.login('u1');
-      await t.http().post('/verifications/email').set(me).send({ orgId, email: work }).expect(202);
+      expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: work })).status).toBe(202);
       const code = t.mailer.lastCodeFor(work);
       expect(await dump()).not.toMatch(/joana|padariaribeira|@/);
       expect(await dump()).not.toContain(code);
-      await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code }).expect(200);
+      expect((await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code })).status).toBe(200);
       expect(await dump()).not.toMatch(/joana|padariaribeira|@/);
     });
 
     it('código errado: 400; ao fim de 5 tentativas o código deixa de valer (429)', async () => {
       const me = await t.login('u1');
-      await t.http().post('/verifications/email').set(me).send({ orgId, email: work }).expect(202);
+      expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: work })).status).toBe(202);
       const code = t.mailer.lastCodeFor(work);
       const wrong = code === '000000' ? '111111' : '000000';
       for (let i = 0; i < 5; i++) {
-        await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code: wrong }).expect(400);
+        expect((await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code: wrong })).status).toBe(400);
       }
-      await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code }).expect(429);
+      expect((await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code })).status).toBe(429);
     });
 
     it('código expirado (10 minutos): 400', async () => {
       const me = await t.login('u1');
-      await t.http().post('/verifications/email').set(me).send({ orgId, email: work }).expect(202);
+      expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: work })).status).toBe(202);
       await t.pool.query(`UPDATE verification_codes SET expires_at = now() - interval '1 second'`);
-      await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code: t.mailer.lastCodeFor(work) }).expect(400);
+      expect((await t.http().post('/verifications/email/confirm').set(me).send({ orgId, code: t.mailer.lastCodeFor(work) })).status).toBe(400);
     });
 
     it('se a organização tiver domínios conhecidos, o email tem de ser de um deles (422)', async () => {
@@ -87,12 +87,12 @@ describe('Verificação anónima', () => {
       const me = await t.login('u1');
       const res = await t.http().post('/verifications/email').set(me).send({ orgId, email: 'joana@gmail.com' }).expect(422);
       expect(res.body.code).toBe('DOMAIN_MISMATCH');
-      await t.http().post('/verifications/email').set(me).send({ orgId, email: work }).expect(202);
+      expect((await t.http().post('/verifications/email').set(me).send({ orgId, email: work })).status).toBe(202);
     });
 
     it('404 para organização inexistente', async () => {
       const me = await t.login('u1');
-      await t.http().post('/verifications/email').set(me).send({ orgId: '00000000-0000-0000-0000-000000000000', email: work }).expect(404);
+      expect((await t.http().post('/verifications/email').set(me).send({ orgId: '00000000-0000-0000-0000-000000000000', email: work })).status).toBe(404);
     });
   });
 
@@ -110,7 +110,7 @@ describe('Verificação anónima', () => {
     it('não guarda o ficheiro, o nome nem o NIF de quem avalia', async () => {
       const me = await t.login('u1');
       const pdf = await makePdf(['Padaria Ribeira NIF 501442600', 'Trabalhador: Joana Silva, NIF 123456789']);
-      await upload(me, pdf).expect(200);
+      expect((await upload(me, pdf)).status).toBe(200);
       expect(await dump()).not.toMatch(/Joana|123456789|recibo/i);
     });
 
@@ -130,13 +130,13 @@ describe('Verificação anónima', () => {
 
     it('só aceita PDF (415)', async () => {
       const me = await t.login('u1');
-      await upload(me, Buffer.from('GIF89a'), orgId, 'image/gif').expect(415);
+      expect((await upload(me, Buffer.from('GIF89a'), orgId, 'image/gif')).status).toBe(415);
     });
 
     it('confirma o NIF da organização e ativa-a se estava pendente', async () => {
       const pendente = await insertOrg(t.pool, { name: 'Oficina Sete', status: 'pending', nif: '500000000' });
       const me = await t.login('u1');
-      await upload(me, await makePdf(['Oficina Sete NIF 500000000']), pendente).expect(200);
+      expect((await upload(me, await makePdf(['Oficina Sete NIF 500000000']), pendente)).status).toBe(200);
       const org = await t.pool.query('SELECT status, nif_verified FROM organizations WHERE id = $1', [pendente]);
       expect(org.rows[0]).toEqual({ status: 'active', nif_verified: true });
     });
@@ -145,7 +145,7 @@ describe('Verificação anónima', () => {
   describe('avaliações verificadas', () => {
     it('uma avaliação feita antes passa a verificada depois da verificação', async () => {
       const me = await t.login('u1');
-      await t.http().post(`/orgs/${orgId}/reviews`).set(me).send(goodReview).expect(201);
+      expect((await t.http().post(`/orgs/${orgId}/reviews`).set(me).send(goodReview)).status).toBe(201);
       await t.http().post('/verifications/document').set(me).field('orgId', orgId)
         .attach('file', await makePdf(['NIF 501442600']), { filename: 'r.pdf', contentType: 'application/pdf' }).expect(200);
       const res = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);

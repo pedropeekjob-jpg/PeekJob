@@ -53,14 +53,33 @@ export class ConsoleReporter implements ErrorReporter {
   }
 }
 
+/** Uma linha de stack ("    at fn (ficheiro:10:5)", "at ficheiro:10:5" ou "fn@ficheiro:10:5"), sem regex com backtracking */
+export function parseFrame(line: string): { function: string; filename: string; lineno: number; colno: number; in_app: boolean } | null {
+  let l = line.trim();
+  if (l.endsWith(')')) l = l.slice(0, -1);
+  const m = /:(\d{1,7}):(\d{1,7})$/.exec(l);
+  if (!m) return null;
+  let head = l.slice(0, m.index);
+  let fn = '?';
+  if (head.startsWith('at ')) {
+    head = head.slice(3);
+    const open = head.lastIndexOf(' (');
+    if (open >= 0) {
+      fn = head.slice(0, open);
+      head = head.slice(open + 2);
+    }
+  } else if (head.includes('@')) {
+    const at = head.indexOf('@');
+    fn = head.slice(0, at) || '?';
+    head = head.slice(at + 1);
+  } else return null;
+  return { function: fn, filename: head, lineno: Number(m[1]), colno: Number(m[2]), in_app: !head.includes('node_modules') };
+}
+
 /** Frames no formato do Sentry (mais antigo primeiro) a partir de uma stack do V8/browser */
 function frames(stack?: string) {
   if (!stack) return undefined;
-  const out = stack
-    .split('\n')
-    .map((l) => l.match(/at (?:(.+?) \()?(.+?):(\d+):(\d+)\)?$/) ?? l.match(/^(.*?)@(.+?):(\d+):(\d+)$/))
-    .filter((m): m is RegExpMatchArray => !!m)
-    .map((m) => ({ function: m[1] || '?', filename: m[2], lineno: Number(m[3]), colno: Number(m[4]), in_app: !m[2].includes('node_modules') }));
+  const out = stack.split('\n').map(parseFrame).filter((f): f is NonNullable<typeof f> => !!f);
   return out.length ? { frames: out.reverse() } : undefined;
 }
 

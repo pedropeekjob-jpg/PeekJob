@@ -47,8 +47,8 @@ describe('Monitorização', () => {
   });
 
   it('erros esperados (4xx) não são reportados', async () => {
-    await t.http().get('/__test/missing').expect(404);
-    await t.http().post('/orgs').send({}).expect(401);
+    expect((await t.http().get('/__test/missing')).status).toBe(404);
+    expect((await t.http().post('/orgs').send({})).status).toBe(401);
     expect(events).toHaveLength(0);
   });
 
@@ -56,16 +56,16 @@ describe('Monitorização', () => {
     const send = (body: Record<string, unknown>) => t.http().post('/client-errors').send(body);
 
     it('recebe o erro do browser e reporta-o sem dados pessoais (204)', async () => {
-      await send({ message: 'Cannot read x of undefined (joao@x.pt)', stack: 'TypeError: …\n at a (https://peekjob.pt/assets/index-1.js:1:2)', path: '/org/3f2a?token=abc', release: 'abc1234' }).expect(204);
+      expect((await send({ message: 'Cannot read x of undefined (joao@x.pt)', stack: 'TypeError: …\n at a (https://peekjob.pt/assets/index-1.js:1:2)', path: '/org/3f2a?token=abc', release: 'abc1234' })).status).toBe(204);
       expect(events[0]).toMatchObject({ platform: 'javascript', route: '/org/:id', release: 'abc1234' });
       expect(events[0].error.message).toBe('Cannot read x of undefined ([email])');
       expect(JSON.stringify(events[0])).not.toMatch(/joao@x|token=abc/);
     });
 
     it('valida e limita (400 sem mensagem; 20 por 10 minutos por IP)', async () => {
-      await send({}).expect(400);
+      expect((await send({})).status).toBe(400);
       for (let i = 0; i < 19; i++) await send({ message: 'e' + i, path: '/' }).expect(204); // o pedido inválido também conta
-      await send({ message: 'mais', path: '/' }).expect(429);
+      expect((await send({ message: 'mais', path: '/' })).status).toBe(429);
     });
   });
 

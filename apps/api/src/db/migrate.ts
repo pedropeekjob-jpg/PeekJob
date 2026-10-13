@@ -6,7 +6,7 @@ import type { Client, PoolClient } from 'pg';
 export async function runMigrations(db: Client | PoolClient, dir: string): Promise<string[]> {
   await db.query('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
   const done = new Set((await db.query('SELECT name FROM schema_migrations')).rows.map((r) => r.name as string));
-  const files = readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
+  const files = readdirSync(dir).filter((f) => f.endsWith('.sql')).sort((a, b) => a.localeCompare(b)); // 001_…, 002_… por ordem
   const applied: string[] = [];
   for (const f of files) {
     if (done.has(f)) continue;

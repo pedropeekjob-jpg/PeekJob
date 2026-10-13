@@ -94,8 +94,8 @@ describe('Organizações: NIF confirmado no VIES', () => {
     });
 
     it('precisa de sessão (401) e de um NIF válido (400)', async () => {
-      await t.http().get('/orgs/nif/500697256').expect(401);
-      await t.http().get('/orgs/nif/123').set(await t.login('ana')).expect(400);
+      expect((await t.http().get('/orgs/nif/500697256')).status).toBe(401);
+      expect((await t.http().get('/orgs/nif/123').set(await t.login('ana'))).status).toBe(400);
     });
   });
 });

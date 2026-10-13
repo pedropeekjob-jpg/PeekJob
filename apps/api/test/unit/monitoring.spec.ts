@@ -1,5 +1,5 @@
 import { scrubText } from '@peekjob/shared';
-import { ConsoleReporter, createReporter, SentryReporter, type ErrorEvent } from '../../src/monitoring/reporter';
+import { ConsoleReporter, createReporter, parseFrame, SentryReporter, type ErrorEvent } from '../../src/monitoring/reporter';
 
 const event: ErrorEvent = {
   platform: 'node',
@@ -56,5 +56,18 @@ describe('Relatórios de erro', () => {
     expect(createReporter({ SENTRY_DSN: 'https://k@o1.ingest.sentry.io/2' }).constructor.name).toBe('MultiReporter');
     expect(createReporter({})).toBeInstanceOf(ConsoleReporter);
     expect(() => createReporter({ SENTRY_DSN: 'não é um dsn' })).toThrow(/SENTRY_DSN/);
+  });
+});
+
+describe('parseFrame: linhas de stack (V8 e browser)', () => {
+  it.each([
+    ['    at OrgsService.find (/app/dist/orgs.js:10:5)', { function: 'OrgsService.find', filename: '/app/dist/orgs.js', lineno: 10, colno: 5, in_app: true }],
+    ['    at /app/node_modules/x/index.js:1:2', { function: '?', filename: '/app/node_modules/x/index.js', lineno: 1, colno: 2, in_app: false }],
+    ['render@https://peekjob.pt/assets/index-1.js:3:40', { function: 'render', filename: 'https://peekjob.pt/assets/index-1.js', lineno: 3, colno: 40, in_app: true }],
+  ])('%s', (line, frame) => expect(parseFrame(line)).toEqual(frame));
+
+  it('linhas que não são frames ficam de fora', () => {
+    expect(parseFrame('TypeError: x is undefined')).toBeNull();
+    expect(parseFrame('at sem posição')).toBeNull();
   });
 });

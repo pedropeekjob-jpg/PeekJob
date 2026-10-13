@@ -7,10 +7,10 @@ import { useOrg } from '../api/orgs';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { DeskSteps, DISPLAY, FlowHead } from './Avaliar.parts';
+import { isEmailLike } from '../lib/validation';
 import { tr } from '../i18n';
 
 type Method = 'email' | 'documento';
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PROMISES = () => [
   tr('Guardamos só o “sim”.', 'We only keep the “yes”.'),
   tr('Email e ficheiro não ficam.', 'We don’t keep your email or file.'),
@@ -46,7 +46,7 @@ export default function AvaliarVerificar() {
   const codeStep = isEmail && step === 'code';
 
   const sendCode = async () => {
-    if (!EMAIL_RE.test(email.trim())) {
+    if (!isEmailLike(email)) {
       setEmailError(tr('Escreve um email válido, por exemplo nome@organizacao.pt.', 'Enter a valid email, for example name@organisation.com.'));
       return;
     }

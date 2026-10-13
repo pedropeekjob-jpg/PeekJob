@@ -1,0 +1,90 @@
+/* Ecrã de transição depois das prioridades. Telemóvel por omissão; computador a partir de 900 px. */
+.screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+  text-align: center;
+}
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.title {
+  font-size: 24px;
+  line-height: 1.15;
+}
+/* No telemóvel o título parte em duas linhas */
+.break {
+  display: block;
+}
+.text {
+  font-size: 14px;
+}
+.priorities {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0 0;
+  margin: 0;
+  list-style: none;
+}
+.priority {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 5px 10px 5px 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+/* A cor de cada critério vem numa variável CSS (--criterion) */
+.rank {
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  border: 2px solid var(--criterion);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.next {
+  height: 44px;
+  margin-top: 4px;
+}
+
+@media (min-width: 900px) {
+  .screen {
+    gap: 36px;
+    padding: 48px 16px;
+  }
+  .status {
+    gap: 14px;
+  }
+  .title {
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.1;
+  }
+  .break {
+    display: inline;
+  }
+  .text {
+    font-size: 17px;
+  }
+  .priorities {
+    gap: 8px;
+    padding-top: 6px;
+  }
+  .next {
+    margin-top: 0;
+  }
+}

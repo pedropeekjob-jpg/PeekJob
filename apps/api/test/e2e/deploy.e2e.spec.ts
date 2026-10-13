@@ -34,8 +34,16 @@ describe('Publicação', () => {
     });
 
     it('as rotas da API continuam a responder JSON', async () => {
-      await t.http().get('/health').expect(200).expect('content-type', /json/);
-      await t.http().get('/orgs').expect(200).expect('content-type', /json/);
+      {
+        const res = await t.http().get('/health');
+        expect(res.status).toBe(200);
+        expect(res.headers['content-type']).toMatch(/json/);
+      }
+      {
+        const res = await t.http().get('/orgs');
+        expect(res.status).toBe(200);
+        expect(res.headers['content-type']).toMatch(/json/);
+      }
     });
   });
 
@@ -51,14 +59,14 @@ describe('Publicação', () => {
     beforeEach(() => resetDb(t));
 
     it('não serve a web (só API)', async () => {
-      await t.http().get('/').expect(404);
+      expect((await t.http().get('/')).status).toBe(404);
     });
 
     it('se o envio do email falhar, responde 503 com uma mensagem clara', async () => {
       t.mailer.failNext = true;
       const res = await t.http().post('/auth/magic-link').send({ email: 'a@teste.pt' }).expect(503);
       expect(res.body.message).toMatch(/email/i);
-      await t.http().post('/auth/magic-link').send({ email: 'a@teste.pt' }).expect(202);
+      expect((await t.http().post('/auth/magic-link').send({ email: 'a@teste.pt' })).status).toBe(202);
     });
 
     it('o mesmo para o código de verificação (503)', async () => {

@@ -105,7 +105,7 @@ export function useSearch(q: string, opts: { type?: string; includePending?: boo
       try {
         const r = await api<{ items: ApiOrg[] }>(`/orgs/search?${params}`);
         const items = r.items.map((o) => toOrg(o));
-        items.forEach(remember);
+        for (const o of items) remember(o);
         if (alive) setRemoteRes({ key, items });
       } catch {
         if (alive) setRemoteRes({ key, items: [] });

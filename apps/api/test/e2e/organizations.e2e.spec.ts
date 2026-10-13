@@ -48,7 +48,7 @@ describe('Organizações', () => {
     const nova = { name: 'Café do Largo', type: 'PME', city: 'Porto' };
 
     it('exige sessão', async () => {
-      await t.http().post('/orgs').send(nova).expect(401);
+      expect((await t.http().post('/orgs').send(nova)).status).toBe(401);
     });
 
     it('cria a organização em estado pendente', async () => {
@@ -63,7 +63,7 @@ describe('Organizações', () => {
     });
 
     it('exige NIF a empresas em nome individual', async () => {
-      await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, type: 'Nome individual' }).expect(400);
+      expect((await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, type: 'Nome individual' })).status).toBe(400);
     });
 
     it('recusa NIF já existente e indica a organização certa (409)', async () => {
@@ -81,17 +81,17 @@ describe('Organizações', () => {
 
     it('limita a criação a 5 organizações por pessoa por dia', async () => {
       for (let i = 0; i < 5; i++) {
-        await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, name: `Loja número ${i}` }).expect(201);
+        expect((await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, name: `Loja número ${i}` })).status).toBe(201);
       }
-      await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, name: 'Loja a mais' }).expect(429);
-      await t.http().post('/orgs').set(await t.login('u2')).send({ ...nova, name: 'Loja de outra pessoa' }).expect(201);
+      expect((await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, name: 'Loja a mais' })).status).toBe(429);
+      expect((await t.http().post('/orgs').set(await t.login('u2')).send({ ...nova, name: 'Loja de outra pessoa' })).status).toBe(201);
     });
   });
 
   describe('GET /orgs/:id', () => {
     it('devolve a organização com nota e nº de avaliações', async () => {
       const id = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
-      await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
+      expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
       const res = await t.http().get(`/orgs/${id}`).expect(200);
       expect(res.body).toMatchObject({ id, name: 'Padaria Ribeira', status: 'active', reviewsCount: 1 });
       expect(res.body.score).toBeCloseTo(4.3, 1);
@@ -100,16 +100,16 @@ describe('Organizações', () => {
 
     it('404 para pendentes e inexistentes', async () => {
       const id = await insertOrg(t.pool, { name: 'Pendente', status: 'pending' });
-      await t.http().get(`/orgs/${id}`).expect(404);
-      await t.http().get('/orgs/00000000-0000-0000-0000-000000000000').expect(404);
-      await t.http().get('/orgs/nao-e-um-uuid').expect(404);
+      expect((await t.http().get(`/orgs/${id}`)).status).toBe(404);
+      expect((await t.http().get('/orgs/00000000-0000-0000-0000-000000000000')).status).toBe(404);
+      expect((await t.http().get('/orgs/nao-e-um-uuid')).status).toBe(404);
     });
   });
 
   describe('Moderação de organizações', () => {
     it('um moderador aprova uma organização pendente', async () => {
       const id = await insertOrg(t.pool, { name: 'Nova', status: 'pending' });
-      await t.http().post(`/orgs/${id}/approve`).set(await t.login('u1')).expect(403);
+      expect((await t.http().post(`/orgs/${id}/approve`).set(await t.login('u1'))).status).toBe(403);
       const res = await t.http().post(`/orgs/${id}/approve`).set(await t.login('mod', 'moderator')).expect(200);
       expect(res.body.status).toBe('active');
     });
@@ -117,11 +117,11 @@ describe('Organizações', () => {
     it('funde um duplicado: move avaliações, guarda o nome antigo como alias e redireciona', async () => {
       const target = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
       const dup = await insertOrg(t.pool, { name: 'Padaria da Ribeira Lda', status: 'pending' });
-      await t.http().post(`/orgs/${dup}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
-      await t.http().post(`/orgs/${target}/reviews`).set(await t.login('u2')).send(goodReview).expect(201);
+      expect((await t.http().post(`/orgs/${dup}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
+      expect((await t.http().post(`/orgs/${target}/reviews`).set(await t.login('u2')).send(goodReview)).status).toBe(201);
 
-      await t.http().post(`/orgs/${dup}/merge`).set(await t.login('u3')).send({ targetId: target }).expect(403);
-      await t.http().post(`/orgs/${dup}/merge`).set(await t.login('mod', 'moderator')).send({ targetId: target }).expect(200);
+      expect((await t.http().post(`/orgs/${dup}/merge`).set(await t.login('u3')).send({ targetId: target })).status).toBe(403);
+      expect((await t.http().post(`/orgs/${dup}/merge`).set(await t.login('mod', 'moderator')).send({ targetId: target })).status).toBe(200);
 
       const org = await t.http().get(`/orgs/${target}`).expect(200);
       expect(org.body.reviewsCount).toBe(2);
@@ -136,9 +136,9 @@ describe('Organizações', () => {
     it('na fusão, se a mesma pessoa avaliou as duas, fica só a avaliação mais recente', async () => {
       const target = await insertOrg(t.pool, { name: 'Oficina Sete' });
       const dup = await insertOrg(t.pool, { name: 'Oficina 7', status: 'pending' });
-      await t.http().post(`/orgs/${target}/reviews`).set(await t.login('u1')).send({ ...goodReview, text: 'Antiga.' }).expect(201);
-      await t.http().post(`/orgs/${dup}/reviews`).set(await t.login('u1')).send({ ...goodReview, text: 'Mais recente.' }).expect(201);
-      await t.http().post(`/orgs/${dup}/merge`).set(await t.login('mod', 'moderator')).send({ targetId: target }).expect(200);
+      expect((await t.http().post(`/orgs/${target}/reviews`).set(await t.login('u1')).send({ ...goodReview, text: 'Antiga.' })).status).toBe(201);
+      expect((await t.http().post(`/orgs/${dup}/reviews`).set(await t.login('u1')).send({ ...goodReview, text: 'Mais recente.' })).status).toBe(201);
+      expect((await t.http().post(`/orgs/${dup}/merge`).set(await t.login('mod', 'moderator')).send({ targetId: target })).status).toBe(200);
       const res = await t.http().get(`/orgs/${target}/reviews`).expect(200);
       expect(res.body.items.map((r: { text: string }) => r.text)).toEqual(['Mais recente.']);
     });

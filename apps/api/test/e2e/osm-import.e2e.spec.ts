@@ -70,7 +70,7 @@ describe('Importação do OpenStreetMap', () => {
 
   it('não enchem a fila de moderação (só entram lá as criadas por pessoas)', async () => {
     await importOrgs(t.pool, orgs);
-    await t.http().post('/orgs').set(await t.login('ana')).send({ name: 'Grupo Coral', type: 'Associação', city: 'Porto' }).expect(201);
+    expect((await t.http().post('/orgs').set(await t.login('ana')).send({ name: 'Grupo Coral', type: 'Associação', city: 'Porto' })).status).toBe(201);
     const mod = await t.login('mod', 'moderator');
     const q = await t.http().get('/moderation/orgs').set(mod).expect(200);
     expect(q.body.items.map((o: { name: string }) => o.name)).toEqual(['Grupo Coral']);
