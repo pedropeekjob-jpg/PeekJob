@@ -38,9 +38,15 @@ let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
 })"
 
 # Ficheiros com mais linhas por cobrir (para decidir o que testar a seguir)
-q "measures/component_tree?component=peekjob&qualifiers=FIL&metricKeys=uncovered_lines,coverage&s=metric&metricSort=uncovered_lines&asc=false&ps=15" | node -e "
+q "measures/component_tree?component=peekjob&qualifiers=FIL&metricKeys=uncovered_lines,coverage&s=metric&metricSort=uncovered_lines&metricSortFilter=withMeasuresOnly&asc=false&ps=20" | node -e "
 let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
-  const j=JSON.parse(d); const v=(c,k)=>(c.measures.find(m=>m.metric===k)||{}).value;
-  const list=j.components.map(c=>c.path.replace('apps/','').replace('/src/','/')+' '+v(c,'uncovered_lines')+' ('+v(c,'coverage')+'%)');
-  console.log('::notice title=Mais linhas por cobrir::'+list.join(' · '));
+  try {
+    const j=JSON.parse(d); if (!j.components) { console.log('::warning title=Mais linhas por cobrir::sem dados ('+d.slice(0,200)+')'); return; }
+    const v=(c,k)=>(c.measures.find(m=>m.metric===k)||{}).value;
+    const list=j.components.map(c=>(c.path||c.key).replace('apps/','').replace('/src/','/')+' '+v(c,'uncovered_lines')+' ('+v(c,'coverage')+'%)');
+    console.log('::notice title=Mais linhas por cobrir::'+list.join(' · '));
+  } catch (e) { console.log('::warning title=Mais linhas por cobrir::'+e.message); }
 })"
+
+# o resumo é informativo: nunca falha o job (o Quality Gate é o passo anterior)
+exit 0
