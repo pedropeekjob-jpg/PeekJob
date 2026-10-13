@@ -147,6 +147,16 @@ export function ScoreRow({
                 role="radio"
                 aria-checked={n === value}
                 aria-label={tr(`${c.label}, ${n} de 5`, `${c.label}, ${n} of 5`)}
+                // um só Tab por critério (a nota escolhida, ou a primeira); setas mudam a nota
+                tabIndex={(value ? n === value : n === 1) ? 0 : -1}
+                onKeyDown={(e) => {
+                  const next = { ArrowRight: n + 1, ArrowUp: n + 1, ArrowLeft: n - 1, ArrowDown: n - 1, Home: 1, End: 5 }[e.key];
+                  if (next == null) return;
+                  e.preventDefault();
+                  const to = Math.min(5, Math.max(1, next));
+                  onPick(to);
+                  (e.currentTarget.parentElement?.children[to - 1] as HTMLElement | undefined)?.focus();
+                }}
                 onClick={() => onPick(n === value ? 0 : n)}
                 style={{ width: desktop ? 44 : 42, height: 44, border: 0, background: 'transparent', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >

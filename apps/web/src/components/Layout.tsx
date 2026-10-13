@@ -181,14 +181,14 @@ export function Shell({ children, nav: withNav = false, chrome = 'full', footer 
     return (
       <>
         {chrome !== 'none' && <DesktopHeader />}
-        <main>{children}</main>
+        <main id="conteudo" tabIndex={-1}>{children}</main>
         {chrome === 'full' && <SiteFooter />}
       </>
     );
   }
   return (
     <>
-      <main>{children}</main>
+      <main id="conteudo" tabIndex={-1}>{children}</main>
       {footer && <SiteFooter compact />}
       {withNav && <BottomNav />}
     </>

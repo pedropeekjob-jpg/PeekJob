@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
 import { ConsentBanner } from './components/ConsentBanner';
 import { EnvRibbon } from './components/EnvRibbon';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { SkipLink } from './components/SkipLink';
 import { StoreProvider } from './lib/store';
 import { LangRoot } from './i18n';
 import Inicio from './pages/Inicio';
@@ -34,11 +35,31 @@ import ParaOrganizacoes from './pages/ParaOrganizacoes';
 import Painel from './pages/Painel';
 import NotFound from './pages/NotFound';
 
-/** Volta ao topo em cada mudança de ecrã (excepto âncoras) */
+/**
+ * Em cada mudança de ecrã: volta ao topo e põe o foco no título (o leitor de ecrã anuncia a página nova;
+ * quem usa teclado continua a partir do conteúdo). Na primeira página não mexe no foco.
+ */
 function ScrollTop() {
   const { pathname } = useLocation();
+  const first = useRef(true);
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    // espera pelo ecrã novo (dados que chegam a seguir)
+    const t = setTimeout(() => {
+      const main = document.getElementById('conteudo');
+      const active = document.activeElement;
+      // a pessoa já está a usar o ecrã novo: não lhe roubar o foco
+      if (main && active && active !== main && main.contains(active)) return;
+      const target = document.querySelector<HTMLElement>('main h1') ?? main;
+      if (!target) return;
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
+    }, 60);
+    return () => clearTimeout(t);
   }, [pathname]);
   return null;
 }
@@ -73,6 +94,7 @@ export default function App() {
     <StoreProvider>
       <LangRoot>
       <Router>
+        <SkipLink />
         <EnvRibbon />
         <ScrollTop />
         <PageTracking />

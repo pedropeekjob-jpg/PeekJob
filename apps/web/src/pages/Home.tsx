@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <div className="home">
       {desktop ? <DesktopHeader home /> : <MobileHomeHeader />}
-      <main className="home-split" data-door={door ?? ''}>
+      <main id="conteudo" tabIndex={-1} className="home-split" data-door={door ?? ''}>
         <Link
           to="/explorar"
           className="home-door home-peek"

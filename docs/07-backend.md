@@ -203,7 +203,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - **Domínio partilhado:** 46 testes (vitest).
 - **Web:** 30 testes (medição, privacidade, morada do VIES e envio de erros).
 - **API:** 195 testes, entre unitários e de integração contra PostgreSQL (incluindo o fluxo real do link mágico e PDFs gerados nos testes). A base de testes é recriada em cada execução.
-- **Browser (Playwright, `e2e/`):** 22 testes, 11 fluxos × telemóvel e computador. Correm no CI em cada envio, contra a aplicação como em produção: a API a servir a web, PostgreSQL e um servidor de email falso no lugar do Resend.
+- **Browser (Playwright, `e2e/`):** 36 testes em telemóvel e computador, incluindo acessibilidade e teclado. Correm no CI em cada envio, contra a aplicação como em produção: a API a servir a web, PostgreSQL e um servidor de email falso no lugar do Resend.
   - **Fluxos:**
     - visita pública e 404;
     - inglês;
@@ -218,6 +218,23 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
   - **Limites por IP:** os testes vêm todos do mesmo IP, por isso os limites são multiplicados com `RATE_LIMIT_SCALE`. A API recusa arrancar com esta variável em produção.
   - **Se falhar no CI:** o relatório, com capturas e trace, fica nos artefactos do run durante 7 dias.
   - **Promoção:** promover para produção exige o CI todo verde, e isso já inclui estes testes.
+
+## Acessibilidade (WCAG 2.1 AA)
+
+- **Automática:** o axe-core corre em cerca de 25 ecrãs, em telemóvel e computador: páginas públicas, organização, denúncia, os passos de avaliar (com o texto bloqueado e a proposta da IA), perfil, os meus dados, guardadas, apoio e preferências. Há também um teste de reflow a 320 px.
+- **Teclado** (testes próprios):
+  - o primeiro Tab mostra "Saltar para o conteúdo";
+  - ao mudar de ecrã, o foco vai para o título, para o leitor de ecrã anunciar a página nova. Não rouba o foco a quem já está a usar o ecrã;
+  - o anel de foco tem dois tons (branco e preto) e vê-se em fundos claros e escuros;
+  - nas notas, um Tab por critério, e as setas, Home e End escolhem a nota;
+  - os separadores da verificação funcionam com setas.
+- **Já existia:** idioma do documento (`lang`), título por ecrã, `prefers-reduced-motion` nas animações, regiões `aria-live` nos resultados de pesquisa, erros de formulário com `aria-invalid` e `role="alert"`, e alvos de toque com 44 px.
+- **Corrigido nesta revisão:**
+  - contraste do "Espreitar" na página Sobre;
+  - mapa com pinos clicáveis marcado como "imagem" (os leitores de ecrã escondiam os pinos);
+  - atributo ARIA inválido nos separadores;
+  - scroll horizontal a 320 px no cabeçalho da página inicial, Sobre e Contacto.
+- **Falta (manual):** testar com leitores de ecrã reais (VoiceOver no iPhone, NVDA no Windows) e com pessoas que os usam no dia a dia. Os testes automáticos apanham cerca de metade dos problemas.
 
 ## Próxima fatia
 - Guardadas e "útil" no servidor (hoje ficam no browser).

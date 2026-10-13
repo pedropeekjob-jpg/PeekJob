@@ -150,7 +150,14 @@ export default function AvaliarVerificar() {
             id={`tab-${m}`}
             aria-selected={on}
             aria-controls="verif-panel"
-            aria-pressed={desktop ? undefined : on}
+            tabIndex={on ? 0 : -1}
+            onKeyDown={(e) => {
+              if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+              e.preventDefault();
+              const to = m === 'email' ? 'documento' : 'email';
+              setMethod(to);
+              document.getElementById(`tab-${to}`)?.focus();
+            }}
             onClick={() => setMethod(m)}
             style={
               desktop

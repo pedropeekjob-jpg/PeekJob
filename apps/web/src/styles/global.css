@@ -495,7 +495,8 @@ a.plain {
   font-weight: 600;
   padding: 0 16px;
 }
-.segmented button[aria-pressed='true'] {
+.segmented button[aria-pressed='true'],
+.segmented button[aria-selected='true'] {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 1px 3px rgba(1, 11, 19, 0.08);
@@ -887,3 +888,63 @@ a.plain {
 .rewrite-proposal { margin: 0; padding: 12px 14px; border-left: 3px solid var(--teal); background: var(--ground); border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rewrite-link { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 0; min-height: 36px; font-size: 14px; }
 .osm-credit { font-size: 12px; text-align: center; color: var(--muted); }
+
+/* Acessibilidade ------------------------------------------------------------ */
+/* Anel de foco em dois tons (branco + preto): vê-se em fundos claros e escuros (roxo, preto, turquesa) */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #fff;
+}
+main:focus,
+main h1:focus,
+#conteudo:focus {
+  outline: none;
+  box-shadow: none;
+}
+.search:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #fff;
+}
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* Ecrãs muito estreitos (320–359 px, ex.: iPhone SE com zoom): o cabeçalho da página inicial cabe sem scroll horizontal */
+@media (max-width: 359px) {
+  .site-header.is-home .page-x {
+    gap: 8px !important;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .site-header.is-home nav {
+    gap: 10px !important;
+  }
+  .site-header.is-home .caps-link {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .site-header.is-home a:first-child svg {
+    height: 28px;
+    width: auto;
+  }
+  .site-header.is-home .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+}

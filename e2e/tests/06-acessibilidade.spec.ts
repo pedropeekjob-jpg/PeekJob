@@ -63,3 +63,18 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   }
   expect(report(found)).toEqual([]);
 });
+
+test('reflow a 320 px (WCAG 1.4.10): sem scroll horizontal nos ecrãs principais', async ({ browser }, info) => {
+  test.skip(info.project.name !== 'telemovel', 'basta uma vez');
+  const ctx = await browser.newContext({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  const wide: string[] = [];
+  for (const path of ['/', '/explorar', '/ranking', '/pesquisa', '/sobre', '/contacto', '/metodologia', '/setores', '/para-organizacoes', '/entrar', '/avaliar', '/?lang=en']) {
+    await page.goto(path);
+    await page.waitForTimeout(300);
+    const { sw, cw } = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+    if (sw > cw) wide.push(`${path} (${sw}px)`);
+  }
+  await ctx.close();
+  expect(wide).toEqual([]);
+});
