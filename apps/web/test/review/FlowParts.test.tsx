@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { REVIEW_TAGS } from '../../src/data/content';
-import { DeskSteps, FlowHead, LockLine, MiniSteps, NotesGrid, RecommendButtons, ScoreRow, TagPicker } from '../../src/pages/Avaliar.parts';
+import { DeskSteps, FlowHead, LockLine, MiniSteps, NotesGrid, RecommendButtons, ScoreRow, TagPicker } from '../../src/features/review/FlowParts';
 
 const inRouter = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
 

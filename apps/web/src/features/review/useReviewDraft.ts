@@ -3,7 +3,7 @@ import type { CriterionKey } from '../../data/criteria';
 import { tr } from '../../i18n';
 import { detectRedFlags, hasInsultOrName } from '../../lib/moderation';
 import { avgOf, useStore, type Failure } from '../../lib/store';
-import { countDone } from '../../pages/Avaliar.parts';
+import { countDone } from './flow';
 
 export const REVIEW_TEXT_MAX = 600;
 

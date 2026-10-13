@@ -1,0 +1,304 @@
+/* Partes do fluxo de avaliar: telemóvel por omissão; variantes "Wide" no computador */
+
+.head {
+  gap: 12px;
+  min-height: 44px;
+}
+.lock {
+  gap: 8px;
+}
+.lock[data-center] {
+  justify-content: center;
+}
+
+/* Passos no telemóvel */
+.mini {
+  gap: 10px;
+}
+.bars {
+  gap: 4px;
+}
+.bar {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--field);
+}
+.bar[data-on] {
+  background: var(--teal);
+}
+
+/* Passos no computador */
+.desk {
+  gap: 16px;
+  padding-top: 16px;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+}
+.step {
+  gap: 10px;
+}
+.link {
+  width: 32px;
+  height: 2px;
+  background: var(--field);
+}
+.link[data-on] {
+  background: var(--teal);
+}
+.circle {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  border: 2px solid var(--field);
+  color: var(--muted);
+}
+.step[data-state='current'] .circle {
+  border: 0;
+  background: var(--teal);
+  color: var(--ink);
+}
+.circleDone {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: 3px solid var(--teal);
+  background: var(--surface);
+  color: var(--ink);
+}
+.stepLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.step[data-state='current'] .stepLabel {
+  font-weight: 600;
+  color: var(--ink);
+}
+.step[data-state='done'] .stepLabel {
+  color: var(--teal-dark);
+}
+
+/* Notas 1–5 */
+.score,
+.scoreWide {
+  --col: var(--teal);
+  --on-text: var(--ink);
+  --off: #c9cdd0;
+  --off-text: var(--muted);
+  --name: 15px;
+  --dot: 30px;
+  --dot-font: 11px;
+  display: flex;
+  flex-direction: column;
+}
+.scoreWide {
+  --off: var(--grey);
+  --off-text: var(--body);
+  --name: 16px;
+  --dot: 34px;
+  --dot-font: 13px;
+  border-bottom: 1px solid #eef0f1;
+}
+.score[data-respect],
+.scoreWide[data-respect] {
+  --col: var(--purple);
+  --on-text: #fff;
+}
+.scoreGroup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  min-height: 48px;
+}
+.scoreWide .scoreGroup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: 52px;
+}
+.scoreName {
+  gap: 2px;
+  min-width: 0;
+}
+.scoreLabel {
+  font-size: var(--name);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink);
+}
+[data-respect] .scoreLabel {
+  color: var(--purple-text);
+}
+.help {
+  flex: none;
+  width: 32px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.helpMark {
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  border: 1.5px solid var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+}
+.help[aria-expanded='true'] .helpMark {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--line);
+}
+.dots {
+  gap: 0;
+}
+.scoreWide .dots {
+  gap: 2px;
+}
+.dotButton {
+  width: 42px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scoreWide .dotButton {
+  width: 44px;
+}
+.dot {
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: calc(var(--dot) / 2);
+  border: 3px solid var(--off);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--dot-font);
+  color: var(--off-text);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.dot[data-on] {
+  border-color: var(--col);
+  background: var(--col);
+  color: var(--on-text);
+}
+.hint {
+  font-size: 13px;
+  color: var(--body);
+  padding-bottom: 8px;
+}
+
+/* Recomendavas? */
+.recommend {
+  gap: 6px;
+}
+.recommendWide {
+  gap: 8px;
+}
+.yesNo {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--field);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+.recommendWide .yesNo {
+  min-width: 76px;
+  padding: 0 20px;
+}
+.yesNo[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+/* Etiquetas (.chip global; a classe do módulo ganha no empate) */
+.tags {
+  gap: 6px;
+}
+.tagsWide {
+  gap: 8px;
+}
+.tag {
+  height: 44px;
+  font-size: 13px;
+  padding: 0 14px;
+}
+.tagsWide .tag {
+  font-size: 14px;
+  padding: 0 16px;
+}
+.moreTags {
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--teal-text);
+  font-weight: 600;
+  font-size: 13px;
+}
+.tagsWide .moreTags {
+  border: 1px dashed var(--grey);
+  color: var(--body);
+  font-size: 14px;
+}
+
+/* Grelha das notas */
+.notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  padding-bottom: 8px;
+}
+.notesWide {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
+  gap: 18px 24px;
+}
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.noteName {
+  font-size: 13px;
+  color: var(--body);
+}
+.noteValue {
+  gap: 6px;
+}
+.noteNumber {
+  font-size: 13px;
+}

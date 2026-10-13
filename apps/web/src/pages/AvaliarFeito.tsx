@@ -10,7 +10,7 @@ import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { useToggle } from '../lib/useToggle';
-import { FlowHead, MiniSteps, NotesGrid } from './Avaliar.parts';
+import { FlowHead, MiniSteps, NotesGrid } from '../features/review/FlowParts';
 
 /** Avaliação publicada: agradecer, mostrar a nota e, se houve relato grave, o apoio */
 export default function AvaliarFeito() {

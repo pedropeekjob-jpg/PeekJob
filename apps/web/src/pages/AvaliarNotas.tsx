@@ -15,7 +15,8 @@ import { tr } from '../i18n';
 import { fmt } from '../lib/format';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
-import { DeskSteps, DESKTOP_ORDER, FlowHead, LockLine, MiniSteps, MOBILE_ORDER, RecommendButtons, ScoreRow, scoreOf, TagPicker } from './Avaliar.parts';
+import { DeskSteps, FlowHead, LockLine, MiniSteps, RecommendButtons, ScoreRow, TagPicker } from '../features/review/FlowParts';
+import { DESKTOP_ORDER, MOBILE_ORDER, scoreOf } from '../features/review/flow';
 import styles from './AvaliarNotas.module.css';
 
 type Review = ReturnType<typeof useReviewDraft>;

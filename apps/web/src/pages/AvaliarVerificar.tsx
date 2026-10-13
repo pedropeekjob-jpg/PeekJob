@@ -9,7 +9,7 @@ import styles from '../features/verify/Verify.module.css';
 import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
-import { DeskSteps, FlowHead } from './Avaliar.parts';
+import { DeskSteps, FlowHead } from '../features/review/FlowParts';
 
 /** Avaliar · passo 2 (opcional): confirmar que trabalha lá, por email do trabalho ou documento */
 export default function AvaliarVerificar() {

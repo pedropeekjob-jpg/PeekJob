@@ -7,7 +7,7 @@ import { useAddOrg } from '../features/review/useAddOrg';
 import { useOrgPicker } from '../features/review/useOrgPicker';
 import { tr } from '../i18n';
 import { useIsDesktop } from '../lib/useMedia';
-import { DeskSteps, FlowHead, LockLine } from './Avaliar.parts';
+import { DeskSteps, FlowHead, LockLine } from '../features/review/FlowParts';
 
 /** Avaliar · passo 1: escolher a organização (e o local) ou adicionar uma que falta */
 export default function AvaliarEscolher() {

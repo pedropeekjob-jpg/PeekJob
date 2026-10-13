@@ -10,7 +10,7 @@ import { REVIEW_TEXT_MAX, useReviewDraft } from '../features/review/useReviewDra
 import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
-import { FlowHead, LockLine, MiniSteps, TagPicker } from './Avaliar.parts';
+import { FlowHead, LockLine, MiniSteps, TagPicker } from '../features/review/FlowParts';
 import styles from './AvaliarTexto.module.css';
 
 /** Avaliar · passo 2 no telemóvel: etiquetas, texto, avisos e publicar (no computador está no ecrã das notas) */
