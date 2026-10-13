@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 import { tr } from '../i18n';
 import sheetStyles from './Sheet.module.css';
 import styles from './UI.module.css';
+import { useBack } from '../lib/useBack';
 
 /** Secção que abre e fecha (revelação progressiva) */
 export function Disclosure({
@@ -174,12 +175,7 @@ export function Empty({ title, body, action }: { title: string; body?: string; a
 
 /** Botão redondo de voltar (telemóvel), com destino de reserva quando não há histórico */
 export function BackButton({ fallback, label = tr('Voltar', 'Back') }: { fallback: string; label?: string }) {
-  const nav = useNavigate();
-  const go = () => {
-    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-    if (idx > 0) nav(-1);
-    else nav(fallback);
-  };
+  const go = useBack(fallback);
   return (
     <button type="button" className="icon-btn" aria-label={label} onClick={go}>
       <Icon name="back" size={18} />

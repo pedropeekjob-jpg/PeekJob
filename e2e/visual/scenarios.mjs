@@ -175,7 +175,20 @@ export const SCENARIOS = [
       await tap(p, 'button', /^Repor dados de demonstração/);
     },
   },
-  { name: 'apoio', path: '/apoio' },
+  { name: 'apoio', path: '/apoio', full: true },
+  {
+    name: 'apoio-mensagem',
+    path: '/apoio',
+    full: true,
+    state: {
+      messages: [
+        { id: 'm1', orgId: 'padaria-ribeira', kinds: ['assedio', 'discriminação'], found: ['assédio', 'insultos'], when: 'há 2 dias', read: false },
+        { id: 'n1', orgId: 'padaria-ribeira', type: 'moderation', orgName: 'Padaria Ribeira', details: { decision: 'removed', note: 'Dados pessoais.' }, kinds: [], found: [], when: 'ontem', read: false },
+        { id: 'n2', orgId: 'padaria-ribeira', type: 'moderation', details: { decision: 'rejected', note: '' }, kinds: [], found: [], when: 'hoje', read: false },
+      ],
+    },
+  },
+  { name: 'apoio-dicas', path: '/apoio', full: true, run: (p) => tap(p, 'button', /^O que pode ajudar/) },
   { name: '404', path: '/nao-existe' },
   { name: 'denunciar', path: '/org/padaria-ribeira/denunciar/r1', full: true },
   {
