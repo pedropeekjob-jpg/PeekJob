@@ -1,0 +1,72 @@
+.page {
+  min-height: 100dvh;
+  padding-bottom: 0;
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.05;
+}
+.tags {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.legend,
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+}
+.legend {
+  padding: 0 0 10px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.count {
+  font-weight: 500;
+}
+.countOver {
+  composes: count;
+  color: var(--down);
+}
+.text {
+  border-radius: 16px;
+  border: 2px solid var(--field);
+  font-size: 15px;
+  resize: none;
+  min-height: 140px;
+}
+.textFlagged {
+  composes: text;
+  border-color: var(--purple);
+}
+.textBlocked {
+  composes: text;
+  border-color: #e3a56b;
+}
+.ok {
+  gap: 8px;
+  font-size: 15px;
+  color: var(--teal-dark);
+}
+.missing {
+  color: var(--warn-text);
+}
+.missing a {
+  font-weight: 600;
+}
+.cta {
+  gap: 10px;
+}
+.publish {
+  height: 56px;
+}

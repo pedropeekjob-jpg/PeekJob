@@ -22,7 +22,7 @@ export default defineConfig({
   },
   test: {
     include: ['test/**/*.{spec,test}.{ts,tsx}'],
-    environmentMatchGlobs: [['test/**/*.test.tsx', 'jsdom']],
+    environmentMatchGlobs: [['test/**/*.test.{ts,tsx}', 'jsdom']],
     setupFiles: ['test/setup.ts'],
     coverage: {
       provider: 'istanbul',

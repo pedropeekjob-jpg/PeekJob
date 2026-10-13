@@ -1,0 +1,167 @@
+/* ---------- Telemóvel: passo 1 de 3 ---------- */
+.mobile {
+  min-height: 100dvh;
+  padding-bottom: 0;
+  gap: 20px;
+}
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.05;
+}
+.change {
+  font-weight: 600;
+}
+.recommend {
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.recommendLabel {
+  font-size: 15px;
+  font-weight: 600;
+}
+.next {
+  height: 56px;
+}
+.nextCount {
+  font-size: 13px;
+  font-weight: 500;
+}
+.next:not(:disabled) .nextCount {
+  color: var(--grey);
+}
+
+/* ---------- Computador: notas e texto num só ecrã ---------- */
+.desktop {
+  padding-bottom: 80px;
+}
+.orgLink {
+  min-height: 44px;
+  gap: 10px;
+  font-size: 15px;
+}
+.orgName {
+  font-weight: 600;
+}
+.orgChange {
+  font-weight: 600;
+  color: var(--teal-text);
+  padding-left: 4px;
+}
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 56px;
+  align-items: flex-start;
+  padding-top: 48px;
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1.7 1 600px;
+  min-width: 0;
+  gap: 32px;
+}
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.desktopTitle {
+  composes: title;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.lead {
+  font-size: 16px;
+}
+.scores {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 12px 28px 20px;
+}
+.scoresFoot {
+  gap: 12px;
+  padding-top: 16px;
+}
+.scoresFootLabel {
+  font-size: 16px;
+  font-weight: 600;
+}
+.experience {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.h2 {
+  composes: title;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.text {
+  border-radius: 18px;
+  border: 2px solid var(--field);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.textFlagged {
+  composes: text;
+  border-color: var(--purple);
+}
+.textBlocked {
+  composes: text;
+  border-color: #e3a56b;
+}
+.fieldFoot {
+  gap: 12px;
+}
+.countOver {
+  color: var(--down);
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 320px;
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+  gap: 20px;
+}
+.summary {
+  gap: 18px;
+}
+.summaryText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.summaryTitle {
+  composes: title;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.ok {
+  gap: 8px;
+  font-size: 15px;
+  color: var(--teal-dark);
+}
+.publish {
+  height: 56px;
+}

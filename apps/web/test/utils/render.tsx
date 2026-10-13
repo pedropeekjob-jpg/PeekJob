@@ -1,9 +1,9 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ReactElement } from 'react';
+import { useEffect, type ReactElement, type ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { LangRoot } from '../../src/i18n';
-import { StoreProvider } from '../../src/lib/store';
+import { StoreProvider, useStore, type Draft } from '../../src/lib/store';
 
 /** Largura simulada: 'mobile' (390 px) ou 'desktop' (1440 px). Afeta useIsDesktop (matchMedia). */
 export function setViewport(kind: 'mobile' | 'desktop') {
@@ -36,4 +36,26 @@ export function renderScreen(ui: ReactElement, { route = '/', path = '*', viewpo
     opts,
   );
   return { user, ...result };
+}
+
+/** Começa um rascunho de avaliação antes de mostrar o ecrã (como se a pessoa já tivesse escolhido a organização) */
+export function WithDraft({ orgId = 'padaria-ribeira', patch, children }: { orgId?: string; patch?: Partial<Draft>; children: ReactNode }) {
+  const store = useStore();
+  useEffect(() => {
+    store.startDraft(orgId, null);
+    store.updateDraft({ text: '', tags: [], ...patch }); // a demonstração começa com um texto de exemplo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return store.draft.orgId === orgId ? <>{children}</> : null;
+}
+
+/** Providers para renderHook */
+export function Providers({ children, route = '/' }: { children: ReactNode; route?: string }) {
+  return (
+    <StoreProvider>
+      <LangRoot>
+        <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+      </LangRoot>
+    </StoreProvider>
+  );
 }
