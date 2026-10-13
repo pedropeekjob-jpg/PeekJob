@@ -15,10 +15,10 @@ export const STORAGE_KEY = 'peekjob-poc-v1';
 export const STATE = draft;
 
 /** Carrega no primeiro elemento com este nome acessível, se existir neste tamanho de ecrã */
-async function tap(p, role, name) {
+async function tap(p, role, name, { force = false } = {}) {
   const el = p.getByRole(role, { name }).first();
   if (!(await el.count())) return;
-  await el.click();
+  await el.click({ force }); // force: botões com aria-disabled que continuam clicáveis (explicam porque não avançam)
   await p.waitForTimeout(120); // deixa o React aplicar o estado antes do passo seguinte
 }
 
@@ -177,6 +177,29 @@ export const SCENARIOS = [
   },
   { name: 'apoio', path: '/apoio' },
   { name: '404', path: '/nao-existe' },
+  { name: 'denunciar', path: '/org/padaria-ribeira/denunciar/r1', full: true },
+  {
+    name: 'denunciar-sem-motivo',
+    path: '/org/padaria-ribeira/denunciar/i1',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'button', /^Enviar denúncia$/, { force: true });
+      await tap(p, 'button', /^Adicionar detalhe/);
+      await tap(p, 'button', /^Ver os 3 passos/);
+    },
+  },
+  {
+    name: 'denunciar-enviada',
+    path: '/org/padaria-ribeira/denunciar/r1',
+    full: true,
+    run: async (p) => {
+      await tap(p, 'radio', /Identifica uma pessoa/);
+      await tap(p, 'button', /^Enviar denúncia$/);
+      // a referência depende da hora: esconde-a para comparar
+      await p.addStyleTag({ content: '.mono.small.muted { visibility: hidden }' });
+    },
+  },
+  { name: 'denunciar-nao-encontrado', path: '/org/padaria-ribeira/denunciar/nao-existe' },
   { name: 'moderacao', path: '/moderacao', full: true },
   {
     name: 'moderacao-decisao',

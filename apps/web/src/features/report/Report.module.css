@@ -1,0 +1,426 @@
+/* Denunciar: telemóvel por omissão, computador a partir de 900 px */
+
+.start {
+  align-self: flex-start;
+}
+.baseline {
+  align-items: baseline;
+}
+.purple {
+  color: var(--purple-text);
+}
+.error {
+  color: var(--warn-text);
+  font-weight: 600;
+}
+
+/* Motivos */
+.reasonBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.reasonList {
+  display: flex;
+  flex-direction: column;
+}
+.reasonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 10px;
+}
+.reasonRow,
+.reasonCard {
+  gap: 12px;
+  text-align: left;
+  font-size: 15px;
+}
+.reasonRow {
+  min-height: 56px;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  font-weight: 400;
+}
+.reasonCard {
+  min-height: 64px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  font-weight: 500;
+}
+.reasonRow[aria-checked='true'],
+.reasonCard[aria-checked='true'] {
+  font-weight: 600;
+}
+.reasonCard[aria-checked='true'] {
+  border-color: var(--teal);
+}
+/* rádio do computador: anel que engrossa */
+.radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  border: 2px solid var(--grey);
+  box-sizing: border-box;
+}
+.reasonCard[aria-checked='true'] .radio {
+  border: 6px solid var(--teal);
+}
+/* rádio do telemóvel: anel com ponto */
+.radioRing {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  border: 3px solid var(--grey);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radioDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: transparent;
+}
+.reasonRow[aria-checked='true'] .radioRing {
+  border-color: var(--ink);
+}
+.reasonRow[aria-checked='true'] .radioDot {
+  background: var(--teal);
+}
+.reasonText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.hint {
+  font-weight: 400;
+}
+
+/* Detalhe e contacto */
+.textarea {
+  min-height: 90px;
+  border-radius: 16px;
+}
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.contactLegend {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* Apoio para situações ilegais */
+.illegal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 0;
+}
+.illegalTitle {
+  font-size: 20px;
+  color: var(--purple-text);
+}
+.illegalText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--purple-text);
+}
+.illegalButton {
+  align-self: flex-start;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+
+/* Citação do que se denuncia */
+.quote {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 4px 0 4px 16px;
+  border-left: 3px solid var(--field);
+  gap: 2px;
+}
+.quoteTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Confirmação */
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.checkInner {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--ground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confirmTitle {
+  font-size: 32px;
+}
+.confirmText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 520px;
+}
+.reasonStrong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.back {
+  margin-top: 8px;
+  height: 56px;
+}
+
+/* Como moderamos */
+.steps {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  gap: 14px;
+}
+.step {
+  gap: 12px;
+  align-items: flex-start;
+}
+.stepNum {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  border: 3px solid var(--teal);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stepTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+.stepBody {
+  line-height: 1.45;
+}
+
+/* Não encontrado */
+.notFound {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+/* ---------- Telemóvel: folha sobre fundo escuro ---------- */
+.backdrop {
+  min-height: 100dvh;
+  background: #3a4248;
+  display: flex;
+  flex-direction: column;
+}
+.backdropClose {
+  flex: none;
+  height: 72px;
+  display: block;
+}
+.sheet {
+  flex: 1;
+  background: var(--ground);
+  border-radius: 28px 28px 0 0;
+  display: flex;
+  flex-direction: column;
+}
+.handleRow {
+  justify-content: center;
+  padding-top: 10px;
+}
+.handle {
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--field);
+}
+.sheetBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
+  padding: 16px 20px 24px;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+.sentGap {
+  padding-top: 20px;
+}
+.sheetHead {
+  align-items: flex-start;
+  gap: 12px;
+}
+.headMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.titleMobile {
+  font-size: 32px;
+}
+.close {
+  margin-right: -10px;
+}
+.addDetail {
+  align-self: flex-start;
+  font-size: 15px;
+}
+.sendMobile {
+  margin-top: auto;
+  height: 56px;
+}
+
+/* ---------- Computador ---------- */
+.container {
+  padding-top: 8px;
+  padding-bottom: 80px;
+}
+.backLink {
+  display: inline-flex;
+  gap: 6px;
+  min-height: 44px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--body);
+}
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 680px) minmax(280px, 340px);
+  justify-content: space-between;
+  gap: 64px;
+  align-items: start;
+  padding-top: 24px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.title {
+  font-size: 48px;
+  line-height: 1;
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.detailLabel {
+  font-size: 15px;
+  font-weight: 600;
+}
+.optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+.actions {
+  gap: 12px;
+}
+.send {
+  height: 56px;
+  padding: 0 28px;
+}
+.cancel {
+  padding: 0 12px;
+  color: var(--body);
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-top: 8px;
+}
+.how {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.howTitle {
+  font-size: 20px;
+}
+.howText {
+  font-size: 15px;
+}
+
+@media (min-width: 900px) {
+  .textarea {
+    min-height: 110px;
+  }
+  .illegal {
+    padding: 24px;
+  }
+  .quoteTitle {
+    font-size: 16px;
+  }
+  .confirm {
+    gap: 20px;
+  }
+  .check {
+    width: 80px;
+    height: 80px;
+  }
+  .checkInner {
+    width: 64px;
+    height: 64px;
+  }
+  .confirmTitle {
+    font-size: 48px;
+  }
+  .confirmText {
+    font-size: 16px;
+  }
+  .back {
+    align-self: flex-start;
+  }
+}
