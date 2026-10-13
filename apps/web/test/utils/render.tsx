@@ -75,3 +75,8 @@ export function WithoutDraft({ children }: { children: ReactNode }) {
   }, []);
   return store.draft.orgId == null ? <>{children}</> : null;
 }
+
+/** Estado inicial da loja (demonstração), gravado antes de montar o ecrã */
+export function seedStore(patch: Record<string, unknown>) {
+  localStorage.setItem('peekjob-poc-v1', JSON.stringify(patch));
+}
