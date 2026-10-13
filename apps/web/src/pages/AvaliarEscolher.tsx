@@ -4,6 +4,8 @@ import { Shell } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { Ring } from '../components/Data';
 import { MapView } from '../components/MapView';
+import { NifField } from '../components/NifField';
+import { isValidNif, normalizeNif } from '@peekjob/shared';
 import { useOrg, useOrgs, useSearch } from '../api/orgs';
 import { ORG_TYPES, type Org, type OrgType } from '../data/orgs';
 import { useStore } from '../lib/store';
@@ -35,6 +37,7 @@ export default function AvaliarEscolher() {
   const [addName, setAddName] = useState('');
   const [addType, setAddType] = useState<OrgType>('PME');
   const [addCity, setAddCity] = useState('');
+  const [addNif, setAddNif] = useState('');
   const [addError, setAddError] = useState('');
 
   const chosen = useOrg(chosenId);
@@ -76,8 +79,13 @@ export default function AvaliarEscolher() {
         setAddError(!addName.trim() ? tr('Escreve o nome da organização.', 'Enter the organisation’s name.') : tr('Escreve a localidade.', 'Enter the town or city.'));
         return;
       }
+      const nif = normalizeNif(addNif);
+      if ((nif || addType === 'Nome individual') && !isValidNif(nif)) {
+        setAddError(nif ? tr('O NIF não é válido.', 'The tax number isn’t valid.') : tr('Para quem trabalha em nome individual, o NIF é obrigatório.', 'For a sole trader, the tax number (NIF) is required.'));
+        return;
+      }
       setBusy(true);
-      const r = await addOrg({ name: addName.trim(), type: addType, city: addCity.trim() });
+      const r = await addOrg({ name: addName.trim(), type: addType, city: addCity.trim(), ...(nif ? { nif } : {}) });
       setBusy(false);
       if (!r.ok) {
         setAddError(r.status === 401 ? tr('Entra primeiro para adicionar uma organização.', 'Sign in first to add an organisation.') : r.message);
@@ -248,6 +256,16 @@ export default function AvaliarEscolher() {
           <input className="input" id="na" type="text" value={addCity} onChange={(e) => setAddCity(e.target.value)} placeholder={tr('Ex.: Porto', 'E.g. Porto')} required aria-invalid={!!addError && !addCity.trim()} />
         </div>
       </div>
+      <NifField
+        value={addNif}
+        onChange={setAddNif}
+        required={addType === 'Nome individual'}
+        invalid={!!addError && addType === 'Nome individual' && !isValidNif(normalizeNif(addNif))}
+        onOfficial={(o) => {
+          if (o.name) setAddName(o.name);
+          if (o.city) setAddCity(o.city);
+        }}
+      />
       {addError && (
         <div role="alert" style={{ fontSize: 14, color: 'var(--warn-text)' }}>
           {addError}

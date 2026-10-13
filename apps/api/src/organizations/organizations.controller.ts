@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
-import { CreateOrganizationInput, SearchOrganizationsQuery } from '@peekjob/shared';
+import { CreateOrganizationInput, isValidNif, normalizeNif, SearchOrganizationsQuery } from '@peekjob/shared';
 import type { Response } from 'express';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, Roles, type AuthUser } from '../auth/auth.guard';
@@ -8,6 +8,7 @@ import { parse } from '../common/zod';
 import { MergedOrgRedirect, OrganizationsService } from './organizations.service';
 
 const MergeBody = z.object({ targetId: z.string().uuid() });
+const NifParam = z.string().transform(normalizeNif).refine(isValidNif, { message: 'NIF inválido' });
 
 @Controller('orgs')
 export class OrganizationsController {
@@ -27,6 +28,13 @@ export class OrganizationsController {
   @UseGuards(AuthGuard)
   create(@Body() body: unknown, @CurrentUser() user: AuthUser) {
     return this.orgs.create(parse(CreateOrganizationInput, body), userRef(privacySecret(), user.id));
+  }
+
+  /** Nome e morada oficiais a partir do NIF (VIES), para preencher o formulário de nova organização */
+  @Get('nif/:nif')
+  @UseGuards(AuthGuard)
+  lookupNif(@Param('nif') nif: string) {
+    return this.orgs.lookupNif(parse(NifParam, nif));
   }
 
   @Get(':id')

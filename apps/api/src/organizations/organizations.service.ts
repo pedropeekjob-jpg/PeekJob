@@ -1,10 +1,21 @@
 import { ConflictException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CRITERION_KEYS, type CreateOrganizationInput, type SearchOrganizationsQuery } from '@peekjob/shared';
+import { CRITERION_KEYS, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { isUuid } from '../common/zod';
 import { PG_POOL, tx } from '../db/db.module';
+import { VIES, type ViesClient, type ViesResult } from './vies';
 
 export const MAX_ORGS_PER_DAY = 5;
+/** Semelhança mínima entre o nome escrito e o nome oficial para dar o NIF como confirmado */
+export const VIES_NAME_MATCH = 0.5;
+export const VIES_LICENSE = 'Comissão Europeia (VIES), reutilização autorizada';
+
+/** NIF de pessoa singular ou empresário: o nome oficial é o nome de uma pessoa (dado pessoal) */
+const isPersonalNif = (nif: string) => ['singular', 'empresario'].includes(nifKind(nif) ?? '');
+
+export type NifCheck =
+  | { status: 'confirmed' | 'name_mismatch'; officialName: string | null }
+  | { status: 'exists' | 'not_found' | 'unavailable' };
 
 export interface OrgSummary {
   id: string;
@@ -50,7 +61,23 @@ function toPublicOrg(row: Record<string, any>) {
 
 @Injectable()
 export class OrganizationsService {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pool,
+    @Inject(VIES) private readonly vies: ViesClient,
+  ) {}
+
+  /** Consulta ao VIES para preencher o formulário. Para NIFs de pessoas só diz se existe. */
+  async lookupNif(nif: string) {
+    const r = await this.vies.check(nif);
+    const personal = isPersonalNif(nif);
+    return {
+      nif,
+      status: r.status,
+      name: r.status === 'valid' && !personal ? r.name : null,
+      address: r.status === 'valid' && !personal ? r.address : null,
+      kind: nifKind(nif),
+    };
+  }
 
   /** Pesquisa tolerante a acentos, maiúsculas e erros (pg_trgm), incluindo nomes antigos (aliases). */
   async search(q: SearchOrganizationsQuery): Promise<OrgSummary[]> {
@@ -80,6 +107,8 @@ export class OrganizationsService {
   }
 
   async create(input: CreateOrganizationInput, creatorRef: string) {
+    // Rede fora da transação: o VIES pode demorar (até 5 s) e nunca bloqueia a criação.
+    const vies: ViesResult | null = input.nif ? await this.vies.check(input.nif) : null;
     return tx(this.pool, async (c) => {
       if (input.nif) {
         const dup = await c.query(`SELECT id FROM organizations WHERE nif = $1 AND status <> 'merged'`, [input.nif]);
@@ -110,8 +139,32 @@ export class OrganizationsService {
         await c.query(`INSERT INTO org_locations (org_id, address, city) VALUES ($1, $2, $3)`, [rows[0].id, input.address, input.city]);
       }
       await c.query(`INSERT INTO org_sources (org_id, field, source) VALUES ($1, 'name,type,city', 'user')`, [rows[0].id]);
-      return { ...rows[0], possibleDuplicates: dups.rows };
+      const nifCheck = vies && input.nif ? await this.applyVies(c, rows[0].id, input.name, input.nif, vies) : undefined;
+      return { ...rows[0], possibleDuplicates: dups.rows, ...(nifCheck ? { nifCheck } : {}) };
     });
+  }
+
+  private async applyVies(c: { query: Pool['query'] }, orgId: string, name: string, nif: string, r: ViesResult): Promise<NifCheck> {
+    if (r.status === 'unavailable') return { status: 'unavailable' };
+    if (r.status === 'invalid') return { status: 'not_found' };
+    if (isPersonalNif(nif)) return { status: 'exists' }; // nunca guardamos nem mostramos o nome da pessoa
+    const official = r.name;
+    let match = official == null; // sem nome público: o NIF existe mas não dá para comparar
+    if (official) {
+      const sim = await c.query(
+        `SELECT greatest(similarity(a, b), word_similarity(a, b), word_similarity(b, a)) AS s
+           FROM (SELECT lower(f_unaccent($1)) AS a, lower(f_unaccent($2)) AS b) x`,
+        [name, official],
+      );
+      match = Number(sim.rows[0].s) >= VIES_NAME_MATCH;
+    }
+    if (!match || !official) return { status: 'name_mismatch', officialName: official };
+    await c.query(`UPDATE organizations SET nif_verified = true WHERE id = $1`, [orgId]);
+    if (official.toLowerCase() !== name.toLowerCase()) {
+      await c.query(`INSERT INTO org_aliases (org_id, alias) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [orgId, official]);
+    }
+    await c.query(`INSERT INTO org_sources (org_id, field, source, license) VALUES ($1, 'nif,official_name', 'vies', $2)`, [orgId, VIES_LICENSE]);
+    return { status: 'confirmed', officialName: official };
   }
 
   /** Página pública: só organizações ativas. Fundidas redirecionam para a organização certa. */
