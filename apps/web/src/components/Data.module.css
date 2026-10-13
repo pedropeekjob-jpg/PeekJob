@@ -1,0 +1,122 @@
+/* Anéis, bolinhas e linhas de organização. Valores por componente em variáveis CSS */
+
+/* Ring: --size, --t (espessura), --deg, --color, --track, --inner, --fs */
+.ring {
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: conic-gradient(var(--color) var(--deg), var(--track) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ring[data-muted] {
+  background: var(--track);
+}
+.ringInner {
+  width: calc(var(--size) - 2 * var(--t));
+  height: calc(var(--size) - 2 * var(--t));
+  border-radius: 50%;
+  background: var(--inner);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs);
+}
+.ring[data-muted] .ringInner {
+  color: var(--muted);
+}
+
+/* Dots: --size, --gap, --c */
+.dots {
+  display: flex;
+  gap: var(--gap);
+}
+.dot {
+  width: var(--size);
+  height: var(--size);
+  border-radius: calc(var(--size) / 2);
+  background: var(--line);
+}
+.dot[data-fill='full'] {
+  background: var(--c);
+}
+.dot[data-fill='half'] {
+  background: linear-gradient(90deg, var(--c) 50%, var(--line) 50%);
+}
+.dot[data-fill='none'] {
+  background: var(--soft);
+}
+
+/* Linha de critério: --label (largura do nome), --c */
+.criterion {
+  display: grid;
+  grid-template-columns: var(--label) auto 34px;
+  gap: 12px;
+  align-items: center;
+  min-height: 28px;
+}
+.criterionName {
+  font-size: 14px;
+  color: var(--body);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.priority {
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  border: 2px solid var(--c);
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+}
+.criterionValue {
+  font-size: 13px;
+  text-align: right;
+}
+
+.pillLarge {
+  font-size: 15px;
+  padding: 7px 14px;
+}
+.trend[data-dir='up'] {
+  color: var(--up);
+}
+.trend[data-dir='down'] {
+  color: var(--down);
+}
+
+/* Linhas e cartões de organização */
+.orgRow {
+  gap: 14px;
+  padding: 14px 0;
+  min-height: 72px;
+}
+.orgRowText {
+  gap: 2px;
+}
+.strong {
+  font-weight: 600;
+}
+/* .card global: a classe do módulo ganha no empate */
+.orgCard {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 18px;
+}
+.orgCardText {
+  gap: 4px;
+}
+.orgCardName {
+  font-weight: 600;
+  font-size: 17px;
+}
