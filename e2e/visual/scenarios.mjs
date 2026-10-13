@@ -155,7 +155,8 @@ export const SCENARIOS = [
       await p.getByRole('link', { name: /Comunidade/ }).first().hover().catch(() => {});
     },
   },
-  { name: 'para-organizacoes', path: '/para-organizacoes' },
+  { name: 'para-organizacoes', path: '/para-organizacoes', full: true },
+  { name: 'para-organizacoes-pergunta', path: '/para-organizacoes', full: true, run: (p) => tap(p, 'button', /^Pagar o Pro melhora/) },
   { name: 'entrar', path: '/entrar' },
   {
     name: 'entrar-erro',

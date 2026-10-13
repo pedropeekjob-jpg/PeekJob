@@ -1,0 +1,270 @@
+/* Para organizações: telemóvel por omissão, computador a partir de 900 px */
+
+.page {
+  gap: 40px;
+}
+.desktop {
+  padding-top: 32px;
+  padding-bottom: 80px;
+}
+.h2 {
+  font-size: 24px;
+}
+
+/* Abertura */
+.hero {
+  gap: 24px;
+  align-items: center;
+}
+.heroText {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  min-width: 0;
+  gap: 16px;
+}
+.title {
+  font-size: 38px;
+  line-height: 1;
+}
+.lead {
+  font-size: 16px;
+}
+.ctas {
+  gap: 12px;
+  padding-top: 8px;
+}
+.cta {
+  width: 100%;
+  height: 56px;
+  padding: 0 24px;
+}
+.ctaMain {
+  padding: 0 28px;
+}
+.heroArt {
+  flex: 1 1 100%;
+  min-width: 0;
+  justify-content: center;
+}
+
+/* Anel de exemplo */
+.ring {
+  position: relative;
+  width: 200px;
+  max-width: 100%;
+  aspect-ratio: 1;
+}
+.ringPulse,
+.ringFill {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+}
+.ringPulse {
+  border: 3px solid var(--teal);
+}
+.ringFill {
+  background: conic-gradient(var(--teal) var(--deg), var(--line) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ringInner {
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  background: var(--ground);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.ringScore {
+  font-size: 48px;
+  line-height: 1;
+}
+.ringTrend {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--up);
+}
+.ringTrend[data-trend='down'] {
+  color: var(--down);
+}
+
+/* Como funciona e perguntas */
+.middle {
+  gap: 40px;
+  align-items: flex-start;
+}
+.how {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 340px;
+  min-width: 0;
+  gap: 24px;
+}
+.steps {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: 22px;
+}
+.step {
+  gap: 14px;
+  align-items: flex-start;
+}
+.stepNum {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  border: 4px solid var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stepTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+.stepBody {
+  line-height: 1.45;
+}
+.faq {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  min-width: 0;
+  gap: 8px;
+}
+.faqHead {
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* Planos */
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.plansHead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.promise {
+  font-size: 15px;
+  font-weight: 600;
+}
+.planList {
+  gap: 20px;
+  align-items: stretch;
+}
+.plan {
+  --accent: var(--line);
+  --dot: var(--grey);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 320px;
+  min-width: 0;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 28px;
+  padding: 22px;
+  gap: 18px;
+}
+.plan[data-pro] {
+  --accent: var(--teal);
+  --dot: var(--teal);
+}
+.planHead {
+  align-items: baseline;
+  gap: 12px;
+}
+.planName {
+  margin: 0;
+  font-size: 24px;
+}
+.price {
+  align-items: baseline;
+  gap: 6px;
+}
+.priceValue {
+  font-size: 32px;
+  line-height: 1;
+}
+.points {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: 10px;
+}
+.point {
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.pointDot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  border: 3px solid var(--dot);
+}
+.planCta {
+  margin-top: auto;
+  border-radius: 16px;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    gap: 48px;
+  }
+  .heroText {
+    flex: 1.3 1 480px;
+    gap: 20px;
+  }
+  .title {
+    font-size: 56px;
+  }
+  .cta {
+    width: auto;
+  }
+  .heroArt {
+    flex: 1 1 320px;
+  }
+  .ring {
+    width: 280px;
+  }
+  .ringScore {
+    font-size: 64px;
+  }
+  .middle {
+    padding-top: 56px;
+    gap: 40px 64px;
+  }
+  .faq {
+    flex: 1.5 1 480px;
+  }
+  .plans {
+    padding-top: 56px;
+  }
+  .plan {
+    padding: 28px;
+  }
+}
