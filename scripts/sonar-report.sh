@@ -26,3 +26,13 @@ let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
 })" >> "$GITHUB_STEP_SUMMARY" 2> issues.txt
 cat issues.txt
 echo "::notice title=SonarQube problemas::$(cat issues.txt)"
+
+# Bugs e vulnerabilidades (todos) e um exemplo por regra dos restantes, como anotações no ficheiro e linha
+q "issues/search?componentKeys=peekjob&resolved=false&ps=500" | node -e "
+let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
+  const j=JSON.parse(d); const seen=new Set(); let n=0;
+  const file=(i)=>i.component.replace('peekjob:','');
+  for (const i of j.issues.filter(i=>i.type!=='CODE_SMELL')) console.log('::error file='+file(i)+',line='+(i.line||1)+',title='+i.type+' '+i.rule+'::'+i.message);
+  for (const i of j.issues.filter(i=>i.type==='CODE_SMELL')) { if (seen.has(i.rule)) continue; seen.add(i.rule); const c=j.issues.filter(x=>x.rule===i.rule);
+    console.log('::warning file='+file(i)+',line='+(i.line||1)+',title='+i.rule+' ×'+c.length+'::'+i.message+' | '+c.slice(0,6).map(x=>file(x).split('/').slice(-2).join('/')+':'+(x.line||'')).join(', ')); }
+})"
