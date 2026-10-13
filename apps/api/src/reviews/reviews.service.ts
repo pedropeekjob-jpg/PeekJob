@@ -33,7 +33,7 @@ export class ReviewsService {
     const avg = round1(values.reduce((a, b) => a + b, 0) / values.length);
 
     return tx(this.pool, async (c) => {
-      const org = await c.query(`SELECT id, status, nif_verified FROM organizations WHERE id = $1 FOR UPDATE`, [orgId]);
+      const org = await c.query(`SELECT id, status, nif_verified, source FROM organizations WHERE id = $1 FOR UPDATE`, [orgId]);
       if (!org.rows[0] || !['active', 'pending'].includes(org.rows[0].status)) throw new NotFoundException();
 
       let review;
@@ -62,7 +62,7 @@ export class ReviewsService {
       let orgStatus = org.rows[0].status as 'active' | 'pending';
       if (orgStatus === 'pending') {
         const n = await c.query(`SELECT count(DISTINCT author_ref)::int AS n FROM reviews WHERE org_id = $1`, [orgId]);
-        if (shouldActivate({ status: 'pending', nifVerified: org.rows[0].nif_verified, distinctReviewers: n.rows[0].n })) {
+        if (shouldActivate({ status: 'pending', nifVerified: org.rows[0].nif_verified, distinctReviewers: n.rows[0].n, imported: org.rows[0].source === 'import' })) {
           await c.query(`UPDATE organizations SET status = 'active', activated_at = now() WHERE id = $1`, [orgId]);
           orgStatus = 'active';
         }

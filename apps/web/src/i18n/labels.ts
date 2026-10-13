@@ -28,6 +28,9 @@ const SECTOR_EN: Record<string, string> = {
   Educação: 'Education',
   Comércio: 'Retail',
   Tecnologia: 'Technology',
+  Ofícios: 'Crafts & trades',
+  Turismo: 'Tourism',
+  Serviços: 'Services',
 };
 export const sectorLabel = (s: string) => tr(s, SECTOR_EN[s] ?? s);
 

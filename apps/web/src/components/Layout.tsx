@@ -131,6 +131,9 @@ export function SiteFooter({ compact = false }: { compact?: boolean }) {
           <LangSwitch />
           <span className="small muted">{tr('Avaliações anónimas de quem trabalha em pequenas organizações.', 'Anonymous reviews from people who work at small organisations.')}</span>
         </div>
+        <a className="small muted osm-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+          {tr('Dados de organizações: © contribuidores do OpenStreetMap (ODbL)', 'Organisation data: © OpenStreetMap contributors (ODbL)')}
+        </a>
       </div>
     </footer>
   );

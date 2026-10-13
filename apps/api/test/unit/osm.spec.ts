@@ -32,10 +32,10 @@ describe('OpenStreetMap (Overpass): organizações de um concelho', () => {
       externalId: 'node/101', name: 'Padaria Ribeira', type: 'PME', sector: 'Comércio', city: 'Porto',
       address: 'Rua de Cima 12, 4050-123 Porto', lat: 41.1496, lng: -8.6109, nif: null,
     });
-    expect(by['Associação Mãos Dadas']).toMatchObject({ externalId: 'way/202', type: 'Associação', sector: 'Social', lat: 41.158, lng: -8.629 });
+    expect(by['Associação Mãos Dadas']).toMatchObject({ externalId: 'way/202', type: 'Associação', sector: 'Ação social', lat: 41.158, lng: -8.629 });
     expect(by['Oficina Sete']).toMatchObject({ type: 'PME', sector: 'Ofícios', nif: '513000003', address: null, city: 'Porto' });
     expect(by['Café Majestic']).toMatchObject({ sector: 'Restauração' });
-    expect(by['Lar da Boa Vontade']).toMatchObject({ externalId: 'relation/707', type: 'Associação', sector: 'Social' });
+    expect(by['Lar da Boa Vontade']).toMatchObject({ externalId: 'relation/707', type: 'Associação', sector: 'Ação social' });
     expect(by['Banco Alimentar do Porto']).toMatchObject({ type: 'Associação' });
     expect(by['Hotel Infante Sagres']).toMatchObject({ sector: 'Turismo' });
   });

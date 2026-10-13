@@ -1,0 +1,54 @@
+name: Importar organizações (OpenStreetMap)
+
+# Manual: Actions → "Importar organizações (OpenStreetMap)" → Run workflow.
+# Corre num servidor do GitHub (com acesso ao Overpass). Para gravar precisa do segredo da base de dados do ambiente:
+#   UAT_DATABASE_URL / PROD_DATABASE_URL (Render → base de dados → External Database URL)
+on:
+  workflow_dispatch:
+    inputs:
+      area:
+        description: 'Concelho (ex.: Porto), "distrito:Braga", "distrito:Açores" ou "todos"'
+        required: true
+        default: Porto
+      target:
+        description: Onde gravar
+        type: choice
+        options: [simular, uat, production]
+        default: simular
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @peekjob/shared && npm run build -w @peekjob/api
+      - name: Importar
+        env:
+          AREA: ${{ github.event.inputs.area }}
+          TARGET: ${{ github.event.inputs.target }}
+          UAT_DB: ${{ secrets.UAT_DATABASE_URL }}
+          PROD_DB: ${{ secrets.PROD_DATABASE_URL }}
+        working-directory: apps/api
+        run: |
+          case "$AREA" in
+            todos) ARGS=(--all) ;;
+            distrito:*) ARGS=(--district "${AREA#distrito:}") ;;
+            *) ARGS=(--city "$AREA") ;;
+          esac
+          case "$TARGET" in
+            simular) ARGS+=(--dry-run) ;;
+            uat) export DATABASE_URL="$UAT_DB" ;;
+            production) export DATABASE_URL="$PROD_DB" ;;
+          esac
+          if [ "$TARGET" != simular ] && [ -z "$DATABASE_URL" ]; then echo "Falta o segredo da base de dados para $TARGET"; exit 1; fi
+          if [ "$TARGET" != simular ]; then node dist/db/migrate-cli.js; fi
+          node dist/import/osm-cli.js "${ARGS[@]}"

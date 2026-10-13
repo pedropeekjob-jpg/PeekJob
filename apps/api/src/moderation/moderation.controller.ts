@@ -19,7 +19,7 @@ export class ModerationController {
     const { rows } = await this.pool.query(`SELECT
       (SELECT count(*) FROM reports WHERE status = 'open')::int AS open_reports,
       (SELECT count(DISTINCT review_id) FROM reports WHERE status = 'open')::int AS reviews_with_reports,
-      (SELECT count(*) FROM organizations WHERE status = 'pending')::int AS pending_orgs`);
+      (SELECT count(*) FROM organizations WHERE status = 'pending' AND source <> 'import')::int AS pending_orgs`);
     const r = rows[0];
     return { openReports: r.open_reports, reviewsWithReports: r.reviews_with_reports, pendingOrgs: r.pending_orgs };
   }
@@ -41,7 +41,7 @@ export class ModerationController {
                          ORDER BY similarity(d.search_name, o.search_name) DESC LIMIT 5) d
               ), '[]'::json) AS duplicates
          FROM organizations o
-        WHERE o.status = 'pending'
+        WHERE o.status = 'pending' AND o.source <> 'import' -- importadas não precisam de decisão humana
         ORDER BY o.created_at ASC
         LIMIT 200`,
     );

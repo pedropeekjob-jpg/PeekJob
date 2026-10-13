@@ -563,6 +563,18 @@ function Privacy({ desktop = false }: { desktop?: boolean }) {
         <li>{tr('As avaliações são anónimas: a organização nunca sabe quem escreveu.', 'Reviews are anonymous: the organisation never knows who wrote them.')}</li>
         <li>{tr('Os comprovativos de verificação são apagados logo a seguir.', 'Verification documents are deleted straight away.')}</li>
         <li>{tr('Podes exportar ou apagar os teus dados quando quiseres.', 'You can export or delete your data whenever you like.')}</li>
+        <li>
+          {tr(
+            'Se pedires “Reescrever com IA”, o texto do comentário é enviado à Anthropic (fornecedora do modelo) só para gerar a proposta. Não o guardamos nem o associamos a ti, e a Anthropic não o usa para treinar modelos.',
+            'If you use “Rewrite with AI”, your comment text is sent to Anthropic (the model provider) only to generate the suggestion. We don’t store it or link it to you, and Anthropic doesn’t use it to train models.',
+          )}
+        </li>
+        <li>
+          {tr(
+            'A lista de organizações vem também do OpenStreetMap (© contribuidores do OpenStreetMap, licença ODbL) e do registo europeu VIES.',
+            'The list of organisations also comes from OpenStreetMap (© OpenStreetMap contributors, ODbL licence) and the European VIES register.',
+          )}
+        </li>
         {analytics.configured() && (
           <li>
             {tr(

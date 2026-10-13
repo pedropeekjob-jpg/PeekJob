@@ -886,3 +886,4 @@ a.plain {
 .rewrite-box.is-blocked .rewrite-title { color: var(--warn-text); }
 .rewrite-proposal { margin: 0; padding: 12px 14px; border-left: 3px solid var(--teal); background: var(--ground); border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rewrite-link { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 0; min-height: 36px; font-size: 14px; }
+.osm-credit { font-size: 12px; text-align: center; color: var(--muted); }
