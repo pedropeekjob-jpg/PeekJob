@@ -18,11 +18,13 @@ export interface TestCtx {
   sessions: Map<string, { Cookie: string }>;
 }
 
-export async function createTestApp(): Promise<TestCtx> {
+export async function createTestApp(overrides: Record<string, unknown> = {}): Promise<TestCtx> {
   process.env.DATABASE_URL = TEST_DB;
   process.env.PRIVACY_SECRET = 'segredo-de-teste';
   const mailer = new InMemoryMailer();
-  const mod = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(MAILER).useValue(mailer).compile();
+  let builder = Test.createTestingModule({ imports: [AppModule] }).overrideProvider(MAILER).useValue(mailer);
+  for (const [token, value] of Object.entries(overrides)) builder = builder.overrideProvider(token).useValue(value);
+  const mod = await builder.compile();
   const app = mod.createNestApplication();
   configureApp(app);
   await app.init();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectRedFlags, findPersonalAttacks, softenText } from '../src/moderation';
+import { detectRedFlags, findPersonalAttacks, softenText, toneIssues } from '../src/moderation';
 
 describe('detectRedFlags', () => {
   it('deteta salário em atraso e assédio sexual no texto', () => {
@@ -63,5 +63,34 @@ describe('softenText', () => {
     const out = softenText('O Ricardo é incompetente e muda tudo.');
     expect(out).not.toMatch(/Ricardo|incompetente/);
     expect(findPersonalAttacks(out).blocked).toBe(false);
+  });
+});
+
+describe('textos em inglês e tom agressivo', () => {
+  it('bloqueia também insultos em inglês', () => {
+    const r = findPersonalAttacks('The manager is an idiot and totally incompetent.');
+    expect(r.blocked).toBe(true);
+    expect(r.insults).toEqual(expect.arrayContaining(['idiot', 'incompetent']));
+  });
+
+  it('a reescrita por regras usa o idioma do texto', () => {
+    const out = softenText('Ricardo is an idiot.', undefined, 'en');
+    expect(out).toMatch(/^The manager is/);
+    expect(findPersonalAttacks(out).blocked).toBe(false);
+    expect(out).not.toMatch(/a chefia|desorganizada/);
+  });
+
+  it('toneIssues: deteta insultos, nomes, gritos (MAIÚSCULAS) e palavrões, sem bloquear os dois últimos', () => {
+    expect(toneIssues('Equipa unida e horários cumpridos.')).toEqual({ aggressive: false, blocked: false, reasons: [] });
+    expect(toneIssues('O Ricardo é idiota').reasons).toEqual(expect.arrayContaining(['insult', 'name']));
+    const shout = toneIssues('NUNCA PAGAM A HORAS E ISTO É UMA VERGONHA!!!');
+    expect(shout).toMatchObject({ aggressive: true, blocked: false });
+    expect(shout.reasons).toContain('shouting');
+    expect(toneIssues('Que merda de horários.').reasons).toContain('profanity');
+    expect(toneIssues('This place is shit.').reasons).toContain('profanity');
+  });
+
+  it('siglas curtas não contam como gritar', () => {
+    expect(toneIssues('Trabalhei numa PME com IVA e IRS em dia.').aggressive).toBe(false);
   });
 });
