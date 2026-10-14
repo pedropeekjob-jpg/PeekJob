@@ -6,6 +6,36 @@
   --mark-above: calc(var(--mark-h) * 0.482);
   --mark-below: calc(var(--mark-h) * 0.518);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Paleta "branco e menta" (14/10, pedido do cliente: mais leve): o verde-água fica para a linha, o logo e os detalhes.
+     A estrutura e a animação não dependem destas variáveis */
+  --mint: #eef8f8;
+  --peek-bg: var(--surface);
+  --peek-fg: var(--ink);
+  --peek-glow: rgba(0, 169, 175, 0.14);
+  --job-bg: var(--mint);
+  --job-fg: var(--ink);
+  --job-glow: rgba(101, 45, 144, 0.1);
+  --rule: var(--teal);
+  --hint-peek-bg: var(--ink);
+  --hint-peek-fg: #fff;
+  --hint-job-bg: var(--ink);
+  --hint-job-fg: #fff;
+  --search-bg: var(--surface);
+  --search-border: var(--line);
+  --go-bg: var(--ink);
+  --go-fg: #fff;
+  --cta-bg: var(--ink);
+  --cta-fg: #fff;
+  --cta-hover: #1b252d;
+  --close-bg: var(--surface);
+  --mk-top-ink: #010b13;
+  --mk-top-accent: #00a9af;
+  --mk-top-bg: #ffffff;
+  --mk-top-road: rgba(1, 11, 19, 0.18);
+  --mk-bot-ink: #010b13;
+  --mk-bot-accent: #00a9af;
+  --mk-bot-bg: #eef8f8;
+  --mk-bot-road: #c5dfe0;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -34,14 +64,14 @@
 .peek {
   --gx: 72vw;
   --gy: 120px;
-  background: var(--teal);
-  color: var(--ink);
+  background: var(--peek-bg);
+  color: var(--peek-fg);
 }
 .job {
   --gx: 22vw;
   --gy: 240px;
-  background: var(--ink);
-  color: #fff;
+  background: var(--job-bg);
+  color: var(--job-fg);
 }
 /* a zona escolhida estende-se até ocupar a página; a outra retrai-se até desaparecer */
 .split[data-zone='peek'] .job,
@@ -73,11 +103,11 @@
   opacity: 0.85;
 }
 .peek .glow::before {
-  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0));
+  background: radial-gradient(closest-side, var(--peek-glow), transparent);
 }
 .job .glow::before {
   /* roxo da marca: respeito, direitos humanos e diversidade */
-  background: radial-gradient(closest-side, rgba(101, 45, 144, 0.7), rgba(101, 45, 144, 0));
+  background: radial-gradient(closest-side, var(--job-glow), transparent);
 }
 @media (hover: none) {
   .peek .glow::before {
@@ -131,7 +161,7 @@
 }
 .label {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 500;
   font-size: clamp(44px, 12vw, 88px);
   line-height: 1;
   letter-spacing: -0.02em;
@@ -179,12 +209,12 @@
       transform 0.08s linear;
   }
   .peek .hint {
-    background: var(--ink);
-    color: #fff;
+    background: var(--hint-peek-bg);
+    color: var(--hint-peek-fg);
   }
   .job .hint {
-    background: var(--teal);
-    color: var(--ink);
+    background: var(--hint-job-bg);
+    color: var(--hint-job-fg);
   }
   .split[data-zone='none'] .half:hover .hint {
     opacity: 1;
@@ -198,7 +228,7 @@
   right: 0;
   top: -0.75px;
   height: 1.5px;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--rule);
   transform-origin: left center;
   animation: rule 1.4s var(--ease) 0.2s both;
   z-index: 2;
@@ -242,19 +272,19 @@
 }
 .mkTop {
   clip-path: inset(0 0 51.8% 0);
-  --pj-ink: #010b13;
-  --pj-accent: #ffffff;
-  --pj-bg: #00a9af;
-  --pj-node: #00a9af;
-  --pj-road: rgba(1, 11, 19, 0.25);
+  --pj-ink: var(--mk-top-ink);
+  --pj-accent: var(--mk-top-accent);
+  --pj-bg: var(--mk-top-bg);
+  --pj-node: var(--mk-top-bg);
+  --pj-road: var(--mk-top-road);
 }
 .mkBot {
   clip-path: inset(48.2% 0 0 0);
-  --pj-ink: #ffffff;
-  --pj-accent: #00a9af;
-  --pj-bg: #010b13;
-  --pj-node: #010b13;
-  --pj-road: #2a3238;
+  --pj-ink: var(--mk-bot-ink);
+  --pj-accent: var(--mk-bot-accent);
+  --pj-bg: var(--mk-bot-bg);
+  --pj-node: var(--mk-bot-bg);
+  --pj-road: var(--mk-bot-road);
 }
 /* Os olhos olham para a zona onde está o cursor */
 .mark :global(.pj-eyes),
@@ -302,6 +332,7 @@
   animation-delay: 0.56s;
 }
 .close {
+  background: var(--close-bg);
   position: absolute;
   top: 16px;
   right: 16px;
@@ -340,14 +371,16 @@
   gap: 8px;
   padding: 0 6px 0 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
   color: var(--ink);
-  box-shadow: 0 10px 30px rgba(1, 11, 19, 0.14);
+  box-shadow: 0 8px 24px rgba(1, 11, 19, 0.06);
 }
 .search:focus-within {
+  border-color: var(--teal);
   box-shadow:
-    0 10px 30px rgba(1, 11, 19, 0.14),
-    0 0 0 4px rgba(1, 11, 19, 0.3);
+    0 8px 24px rgba(1, 11, 19, 0.06),
+    0 0 0 4px var(--teal-tint);
 }
 .searchIcon {
   flex: none;
@@ -374,8 +407,8 @@
   height: 46px;
   border-radius: 14px;
   border: 0;
-  background: var(--ink);
-  color: #fff;
+  background: var(--go-bg);
+  color: var(--go-fg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -396,8 +429,8 @@
   height: 56px;
   padding: 0 22px;
   border-radius: 18px;
-  background: var(--teal);
-  color: var(--ink);
+  background: var(--cta-bg);
+  color: var(--cta-fg);
   font-weight: 600;
   font-size: 16px;
   text-decoration: none;
@@ -406,11 +439,11 @@
     background 0.3s;
 }
 .cta:hover {
-  background: #14b6bc;
+  background: var(--cta-hover);
   transform: translateY(-2px);
 }
 .cta:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid currentColor;
   outline-offset: 3px;
 }
 

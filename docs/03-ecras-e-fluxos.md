@@ -10,14 +10,15 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 - **Dois idiomas:** português por omissão e inglês (UK), com o seletor PT · EN no cabeçalho, rodapé e Perfil. O conteúdo escrito pelas pessoas fica no idioma original.
 
 ## Página inicial (esboço do cliente, revisto a 14/10)
-- **Primeiro passo:** duas zonas de cor, cada uma um botão inteiro, só com uma palavra: **Espreitar** (em cima, teal) e **O teu trabalho** (em baixo, ink). O logo fica na fronteira e muda de cor ao atravessar a linha.
+- **Primeiro passo:** duas zonas, cada uma um botão inteiro, só com uma palavra: **Espreitar** (em cima, branco) e **O teu trabalho** (em baixo, menta muito clara). O logo fica na fronteira e muda de cor ao atravessar a linha.
 - **O primeiro clique escolhe** (telemóvel e computador): a zona clicada estende-se até ocupar a página (a linha desliza para o fundo ou para o topo) enquanto a outra se retrai; o logo sai (já está no cabeçalho) e só então aparece o conteúdo:
   - **Espreitar:** "Como é trabalhar lá dentro?", pesquisa a sério (Enter leva aos resultados) e "Ver todas as organizações" (`/explorar`).
   - **O teu trabalho:** "Conta como é. Sem dar a cara." e o botão "Avaliar onde trabalho" (`/avaliar`).
 - **O que acontece ao clicar:** com rato, uma dica segue o cursor ("Espreitar organizações" / "Avaliar onde trabalho"); em ecrãs táteis o texto está fixo em cada zona ("Toca para…").
 - **Voltar às duas zonas:** botão ✕, tecla Escape ou o "voltar" do browser. A zona aberta fica no endereço (`/?lado=espreitar`, `/?lado=avaliar`), por isso também se pode partilhar.
 - **Atalhos:** com rato, o campo de pesquisa fica logo pronto a escrever (no telemóvel não abre o teclado sem a pessoa tocar); começar a escrever nas duas zonas abre a pesquisa com o que se escreveu.
-- **Animação:** a mancha de luz segue o cursor (branca em cima, roxa em baixo, a cor do respeito); os olhos do logo olham para a zona onde está o cursor; em telemóvel as manchas deslizam sozinhas. Quem prefere menos movimento vê a troca sem animação.
+- **Cores (14/10, "branco e menta"):** o cliente achou o verde-água a cheio pesado. O verde-água fica só na linha da fronteira, no logo e nos detalhes; os botões principais são tinta. As cores estão em variáveis no topo de `features/home/Home.module.css` (trocar de paleta não mexe na estrutura nem na animação).
+- **Animação:** uma mancha de luz suave segue o cursor (verde-água em cima, roxa em baixo, a cor do respeito); os olhos do logo olham para a zona onde está o cursor; em telemóvel as manchas deslizam sozinhas. Quem prefere menos movimento vê a troca sem animação.
 - **Medição:** `cta_click` com `cta=abrir_espreitar` / `abrir_avaliar` (o primeiro clique), `pesquisar`, `explorar` e `avaliar` (o segundo), sempre com `area=home`.
 - **Cabeçalho:** Sobre, Ranking e Contacto. **Rodapé:** Facebook e Instagram ao centro, e por baixo as ligações secundárias e o idioma.
 - **Para onde foi o resto:** o início anterior, com a lista "Para ti", passa para **Explorar** (`/explorar`), o primeiro separador da barra inferior.
