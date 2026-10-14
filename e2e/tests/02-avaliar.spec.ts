@@ -1,4 +1,5 @@
-import { expect, expectNoHorizontalScroll, login, pickOrg, test, uniqueEmail } from '../support/fixtures';
+import type { Page } from '@playwright/test';
+import { expect, expectNoHorizontalScroll, login, openMagicLink, pickOrg, test, uniqueEmail } from '../support/fixtures';
 
 /** O fluxo principal: entrar, escolher a organização, dar notas e escrever no mesmo ecrã, reescrever, publicar e verificar depois */
 test.describe('Avaliar onde trabalho', () => {
@@ -67,4 +68,67 @@ test.describe('Avaliar onde trabalho', () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/pesquisa/);
   });
+
+  test('publicado → "Ver na página": voltar leva à lista (nunca a "publicado" nem às notas)', async ({ page }) => {
+    await login(page, uniqueEmail('voltar'));
+    const orgUrl = await openOrgFromList(page);
+    await startAndPublish(page);
+    await page.getByRole('link', { name: 'Ver na página da organização' }).first().click();
+    await expect(page).toHaveURL(orgUrl);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/pesquisa/);
+  });
+
+  test('publicado → verificar → "Agora não" → "Voltar ao início": voltar leva à organização', async ({ page }) => {
+    await login(page, uniqueEmail('inicio'));
+    const orgUrl = await openOrgFromList(page);
+    await startAndPublish(page);
+    await page.getByRole('link', { name: 'Confirmar agora' }).click();
+    await page.waitForURL(/\/avaliar\/verificar\?org=/);
+    await page.getByRole('button', { name: 'Agora não' }).first().click();
+    await page.waitForURL(/\/avaliar\/feito/);
+    await page.getByRole('link', { name: 'Voltar ao início' }).first().click();
+    await expect(page).toHaveURL(/\/$/);
+    await page.goBack();
+    await expect(page).toHaveURL(orgUrl);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/pesquisa/);
+  });
+
+  test('sem sessão: "Entra para publicar" → link do email → volta às notas com o rascunho e publica', async ({ page }) => {
+    const email = uniqueEmail('a-meio');
+    await openOrgFromList(page);
+    await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
+    await page.waitForURL(/\/avaliar\/notas/);
+    await page.getByRole('radio', { name: 'Ambiente, 4 de 5' }).first().click();
+    await page.getByRole('button', { name: /Publicar avaliação/ }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Entra para publicar.' })).toBeVisible();
+    await page.getByRole('link', { name: 'Entrar', exact: true }).click();
+    await page.getByLabel('O teu email').fill(email);
+    await page.getByRole('button', { name: 'Receber link de acesso' }).click();
+    await expect(page.getByText('Vê o teu email.')).toBeVisible();
+    await openMagicLink(page, email);
+    await expect(page).toHaveURL(/\/avaliar\/notas/);
+    await expect(page.getByRole('radio', { name: 'Ambiente, 4 de 5' }).first()).toBeChecked();
+    await page.getByRole('button', { name: /Publicar avaliação/ }).click();
+    await page.waitForURL(/\/avaliar\/feito/);
+  });
 });
+
+/** Lista → organização (como quem navega), devolve o endereço da organização */
+async function openOrgFromList(page: Page) {
+  await page.goto('/pesquisa');
+  await page.getByRole('searchbox').first().fill('oficina sete');
+  await page.getByText('Oficina Sete', { exact: true }).first().click();
+  await page.waitForURL(/\/org\//);
+  return page.url();
+}
+
+/** Avaliar esta organização → uma nota → publicar */
+async function startAndPublish(page: Page) {
+  await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
+  await page.waitForURL(/\/avaliar\/notas/);
+  await page.getByRole('radio', { name: 'Ambiente, 4 de 5' }).first().click();
+  await page.getByRole('button', { name: /Publicar avaliação/ }).click();
+  await page.waitForURL(/\/avaliar\/feito/);
+}

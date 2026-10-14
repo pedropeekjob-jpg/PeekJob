@@ -11,6 +11,6 @@ describe('publishErrorMessage: o que a pessoa vê quando a publicação falha', 
     });
   });
   it('409: já avaliou', () => expect(publishErrorMessage(fail(409)).message).toBe('Já avaliaste esta organização.'));
-  it('401: tem de entrar', () => expect(publishErrorMessage(fail(401)).message).toBe('Entra para publicar.'));
+  it('401: tem de entrar (com ligação para entrar e voltar)', () => expect(publishErrorMessage(fail(401))).toEqual({ message: 'Entra para publicar.', signIn: true }));
   it('outros: a mensagem da API', () => expect(publishErrorMessage(fail(500, null, 'Sem ligação ao servidor.'))).toEqual({ message: 'Sem ligação ao servidor.' }));
 });

@@ -11,6 +11,8 @@ export interface PublishError {
   message: string;
   /** versão sem nomes nem insultos proposta pela API (422) */
   suggestion?: string;
+  /** sessão expirada (401): mostrar "Entrar" e voltar a estas notas depois */
+  signIn?: boolean;
 }
 
 /** O que a pessoa vê quando a publicação falha (função pura: fácil de testar e de reutilizar) */
@@ -19,7 +21,7 @@ export function publishErrorMessage(f: Failure): PublishError {
     return { message: tr('Tira nomes de pessoas e insultos. Descreve a situação.', 'Remove people’s names and insults. Describe the situation.'), suggestion: f.body.suggestion };
   }
   if (f.status === 409) return { message: tr('Já avaliaste esta organização.', 'You’ve already reviewed this organisation.') };
-  if (f.status === 401) return { message: tr('Entra para publicar.', 'Sign in to publish.') };
+  if (f.status === 401) return { message: tr('Entra para publicar.', 'Sign in to publish.'), signIn: true };
   return { message: f.message };
 }
 

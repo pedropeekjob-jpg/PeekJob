@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
@@ -21,10 +22,17 @@ export default function AvaliarFeito() {
   const review = publishedReview(myReviews, lastPublished);
   const org = useOrg(review?.orgId);
   const [open, toggleOpen] = useToggle();
-  const { leave } = useFlowNav();
+  const { leave, leaveTo, linkState } = useFlowNav();
   const goHome = () => nav('/');
   // ✕: sai do fluxo para onde se estava antes de avaliar (ex.: a organização); aberto diretamente, para o início
   const close = () => leave('/');
+  // As ligações de saída também saem do fluxo: o "voltar" do browser no destino não regressa a "publicado".
+  // Continuam a ser ligações (abrir num separador novo funciona).
+  const exitTo = (to: string) => (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    leaveTo(to);
+  };
 
   if (!review) {
     return (
@@ -50,7 +58,7 @@ export default function AvaliarFeito() {
   const orgLink = org ? `/org/${org.id}` : '/';
   const support = review.flagged && <SupportCard signedIn={!!user} unread={unreadAfterPublishing(messages)} />;
   const toggle = <NotesToggle open={open} onToggle={toggleOpen} desktop={desktop} />;
-  const verify = <VerifyInvite orgId={review.orgId} verified={!!review.verified} />;
+  const verify = <VerifyInvite orgId={review.orgId} verified={!!review.verified} state={linkState} />;
   const seeOnPage = tr('Ver na página da organização', 'See it on the organisation’s page');
 
   if (desktop) {
@@ -72,10 +80,10 @@ export default function AvaliarFeito() {
             <aside className={styles.aside}>
               {support}
               {verify}
-              <Link to={orgLink} className={`btn btn-dark lift ${styles.ctaMain}`}>
+              <Link to={orgLink} onClick={exitTo(orgLink)} className={`btn btn-dark lift ${styles.ctaMain}`}>
                 {seeOnPage}
               </Link>
-              <Link to="/" className={`btn ${styles.homeDesktop}`}>
+              <Link to="/" onClick={exitTo('/')} className={`btn ${styles.homeDesktop}`}>
                 {tr('Voltar ao início', 'Back to home')}
               </Link>
             </aside>
@@ -104,10 +112,10 @@ export default function AvaliarFeito() {
         </section>
 
         <div className={`sticky-cta stack ${styles.cta}`}>
-          <Link to={orgLink} className={`btn btn-dark btn-block ${styles.ctaMain}`}>
+          <Link to={orgLink} onClick={exitTo(orgLink)} className={`btn btn-dark btn-block ${styles.ctaMain}`}>
             {seeOnPage}
           </Link>
-          <Link to="/" className={`btn btn-block ${styles.ctaHome}`}>
+          <Link to="/" onClick={exitTo('/')} className={`btn btn-block ${styles.ctaHome}`}>
             {tr('Voltar ao início', 'Back to home')}
           </Link>
         </div>

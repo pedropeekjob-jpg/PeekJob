@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Link, Navigate } from 'react-router';
+import { Navigate } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Ring } from '../components/Data';
@@ -48,7 +48,7 @@ const recommendLabel = (v: boolean | null) =>
   v === true ? tr('recomendas', 'you recommend it') : v === false ? tr('não recomendas', 'you don’t recommend it') : tr('sem resposta', 'no answer');
 
 function MobileNotas({ org, locationLabel, review }: ViewProps) {
-  const { go, leave } = useFlowNav();
+  const { go, leave, change } = useFlowNav();
   const [help, setHelp] = useState<CriterionKey | null>(null);
   const toggleHelp = useCallback((k: CriterionKey) => setHelp((h) => (h === k ? null : k)), []);
   const { done, insult } = review;
@@ -65,9 +65,9 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
           <div className="small muted">
             {org.name}
             {locationLabel ? ` · ${locationLabel.split(' · ').pop()}` : ''} ·{' '}
-            <Link to="/avaliar" className={styles.change}>
+            <button type="button" className={`link ${styles.change}`} onClick={change}>
               {tr('Mudar', 'Change')}
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
 }
 
 function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
-  const { go } = useFlowNav();
+  const { go, change } = useFlowNav();
   const { text, redFlags, insult, done, average } = review;
   const textClass = insult ? styles.textBlocked : redFlags.flagged ? styles.textFlagged : styles.text;
   const publish = async () => {
@@ -109,12 +109,13 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
       <div className={`container ${styles.desktop}`}>
         <DeskSteps
           current={2}
+          onChange={change}
           right={
-            <Link to="/avaliar" className={`plain row ${styles.orgLink}`}>
+            <button type="button" className={`row ${styles.orgLink}`} onClick={change}>
               <span className={styles.orgName}>{org.name}</span>
               {verified ? <span className="pill pill-match">{tr('Verificado', 'Verified')}</span> : locationLabel && <span className="muted">{locationLabel}</span>}
               <span className={styles.orgChange}>{tr('Mudar', 'Change')}</span>
-            </Link>
+            </button>
           }
         />
         <div className={styles.columns}>

@@ -82,6 +82,14 @@ O que fica, por desenho: no ranking os filtros e a ordem vivem no endereço (par
 - **Nos testes:** mudar o endereço (ex.: `setSearchParams` quando a pesquisa é aplicada) é uma transição do React e chega um instante depois do resto do ecrã. Verifica-se com `await waitFor(() => expect(where()).toBe(...))`.
 - O bloco comum (`vendor`) passou de 54 para 60 kB comprimidos.
 
+### Navegação no fluxo de avaliar (`useFlowNav`)
+
+- Cada entrada do histórico dentro do fluxo guarda no `location.state` quantas entradas o fluxo já ocupa (`flowDepth`), se havia um ecrã antes (`flowHasPrev`) e o passo anterior (`flowFrom`).
+- `go` avança (ou substitui), `linkState` é o mesmo para um `<Link>`, `leave(fallback)` recua `flowDepth` entradas, `back(fallback)` recua uma dentro do fluxo, `change()` volta à escolha da organização.
+- `leaveTo(destino)` sai e abre outro ecrã: recua primeiro e o `<FlowReturn />` (ao lado das rotas) abre o destino quando o recuo chega — recuar no histórico é assíncrono.
+- Sem nada antes (primeira entrada do router, ou posição 0 do histórico do browser, ex.: separador aberto pelo link do email) as saídas substituem em vez de recuar.
+- Entrar a meio: `/entrar?next=…` guarda o destino em `localStorage` durante a validade do link (`lib/returnTo.ts`, só caminhos do próprio site).
+
 ## Testes
 
 - **Dois ambientes** (Vitest 4, `projects` em `vite.config.ts`): `*.test.*` são ecrãs e componentes e correm no jsdom; `*.spec.*` são regras puras e correm em Node.

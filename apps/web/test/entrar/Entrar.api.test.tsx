@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react';
+import { useLocation } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderScreen } from '../utils/render';
 
@@ -12,7 +13,12 @@ vi.mock('../../src/lib/store', async (orig) => {
 });
 
 const { default: Entrar } = await import('../../src/pages/Entrar');
-const show = (viewport: 'mobile' | 'desktop', route = '/entrar') => renderScreen(<Entrar />, { route, path: '/entrar', viewport });
+/** Onde se está (para ver para onde se segue depois de entrar) */
+function Where() {
+  const { pathname, search } = useLocation();
+  return <span data-testid="onde">{pathname + search}</span>;
+}
+const show = (viewport: 'mobile' | 'desktop', route = '/entrar') => renderScreen(<Entrar />, { route, path: '/entrar', viewport, outside: <Where /> });
 
 describe.each(['mobile', 'desktop'] as const)('Entrar, modo API (%s)', (viewport) => {
   beforeEach(() => {
@@ -58,5 +64,34 @@ describe.each(['mobile', 'desktop'] as const)('Entrar, modo API (%s)', (viewport
     expect(await screen.findByRole('heading', { level: 1, name: 'Este link já não funciona.' })).toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: 'Pedir um novo link' }));
     expect(await screen.findByLabelText('O teu email')).toBeInTheDocument();
+  });
+
+  it('a meio de avaliar ("Entra para publicar"): o link do email volta às notas, não às preferências', async () => {
+    requestLink.mockResolvedValue({ ok: true });
+    verifyLink.mockResolvedValue({ ok: true });
+    const first = show(viewport, '/entrar?next=%2Favaliar%2Fnotas');
+    const input = await screen.findByLabelText('O teu email');
+    await first.user.clear(input);
+    await first.user.type(input, 'ana@gmail.com');
+    await first.user.click(screen.getByRole('button', { name: 'Receber link de acesso' }));
+    await screen.findByText('Abre o link nesse email para entrar. Podes fechar esta página.');
+    first.unmount();
+    // o link abre noutro separador, sem o destino no endereço
+    show(viewport, '/entrar?token=abc');
+    await vi.waitFor(() => expect(screen.getByTestId('onde')).toHaveTextContent('/avaliar/notas'));
+  });
+
+  it('destino inseguro no endereço é ignorado', async () => {
+    requestLink.mockResolvedValue({ ok: true });
+    verifyLink.mockResolvedValue({ ok: true });
+    const first = show(viewport, '/entrar?next=%2F%2Fmau.pt');
+    const input = await screen.findByLabelText('O teu email');
+    await first.user.clear(input);
+    await first.user.type(input, 'ana@gmail.com');
+    await first.user.click(screen.getByRole('button', { name: 'Receber link de acesso' }));
+    await screen.findByText('Abre o link nesse email para entrar. Podes fechar esta página.');
+    first.unmount();
+    show(viewport, '/entrar?token=abc');
+    await vi.waitFor(() => expect(screen.getByTestId('onde')).toHaveTextContent('/preferencias'));
   });
 });

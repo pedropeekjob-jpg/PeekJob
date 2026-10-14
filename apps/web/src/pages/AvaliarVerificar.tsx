@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
+import { Link, Navigate, useSearchParams } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Icon } from '../components/Icon';
@@ -10,6 +10,7 @@ import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { FlowHead } from '../features/review/FlowParts';
+import { useFlowNav } from '../features/review/useFlowNav';
 
 /**
  * Confirmar que trabalha lá. Desde 14/10 é depois de publicar (?org=, a partir do ecrã "publicado"):
@@ -28,10 +29,11 @@ export default function AvaliarVerificar() {
 
 function Verify({ orgId, orgName, after }: { orgId: string; orgName: string; after: boolean }) {
   const desktop = useIsDesktop();
-  const nav = useNavigate();
+  const { back } = useFlowNav();
   const v = useVerification(orgId);
-  // depois de publicar volta ao ecrã "publicado"; antes (ligações antigas) segue para as notas
-  const toScores = () => nav(after ? '/avaliar/feito' : '/avaliar/notas');
+  // Recua para de onde se veio ("publicado", o perfil…) em vez de abrir uma entrada nova:
+  // assim o "voltar" do browser a seguir não repete ecrãs. Aberto diretamente, vai para o passo seguinte.
+  const toScores = () => back(after ? '/avaliar/feito' : '/avaliar/notas');
 
   const sendingEmail = v.isEmail && !v.codeStep;
   const primaryDisabled = !sendingEmail && !v.canFinish && !v.alreadyVerified;

@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react';
+import { useLocation } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useStore } from '../../src/lib/store';
 import Entrar from '../../src/pages/Entrar';
@@ -6,9 +7,15 @@ import { renderScreen } from '../utils/render';
 
 function Who() {
   const { user } = useStore();
-  return <div data-testid="who">{user?.email ?? ''}</div>;
+  const { pathname } = useLocation();
+  return (
+    <>
+      <div data-testid="who">{user?.email ?? ''}</div>
+      <span data-testid="onde">{pathname}</span>
+    </>
+  );
 }
-const show = (viewport: 'mobile' | 'desktop') => renderScreen(<Entrar />, { route: '/entrar', path: '/entrar', viewport, outside: <Who /> });
+const show = (viewport: 'mobile' | 'desktop', route = '/entrar') => renderScreen(<Entrar />, { route, path: '/entrar', viewport, outside: <Who /> });
 
 describe.each(['mobile', 'desktop'] as const)('Entrar, demonstração (%s)', (viewport) => {
   beforeEach(() => localStorage.clear());
@@ -38,6 +45,16 @@ describe.each(['mobile', 'desktop'] as const)('Entrar, demonstração (%s)', (vi
     await user.click(screen.getByRole('button', { name: 'Abri o link · continuar' }));
     expect(screen.getByTestId('who')).toHaveTextContent('ana@gmail.com');
     expect(screen.getByTestId('outra-rota')).toBeInTheDocument();
+  });
+
+  it('a meio de avaliar (?next=): "abri o link" volta às notas', async () => {
+    const { user } = show(viewport, '/entrar?next=%2Favaliar%2Fnotas');
+    const input = await screen.findByLabelText('O teu email');
+    await user.clear(input);
+    await user.type(input, 'ana@gmail.com');
+    await user.click(screen.getByRole('button', { name: 'Receber link de acesso' }));
+    await user.click(screen.getByRole('button', { name: 'Abri o link · continuar' }));
+    expect(screen.getByTestId('onde')).toHaveTextContent('/avaliar/notas');
   });
 
   it('logo leva ao início e há caminho sem conta', async () => {

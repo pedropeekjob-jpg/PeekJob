@@ -27,6 +27,11 @@ export async function login(page: Page, email: string) {
   await page.getByLabel(/O teu email|Your email/i).fill(email);
   await page.getByRole('button', { name: /Receber link|Enviar|Send/i }).first().click();
   await expect(page.getByText(/Vê o teu email|Check your email/i)).toBeVisible();
+  await openMagicLink(page, email);
+}
+
+/** Abre o último link de acesso enviado para este email (como quem o abre no email) */
+export async function openMagicLink(page: Page, email: string) {
   const mails = (await (await fetch(`${MAIL}/__mails`)).json()) as { to: string[]; text: string }[];
   const mail = mails.filter((m) => m.to[0] === email).at(-1);
   expect(mail, `email para ${email}`).toBeTruthy();

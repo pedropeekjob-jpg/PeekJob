@@ -35,6 +35,8 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 
 **Avaliar (2 passos, 3 toques até publicar além das notas; 14/10):** Escolher a organização (o local só se pergunta quando há mais do que um; ou adicionar nova) → Notas e comentário no mesmo ecrã (8 critérios 1–5, recomendas?; comentário opcional com tags e 600 caracteres, red flags, bloqueio de insultos e nomes) → Publicado (+ mensagem privada de apoio se houver red flag) → **Verificar depois, se quiser** (convite em "Publicado": email com código ou contrato/recibo; só se guarda o "sim", e as avaliações da pessoa nessa organização passam a verificadas). `/avaliar/texto` (ligações antigas) vai para as notas.
 
+**Sair de avaliar e o "voltar" do browser (14/10):** o fluxo nunca fica no histórico depois de se sair. Qualquer saída — ✕/Cancelar, "Ver na página da organização", "Voltar ao início" — volta para onde se estava antes de avaliar (ex.: lista → organização), e o "voltar" seguinte leva ao ecrã anterior a esse, nunca a "Publicado" nem às notas. "Mudar" a organização recua até à escolha (não abre outra). Verificar a partir de "Publicado" ou do perfil: "Agora não" e "Confirmar" voltam ao ecrã de onde se veio. Se a sessão expirou ao publicar ("Entra para publicar"), há uma ligação "Entrar" e, depois de abrir o link do email, volta-se às notas com o rascunho.
+
 ![Avaliar: antes e agora](ecras/avaliar-antes-agora.png)
 
 **Institucional:** Sobre (missão e princípios) · Contacto (email, organizações, redes sociais e, à parte, ajuda urgente com ACT, CITE, APAV e 112).

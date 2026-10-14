@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { apiMode } from '../../api/http';
 import { tr } from '../../i18n';
 import { useStore } from '../../lib/store';
+import { rememberNext, safeNext, takeNext } from '../../lib/returnTo';
 import { isEmailLike } from '../../lib/validation';
 
 export type LinkState = 'idle' | 'checking' | 'error';
 
 /**
  * Modo API: a pessoa chega a /entrar?token=… pelo link do email.
- * Valida o token uma só vez e segue para as preferências (primeira vez) ou para explorar.
+ * Valida o token uma só vez e segue para onde estava (ex.: as notas, se entrou a meio de avaliar),
+ * ou então para as preferências (primeira vez) ou para explorar.
  */
 export function useMagicLink(token: string | null) {
   const nav = useNavigate();
@@ -21,7 +23,7 @@ export function useMagicLink(token: string | null) {
     if (!apiMode || !token || tried.current) return;
     tried.current = true;
     void verifyLink(token).then((r) => {
-      if (r.ok) nav(onboarded ? '/explorar' : '/preferencias', { replace: true });
+      if (r.ok) nav(takeNext() ?? (onboarded ? '/explorar' : '/preferencias'), { replace: true });
       else setState('error');
     });
   }, [token, verifyLink, nav, onboarded]);
@@ -33,6 +35,11 @@ export function useMagicLink(token: string | null) {
 /** Pedir o link de acesso por email (na demonstração, "abri o link" entra logo) */
 export function useSignIn() {
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  const { state, key } = useLocation();
+  const next = safeNext(params.get('next'));
+  // aberto a partir do fluxo de avaliar neste separador: depois de entrar recua até lá (sem repetir ecrãs)
+  const backToFlow = !!(state as { backToFlow?: boolean } | null)?.backToFlow && key !== 'default';
   const { user, login, requestLink } = useStore();
   const [email, setEmail] = useState(user?.email ?? '');
   const [sent, setSent] = useState(false);
@@ -48,6 +55,7 @@ export function useSignIn() {
     setError('');
     if (apiMode) {
       setBusy(true);
+      rememberNext(next);
       const r = await requestLink(email.trim());
       setBusy(false);
       if (!r.ok) {
@@ -60,8 +68,10 @@ export function useSignIn() {
 
   const openDemoLink = useCallback(() => {
     login(email.trim());
-    nav('/preferencias');
-  }, [login, email, nav]);
+    if (next && backToFlow) nav(-1);
+    else if (next) nav(next, { replace: true });
+    else nav('/preferencias');
+  }, [login, email, nav, next, backToFlow]);
 
   const changeEmail = useCallback(() => setSent(false), []);
 

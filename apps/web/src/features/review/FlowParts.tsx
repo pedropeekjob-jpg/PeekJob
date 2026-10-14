@@ -1,5 +1,4 @@
 import { memo, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { Link } from 'react-router';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { CRITERION, type CriterionKey } from '../../data/criteria';
@@ -7,7 +6,7 @@ import type { Scores } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { fmt } from '../../lib/format';
-import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, STEP_LABELS, STEP_ROUTES, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
+import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
 import styles from './Flow.module.css';
 
 /** Partes partilhadas pelos ecrãs do fluxo de avaliar */
@@ -40,8 +39,12 @@ export const MiniSteps = memo(function MiniSteps({ current, done = false }: { cu
   );
 });
 
-/** Indicador de passos do computador: passos feitos são ligações, o atual a verde-água, os seguintes a cinzento */
-export function DeskSteps({ current, right }: { current: 1 | 2; right?: ReactNode }) {
+/**
+ * Indicador de passos do computador: passos feitos são botões (voltar a esse passo), o atual a verde-água,
+ * os seguintes a cinzento. O passo feito só pode ser a escolha da organização: `onChange` decide como lá voltar
+ * (recuar no histórico em vez de abrir uma entrada nova).
+ */
+export function DeskSteps({ current, right, onChange }: { current: 1 | 2; right?: ReactNode; onChange?: () => void }) {
   return (
     <div className={`row wrap between ${styles.desk}`}>
       <ol aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}`, `Step ${current} of ${STEPS_TOTAL}`)} className={`row wrap ${styles.steps}`}>
@@ -52,9 +55,9 @@ export function DeskSteps({ current, right }: { current: 1 | 2; right?: ReactNod
             <li key={label} aria-current={state === 'current' ? 'step' : undefined} className={`row ${styles.step}`} data-state={state}>
               {i > 0 && <span aria-hidden="true" className={styles.link} data-on={n <= current || undefined} />}
               {state === 'done' ? (
-                <Link to={STEP_ROUTES[i]} aria-label={tr(`Passo ${n}, ${label}, feito`, `Step ${n}, ${label}, done`)} className={`${styles.circle} ${styles.circleDone}`}>
+                <button type="button" onClick={onChange} aria-label={tr(`Passo ${n}, ${label}, feito`, `Step ${n}, ${label}, done`)} className={`${styles.circle} ${styles.circleDone}`}>
                   <Icon name="check" size={16} stroke={2.4} />
-                </Link>
+                </button>
               ) : (
                 <span className={styles.circle}>{n}</span>
               )}

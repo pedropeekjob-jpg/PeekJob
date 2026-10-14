@@ -17,7 +17,9 @@
   line-height: 1.05;
 }
 .change {
-  font-weight: 600;
+  min-height: 0;
+  padding: 0;
+  font-size: inherit;
 }
 .recommend {
   gap: 12px;
@@ -49,6 +51,10 @@
 }
 .orgLink {
   min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
   gap: 10px;
   font-size: 15px;
 }

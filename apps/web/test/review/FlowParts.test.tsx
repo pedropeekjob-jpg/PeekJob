@@ -78,18 +78,20 @@ describe('partes do fluxo de avaliar', () => {
     expect(screen.getAllByRole('button')[0]).toHaveTextContent(REVIEW_TAGS[0]);
   });
 
-  it('passos no computador: feitos são ligações, o atual marcado', () => {
-    inRouter(<DeskSteps current={2} right={<span>direita</span>} />);
+  it('passos no computador: feitos são botões (voltar a esse passo), o atual marcado', async () => {
+    const onChange = vi.fn();
+    inRouter(<DeskSteps current={2} onChange={onChange} right={<span>direita</span>} />);
     const steps = screen.getByRole('list', { name: 'Passo 2 de 2' });
-    expect(within(steps).getByRole('link', { name: 'Passo 1, Organização, feito' })).toHaveAttribute('href', '/avaliar');
-    expect(within(steps).getAllByRole('link')).toHaveLength(1);
+    await userEvent.click(within(steps).getByRole('button', { name: 'Passo 1, Organização, feito' }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(within(steps).getAllByRole('button')).toHaveLength(1);
     expect(within(steps).getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
     expect(screen.getByText('direita')).toBeInTheDocument();
   });
 
-  it('passos no computador: no primeiro, nenhum é ligação', () => {
+  it('passos no computador: no primeiro, nenhum é botão', () => {
     inRouter(<DeskSteps current={1} />);
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Avaliação']);
   });
 

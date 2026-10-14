@@ -20,10 +20,12 @@ export function useOrgPicker(desktop: boolean) {
   const { draft, startDraft } = useStore();
 
   const fromLink = params.get('org');
-  const initialId = fromLink ?? draft.orgId;
+  const typed = params.get('q');
+  // com uma pesquisa escrita (página inicial) mostra-se a pesquisa, não a organização de um rascunho antigo
+  const initialId = fromLink ?? (typed ? null : draft.orgId);
   const initialOrg = initialId ? orgs.find((o) => o.id === initialId) : undefined;
   // ?q= vem da página inicial ("O teu trabalho"): a pesquisa já vem escrita
-  const [query, setQueryState] = useState(params.get('q') ?? '');
+  const [query, setQueryState] = useState(typed ?? '');
   const [step, setStep] = useState<PickStep>(initialOrg ? 'confirm' : 'pick');
   const [chosenId, setChosenId] = useState<string | null>(initialOrg?.id ?? null);
   const [locationId, setLocationId] = useState<string | null>(

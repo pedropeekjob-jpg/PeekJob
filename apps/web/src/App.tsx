@@ -11,6 +11,7 @@ import { LangRoot } from './i18n';
 import Home from './pages/Home';
 import { Pages } from './pages/lazy';
 import { PageLoading } from './components/PageLoading';
+import { FlowReturn } from './features/review/FlowReturn';
 
 /**
  * Em cada mudança de ecrã: volta ao topo e põe o foco no título (o leitor de ecrã anuncia a página nova;
@@ -80,6 +81,7 @@ export default function App() {
         <EnvRibbon />
         <ScrollTop />
         <PageTracking />
+        <FlowReturn />
         <ConsentBanner />
         <ScreenBoundary>
         <Suspense fallback={<PageLoading />}>
