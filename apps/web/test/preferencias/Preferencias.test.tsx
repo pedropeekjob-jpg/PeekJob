@@ -22,7 +22,8 @@ describe.each(['mobile', 'desktop'] as const)('Preferências (%s)', (viewport) =
     show(viewport);
     expect(screen.getByRole('heading', { level: 1, name: 'O que mais valorizas num trabalho?' })).toBeInTheDocument();
     expect(within(group()).getAllByRole('button')).toHaveLength(8);
-    expect(option(/^Respeito e inclusão/)).toHaveAccessibleName(desktop ? 'Respeito e inclusão Direitos, diversidade, sem assédio , prioridade 1' : 'Respeito e inclusão , prioridade 1');
+    expect(option(/^Respeito e inclusão/)).toHaveAccessibleName('Respeito e inclusão, prioridade 1');
+    if (desktop) expect(option(/^Respeito e inclusão/)).toHaveAccessibleDescription('Direitos, diversidade, sem assédio');
     expect(option(/^Salário justo/)).toHaveAttribute('aria-pressed', 'true');
     expect(option(/^Ambiente/)).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'Ver organizações para mim' })).toBeEnabled();
@@ -43,7 +44,7 @@ describe.each(['mobile', 'desktop'] as const)('Preferências (%s)', (viewport) =
     await user.click(option(/^Propósito/));
     await user.click(option(/^Ambiente/)); // já há 3: ignorado
     expect(option(/^Ambiente/)).toHaveAttribute('aria-pressed', 'false');
-    expect(option(/^Propósito/)).toHaveAccessibleName(desktop ? 'Propósito Trabalho com impacto , prioridade 3' : 'Propósito , prioridade 3');
+    expect(option(/^Propósito/)).toHaveAccessibleName('Propósito, prioridade 3');
     await user.click(screen.getByRole('button', { name: 'Ver organizações para mim' }));
     expect(stored().prefs).toEqual(['salario', 'equilibrio', 'proposito']);
     expect(where()).toBe('/a-preparar');

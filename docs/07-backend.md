@@ -174,7 +174,8 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - **Nest 11.2.7 com Express 5.2** (o Nest 12 é só ESM; a linha 11.2 já corrige os avisos, incluindo o Multer 2.4). As rotas e o middleware não precisaram de mudanças; os 233 testes da API passaram sem alterações.
 - **pdf.js 6.4** (o 3.x tinha execução de JavaScript em PDFs e dependências opcionais `canvas`/`tar` vulneráveis). Só existe em ESM: carrega-se com `import()` a partir de `src/verification/pdfjs-loader.cjs` (JavaScript simples, copiado para `dist` no build), porque o TypeScript em CommonJS trocaria o `import()` por `require`. Os testes da API correm com `NODE_OPTIONS=--experimental-vm-modules` para o Jest aceitar esse `import()`.
 - **React Router 7.18** (ver [11 · Frontend](11-frontend.md)).
-- Ferramentas de desenvolvimento: Vite 6.4.3 e ts-jest 29.4.14. Ficam para uma tarefa à parte as versões principais das ferramentas de teste (Jest 30, Vitest 4, jsdom 29, nyc 18): só correm nos testes, nunca em produção.
+- **Ferramentas de teste (14/10):** Jest 30, Vitest 4.1, jsdom 29, nyc 18, vite-plugin-istanbul 7 e Vite 6.4.4 (uma só versão em todo o repositório, fixada em `overrides`). `npm audit` completo: de 50 avisos (5 críticos, 33 altos) para 22 moderados, todos dentro do Jest 30 e do nyc 18 (já as versões mais recentes; sem correção publicada). Nada disto chega à produção.
+- **Atualizar dependências de teste:** o npm 10 (o do Node 22) falha a resolver as dependências opcionais do Vitest 4 (`Cannot read properties of null (reading 'edgesOut')`). Para mudar versões usa-se `npx npm@11.6.4 install …`; o `npm ci` do npm 10 (CI e Docker) instala o resultado sem problemas.
 
 ## Monitorização
 

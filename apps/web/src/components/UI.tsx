@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Icon } from './Icon';
 import { tr } from '../i18n';
@@ -133,18 +133,28 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
 }
 
 /** Interruptor acessível */
+/** Interruptor: o rótulo é o nome; a explicação é a descrição (os leitores de ecrã leem-na à parte) */
 export function Switch({ checked, onChange, label, hint, purple = false }: { checked: boolean; onChange: (v: boolean) => void; label: ReactNode; hint?: ReactNode; purple?: boolean }) {
+  const id = useId();
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-labelledby={`${id}-l`}
+      aria-describedby={hint ? `${id}-h` : undefined}
       onClick={() => onChange(!checked)}
       className={`row between ${styles.switchRow}`}
     >
       <span className={`stack ${styles.switchText}`}>
-        <span className={styles.switchLabel}>{label}</span>
-        {hint && <span className="small body">{hint}</span>}
+        <span id={`${id}-l`} className={styles.switchLabel}>
+          {label}
+        </span>
+        {hint && (
+          <span id={`${id}-h`} className="small body">
+            {hint}
+          </span>
+        )}
       </span>
       <span className={'switch' + (purple ? ' purple' : '')} />
     </button>

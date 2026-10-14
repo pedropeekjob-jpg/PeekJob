@@ -26,8 +26,11 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.56.1",
-    "nyc": "^17.1.0",
+    "nyc": "18.0.0",
     "pixelmatch": "^6.0.0",
     "pngjs": "^7.0.0"
+  },
+  "overrides": {
+    "vite": "6.4.4"
   }
 }

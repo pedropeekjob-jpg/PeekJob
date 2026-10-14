@@ -85,7 +85,8 @@ describe('componentes de UI', () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(<Switch checked={false} onChange={onChange} label="Notificações" hint="Uma por semana" purple />);
-    const sw = screen.getByRole('switch', { name: 'Notificações Uma por semana' });
+    const sw = screen.getByRole('switch', { name: 'Notificações' });
+    expect(sw).toHaveAccessibleDescription('Uma por semana');
     expect(sw).toHaveAttribute('aria-checked', 'false');
     await user.click(sw);
     expect(onChange).toHaveBeenCalledWith(true);

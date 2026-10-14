@@ -84,6 +84,9 @@ O que fica, por desenho: no ranking os filtros e a ordem vivem no endereço (par
 
 ## Testes
 
+- **Dois ambientes** (Vitest 4, `projects` em `vite.config.ts`): `*.test.*` são ecrãs e componentes e correm no jsdom; `*.spec.*` são regras puras e correm em Node.
+- **Nomes acessíveis explícitos:** o jsdom não aplica o CSS, por isso não junta espaços entre blocos como o browser. Quando um controlo tem rótulo e explicação, o rótulo é o nome e a explicação a descrição (`aria-describedby`): o `Switch` e os cartões das prioridades. Nos testes: `toHaveAccessibleName` + `toHaveAccessibleDescription`.
+
 | Camada | Ferramenta | O quê |
 |---|---|---|
 | Funções puras | Vitest | Regras, validações, formatação |

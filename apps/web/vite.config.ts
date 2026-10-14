@@ -29,9 +29,12 @@ export default defineConfig({
     'import.meta.env.VITE_APP_VERSION': JSON.stringify((process.env.VITE_APP_VERSION || process.env.npm_package_version || 'dev').slice(0, 12)),
   },
   test: {
-    include: ['test/**/*.{spec,test}.{ts,tsx}'],
-    environmentMatchGlobs: [['test/**/*.test.{ts,tsx}', 'jsdom']],
     setupFiles: ['test/setup.ts'],
+    // *.test.* são ecrãs e componentes (browser simulado: jsdom); *.spec.* são regras puras (Node)
+    projects: [
+      { extends: true, test: { name: 'ecras', include: ['test/**/*.test.{ts,tsx}'], environment: 'jsdom' } },
+      { extends: true, test: { name: 'regras', include: ['test/**/*.spec.{ts,tsx}'], environment: 'node' } },
+    ],
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.{ts,tsx}'],

@@ -42,12 +42,23 @@ export function Options({ picks, pick, desktop }: OptionsProps) {
           </>
         );
         return desktop ? (
-          <button key={c.key} type="button" className={styles.card} aria-pressed={on} onClick={() => pick(c.key)} style={{ '--c': c.color, '--tint': tintOf(c.key) } as CSSProperties}>
+          <button
+            key={c.key}
+            type="button"
+            className={styles.card}
+            aria-pressed={on}
+            aria-describedby={`pref-hint-${c.key}`}
+            onClick={() => pick(c.key)}
+            style={{ '--c': c.color, '--tint': tintOf(c.key) } as CSSProperties}
+          >
             <span className={`row num ${styles.cardTitle}`}>
               <span aria-hidden="true" className={styles.cardDot} />
               {c.label}
             </span>
-            <span className={styles.cardHint}>{c.hint}</span>
+            {/* a explicação é a descrição do botão (o nome fica só o critério e a prioridade) */}
+            <span id={`pref-hint-${c.key}`} aria-hidden="true" className={styles.cardHint}>
+              {c.hint}
+            </span>
             {rank}
           </button>
         ) : (
