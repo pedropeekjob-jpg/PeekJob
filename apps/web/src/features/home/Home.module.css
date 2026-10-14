@@ -226,6 +226,10 @@
   .split[data-zone='none'] .half:hover .hint {
     opacity: 1;
   }
+  /* por cima do logo (fica entre as duas zonas) a frase confundia: esconde-se (pedido do cliente, 14/10) */
+  .split[data-zone='none']:has(.mark:hover) .hint {
+    opacity: 0;
+  }
 }
 
 /* A linha do esboço: desenha-se da esquerda para a direita e desliza com a zona */
@@ -258,7 +262,8 @@
   width: var(--mark-w);
   aspect-ratio: 142 / 78;
   transform: translate(-50%, -48.2%);
-  pointer-events: none;
+  /* recebe o rato (para esconder as frases por cima dele); não é clicável: o clique é das zonas */
+  cursor: default;
   z-index: 3;
   opacity: 0;
   transition: opacity 0.4s var(--ease);
@@ -269,6 +274,7 @@
 .split[data-zone='peek'] .mark,
 .split[data-zone='job'] .mark {
   opacity: 0;
+  pointer-events: none; /* invisível: não pode apanhar cliques do conteúdo aberto */
 }
 .mk {
   position: absolute;
