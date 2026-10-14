@@ -26,6 +26,10 @@ const REPORT = {
   reviewId: 'r9', orgId: 'o1', orgName: 'Oficina Nove', text: '', tags: [], count: 1, firstReportedAt: new Date().toISOString(),
   reports: [{ id: 'x', reason: 'ilegal', details: '', createdAt: new Date().toISOString() }],
 };
+const APPEAL = {
+  id: 'a1', side: 'reporter', originalDecision: 'rejected', originalNote: 'Não viola as regras.', text: 'Tem o nome da gerente.', createdAt: new Date().toISOString(),
+  orgName: 'Oficina Nove', review: { id: 'r9', text: 'A Dona Rosa não paga.', tags: [], avg: 2, status: 'published' },
+};
 const ORG = { id: 'p1', name: 'Loja Nova', type: 'PME', city: 'Faro', nif: '500697256', address: null, createdAt: new Date().toISOString(), reviewers: 0, duplicates: [] };
 
 function routes(overrides: Record<string, unknown> = {}) {
@@ -37,6 +41,7 @@ function routes(overrides: Record<string, unknown> = {}) {
     }
     if (path === '/moderation/reports') return { items: [REPORT] };
     if (path === '/moderation/orgs') return { items: [ORG] };
+    if (path === '/moderation/appeals') return { items: [APPEAL] };
     return { items: [] };
   });
 }
@@ -82,6 +87,13 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, modo API (%s)', (vie
     expect(within(org).getByText(/Ainda sem avaliações/)).toBeInTheDocument();
     await user.click(within(org).getByRole('button', { name: 'Aprovar' }));
     expect(api).toHaveBeenCalledWith('/orgs/p1/approve', { method: 'POST' });
+
+    await user.click(screen.getByRole('tab', { name: /Pedidos de revisão 1/ }));
+    const appeal = screen.getByRole('article', { name: 'Pedido de revisão sobre uma avaliação de Oficina Nove' });
+    expect(within(appeal).getByText('Quem denunciou contesta a decisão de manter')).toBeInTheDocument();
+    await user.type(within(appeal).getByRole('textbox'), 'Tem mesmo um nome: remover.');
+    await user.click(within(appeal).getByRole('button', { name: 'Reverter a decisão' }));
+    expect(api).toHaveBeenCalledWith('/moderation/appeals/a1/decision', { body: { action: 'reverse', note: 'Tem mesmo um nome: remover.' } });
   });
 
   it('erro ao carregar e erro numa decisão', async () => {

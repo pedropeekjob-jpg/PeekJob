@@ -60,7 +60,7 @@ describe('Moderação: organizações novas e resumo', () => {
     const r = await t.http().post(`/orgs/${org}/reviews`).set(await t.login('autora')).send(goodReview).expect(201);
     expect((await t.http().post(`/reviews/${r.body.review.id}/reports`).send({ reason: 'ofensa' })).status).toBe(201);
     const res = await t.http().get('/moderation/summary').set(mod).expect(200);
-    expect(res.body).toEqual({ openReports: 1, reviewsWithReports: 1, pendingOrgs: 1 });
+    expect(res.body).toEqual({ openReports: 1, reviewsWithReports: 1, pendingOrgs: 1, openAppeals: 0 });
   });
 
   it('o papel vem em /auth/me (a web mostra a moderação só a moderadores)', async () => {

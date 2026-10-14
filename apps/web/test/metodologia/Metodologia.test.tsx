@@ -51,6 +51,8 @@ describe.each(['mobile', 'desktop'] as const)('Metodologia (%s)', (viewport) => 
     await user.click(within(rules).getByRole('button', { name: 'Moderação com critério' }));
     expect(min).toHaveAttribute('aria-expanded', 'false');
     expect(within(rules).getByText(/críticas duras, quando descrevem factos\./)).toBeInTheDocument();
+    // o direito de contestar está nas regras públicas (DSA art. 20.º)
+    expect(within(rules).getByText(/pode contestá-la durante 6 meses/)).toBeInTheDocument();
     await user.click(within(rules).getByRole('button', { name: 'Moderação com critério' }));
     expect(within(rules).queryByText(/críticas duras/)).not.toBeInTheDocument();
   });

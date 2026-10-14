@@ -100,6 +100,10 @@ export function toMessage(m: {
   orgName?: string;
   type?: 'support' | 'moderation';
   details?: SupportMessage['details'];
+  appeal?: SupportMessage['appeal'];
 }): SupportMessage {
-  return { id: m.id, orgId: '', kinds: m.kinds, found: [], when: when(m.createdAt), read: m.read, type: m.type ?? 'support', orgName: m.orgName ?? m.details?.orgName, details: m.details ?? null };
+  return {
+    id: m.id, orgId: '', kinds: m.kinds, found: [], when: when(m.createdAt), read: m.read, type: m.type ?? 'support',
+    orgName: m.orgName ?? m.details?.orgName, details: m.details ?? null, appeal: m.appeal ?? null,
+  };
 }

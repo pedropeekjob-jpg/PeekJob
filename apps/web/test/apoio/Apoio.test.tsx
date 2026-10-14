@@ -10,7 +10,7 @@ function Unread() {
 }
 const show = (viewport: 'mobile' | 'desktop') => renderScreen(<Apoio />, { route: '/apoio', path: '/apoio', viewport, outside: <Unread /> });
 const support = { id: 's1', orgId: 'padaria-ribeira', kinds: ['assédio moral', 'salário em atraso'], found: ['grita'], when: 'há 2 dias', read: false, type: 'support' };
-const notice = (id: string, decision: string, note = '', orgName?: string) => ({ id, orgId: 'x', kinds: [], found: [], when: 'ontem', read: false, type: 'moderation', orgName, details: { decision, note } });
+const notice = (id: string, decision: string, note = '', orgName?: string, appeal: unknown = null) => ({ id, orgId: 'x', kinds: [], found: [], when: 'ontem', read: false, type: 'moderation', orgName, details: { decision, note }, appeal });
 
 describe.each(['mobile', 'desktop'] as const)('Apoio (%s)', (viewport) => {
   const desktop = viewport === 'desktop';
@@ -49,6 +49,39 @@ describe.each(['mobile', 'desktop'] as const)('Apoio (%s)', (viewport) => {
     expect(within(section).getByText('Motivo: Tinha um nome.')).toBeInTheDocument();
     expect(within(section).getByText('A tua denúncia sobre uma organização foi aceite: a avaliação foi removida.')).toBeInTheDocument();
     expect(within(section).getByText('Analisámos a tua denúncia sobre uma organização: a avaliação mantém-se.')).toBeInTheDocument();
+  });
+
+  it('contestar uma decisão: pedido por escrito (10+ caracteres), prazo, e o pedido fica em análise', async () => {
+    seedStore({ messages: [notice('n1', 'removed', 'Tinha um nome.', 'Café Vinha', { status: 'available', until: '2027-04-12T10:00:00.000Z' })] });
+    const { user } = show(viewport);
+    const card = (await screen.findByText('A tua avaliação de Café Vinha foi removida.')).closest('.card') as HTMLElement;
+    expect(within(card).getByText(/Podes pedir que a decisão seja revista até 12\/04\/2027/)).toBeInTheDocument();
+    await user.click(within(card).getByRole('button', { name: 'Contestar esta decisão' }));
+    const box = within(card).getByRole('textbox', { name: 'Porque deve ser revista?' });
+    const send = within(card).getByRole('button', { name: 'Pedir revisão' });
+    expect(send).toBeDisabled();
+    await user.type(box, 'Não tinha nome nenhum.');
+    await user.click(send);
+    expect(await within(card).findByRole('status')).toHaveTextContent('Pedido de revisão enviado. Uma pessoa da equipa revê a decisão e responde aqui.');
+    expect(within(card).queryByRole('button', { name: 'Contestar esta decisão' })).not.toBeInTheDocument();
+  });
+
+  it('estado do pedido: em análise, prazo terminado; e a resposta explica os passos seguintes', async () => {
+    seedStore({
+      messages: [
+        notice('n1', 'removed', '', 'Café Vinha', { status: 'open' }),
+        notice('n2', 'rejected', '', 'Oficina Sete', { status: 'expired' }),
+        notice('n3', 'appeal_confirmed', 'As regras proíbem nomes.', 'Café Vinha'),
+        notice('n4', 'appeal_reversed', 'Afinal não tinha nome.', 'Lavandaria Sol'),
+      ],
+    });
+    show(viewport);
+    expect(await screen.findByText('Pedido de revisão em análise. Respondemos aqui.')).toBeInTheDocument();
+    expect(screen.getByText('O prazo para contestar esta decisão terminou.')).toBeInTheDocument();
+    expect(screen.getByText('Revimos a tua contestação sobre Café Vinha: a decisão mantém-se.')).toBeInTheDocument();
+    expect(screen.getByText('Revimos a tua contestação sobre Lavandaria Sol: a decisão foi revertida.')).toBeInTheDocument();
+    expect(screen.getAllByText(/resolução extrajudicial de litígios/)).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'Contestar esta decisão' })).not.toBeInTheDocument();
   });
 
   it('o que pode ajudar (acordeão)', async () => {

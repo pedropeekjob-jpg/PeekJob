@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AppealsModule } from './appeals/appeals.module';
 import { AuthModule } from './auth/auth.module';
 import { DbModule } from './db/db.module';
 import { HealthController } from './health.controller';
@@ -18,7 +19,7 @@ import { SecurityModule } from './security/security.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 
 @Module({
-  imports: [SecurityModule, MonitoringModule, DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, RewriteModule],
+  imports: [SecurityModule, MonitoringModule, DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, AppealsModule, RewriteModule],
   controllers: [HealthController, MessagesController, MyReviewsController, AccountController, SavedController, HelpfulController, ModerationController, SeoController],
 })
 export class AppModule {}

@@ -197,3 +197,13 @@
 .signIn {
   align-self: flex-start;
 }
+
+/* Pedido de revisão: o texto de quem pede, destacado */
+.appealText {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--purple-tint);
+  font-size: 15px;
+  line-height: 1.5;
+}

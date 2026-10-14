@@ -39,3 +39,48 @@ test('quem não é moderador não vê a moderação', async ({ page }) => {
   await page.goto('/moderacao');
   await expect(page.getByText(/só para moderadores/)).toBeVisible();
 });
+
+/** DSA art. 20.º: quem escreveu contesta a remoção; outra pessoa da moderação revê e reverte */
+test('contestar uma remoção: pedido no aviso, revisão na moderação, a avaliação volta', async ({ page, browser }, info) => {
+  const text = `Turnos trocados no próprio dia, sem aviso (${info.project.name} ${Date.now()}).`;
+  const [org] = await sql<{ id: string }>(`SELECT id FROM organizations WHERE name = 'Clínica Foz'`);
+  await login(page, uniqueEmail('autora'));
+  const created = await page.request.post(`/orgs/${org.id}/reviews`, { data: { scores: { lideranca: 2 }, recommend: false, tags: [], text } });
+  expect(created.status()).toBe(201);
+  const reviewId = (await created.json()).review.id as string;
+  expect((await page.request.post(`/reviews/${reviewId}/reports`, { headers: { cookie: '' }, data: { reason: 'falso' } })).status()).toBe(201);
+
+  const ctx = await browser.newContext({ viewport: info.project.use.viewport ?? undefined });
+  const mod = await ctx.newPage();
+  const email = uniqueEmail('moderadora');
+  await login(mod, email);
+  await makeModerator(email);
+  await mod.goto('/moderacao');
+  const card = mod.locator('article').filter({ hasText: text }).first();
+  await card.getByPlaceholder(/Ou escreve a justificação/).fill('Remoção de teste: parece não descrever factos.');
+  await card.getByRole('button', { name: 'Remover avaliação' }).click();
+  await expect(mod.getByText(/Avaliação removida/)).toBeVisible();
+
+  // quem escreveu vê o aviso e pede a revisão
+  await page.goto('/apoio');
+  const notice = page.locator('.card').filter({ hasText: 'A tua avaliação de Clínica Foz foi removida.' }).first();
+  await notice.getByRole('button', { name: 'Contestar esta decisão' }).click();
+  await notice.getByRole('textbox', { name: 'Porque deve ser revista?' }).fill('Aconteceu mesmo: tenho as escalas guardadas.');
+  await notice.getByRole('button', { name: 'Pedir revisão' }).click();
+  await expect(notice.getByRole('status')).toHaveText(/Pedido de revisão enviado/);
+
+  // a moderação revê e reverte
+  await mod.goto('/moderacao');
+  await mod.getByRole('tab', { name: /Pedidos de revisão/ }).click();
+  const appeal = mod.locator('article').filter({ hasText: text }).first();
+  await expect(appeal.getByText(/tenho as escalas guardadas/)).toBeVisible();
+  await appeal.getByRole('textbox').fill('Revisto: descreve factos do trabalho.');
+  await appeal.getByRole('button', { name: 'Reverter a decisão' }).click();
+  await expect(mod.getByText(/Decisão revertida/)).toBeVisible();
+  await ctx.close();
+
+  const [r] = await sql<{ status: string }>(`SELECT status FROM reviews WHERE id = $1`, [reviewId]);
+  expect(r.status).toBe('published');
+  await page.goto('/apoio');
+  await expect(page.getByText('Revimos a tua contestação sobre Clínica Foz: a decisão foi revertida.')).toBeVisible();
+});

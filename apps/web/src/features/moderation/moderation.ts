@@ -41,6 +41,17 @@ export const decisionNotice = (action: Decision) =>
     ? tr('Avaliação removida. Avisámos quem escreveu e quem denunciou.', 'Review removed. We let the author and the reporters know.')
     : tr('Avaliação mantida. Avisámos quem denunciou.', 'Review kept. We let the reporters know.');
 
+export type AppealAction = 'reverse' | 'confirm';
+
+export const appealNotice = (action: AppealAction) =>
+  action === 'reverse'
+    ? tr('Decisão revertida. Quem pediu a revisão foi avisado.', 'Decision reversed. The person who asked for the review was notified.')
+    : tr('Decisão mantida. Quem pediu a revisão foi avisado.', 'Decision upheld. The person who asked for the review was notified.');
+
+/** Quem pede a revisão e de quê */
+export const appealSide = (side: 'author' | 'reporter') =>
+  side === 'author' ? tr('Quem escreveu contesta a remoção', 'The author appeals the removal') : tr('Quem denunciou contesta a decisão de manter', 'The reporter appeals the decision to keep it');
+
 export const reportsText = (n: number) => plural(n, tr('denúncia', 'report'), tr('denúncias', 'reports'));
 
 export const reviewersText = (n: number) =>

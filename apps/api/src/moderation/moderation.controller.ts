@@ -19,9 +19,10 @@ export class ModerationController {
     const { rows } = await this.pool.query(`SELECT
       (SELECT count(*) FROM reports WHERE status = 'open')::int AS open_reports,
       (SELECT count(DISTINCT review_id) FROM reports WHERE status = 'open')::int AS reviews_with_reports,
-      (SELECT count(*) FROM organizations WHERE status = 'pending' AND source <> 'import')::int AS pending_orgs`);
+      (SELECT count(*) FROM organizations WHERE status = 'pending' AND source <> 'import')::int AS pending_orgs,
+      (SELECT count(*) FROM appeals WHERE status = 'open')::int AS open_appeals`);
     const r = rows[0];
-    return { openReports: r.open_reports, reviewsWithReports: r.reviews_with_reports, pendingOrgs: r.pending_orgs };
+    return { openReports: r.open_reports, reviewsWithReports: r.reviews_with_reports, pendingOrgs: r.pending_orgs, openAppeals: r.open_appeals };
   }
 
   /** Organizações criadas por quem avalia, à espera de decisão (mais antigas primeiro) */

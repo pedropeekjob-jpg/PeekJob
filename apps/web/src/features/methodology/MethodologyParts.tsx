@@ -278,6 +278,12 @@ const rules = (): { t: string; d: ReactNode }[] => [
             </>,
           )}
         </div>
+        <div>
+          {tr(
+            'Cada decisão vem com o motivo. Quem escreveu ou denunciou pode contestá-la durante 6 meses, no próprio aviso; uma pessoa da equipa revê e responde.',
+            'Every decision comes with its reason. The author or the reporter can appeal it within 6 months, from the notice itself; a person on the team reviews it and answers.',
+          )}
+        </div>
       </div>
     ),
   },

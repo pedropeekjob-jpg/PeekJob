@@ -5,6 +5,7 @@ import { Accordion } from '../../components/UI';
 import { SUPPORT } from '../../data/content';
 import { tr } from '../../i18n';
 import type { SupportMessage } from '../../lib/store';
+import { AppealBox } from './AppealBox';
 import { DISCLAIMER, noticeTitle, tips } from './support';
 import styles from './Support.module.css';
 
@@ -65,6 +66,7 @@ export function ModerationNotices({ notices }: { notices: SupportMessage[] }) {
             </span>
           )}
           <span className="small muted">{n.when}</span>
+          <AppealBox n={n} />
         </div>
       ))}
     </section>

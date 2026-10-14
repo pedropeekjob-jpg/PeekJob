@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { PendingOrg, ReportedReview } from '../../api/moderation';
+import type { Appeal, PendingOrg, ReportedReview } from '../../api/moderation';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { orgTypeLabel, tagLabel } from '../../i18n/labels';
-import { keepTemplates, NOTE_MIN, orgDetails, reasonLabel, rejectTemplates, REJECT_NOTE_MIN, removeTemplates, reportsText, reviewersText, sinceIso, type Decision } from './moderation';
+import { appealSide, keepTemplates, NOTE_MIN, orgDetails, reasonLabel, rejectTemplates, REJECT_NOTE_MIN, removeTemplates, reportsText, reviewersText, sinceIso, type AppealAction, type Decision } from './moderation';
 import { useCardAction, type Queue } from './useQueues';
 import styles from './Moderation.module.css';
 
-export function QueueTabs({ tab, reports, orgs, onChange }: { tab: Queue; reports: number; orgs: number; onChange: (q: Queue) => void }) {
+export function QueueTabs({ tab, reports, orgs, appeals, onChange }: { tab: Queue; reports: number; orgs: number; appeals: number; onChange: (q: Queue) => void }) {
   return (
     <div role="tablist" aria-label={tr('Filas', 'Queues')} className={styles.tabs}>
       <button type="button" role="tab" aria-selected={tab === 'reports'} onClick={() => onChange('reports')}>
@@ -16,6 +16,9 @@ export function QueueTabs({ tab, reports, orgs, onChange }: { tab: Queue; report
       </button>
       <button type="button" role="tab" aria-selected={tab === 'orgs'} onClick={() => onChange('orgs')}>
         {tr('Organizações novas', 'New organisations')} <span className={styles.count}>{orgs}</span>
+      </button>
+      <button type="button" role="tab" aria-selected={tab === 'appeals'} onClick={() => onChange('appeals')}>
+        {tr('Pedidos de revisão', 'Appeals')} <span className={styles.count}>{appeals}</span>
       </button>
     </div>
   );
@@ -198,6 +201,44 @@ export function OrgCard({
             </button>
           </>
         )}
+      </div>
+    </article>
+  );
+}
+
+/** Pedido de revisão (DSA art. 20.º): a avaliação, a decisão original e o que a pessoa diz; reverter ou manter, com justificação */
+export function AppealCard({ item, onDecide }: { item: Appeal; onDecide: (a: AppealAction, note: string) => Promise<string | null> }) {
+  const [note, setNote] = useState('');
+  const { busy, error, run } = useCardAction();
+  const ok = note.trim().length >= NOTE_MIN;
+  const go = (a: AppealAction) => ok && run(() => onDecide(a, note.trim()));
+  return (
+    <article className={`card ${styles.card}`} aria-label={tr(`Pedido de revisão sobre uma avaliação de ${item.orgName}`, `Appeal about a review of ${item.orgName}`)}>
+      <div className={`row wrap between ${styles.cardHead}`}>
+        <strong className={styles.org}>{item.orgName}</strong>
+        <span className="small muted">
+          <span className={styles.badge}>{appealSide(item.side)}</span> · {sinceIso(item.createdAt)}
+        </span>
+      </div>
+      <blockquote className={styles.quote}>“{item.review.text || tr('(sem texto)', '(no text)')}”</blockquote>
+      <p className="small body">
+        {tr('Decisão original: ', 'Original decision: ')}
+        {item.originalNote ?? '—'}
+      </p>
+      <p className={styles.appealText}>
+        <strong>{tr('O pedido: ', 'The appeal: ')}</strong>
+        {item.text}
+      </p>
+      <NoteBox value={note} onChange={setNote} groups={[]} label={tr('Justificação (obrigatória; chega a quem pediu)', 'Reason (required; sent to the person who appealed)')} />
+      {error && <ErrorText text={error} />}
+      <div className={`row wrap ${styles.actions}`}>
+        <button type="button" className={`btn ${styles.remove}`} disabled={!ok || busy} onClick={() => go('reverse')}>
+          {tr('Reverter a decisão', 'Reverse the decision')}
+        </button>
+        <button type="button" className="btn btn-ghost" disabled={!ok || busy} onClick={() => go('confirm')}>
+          {tr('Manter a decisão', 'Uphold the decision')}
+        </button>
+        {!ok && <span className="small muted">{tr('Escreve a justificação.', 'Write the reason.')}</span>}
       </div>
     </article>
   );

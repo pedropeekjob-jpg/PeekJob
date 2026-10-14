@@ -91,6 +91,44 @@
   font-size: 15px;
 }
 
+/* Contestar uma decisão (DSA art. 20.º) */
+.appeal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.appealForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+.appealForm textarea {
+  width: 100%;
+}
+.appealLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
+.appealStatus {
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--body);
+}
+.appealNext {
+  margin: 0;
+  color: var(--body);
+  line-height: 1.5;
+}
+.appealError {
+  font-size: 14px;
+  color: var(--warn-text);
+}
+
 .phone {
   font-family: var(--font-mono);
   font-weight: 500;

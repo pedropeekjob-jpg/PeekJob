@@ -69,6 +69,21 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, demonstração (%s)'
     expect(screen.getByText('Sem organizações novas por rever.')).toBeInTheDocument();
   });
 
+  it('pedidos de revisão: o pedido, a decisão original e reverter/manter com justificação', async () => {
+    const { user } = show(viewport);
+    await user.click(await screen.findByRole('tab', { name: /Pedidos de revisão 1/ }));
+    const card = screen.getByRole('article', { name: /Pedido de revisão sobre uma avaliação de/ });
+    expect(within(card).getByText('Quem escreveu contesta a remoção')).toBeInTheDocument();
+    expect(within(card).getByText(/Decisão original: Identifica uma pessoa/)).toBeInTheDocument();
+    expect(within(card).getByText(/Não identifiquei ninguém/)).toBeInTheDocument();
+    const reverse = within(card).getByRole('button', { name: 'Reverter a decisão' });
+    expect(reverse).toBeDisabled();
+    await user.type(within(card).getByRole('textbox'), 'Revisto: sem dados pessoais.');
+    await user.click(reverse);
+    expect(await screen.findByRole('status')).toHaveTextContent('Decisão revertida. Quem pediu a revisão foi avisado.');
+    expect(screen.queryByRole('article', { name: /Pedido de revisão/ })).not.toBeInTheDocument();
+  });
+
   it('aprovar torna pública', async () => {
     const { user } = show(viewport);
     await user.click(await screen.findByRole('tab', { name: /Organizações novas/ }));

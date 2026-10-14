@@ -36,6 +36,7 @@ export class AccountController {
       [ref],
     );
     const orgs = await q(`SELECT name, city, status, created_at FROM organizations WHERE created_by = $1`, [ref]);
+    const appeals = await q(`SELECT original_decision, text, status, decision_note, created_at, decided_at FROM appeals WHERE appellant_ref = $1 ORDER BY created_at`, [ref]);
     const saved = await q(`SELECT o.name AS org_name, s.created_at FROM saved_orgs s JOIN organizations o ON o.id = s.org_id WHERE s.user_ref = $1 ORDER BY s.created_at`, [ref]);
     const helpful = await q(
       `SELECT o.name AS org_name, h.created_at FROM review_helpful h JOIN reviews r ON r.id = h.review_id JOIN organizations o ON o.id = r.org_id WHERE h.voter_ref = $1 ORDER BY h.created_at`,
@@ -67,6 +68,7 @@ export class AccountController {
       messages: messages.map((m) => ({ type: m.type, kinds: m.kinds, details: m.details, createdAt: m.created_at, readAt: m.read_at })),
       reportsFiled: reports.map((p) => ({ reason: p.reason, details: p.details, status: p.status, decision: p.decision_note, createdAt: p.created_at, decidedAt: p.decided_at })),
       organizationsAdded: orgs.map((o) => ({ name: o.name, city: o.city, status: o.status, createdAt: o.created_at })),
+      appeals: appeals.map((a) => ({ decision: a.original_decision, text: a.text, status: a.status, answer: a.decision_note, createdAt: a.created_at, decidedAt: a.decided_at })),
       saved: saved.map((s) => ({ orgName: s.org_name, savedAt: s.created_at })),
       helpful: helpful.map((h) => ({ orgName: h.org_name, markedAt: h.created_at })),
     };
@@ -86,6 +88,7 @@ export class AccountController {
       if (keepReviews) await c.query(`UPDATE reviews SET author_ref = 'apagado:' || gen_random_uuid() WHERE author_ref = $1`, [ref]);
       else await c.query(`DELETE FROM reviews WHERE author_ref = $1`, [ref]);
       await c.query(`DELETE FROM support_messages WHERE user_ref = $1`, [ref]);
+      await c.query(`DELETE FROM appeals WHERE appellant_ref = $1`, [ref]);
       await c.query(`DELETE FROM saved_orgs WHERE user_ref = $1`, [ref]);
       await c.query(`DELETE FROM review_helpful WHERE voter_ref = $1`, [ref]);
       await c.query(`DELETE FROM verifications WHERE user_ref = $1`, [ref]);

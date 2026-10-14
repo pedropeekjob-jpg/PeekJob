@@ -30,16 +30,28 @@ export interface PendingOrg {
   reviewers: number;
   duplicates: { id: string; name: string; city: string; type: string; status: 'active' | 'pending' }[];
 }
+/** Pedido de revisão de uma decisão (DSA art. 20.º) */
+export interface Appeal {
+  id: string;
+  side: 'author' | 'reporter';
+  originalDecision: 'removed' | 'rejected';
+  originalNote: string | null;
+  text: string;
+  createdAt: string;
+  orgName: string;
+  review: { id: string; text: string; tags: string[]; avg: number; status: string };
+}
 export interface Summary {
   openReports: number;
   reviewsWithReports: number;
   pendingOrgs: number;
+  openAppeals: number;
 }
 
 const daysAgo = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
 
 /** Demonstração: filas de exemplo, para se ver o ecrã sem API */
-function demoData(): { reports: ReportedReview[]; orgs: PendingOrg[] } {
+function demoData(): { reports: ReportedReview[]; orgs: PendingOrg[]; appeals: Appeal[] } {
   const ribeira = ORGS.find((o) => o.id === 'padaria-ribeira') ?? ORGS[0];
   const other = ORGS[3] ?? ORGS[1];
   return {
@@ -68,6 +80,14 @@ function demoData(): { reports: ReportedReview[]; orgs: PendingOrg[] } {
       },
       { id: 'demo-o2', name: 'Horta Comunitária da Sé', type: 'Voluntariado', city: 'Braga', nif: null, address: null, createdAt: daysAgo(1), reviewers: 2, duplicates: [] },
     ],
+    appeals: [
+      {
+        id: 'demo-a1', side: 'author', originalDecision: 'removed',
+        originalNote: 'Identifica uma pessoa pelo nome ou por detalhes.',
+        text: 'Não identifiquei ninguém: "a chefia" é um cargo, não uma pessoa.', createdAt: daysAgo(1), orgName: other.name,
+        review: { id: 'demo-r3', text: 'A chefia muda os turnos sem avisar e não paga as horas extra.', tags: ['Horas extra não pagas'], avg: 2.1, status: 'removed' },
+      },
+],
   };
 }
 
@@ -75,6 +95,7 @@ function demoData(): { reports: ReportedReview[]; orgs: PendingOrg[] } {
 export function useModeration() {
   const [reports, setReports] = useState<ReportedReview[]>([]);
   const [orgs, setOrgs] = useState<PendingOrg[]>([]);
+  const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -86,10 +107,16 @@ export function useModeration() {
         const d = demoData();
         setReports(d.reports);
         setOrgs(d.orgs);
+        setAppeals(d.appeals);
       } else {
-        const [r, o] = await Promise.all([api<{ items: ReportedReview[] }>('/moderation/reports'), api<{ items: PendingOrg[] }>('/moderation/orgs')]);
+        const [r, o, a] = await Promise.all([
+          api<{ items: ReportedReview[] }>('/moderation/reports'),
+          api<{ items: PendingOrg[] }>('/moderation/orgs'),
+          api<{ items: Appeal[] }>('/moderation/appeals'),
+        ]);
         setReports(r.items);
         setOrgs(o.items);
+        setAppeals(a.items);
       }
     } catch (e) {
       setError(errorText(e));
@@ -115,6 +142,7 @@ export function useModeration() {
   return {
     reports,
     orgs,
+    appeals,
     loading,
     error,
     reload,
@@ -125,6 +153,8 @@ export function useModeration() {
       ),
     approve: (id: string) => run(() => api(`/orgs/${id}/approve`, { method: 'POST' }), () => setOrgs((x) => x.filter((o) => o.id !== id))),
     reject: (id: string, note: string) => run(() => api(`/orgs/${id}/reject`, { body: { note } }), () => setOrgs((x) => x.filter((o) => o.id !== id))),
+    decideAppeal: (id: string, action: 'reverse' | 'confirm', note: string) =>
+      run(() => api(`/moderation/appeals/${id}/decision`, { body: { action, note } }), () => setAppeals((x) => x.filter((a) => a.id !== id))),
     merge: (id: string, targetId: string) => run(() => api(`/orgs/${id}/merge`, { body: { targetId } }), () => setOrgs((x) => x.filter((o) => o.id !== id))),
   };
 }

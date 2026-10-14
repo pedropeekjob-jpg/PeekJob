@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useModeration, type PendingOrg } from '../../api/moderation';
 import { tr } from '../../i18n';
-import { decisionNotice, NOTICE_MS, type Decision } from './moderation';
+import { appealNotice, decisionNotice, NOTICE_MS, type AppealAction, type Decision } from './moderation';
 
-export type Queue = 'reports' | 'orgs';
+export type Queue = 'reports' | 'orgs' | 'appeals';
 
 /** Aviso de decisão tomada, que desaparece sozinho */
 function useNotice() {
@@ -32,13 +32,14 @@ export function useQueues() {
     [setNotice],
   );
 
-  const { decide, approve, reject, merge } = m;
+  const { decide, approve, reject, merge, decideAppeal } = m;
   return {
     ...m,
     tab,
     setTab,
     notice,
     decide: (reviewId: string, action: Decision, note: string) => withNotice(decide(reviewId, action, note), decisionNotice(action)),
+    decideAppeal: (id: string, action: AppealAction, note: string) => withNotice(decideAppeal(id, action, note), appealNotice(action)),
     approve: (o: PendingOrg) => withNotice(approve(o.id), tr(`${o.name} está agora pública.`, `${o.name} is now public.`)),
     reject: (o: PendingOrg, note: string) => withNotice(reject(o.id, note), tr(`${o.name} foi rejeitada.`, `${o.name} was rejected.`)),
     merge: (o: PendingOrg, targetId: string, targetName: string) =>

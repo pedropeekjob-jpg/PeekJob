@@ -83,12 +83,15 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
 | GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação |
 | POST | `/moderation/reviews/:id/decision` | moderador | `remove` ou `keep`, com justificação; avisa quem escreveu e quem denunciou |
+| POST | `/me/messages/:id/appeal` | sessão | Contestar a decisão desse aviso (texto 10–2000; 6 meses; uma vez) |
+| GET | `/moderation/appeals` | moderador | Pedidos de revisão em aberto (sem pseudónimos) |
+| POST | `/moderation/appeals/:id/decision` | moderador | `reverse` ou `confirm`, com justificação; avisa quem pediu |
 | GET | `/moderation/summary` | moderador | Nº de denúncias em aberto e de organizações pendentes |
 | GET | `/moderation/orgs` | moderador | Organizações novas pendentes, com nº de pessoas que avaliaram e possíveis duplicados |
 | POST | `/orgs/:id/reject` | moderador | Rejeitar uma organização pendente, com justificação |
 | GET | `/me/export` | sessão | Os meus dados (JSON) |
 | DELETE | `/me` | sessão | Apagar a conta (`keepReviews` mantém as avaliações, desligadas da pessoa) |
-| GET | `/me/messages` | sessão | Mensagens privadas de apoio com os contactos |
+| GET | `/me/messages` | sessão | Mensagens privadas de apoio com os contactos; nos avisos de moderação, `appeal` (disponível até quando, expirado, ou o estado do pedido) |
 | POST | `/me/messages/:id/read` | sessão | Marca a mensagem como lida |
 | GET | `/health` | todos | Estado da API e da base de dados |
 | GET | `/robots.txt`, `/sitemap.xml` | todos | Para o Search Console (organizações ativas no sitemap) |
@@ -127,7 +130,12 @@ Quem escreve com raiva recebe uma proposta publicável e decide se a usa. Pode s
 - **Ecrã de moderação** (`/moderacao`, só para o papel `moderator`; entrada no Perfil):
   - **Denúncias:** avaliação, motivos e justificações frequentes; remover ou manter.
   - **Organizações novas:** aprovar, rejeitar com justificação, ou fundir num duplicado sugerido.
-- Falta: um canal para quem escreveu contestar a decisão.
+  - **Pedidos de revisão:** a avaliação, a decisão original e o pedido; reverter ou manter, com justificação.
+- **Contestar decisões (art. 20.º):** no aviso da decisão (Apoio), quem foi afetado pede a revisão por escrito, grátis, durante 6 meses: quem escreveu, se a avaliação foi removida; quem denunciou, se se manteve. Uma vez por decisão.
+  - Uma pessoa da moderação revê (não é automático). Reverter desfaz a decisão: a avaliação removida volta; a que se manteve sai, e quem a escreveu recebe o aviso (que também pode contestar).
+  - Quem pediu recebe a resposta com a justificação; se a decisão se mantém, a resposta indica a resolução extrajudicial de litígios (art. 21.º) e os tribunais.
+  - O direito de contestar está nas regras públicas (*Como calculamos → Moderação com critério*).
+  - Recomendação de operação: a revisão deve ser feita por outra pessoa da equipa que não a que decidiu (a API regista quem decidiu cada passo).
 - **Dar o papel de moderador** (por agora na base de dados): `UPDATE users SET role = 'moderator' WHERE id = '…'`.
 
 ## Segurança
@@ -190,7 +198,7 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 
 ## RGPD
 - **Acesso:** `GET /me/export` (inclui as guardadas e os "úteis") e o ecrã *Perfil → Privacidade e dados → Descarregar*.
-- **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
 
 ## Correr localmente
 
@@ -252,7 +260,6 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - **Falta (manual):** testar com leitores de ecrã reais (VoiceOver no iPhone, NVDA no Windows) e com pessoas que os usam no dia a dia. Os testes automáticos apanham cerca de metade dos problemas.
 
 ## Próxima fatia
-- Guardadas e "útil" no servidor (hoje ficam no browser).
 - Verificação por fotografia do recibo (OCR); hoje só PDF com texto.
 - Locais e mapa: geocodificação em segundo plano.
 

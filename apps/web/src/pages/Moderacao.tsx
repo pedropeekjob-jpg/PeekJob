@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { apiMode } from '../api/http';
 import { Shell } from '../components/Layout';
 import { Empty, TopBar } from '../components/UI';
-import { LoadingCards, Notice, OrgCard, QueueTabs, ReportCard, Skeleton } from '../features/moderation/ModerationParts';
+import { AppealCard, LoadingCards, Notice, OrgCard, QueueTabs, ReportCard, Skeleton } from '../features/moderation/ModerationParts';
 import styles from '../features/moderation/Moderation.module.css';
 import { useQueues } from '../features/moderation/useQueues';
 import { tr } from '../i18n';
@@ -59,7 +59,7 @@ function Queues({ desktop }: { desktop: boolean }) {
         {!apiMode && <span className="small muted">{tr('Demonstração: dados de exemplo; as decisões não são guardadas.', 'Demo: sample data; decisions are not saved.')}</span>}
       </header>
 
-      <QueueTabs tab={q.tab} reports={q.reports.length} orgs={q.orgs.length} onChange={q.setTab} />
+      <QueueTabs tab={q.tab} reports={q.reports.length} orgs={q.orgs.length} appeals={q.appeals.length} onChange={q.setTab} />
       {q.notice && <Notice text={q.notice} />}
       {q.error && (
         <div role="alert" className={styles.error}>
@@ -79,6 +79,23 @@ function QueueBody({ q }: { q: ReturnType<typeof useQueues> }) {
       <div className={styles.list}>
         {q.reports.map((r) => (
           <ReportCard key={r.reviewId} item={r} onDecide={(action, note) => q.decide(r.reviewId, action, note)} />
+        ))}
+      </div>
+    );
+  }
+  if (q.tab === 'appeals') {
+    if (!q.appeals.length) {
+      return (
+        <Empty
+          title={tr('Sem pedidos de revisão.', 'No appeals.')}
+          body={tr('Quem é afetado por uma decisão pode pedir que seja revista durante 6 meses; os pedidos aparecem aqui.', 'Anyone affected by a decision can ask for it to be reviewed within 6 months; appeals show up here.')}
+        />
+      );
+    }
+    return (
+      <div className={styles.list}>
+        {q.appeals.map((a) => (
+          <AppealCard key={a.id} item={a} onDecide={(action, note) => q.decideAppeal(a.id, action, note)} />
         ))}
       </div>
     );

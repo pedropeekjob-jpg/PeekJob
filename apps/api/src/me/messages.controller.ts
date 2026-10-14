@@ -2,6 +2,7 @@ import { Controller, Get, HttpCode, Inject, NotFoundException, Param, Post, UseG
 import { EMERGENCY_NUMBER, SUPPORT_CONTACTS } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { AuthGuard, CurrentUser, type AuthUser } from '../auth/auth.guard';
+import { appealInfo } from '../appeals/appeals';
 import { privacySecret, userRef } from '../common/privacy';
 import { isUuid } from '../common/zod';
 import { PG_POOL } from '../db/db.module';
@@ -15,8 +16,10 @@ export class MessagesController {
   @Get()
   async list(@CurrentUser() user: AuthUser) {
     const { rows } = await this.pool.query(
-      `SELECT m.id, m.type, m.kinds, m.details, m.created_at, m.read_at, o.name AS org_name
+      `SELECT m.id, m.type, m.kinds, m.details, m.created_at, m.read_at, o.name AS org_name,
+              a.status AS appeal_status, a.decision_note AS appeal_note
          FROM support_messages m
+         LEFT JOIN appeals a ON a.message_id = m.id
          LEFT JOIN reviews r ON r.id = m.review_id
          LEFT JOIN organizations o ON o.id = r.org_id
         WHERE m.user_ref = $1 ORDER BY m.created_at DESC`,
@@ -31,6 +34,8 @@ export class MessagesController {
         orgName: m.org_name,
         createdAt: m.created_at,
         read: m.read_at != null,
+        // contestar a decisão (DSA art. 20.º): disponível até quando, expirado, ou o estado do pedido
+        appeal: appealInfo({ type: m.type, decision: m.details?.decision, createdAt: m.created_at }, m.appeal_status ? { status: m.appeal_status, note: m.appeal_note } : null),
         contacts: SUPPORT_CONTACTS,
         emergency: EMERGENCY_NUMBER,
       })),

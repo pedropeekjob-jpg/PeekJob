@@ -9,19 +9,30 @@ import { expect, login, pickOrg, test, uniqueEmail } from '../support/fixtures';
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 type Found = { page: string; rule: string; impact: string; help: string; targets: string[] };
 
+// cada teste percorre muitas páginas e espera pelo fim das animações antes de medir: mais tempo que o normal
+test.describe.configure({ timeout: 120_000 });
+
 async function audit(page: Page, label: string, found: Found[]) {
   await page.waitForLoadState('networkidle');
   // as páginas chegam a pedido: esperar que a nova esteja montada (sem o "a carregar")
   await page.waitForFunction(() => !document.querySelector('main[aria-busy="true"]'));
   // animações de entrada (fade-up): o contraste só conta no estado final; as infinitas (anéis a flutuar) não acabam.
-  // Repete até não começar nenhuma nova (um ecrã que acabou de montar pode arrancar animações a seguir)
+  // Só segue quando não há nenhuma a correr em 3 verificações seguidas (100 ms entre elas): dados que chegam
+  // depois de o ecrã montar (ex.: as mensagens, em "publicado") podem arrancar animações novas
   await page.evaluate(async () => {
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    for (let i = 0; i < 10; i++) {
+    let quiet = 0;
+    for (let i = 0; i < 40 && quiet < 3; i++) {
       await frame();
       const running = document.getAnimations().filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations !== Infinity);
-      if (!running.length) return;
-      await Promise.all(running.map((a) => a.finished.catch(() => undefined)));
+      if (running.length) {
+        quiet = 0;
+        await Promise.all(running.map((a) => a.finished.catch(() => undefined)));
+      } else {
+        quiet++;
+        await wait(100);
+      }
     }
   });
   const r = await new AxeBuilder({ page }).withTags(TAGS).analyze();

@@ -40,8 +40,16 @@ export interface SupportMessage {
   /** 'moderation': aviso de uma decisão da moderação (avaliação removida ou denúncia analisada) */
   type?: 'support' | 'moderation';
   orgName?: string;
-  details?: { decision: 'removed' | 'upheld' | 'rejected'; note: string; orgName?: string } | null;
+  details?: { decision: 'removed' | 'upheld' | 'rejected' | 'appeal_reversed' | 'appeal_confirmed'; note: string; orgName?: string } | null;
+  /** Contestar a decisão (DSA art. 20.º): disponível até quando, prazo terminado, ou o estado do pedido */
+  appeal?: AppealState;
 }
+
+export type AppealState =
+  | null
+  | { status: 'available'; until: string }
+  | { status: 'expired' }
+  | { status: 'open' | 'reversed' | 'confirmed'; note?: string | null };
 
 export interface Draft {
   orgId: string | null;
@@ -494,6 +502,18 @@ function useAppState() {
           await api('/me', { method: 'DELETE', body: { keepReviews } });
           set({ user: null, myReviews: [], messages: [], lastPublished: null });
           void loadOrgs().catch(() => undefined);
+          return { ok: true };
+        } catch (e) {
+          return fail(e);
+        }
+      },
+
+      /** Pedir a revisão de uma decisão da moderação (a partir do aviso recebido) */
+      appeal: async (messageId: string, text: string): Promise<Result> => {
+        try {
+          if (apiMode) await api(`/me/messages/${messageId}/appeal`, { body: { text } });
+          set((s) => ({ messages: s.messages.map((m) => (m.id === messageId ? { ...m, appeal: { status: 'open' } } : m)) }));
+          track('moderation_appeal', { result: 'sent' });
           return { ok: true };
         } catch (e) {
           return fail(e);
