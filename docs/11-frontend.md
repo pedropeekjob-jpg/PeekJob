@@ -51,19 +51,28 @@ apps/web/src/
 
 | Interação | Ecrã | Componentes | Render |
 |---|---|---|---|
-| Pesquisa: escrever "padaria porto" | telemóvel | 301 → 238 (−21%) | 68,8 → 51,3 ms (−25%) |
-| | computador | 764 → 710 (−7%) | 96,1 → 85,8 ms (−11%) |
-| Avaliar: nota aos 8 critérios | telemóvel | 128 → 72 (−44%) | 38,7 → 17,3 ms (−55%) |
-| | computador | 376 → 328 (−13%) | 72,9 → 54,1 ms (−26%) |
-| Avaliar: escrever o comentário (60 teclas) | telemóvel | 684 → 684 | 90,4 → 85,3 ms (−6%) |
-| Ranking: mudar a ordem 4 vezes | telemóvel | 204 → 204 | 38,7 → 34,5 ms (−11%) |
-| | computador | 252 → 280 (+11%) | 44,3 → 43,8 ms (−1%) |
-| Organização: critérios, útil, guardar | telemóvel | 194 → 203 (+5%) | 35,5 → 28,2 ms (−21%) |
-| | computador | 283 → 298 (+5%) | 46,4 → 40,5 ms (−13%) |
-| Preferências: 6 escolhas | telemóvel | 45 → 51 (+13%) | 15,6 → 14,6 ms (−6%) |
-| | computador | 69 → 75 (+9%) | 20,2 → 16,5 ms (−18%) |
+| Pesquisa: escrever "padaria porto" | telemóvel | 301 → 130 (−57%) | −49% |
+| | computador | 764 → 122 (−84%) | −70% |
+| Avaliar: nota aos 8 critérios | telemóvel | 128 → 72 (−44%) | −37% |
+| | computador | 376 → 144 (−62%) | −45% |
+| Avaliar: escrever o comentário (60 teclas) | telemóvel | 684 → 285 (−58%) | −22% |
+| Organização: critérios, útil, guardar | telemóvel | 194 → 203 (+5%) | −18% |
+| | computador | 283 → 214 (−24%) | −27% |
+| Ranking: mudar a ordem 4 vezes | telemóvel | 204 → 204 | −20% |
+| | computador | 252 → 224 (−11%) | −18% |
+| Preferências: 6 escolhas | telemóvel | 45 → 51 (+13%) | −15% |
+| | computador | 69 → 75 (+9%) | −10% |
 
-O número de commits é igual em todas (o refactoring não acrescentou atualizações). Onde há mais componentes é porque agora são mais pequenos (ex.: cada linha do ranking é um componente); o tempo não piorou em nenhuma interação. Variações abaixo de ~10% estão dentro do ruído. O que sobra a cada tecla no computador é sobretudo o cabeçalho e o rodapé: as ligações do React Router voltam a correr quando o endereço muda (`?q=`), e o memo não evita isso.
+Os tempos absolutos variam com a carga da máquina; comparam-se as duas versões na mesma corrida (alternadas). Variações abaixo de ~10% estão dentro do ruído.
+
+O que fez a diferença:
+- **Pesquisa:** o `?q=` muda quando a pesquisa é aplicada (fim da espera), não a cada tecla. Mudar o endereço fazia correr a app inteira (router, rotas, cabeçalho, rodapé e todas as ligações, que reagem ao endereço).
+- **Cabeçalho e rodapé** (`DesktopHeader`, `SiteFooter`) memorizados: já não correm quando só a página muda.
+- **Comentário:** o aviso de apoio compara o que foi encontrado (a moderação devolve um objeto novo a cada tecla), e o cabeçalho do passo, o cadeado e o erro de publicação são memorizados. Por tecla correm só a página e o "reescrever com IA", que depende do texto.
+
+O que fica, por desenho: no ranking os filtros e a ordem vivem no endereço (para se poderem partilhar), por isso mudar a ordem volta a correr as ligações; e abrir os critérios desenha os 8 critérios. Mais componentes em preferências e organização (telemóvel) é porque agora são mais pequenos; o tempo baixou.
+
+`PJ_NAMES=1 PJ_ONLY=<interação> npm run react:profile -- HEAD` lista os componentes que correm, pelo nome.
 
 ## Testes
 
