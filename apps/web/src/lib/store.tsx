@@ -25,6 +25,8 @@ export interface MyReview {
   text: string;
   when: string;
   flagged: boolean;
+  /** quem escreveu confirmou que trabalha lá (antes ou depois de publicar) */
+  verified?: boolean;
 }
 
 export interface SupportMessage {
@@ -293,6 +295,9 @@ function useAppState() {
         track('mark_helpful', { helpful: !stRef.current.useful[id] });
         set((s) => ({ useful: { ...s.useful, [id]: !s.useful[id] } }));
       },
+      /** Confirmou que trabalha na organização: as suas avaliações dela passam a verificadas (o servidor faz o mesmo) */
+      markVerified: (orgId: string) => set((s) => ({ myReviews: s.myReviews.map((r) => (r.orgId === orgId ? { ...r, verified: true } : r)) })),
+
       updateDraft: (patch: Partial<Draft> | ((d: Draft) => Partial<Draft>)) => set((s) => ({ draft: { ...s.draft, ...(typeof patch === 'function' ? patch(s.draft) : patch) } })),
       startDraft: (orgId: string, locationId: string | null) =>
         set((s) => ({ draft: s.draft.orgId === orgId ? { ...s.draft, locationId } : { ...emptyDraft(), orgId, locationId } })),
@@ -389,7 +394,7 @@ function useAppState() {
             const id = 'mine-' + Date.now();
             const review: MyReview = {
               id, orgId: d.orgId, locationId: d.locationId ?? undefined, scores: d.scores, avg: avgOf(d.scores),
-              recommend: d.recommend, tags: d.tags, text: d.text, when: 'hoje', flagged: rf.flagged,
+              recommend: d.recommend, tags: d.tags, text: d.text, when: 'hoje', flagged: rf.flagged, verified: !!d.verified,
             };
             const msgs = rf.flagged && s.user
               ? [{ id: 'msg-' + Date.now(), orgId: d.orgId, kinds: rf.kinds, found: rf.found, when: 'hoje', read: false }, ...s.messages]

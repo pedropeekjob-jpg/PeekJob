@@ -79,18 +79,18 @@ describe('partes do fluxo de avaliar', () => {
   });
 
   it('passos no computador: feitos são ligações, o atual marcado', () => {
-    inRouter(<DeskSteps current={3} right={<span>direita</span>} />);
-    const steps = screen.getByRole('list', { name: 'Passo 3 de 3' });
+    inRouter(<DeskSteps current={2} right={<span>direita</span>} />);
+    const steps = screen.getByRole('list', { name: 'Passo 2 de 2' });
     expect(within(steps).getByRole('link', { name: 'Passo 1, Organização, feito' })).toHaveAttribute('href', '/avaliar');
-    expect(within(steps).getByRole('link', { name: 'Passo 2, Verificação, feito' })).toHaveAttribute('href', '/avaliar/verificar');
-    expect(within(steps).getAllByRole('listitem')[2]).toHaveAttribute('aria-current', 'step');
+    expect(within(steps).getAllByRole('link')).toHaveLength(1);
+    expect(within(steps).getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
     expect(screen.getByText('direita')).toBeInTheDocument();
   });
 
   it('passos no computador: no primeiro, nenhum é ligação', () => {
     inRouter(<DeskSteps current={1} />);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Verificação', '3Avaliação']);
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Avaliação']);
   });
 
   it('passos no telemóvel, cabeçalho, cadeado e grelha das notas', async () => {
@@ -98,7 +98,7 @@ describe('partes do fluxo de avaliar', () => {
     const onClick = vi.fn();
     render(
       <>
-        <MiniSteps current={3} done />
+        <MiniSteps current={2} done />
         <MiniSteps current={1} />
         <FlowHead icon="close" label="Fechar" onClick={onClick} right={<b>x</b>} />
         <LockLine center>Publicação anónima</LockLine>
@@ -106,8 +106,8 @@ describe('partes do fluxo de avaliar', () => {
         <NotesGrid scores={{}} desktop />
       </>,
     );
-    expect(screen.getByRole('img', { name: 'Passo 3 de 3, concluído' })).toHaveTextContent('3/3');
-    expect(screen.getByRole('img', { name: 'Passo 1 de 3' })).toHaveTextContent('1/3');
+    expect(screen.getByRole('img', { name: 'Passo 2 de 2, concluído' })).toHaveTextContent('2/2');
+    expect(screen.getByRole('img', { name: 'Passo 1 de 2' })).toHaveTextContent('1/2');
     await user.click(screen.getByRole('button', { name: 'Fechar' }));
     expect(onClick).toHaveBeenCalled();
     expect(screen.getByText('Publicação anónima')).toBeInTheDocument();

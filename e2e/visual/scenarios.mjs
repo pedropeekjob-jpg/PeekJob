@@ -282,12 +282,14 @@ export const SCENARIOS = [
     full: true,
     run: async (p) => {
       await tap(p, 'button', /^O que conta em Ambiente/);
+      await tap(p, 'button', /^Contar como é/); // telemóvel: o comentário abre-se no mesmo ecrã
       await tap(p, 'button', /^Ver mais \d+ etiquetas/);
       await tap(p, 'radio', /^Respeito e inclusão, 4 de 5/);
       await tap(p, 'button', /^Não$/);
     },
   },
-  { name: 'avaliar-texto', path: '/avaliar/texto', mobileOnly: true },
+  { name: 'avaliar-comentario', path: '/avaliar/notas', mobileOnly: true, full: true, run: (p) => tap(p, 'button', /^Contar como é/) },
+  { name: 'avaliar-verificar-depois', path: '/avaliar/verificar?org=padaria-ribeira' },
   { name: 'avaliar-feito-vazio', path: '/avaliar/feito', state: { lastPublished: null } },
   { name: 'avaliar-feito', path: '/avaliar/feito', full: true, state: published(false), run: (p) => tap(p, 'button', /^Ver as tuas 8 notas/) },
   { name: 'avaliar-feito-apoio', path: '/avaliar/feito', full: true, state: { ...published(true), user: null } },

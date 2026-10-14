@@ -55,20 +55,21 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   await page.goto('/avaliar');
   await audit(page, '/avaliar', found);
   await pickOrg(page, 'oficina sete', 'Oficina Sete');
-  await audit(page, '/avaliar/verificar', found);
-  await page.getByRole('button', { name: /Saltar|Avaliar sem verificar/ }).first().click();
-  await page.waitForURL(/\/avaliar\/notas/);
   await audit(page, '/avaliar/notas', found);
-  if (isMobile) {
-    await page.getByRole('radio', { name: 'Ambiente, 3 de 5' }).first().click();
-    await page.getByRole('button', { name: /Continuar/ }).last().click();
-    await page.waitForURL(/\/avaliar\/texto/);
-  }
+  await page.getByRole('radio', { name: 'Ambiente, 3 de 5' }).first().click();
+  if (isMobile) await page.getByRole('button', { name: /Contar como é/ }).click();
   await page.locator('textarea').fill('O Ricardo é um idiota e o salário chega sempre atrasado.');
   await audit(page, 'avaliar: texto bloqueado', found);
   await page.getByRole('button', { name: /Reescrever com IA/ }).click();
   await expect(page.getByText('Proposta', { exact: true })).toBeVisible();
   await audit(page, 'avaliar: proposta da IA', found);
+  await page.getByRole('button', { name: 'Usar esta versão' }).click();
+  await page.getByRole('button', { name: /Publicar avaliação/ }).click();
+  await page.waitForURL(/\/avaliar\/feito/);
+  await audit(page, '/avaliar/feito', found);
+  await page.getByRole('link', { name: 'Confirmar agora' }).click();
+  await page.waitForURL(/\/avaliar\/verificar/);
+  await audit(page, '/avaliar/verificar', found);
   for (const path of ['/perfil', '/perfil/dados', '/guardadas', '/apoio', '/preferencias']) {
     await page.goto(path);
     await audit(page, path, found);

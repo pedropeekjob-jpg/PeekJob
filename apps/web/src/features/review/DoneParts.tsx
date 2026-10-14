@@ -67,3 +67,30 @@ export function NotesToggle({ open, onToggle, desktop }: { open: boolean; onTogg
     </button>
   );
 }
+
+/**
+ * Verificar depois de publicar: a avaliação já está publicada; confirmar que trabalha lá dá-lhe o selo.
+ * Já verificada: só a confirmação.
+ */
+export function VerifyInvite({ orgId, verified }: { orgId: string; verified: boolean }) {
+  if (verified) {
+    return (
+      <p className={`row small ${styles.verified}`}>
+        <Icon name="check" size={16} stroke={2.4} /> {tr('Avaliação verificada.', 'Verified review.')}
+      </p>
+    );
+  }
+  return (
+    <section aria-labelledby="verificar-depois" className={styles.verify}>
+      <h2 id="verificar-depois" className={styles.verifyTitle}>
+        {tr('Confirma que trabalhas lá', 'Confirm you work there')}
+      </h2>
+      <p className={`small body ${styles.verifyText}`}>
+        {tr('A tua avaliação ganha o selo Verificado. Leva um minuto e nada fica ligado a ti.', 'Your review gets the Verified badge. It takes a minute and nothing is linked to you.')}
+      </p>
+      <Link to={`/avaliar/verificar?org=${encodeURIComponent(orgId)}`} className={`btn btn-ghost btn-sm ${styles.verifyButton}`} data-ev="cta_click" data-ev-cta="verificar_depois" data-ev-area="publicado">
+        {tr('Confirmar agora', 'Confirm now')}
+      </Link>
+    </section>
+  );
+}

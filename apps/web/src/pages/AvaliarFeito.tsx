@@ -4,7 +4,7 @@ import { useOrg } from '../api/orgs';
 import { Shell } from '../components/Layout';
 import { Empty } from '../components/UI';
 import { publishedReview, reviewsCountText, totalAfterPublishing, unreadAfterPublishing } from '../features/review/done';
-import { DoneRing, NotesToggle, SupportCard } from '../features/review/DoneParts';
+import { DoneRing, NotesToggle, SupportCard, VerifyInvite } from '../features/review/DoneParts';
 import styles from '../features/review/Done.module.css';
 import { tr } from '../i18n';
 import { useStore } from '../lib/store';
@@ -46,6 +46,7 @@ export default function AvaliarFeito() {
   const orgLink = org ? `/org/${org.id}` : '/';
   const support = review.flagged && <SupportCard signedIn={!!user} unread={unreadAfterPublishing(messages)} />;
   const toggle = <NotesToggle open={open} onToggle={toggleOpen} desktop={desktop} />;
+  const verify = <VerifyInvite orgId={review.orgId} verified={!!review.verified} />;
   const seeOnPage = tr('Ver na página da organização', 'See it on the organisation’s page');
 
   if (desktop) {
@@ -66,6 +67,7 @@ export default function AvaliarFeito() {
             </div>
             <aside className={styles.aside}>
               {support}
+              {verify}
               <Link to={orgLink} className={`btn btn-dark lift ${styles.ctaMain}`}>
                 {seeOnPage}
               </Link>
@@ -82,7 +84,7 @@ export default function AvaliarFeito() {
   return (
     <Shell>
       <div className={`page ${styles.mobilePage}`}>
-        <FlowHead icon="close" label={tr('Fechar e voltar ao início', 'Close and go back home')} onClick={goHome} right={<MiniSteps current={3} done />} />
+        <FlowHead icon="close" label={tr('Fechar e voltar ao início', 'Close and go back home')} onClick={goHome} right={<MiniSteps current={2} done />} />
         <div className={styles.hero}>
           <DoneRing avg={review.avg} desktop={false} />
           <h1 className={styles.heroTitle}>{tr('Publicado. Obrigado.', 'Published. Thank you.')}</h1>
@@ -90,6 +92,7 @@ export default function AvaliarFeito() {
         </div>
 
         {support}
+        {verify}
 
         <section aria-label={tr('As tuas notas', 'Your scores')} className={`stack ${styles.notes}`}>
           {toggle}

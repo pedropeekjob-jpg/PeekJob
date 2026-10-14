@@ -37,8 +37,6 @@ test.describe('Teclado', () => {
     await login(page, uniqueEmail('teclado'));
     await page.goto('/avaliar');
     await pickOrg(page, 'oficina sete', 'Oficina Sete');
-    await page.getByRole('button', { name: /Saltar|Avaliar sem verificar/ }).first().click();
-    await page.waitForURL(/\/avaliar\/notas/);
     const group = page.getByRole('radiogroup', { name: 'Salário justo' });
     await expect(group).toBeVisible();
     await expect(group.locator('[tabindex="0"]')).toHaveCount(1);
@@ -56,6 +54,8 @@ test.describe('Teclado', () => {
     await login(page, uniqueEmail('tabs'));
     await page.goto('/avaliar');
     await pickOrg(page, 'oficina sete', 'Oficina Sete');
+    // a verificação (agora depois de publicar) também abre com a organização do rascunho
+    await page.goto('/avaliar/verificar');
     const tabs = page.getByRole('tab');
     await tabs.first().focus();
     await page.keyboard.press('ArrowRight');

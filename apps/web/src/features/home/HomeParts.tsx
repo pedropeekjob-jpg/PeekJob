@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogoAnimated } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
-import { searchHref, type Zone } from './home';
+import { reviewHref, searchHref, type Zone } from './home';
 import styles from './Home.module.css';
 
 /** Textos de cada zona: rótulo, dica que segue o rato e texto fixo nos ecrãs táteis */
@@ -72,14 +72,51 @@ function CloseButton({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Espreitar aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
-export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFocus: boolean; onClose: () => void }) {
+interface SearchFormProps {
+  id: string;
+  label: string;
+  placeholder: string;
+  submitLabel: string;
+  initial?: string;
+  autoFocus: boolean;
+  href: (q: string) => string;
+  cta: string;
+}
+
+/** Campo de pesquisa a sério: Enter (ou a seta) leva ao destino com o que se escreveu */
+function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFocus, href, cta }: SearchFormProps) {
   const nav = useNavigate();
-  const [q, setQ] = useState(typed);
+  const [q, setQ] = useState(initial);
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    nav(searchHref(q));
+    nav(href(q));
   };
+  return (
+    <form role="search" className={`row ${styles.search}`} onSubmit={submit} data-ev="cta_click" data-ev-cta={cta} data-ev-area="home">
+      <Icon name="search" size={20} className={styles.searchIcon} />
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder={placeholder}
+        autoComplete="off"
+        enterKeyHint="search"
+        // eslint-disable-next-line jsx-a11y/no-autofocus -- a pessoa acabou de escolher esta zona (só com teclado físico/rato)
+        autoFocus={autoFocus}
+      />
+      <button type="submit" className={styles.go} aria-label={submitLabel}>
+        <Icon name="arrow" size={20} />
+      </button>
+    </form>
+  );
+}
+
+/** Espreitar aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
+export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFocus: boolean; onClose: () => void }) {
   return (
     <section id="zona-peek" aria-labelledby="zona-peek-t" className={styles.panel}>
       <CloseButton onClose={onClose} />
@@ -88,26 +125,16 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
         {tr('Como é trabalhar lá dentro?', 'What’s it really like to work there?')}
       </h2>
       <p className={styles.sub}>{tr('Procura uma organização e vê o que dizem as pessoas que lá trabalham.', 'Find an organisation and see what the people who work there say.')}</p>
-      <form role="search" className={`row ${styles.search}`} onSubmit={submit} data-ev="cta_click" data-ev-cta="pesquisar" data-ev-area="home">
-        <Icon name="search" size={20} className={styles.searchIcon} />
-        <label htmlFor="home-q" className="sr-only">
-          {tr('Pesquisar organização', 'Search organisations')}
-        </label>
-        <input
-          id="home-q"
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={tr('Empresa, associação ou cidade', 'Company, association or city')}
-          autoComplete="off"
-          enterKeyHint="search"
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- a pessoa acabou de escolher pesquisar (só com teclado físico/rato)
-          autoFocus={autoFocus}
-        />
-        <button type="submit" className={styles.go} aria-label={tr('Procurar', 'Search')}>
-          <Icon name="arrow" size={20} />
-        </button>
-      </form>
+      <SearchForm
+        id="home-q"
+        label={tr('Pesquisar organização', 'Search organisations')}
+        placeholder={tr('Empresa, associação ou cidade', 'Company, association or city')}
+        submitLabel={tr('Procurar', 'Search')}
+        initial={typed}
+        autoFocus={autoFocus}
+        href={searchHref}
+        cta="pesquisar"
+      />
       <Link to="/explorar" className={`link ${styles.all}`} data-ev="cta_click" data-ev-cta="explorar" data-ev-area="home">
         {tr('Ver todas as organizações', 'See all organisations')}
       </Link>
@@ -115,12 +142,8 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
   );
 }
 
-/** O teu trabalho aberto: convite para avaliar */
+/** O teu trabalho aberto: "onde trabalhas?" já aqui (poupa um ecrã); Enter leva à escolha com a pesquisa feita */
 export function JobPanel({ autoFocus, onClose }: { autoFocus: boolean; onClose: () => void }) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    if (autoFocus) ref.current?.focus();
-  }, [autoFocus]);
   return (
     <section id="zona-job" aria-labelledby="zona-job-t" className={styles.panel}>
       <CloseButton onClose={onClose} />
@@ -129,9 +152,17 @@ export function JobPanel({ autoFocus, onClose }: { autoFocus: boolean; onClose: 
         {tr('Conta como é. Sem dar a cara.', 'Tell it like it is. Stay anonymous.')}
       </h2>
       <p className={styles.sub}>{tr('Avaliação anónima em 3 minutos. A organização nunca sabe quem escreveu.', 'An anonymous review in 3 minutes. The organisation never knows who wrote it.')}</p>
-      <Link ref={ref} to="/avaliar" className={`row ${styles.cta}`} data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="home">
-        {tr('Avaliar onde trabalho', 'Review where I work')}
-        <Icon name="arrow" size={20} />
+      <SearchForm
+        id="home-job"
+        label={tr('Onde trabalhas?', 'Where do you work?')}
+        placeholder={tr('Onde trabalhas?', 'Where do you work?')}
+        submitLabel={tr('Avaliar onde trabalho', 'Review where I work')}
+        autoFocus={autoFocus}
+        href={reviewHref}
+        cta="avaliar"
+      />
+      <Link to="/avaliar" className={`link ${styles.all}`} data-ev="cta_click" data-ev-cta="avaliar_lista" data-ev-area="home">
+        {tr('Escolher da lista', 'Choose from the list')}
       </Link>
     </section>
   );

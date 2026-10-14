@@ -19,6 +19,7 @@ apps/web/src/
 
 - **Lógica fora do render.** O ecrã não tem regras de negócio: chama um hook (`useReviewDraft`, `useOrgPicker`, `useVerification`) e passa o resultado aos componentes. As regras puras (`publishErrorMessage`, `validateNewOrg`, `writeDigits`, `codeStatus`) são funções sem React, testadas sozinhas.
 - **Navegação no ecrã.** As ações dos hooks devolvem `true`/`false` (ex.: `publish()`). É o ecrã que decide para onde ir, e assim os hooks servem a vários ecrãs (telemóvel e computador).
+- **Publicar e sair:** depois de publicar com sucesso o `useReviewDraft` fica `busy` até o ecrã sair. O rascunho já foi limpo e, enquanto o ecrã seguinte (lazy) carrega, o ecrã atual continua montado: sem isto via "sem organização" e mandava para `/avaliar`.
 - **Um hook por responsabilidade.** Por exemplo, a lógica de publicar estava duplicada entre o passo de texto no telemóvel e o ecrã único no computador; agora está só em `useReviewDraft`.
 
 ## Estilos

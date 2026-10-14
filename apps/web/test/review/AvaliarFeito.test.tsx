@@ -32,6 +32,19 @@ describe.each(['mobile', 'desktop'] as const)('Avaliação publicada (%s)', (vie
     expect(screen.queryByRole('link', { name: /mensage(m|ns) privada/ })).not.toBeInTheDocument();
   });
 
+  it('por verificar: convite para confirmar agora (depois de publicar); verificada: diz que está', async () => {
+    seedStore({ lastPublished: 'novo-1', myReviews: [mine(false)] });
+    const { unmount } = show(viewport);
+    const invite = await screen.findByRole('region', { name: 'Confirma que trabalhas lá' });
+    expect(invite).toHaveTextContent(/selo Verificado/);
+    expect(screen.getByRole('link', { name: 'Confirmar agora' })).toHaveAttribute('href', '/avaliar/verificar?org=padaria-ribeira');
+    unmount();
+    seedStore({ lastPublished: 'novo-1', myReviews: [{ ...mine(false), verified: true }] });
+    show(viewport);
+    expect(await screen.findByText('Avaliação verificada.')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Confirmar agora' })).not.toBeInTheDocument();
+  });
+
   it('ver e esconder as 8 notas', async () => {
     seedStore({ lastPublished: 'novo-1', myReviews: [mine(false)] });
     const { user } = show(viewport);

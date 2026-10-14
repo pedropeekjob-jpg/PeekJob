@@ -53,7 +53,7 @@ test.describe('Visita pública', () => {
     await page.keyboard.press('Escape');
     await expect(page).toHaveURL(/\/$/);
     await page.getByRole('button', { name: /^O teu trabalho/ }).click();
-    await page.getByRole('link', { name: 'Avaliar onde trabalho' }).click();
+    await page.getByRole('link', { name: 'Escolher da lista' }).click();
     await page.waitForURL(/\/avaliar$/);
     await expectNoHorizontalScroll(page);
   });

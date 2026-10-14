@@ -11,20 +11,57 @@ const show = (viewport: 'mobile' | 'desktop', patch = {}) =>
     { route: '/avaliar/notas', path: '/avaliar/notas', viewport },
   );
 
-describe('Avaliar · notas (telemóvel, passo 1)', () => {
+describe('Avaliar · notas e publicar (telemóvel, passo 2 de 2)', () => {
   beforeEach(() => localStorage.clear());
 
-  it('8 critérios; continuar só com pelo menos uma nota; contador', async () => {
+  it('8 critérios; publicar só com pelo menos uma nota; contador; publica dali, sem passo extra', async () => {
     const { user } = show('mobile');
     expect(await screen.findByRole('heading', { level: 1, name: /Dá uma nota de 1 a 5/ })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Passo 2 de 2' })).toBeInTheDocument();
     expect(screen.getAllByRole('radiogroup')).toHaveLength(8);
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
     await user.click(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' }));
     expect(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' })).toHaveAttribute('aria-checked', 'true');
-    const next = screen.getByRole('button', { name: /Continuar/ });
-    expect(next).toHaveTextContent('1/8');
-    await user.click(next);
+    const publish = screen.getByRole('button', { name: /Publicar avaliação/ });
+    expect(publish).toHaveTextContent('1/8');
+    await user.click(publish);
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
+  });
+
+  it('comentário opcional: fechado por omissão; abre com etiquetas e contador', async () => {
+    const { user } = show('mobile', { scores: { ambiente: 3 } });
+    const toggle = await screen.findByRole('button', { name: /Contar como é \(opcional\)/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    await user.click(toggle);
+    expect(screen.getByRole('group', { name: /O que se destaca/ })).toBeInTheDocument();
+    expect(screen.getByText('0/600')).toBeInTheDocument();
+  });
+
+  it('comentário já escrito: aparece aberto', async () => {
+    show('mobile', { scores: { ambiente: 3 }, text: 'Equipa unida.' });
+    expect(await screen.findByRole('textbox', { name: /A tua experiência/ })).toHaveValue('Equipa unida.');
+    expect(screen.getByText('Tudo certo para publicar.')).toBeInTheDocument();
+  });
+
+  it('texto com insulto: aviso, botão bloqueado e reescrita que substitui o texto', async () => {
+    const { user } = show('mobile', { scores: { ambiente: 3 } });
+    await user.click(await screen.findByRole('button', { name: /Contar como é/ }));
+    await user.type(screen.getByRole('textbox', { name: /A tua experiência/ }), 'O Ricardo é um idiota.');
+    expect(screen.getByText('Sem nomes nem insultos')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Corrige a frase para publicar/ })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /Reescrever com IA/ }));
+    await user.click(await screen.findByRole('button', { name: 'Usar esta versão' }));
+    expect((screen.getByRole('textbox', { name: /A tua experiência/ }) as HTMLTextAreaElement).value).not.toMatch(/Ricardo|idiota/);
+    expect(screen.getByRole('button', { name: /Publicar avaliação/ })).toBeEnabled();
+  });
+
+  it('possível ilegalidade: cartão de apoio com ligação para pedir ajuda', async () => {
+    const { user } = show('mobile', { scores: { ambiente: 3 } });
+    await user.click(await screen.findByRole('button', { name: /Contar como é/ }));
+    await user.type(screen.getByRole('textbox', { name: /A tua experiência/ }), 'O salário chega sempre atrasado.');
+    expect(screen.getByText('Isto pode ser uma ilegalidade')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Pedir ajuda' })).toHaveAttribute('href', '/apoio');
   });
 
   it('clicar na nota escolhida tira-a', async () => {

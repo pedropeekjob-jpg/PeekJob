@@ -33,10 +33,13 @@ export const PROFILE_SCENARIOS = [
   },
   {
     name: 'avaliar: escrever o comentário (60 teclas)',
-    path: '/avaliar/texto',
+    path: '/avaliar/notas',
     mobileOnly: true,
     state: STATE,
     run: async (p) => {
+      // desde 14/10 o comentário está no ecrã das notas (opcional, abre-se ali)
+      const open = p.getByRole('button', { name: /^Contar como é/ });
+      if (await open.count()) await open.click();
       const box = p.getByRole('textbox').first();
       await box.click();
       await box.press('End');

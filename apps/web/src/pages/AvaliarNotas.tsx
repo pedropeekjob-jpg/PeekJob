@@ -10,6 +10,7 @@ import type { CriterionKey } from '../data/criteria';
 import type { Org } from '../data/orgs';
 import { PublishErrorBox } from '../features/review/PublishErrorBox';
 import { SupportAlert } from '../features/review/SupportAlert';
+import { ReviewTextMobile } from '../features/review/ReviewTextMobile';
 import { REVIEW_TEXT_MAX, useReviewDraft } from '../features/review/useReviewDraft';
 import { tr } from '../i18n';
 import { fmt } from '../lib/format';
@@ -27,7 +28,7 @@ interface ViewProps {
   review: Review;
 }
 
-/** Avaliar · notas. Telemóvel: passo 1 de 3. Computador: notas e texto no mesmo ecrã. */
+/** Avaliar · notas, comentário (opcional) e publicar, no mesmo ecrã (telemóvel e computador) */
 export default function AvaliarNotas() {
   const desktop = useIsDesktop();
   const { draft, remote } = useStore();
@@ -49,11 +50,14 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
   const nav = useNavigate();
   const [help, setHelp] = useState<CriterionKey | null>(null);
   const toggleHelp = useCallback((k: CriterionKey) => setHelp((h) => (h === k ? null : k)), []);
-  const { done } = review;
+  const { done, insult } = review;
+  const publish = async () => {
+    if (await review.publish()) nav('/avaliar/feito');
+  };
   return (
     <Shell>
       <div className={`page ${styles.mobile}`}>
-        <FlowHead icon="close" label={tr('Fechar (o rascunho fica guardado)', 'Close (your draft is saved)')} onClick={() => nav(`/org/${org.id}`)} right={<MiniSteps current={1} />} />
+        <FlowHead icon="close" label={tr('Fechar (o rascunho fica guardado)', 'Close (your draft is saved)')} onClick={() => nav(`/org/${org.id}`)} right={<MiniSteps current={2} />} />
         <div className={styles.titleBlock}>
           <h1 className={styles.title}>{tr('Dá uma nota de 1 a 5', 'Score from 1 to 5')}</h1>
           <div className="small muted">
@@ -76,10 +80,15 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
           <RecommendButtons value={review.recommend} onChange={review.setRecommend} />
         </div>
 
-        <div className="sticky-cta">
-          <button type="button" className={`btn btn-dark btn-block ${styles.next}`} disabled={!done} onClick={() => nav('/avaliar/texto')}>
-            {done ? tr('Continuar', 'Continue') : tr('Dá pelo menos uma nota', 'Give at least one score')} <span className={`mono ${styles.nextCount}`}>{done}/8</span>
+        <ReviewTextMobile review={review} />
+
+        <div className={`sticky-cta stack ${styles.cta}`}>
+          <PublishErrorBox error={review.error} onUseSuggestion={review.useText} />
+          <button type="button" className={`btn btn-dark btn-block ${styles.next}`} disabled={!review.canPublish || review.busy} onClick={publish}>
+            {insult ? tr('Corrige a frase para publicar', 'Fix the sentence to publish') : done ? tr('Publicar avaliação', 'Publish review') : tr('Dá pelo menos uma nota', 'Give at least one score')}
+            {!insult && <span className={`mono ${styles.nextCount}`}>{done}/8</span>}
           </button>
+          <LockLine center>{tr('Publicação anónima', 'Anonymous post')}</LockLine>
         </div>
       </div>
     </Shell>
@@ -97,7 +106,7 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
     <Shell chrome="header">
       <div className={`container ${styles.desktop}`}>
         <DeskSteps
-          current={3}
+          current={2}
           right={
             <Link to="/avaliar" className={`plain row ${styles.orgLink}`}>
               <span className={styles.orgName}>{org.name}</span>

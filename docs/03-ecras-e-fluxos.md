@@ -13,7 +13,7 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 - **Primeiro passo:** duas zonas, cada uma um botão inteiro, só com uma palavra: **Espreitar** (em cima, branco) e **O teu trabalho** (em baixo, menta muito clara). O logo fica na fronteira e muda de cor ao atravessar a linha.
 - **O primeiro clique escolhe** (telemóvel e computador): a zona clicada estende-se até ocupar a página (a linha desliza para o fundo ou para o topo) enquanto a outra se retrai; o logo sai (já está no cabeçalho) e só então aparece o conteúdo:
   - **Espreitar:** "Como é trabalhar lá dentro?", pesquisa a sério (Enter leva aos resultados) e "Ver todas as organizações" (`/explorar`).
-  - **O teu trabalho:** "Conta como é. Sem dar a cara." e o botão "Avaliar onde trabalho" (`/avaliar`).
+  - **O teu trabalho:** "Conta como é. Sem dar a cara." e o campo "Onde trabalhas?" (Enter leva a `/avaliar?q=…`, com a pesquisa já feita) e "Escolher da lista" (`/avaliar`).
 - **O que acontece ao clicar:** com rato, uma dica segue o cursor ("Espreitar organizações" / "Avaliar onde trabalho"); em ecrãs táteis o texto está fixo em cada zona ("Toca para…").
 - **Voltar às duas zonas:** botão ✕, tecla Escape ou o "voltar" do browser. A zona aberta fica no endereço (`/?lado=espreitar`, `/?lado=avaliar`), por isso também se pode partilhar.
 - **Atalhos:** com rato, o campo de pesquisa fica logo pronto a escrever (no telemóvel não abre o teclado sem a pessoa tocar); começar a escrever nas duas zonas abre a pesquisa com o que se escreveu.
@@ -29,7 +29,9 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 
 **Descobrir:** Explorar → Pesquisa / Ranking (Para mim · Nota geral, filtros) / Tipos e setores → Organização (Avaliações · Entrevistas · Salários) → Denunciar avaliação.
 
-**Avaliar (3 passos):** Escolher organização e local no mapa (ou adicionar nova) → Verificar (email com código ou contrato/recibo; só se guarda o "sim") → Notas (8 critérios 1–5, recomendas?) → Texto (tags + 600 caracteres, red flags, bloqueio de insultos e nomes) → Publicado (+ mensagem privada de apoio se houver red flag).
+**Avaliar (2 passos, 3 toques até publicar além das notas; 14/10):** Escolher a organização (o local só se pergunta quando há mais do que um; ou adicionar nova) → Notas e comentário no mesmo ecrã (8 critérios 1–5, recomendas?; comentário opcional com tags e 600 caracteres, red flags, bloqueio de insultos e nomes) → Publicado (+ mensagem privada de apoio se houver red flag) → **Verificar depois, se quiser** (convite em "Publicado": email com código ou contrato/recibo; só se guarda o "sim", e as avaliações da pessoa nessa organização passam a verificadas). `/avaliar/texto` (ligações antigas) vai para as notas.
+
+![Avaliar: antes e agora](ecras/avaliar-antes-agora.png)
 
 **Institucional:** Sobre (missão e princípios) · Contacto (email, organizações, redes sociais e, à parte, ajuda urgente com ACT, CITE, APAV e 112).
 
@@ -58,10 +60,9 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 | Salários | ![](ecras/mobile-org-padaria-ribeira-salarios.png) | ![](ecras/desktop-org-padaria-ribeira-salarios.png) |
 | Denunciar | ![](ecras/mobile-org-padaria-ribeira-denunciar-r1.png) | ![](ecras/desktop-org-padaria-ribeira-denunciar-r1.png) |
 | Avaliar · escolher | ![](ecras/mobile-avaliar.png) | ![](ecras/desktop-avaliar.png) |
-| Avaliar · verificar | ![](ecras/mobile-avaliar-verificar.png) | ![](ecras/desktop-avaliar-verificar.png) |
 | Avaliar · notas | ![](ecras/mobile-avaliar-notas.png) | ![](ecras/desktop-avaliar-notas.png) |
-| Avaliar · texto | ![](ecras/mobile-avaliar-texto.png) | (no desktop está no ecrã das notas) |
 | Publicado | ![](ecras/mobile-avaliar-feito.png) | ![](ecras/desktop-avaliar-feito.png) |
+| Verificar (depois de publicar) | ![](ecras/mobile-avaliar-verificar.png) | ![](ecras/desktop-avaliar-verificar.png) |
 | Apoio | ![](ecras/mobile-apoio.png) | ![](ecras/desktop-apoio.png) |
 | Guardadas | ![](ecras/mobile-guardadas.png) | ![](ecras/desktop-guardadas.png) |
 | Perfil | ![](ecras/mobile-perfil.png) | ![](ecras/desktop-perfil.png) |

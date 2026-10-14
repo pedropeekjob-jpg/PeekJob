@@ -19,7 +19,7 @@ export function verificationError(status: number, message: string): string {
  * Na demonstração não há servidor: aceita qualquer código ou ficheiro.
  */
 export function useVerification(orgId: string) {
-  const { draft, updateDraft, sendWorkEmailCode, confirmWorkEmailCode, verifyDocument } = useStore();
+  const { draft, updateDraft, markVerified, sendWorkEmailCode, confirmWorkEmailCode, verifyDocument } = useStore();
   const [method, setMethod] = useState<Method>(draft.verified ?? 'email');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
@@ -78,8 +78,9 @@ export function useVerification(orgId: string) {
       }
     }
     updateDraft({ verified: method });
+    markVerified(orgId); // avaliações já publicadas nesta organização passam a verificadas
     return true;
-  }, [busy, canFinish, code, confirmWorkEmailCode, file, isEmail, method, orgId, updateDraft, verifyDocument]);
+  }, [busy, canFinish, code, confirmWorkEmailCode, file, isEmail, markVerified, method, orgId, updateDraft, verifyDocument]);
 
   return {
     method,

@@ -75,12 +75,16 @@ export const test = base.extend<{ guard: void }>({
 });
 export { expect };
 
-/** Procura no fluxo de avaliar e escolhe a organização (espera pela resposta da pesquisa, como quem vê os resultados) */
+/**
+ * Procura no fluxo de avaliar e escolhe a organização (espera pela resposta da pesquisa, como quem vê os resultados).
+ * Com um só local segue logo para as notas; com vários, confirma o local primeiro.
+ */
 export async function pickOrg(page: Page, query: string, name: string) {
   await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.getByPlaceholder(/Empresa, associação/).fill(query)]);
   await page.getByText(name, { exact: true }).first().click();
-  await page.getByRole('button', { name: /^Continuar/ }).first().click();
-  await page.waitForURL(/\/avaliar\/verificar/);
+  const next = page.getByRole('button', { name: /^Continuar/ }).first();
+  await Promise.race([page.waitForURL(/\/avaliar\/notas/), next.waitFor().then(() => next.click())]);
+  await page.waitForURL(/\/avaliar\/notas/);
 }
 
 /** NIF válido e diferente em cada teste (pessoa coletiva, começa por 5) */

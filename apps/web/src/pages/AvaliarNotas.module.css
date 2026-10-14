@@ -30,6 +30,10 @@
 }
 .next {
   height: 56px;
+  gap: 8px;
+}
+.cta {
+  gap: 10px;
 }
 .nextCount {
   font-size: 13px;

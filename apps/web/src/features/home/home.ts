@@ -20,6 +20,12 @@ export function searchHref(q: string) {
   return t ? `/pesquisa?${new URLSearchParams({ q: t })}` : '/pesquisa';
 }
 
+/** Destino de "onde trabalhas?": a escolha da organização para avaliar, com a pesquisa já escrita */
+export function reviewHref(q: string) {
+  const t = q.trim();
+  return t ? `/avaliar?${new URLSearchParams({ q: t })}` : '/avaliar';
+}
+
 /** Uma tecla que escreve (letra ou número, sem atalhos): nas duas zonas abre a pesquisa com ela */
 export const isTypingKey = (e: { key: string; ctrlKey: boolean; metaKey: boolean; altKey: boolean }) =>
   e.key.length === 1 && /[\p{L}\p{N}]/u.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey;

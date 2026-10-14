@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef } from 'react';
-import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
 import { ConsentBanner } from './components/ConsentBanner';
@@ -101,7 +101,8 @@ export default function App() {
           <Route path="/avaliar" element={<Pages.AvaliarEscolher />} />
           <Route path="/avaliar/verificar" element={<Pages.AvaliarVerificar />} />
           <Route path="/avaliar/notas" element={<Pages.AvaliarNotas />} />
-          <Route path="/avaliar/texto" element={<Pages.AvaliarTexto />} />
+          {/* o comentário passou para o ecrã das notas: ligações antigas vão para lá */}
+          <Route path="/avaliar/texto" element={<Navigate to="/avaliar/notas" replace />} />
           <Route path="/avaliar/feito" element={<Pages.AvaliarFeito />} />
           <Route path="/apoio" element={<Pages.Apoio />} />
           <Route path="/guardadas" element={<Pages.Guardadas />} />

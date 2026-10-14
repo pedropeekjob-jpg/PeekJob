@@ -16,7 +16,7 @@ test('adicionar uma organização com NIF', async ({ page }) => {
   await page.locator('#nnif').fill(`${nif.slice(0, 3)} ${nif.slice(3, 6)} ${nif.slice(6)}`);
   await expect(page.getByText(/Não conseguimos confirmar agora/)).toBeVisible();
   await page.getByRole('button', { name: /Adicionar e continuar/ }).first().click();
-  await page.waitForURL(/\/avaliar\/verificar/);
+  await page.waitForURL(/\/avaliar\/notas/);
   const rows = await sql<{ status: string; nif: string }>(`SELECT status, nif FROM organizations WHERE name = $1`, [name]);
   expect(rows).toEqual([{ status: 'pending', nif }]);
 });

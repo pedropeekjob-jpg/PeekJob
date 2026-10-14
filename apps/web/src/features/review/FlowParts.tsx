@@ -7,7 +7,7 @@ import type { Scores } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { fmt } from '../../lib/format';
-import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, STEP_LABELS, STEP_ROUTES, stepState, tagOrder, visibleTags } from './flow';
+import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, STEP_LABELS, STEP_ROUTES, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
 import styles from './Flow.module.css';
 
 /** Partes partilhadas pelos ecrãs do fluxo de avaliar */
@@ -24,25 +24,27 @@ export function FlowHead({ icon, label, onClick, right }: { icon: 'close' | 'bac
   );
 }
 
-/** Indicador de passos do telemóvel (3 barras + 1/3) */
+/** Indicador de passos do telemóvel (uma barra por passo + 1/2) */
 export const MiniSteps = memo(function MiniSteps({ current, done = false }: { current: number; done?: boolean }) {
   return (
-    <div role="img" aria-label={tr(`Passo ${current} de 3${done ? ', concluído' : ''}`, `Step ${current} of 3${done ? ', done' : ''}`)} className={`row ${styles.mini}`}>
+    <div role="img" aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}${done ? ', concluído' : ''}`, `Step ${current} of ${STEPS_TOTAL}${done ? ', done' : ''}`)} className={`row ${styles.mini}`}>
       <span className={`row ${styles.bars}`}>
-        {[1, 2, 3].map((i) => (
-          <span key={i} className={styles.bar} data-on={i <= current || undefined} />
+        {Array.from({ length: STEPS_TOTAL }, (_, i) => (
+          <span key={i} className={styles.bar} data-on={i < current || undefined} />
         ))}
       </span>
-      <span className="mono small muted">{current}/3</span>
+      <span className="mono small muted">
+        {current}/{STEPS_TOTAL}
+      </span>
     </div>
   );
 });
 
 /** Indicador de passos do computador: passos feitos são ligações, o atual a verde-água, os seguintes a cinzento */
-export function DeskSteps({ current, right }: { current: 1 | 2 | 3; right?: ReactNode }) {
+export function DeskSteps({ current, right }: { current: 1 | 2; right?: ReactNode }) {
   return (
     <div className={`row wrap between ${styles.desk}`}>
-      <ol aria-label={tr(`Passo ${current} de 3`, `Step ${current} of 3`)} className={`row wrap ${styles.steps}`}>
+      <ol aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}`, `Step ${current} of ${STEPS_TOTAL}`)} className={`row wrap ${styles.steps}`}>
         {STEP_LABELS().map((label, i) => {
           const n = i + 1;
           const state = stepState(n, current);

@@ -213,3 +213,34 @@ a.messages {
     padding: 22px;
   }
 }
+
+/* Verificar depois de publicar */
+.verify {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: var(--r-lg);
+  background: var(--mint);
+}
+.verifyTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: 18px;
+  color: var(--title);
+}
+.verifyText {
+  margin: 0;
+  line-height: 1.45;
+}
+.verifyButton {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.verified {
+  gap: 6px;
+  margin: 0;
+  color: var(--teal-dark);
+  font-weight: 600;
+}

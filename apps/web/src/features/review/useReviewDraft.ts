@@ -58,13 +58,17 @@ export function useReviewDraft() {
     [setText],
   );
 
-  /** Publica; devolve true se correu bem (o ecrã decide para onde ir) */
+  /**
+   * Publica; devolve true se correu bem (o ecrã decide para onde ir).
+   * Se correu bem fica `busy` até o ecrã sair: o rascunho já foi limpo e, enquanto o ecrã seguinte carrega,
+   * o atual não deve tratar o rascunho vazio como "sem organização" (e mandar para /avaliar).
+   */
   const publish = useCallback(async (): Promise<boolean> => {
     if (!canPublish || busy) return false;
     setBusy(true);
     const r = await publishDraft();
-    setBusy(false);
     if (!r.ok) {
+      setBusy(false);
       setError(publishErrorMessage(r));
       return false;
     }
@@ -74,3 +78,5 @@ export function useReviewDraft() {
 
   return { text, tags, scores, recommend: draft.recommend, redFlags, insult, done, average, canPublish, busy, error, setText, toggleTag, setScore, setRecommend, useText, publish };
 }
+
+export type ReviewDraft = ReturnType<typeof useReviewDraft>;

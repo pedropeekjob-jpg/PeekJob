@@ -36,8 +36,10 @@ export function scoreForKey(key: string, current: number): number | null {
 /** Só um botão por critério entra no Tab: a nota escolhida, ou a primeira */
 export const isTabStop = (n: number, value: number) => (value ? n === value : n === 1);
 
-export const STEP_LABELS = () => [tr('Organização', 'Organisation'), tr('Verificação', 'Verification'), tr('Avaliação', 'Review')];
-export const STEP_ROUTES = ['/avaliar', '/avaliar/verificar', '/avaliar/notas'];
+/** Dois passos: escolher a organização e avaliar (a verificação passou para depois de publicar) */
+export const STEP_LABELS = () => [tr('Organização', 'Organisation'), tr('Avaliação', 'Review')];
+export const STEP_ROUTES = ['/avaliar', '/avaliar/notas'];
+export const STEPS_TOTAL = STEP_ROUTES.length;
 export type StepState = 'done' | 'current' | 'todo';
 export const stepState = (n: number, current: number): StepState => (n < current ? 'done' : n === current ? 'current' : 'todo');
 

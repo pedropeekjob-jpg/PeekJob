@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isTypingKey, searchHref, zoneFromParam, zoneParam } from '../../src/features/home/home';
+import { isTypingKey, reviewHref, searchHref, zoneFromParam, zoneParam } from '../../src/features/home/home';
 
 describe('página inicial: regras', () => {
   it('zona no endereço (?lado=) e de volta', () => {
@@ -14,6 +14,11 @@ describe('página inicial: regras', () => {
   it('para onde vai a pesquisa', () => {
     expect(searchHref('  padaria ribeira ')).toBe('/pesquisa?q=padaria+ribeira');
     expect(searchHref('   ')).toBe('/pesquisa');
+  });
+
+  it('para onde vai "o teu trabalho"', () => {
+    expect(reviewHref(' padaria ribeira ')).toBe('/avaliar?q=padaria+ribeira');
+    expect(reviewHref('')).toBe('/avaliar');
   });
 
   it('só letras e números (sem Ctrl/Cmd/Alt) abrem a pesquisa', () => {

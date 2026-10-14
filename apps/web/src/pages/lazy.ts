@@ -19,7 +19,6 @@ export const Pages = {
   AvaliarEscolher: lazyPage(() => import('./AvaliarEscolher')),
   AvaliarVerificar: lazyPage(() => import('./AvaliarVerificar')),
   AvaliarNotas: lazyPage(() => import('./AvaliarNotas')),
-  AvaliarTexto: lazyPage(() => import('./AvaliarTexto')),
   AvaliarFeito: lazyPage(() => import('./AvaliarFeito')),
   Apoio: lazyPage(() => import('./Apoio')),
   Guardadas: lazyPage(() => import('./Guardadas')),

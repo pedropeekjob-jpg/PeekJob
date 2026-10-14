@@ -87,7 +87,7 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = []): Org {
 }
 
 export function toMyReview(r: ApiReview & { orgId: string }): MyReview {
-  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, when: when(r.createdAt), flagged: r.flagged };
+  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, when: when(r.createdAt), flagged: r.flagged, verified: r.verified };
 }
 
 export function toMessage(m: {

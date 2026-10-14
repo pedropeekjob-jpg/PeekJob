@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useStore } from '../../src/lib/store';
 import AvaliarVerificar from '../../src/pages/AvaliarVerificar';
@@ -19,7 +20,7 @@ const digits = () => screen.getAllByRole('textbox', { name: /Dígito \d de 6/ })
 
 describe.each(['mobile', 'desktop'] as const)('Avaliar · verificar (%s)', (viewport) => {
   beforeEach(() => localStorage.clear());
-  const confirmLabel = viewport === 'desktop' ? 'Confirmar e continuar' : 'Confirmar e começar';
+  const confirmLabel = 'Confirmar';
   const sendCode = async (user: ReturnType<typeof show>['user'], email = 'ana@padaria.pt') => {
     await user.type(screen.getByRole('textbox', { name: /Email (do trabalho|da organização)/ }), email);
     await user.keyboard('{Enter}');
@@ -89,7 +90,7 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · verificar (%s)', (view
 
   it('saltar a verificação', async () => {
     const { user } = show(viewport);
-    await user.click(screen.getByRole('button', { name: /^(Saltar|Avaliar sem verificar)$/ }));
+    await user.click(screen.getByRole('button', { name: 'Agora não' }));
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
     expect(screen.getByTestId('verified')).toHaveTextContent('');
   });
@@ -99,5 +100,33 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · verificar (%s)', (view
     expect(await screen.findByText(/Já confirmaste com documento/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /^Continuar/ }));
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
+  });
+});
+
+function AfterProbe() {
+  const { myReviews } = useStore();
+  const { pathname } = useLocation();
+  return <output data-testid="after">{`${pathname} ${String(myReviews.find((r) => r.orgId === 'cafe-vinha')?.verified ?? false)}`}</output>;
+}
+const showAfter = (viewport: 'mobile' | 'desktop') =>
+  renderScreen(<AvaliarVerificar />, { route: '/avaliar/verificar?org=cafe-vinha', path: '/avaliar/verificar', viewport, outside: <AfterProbe /> });
+
+describe.each(['mobile', 'desktop'] as const)('Avaliar · verificar depois de publicar (%s)', (viewport) => {
+  beforeEach(() => localStorage.clear());
+
+  it('confirmar marca as avaliações dessa organização como verificadas e volta a "publicado"', async () => {
+    const { user } = showAfter(viewport);
+    expect(await screen.findByText(/Café Vinha|cafe-vinha/i, { selector: 'span, p' })).toBeInTheDocument();
+    await user.type(screen.getByRole('textbox', { name: /Email (do trabalho|da organização)/ }), 'ana@vinha.pt{Enter}');
+    await user.click(digits()[0]);
+    await user.paste('123456');
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+    expect(await screen.findByText('/avaliar/feito true')).toBeInTheDocument();
+  });
+
+  it('agora não: volta a "publicado" sem verificar', async () => {
+    const { user } = showAfter(viewport);
+    await user.click(await screen.findByRole('button', { name: 'Agora não' }));
+    expect(screen.getByTestId('after')).toHaveTextContent('/avaliar/feito false');
   });
 });

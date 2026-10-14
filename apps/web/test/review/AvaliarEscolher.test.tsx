@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import AvaliarEscolher from '../../src/pages/AvaliarEscolher';
 import { useStore } from '../../src/lib/store';
@@ -7,7 +8,13 @@ import { renderScreen, WithoutDraft } from '../utils/render';
 /** Mostra o rascunho para confirmar o que ficou escolhido */
 function DraftProbe() {
   const { draft } = useStore();
-  return <output data-testid="draft">{`${draft.orgId ?? ''}|${draft.locationId ?? ''}`}</output>;
+  const { pathname } = useLocation();
+  return (
+    <>
+      <output data-testid="draft">{`${draft.orgId ?? ''}|${draft.locationId ?? ''}`}</output>
+      <output data-testid="where">{pathname}</output>
+    </>
+  );
 }
 const show = (viewport: 'mobile' | 'desktop', route = '/avaliar') =>
   renderScreen(<WithoutDraft><AvaliarEscolher /></WithoutDraft>, { route, path: '/avaliar', viewport, outside: <DraftProbe /> });
@@ -15,7 +22,7 @@ const show = (viewport: 'mobile' | 'desktop', route = '/avaliar') =>
 describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização (%s)', (viewport) => {
   beforeEach(() => localStorage.clear());
 
-  it('procura, escolhe a organização e o local, e continua para a verificação', async () => {
+  it('procura, escolhe a organização e o local (vários), e continua para as notas', async () => {
     const { user } = show(viewport);
     await user.type(screen.getByRole('searchbox', { name: /Nome da organização/ }), 'padaria');
     await user.click(await screen.findByRole('button', { name: /Padaria Ribeira/ }));
@@ -27,6 +34,7 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(radios[1]).toHaveAttribute('aria-checked', 'true');
     await user.click(screen.getByRole('button', { name: /^Continuar/ }));
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
+    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/notas');
     expect(screen.getByTestId('draft').textContent).toMatch(/^padaria-ribeira\|.+/);
   });
 
@@ -65,6 +73,28 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(screen.getByRole('alert')).toHaveTextContent('Escreve o nome da organização.');
     await user.click(screen.getByRole('button', { name: 'Voltar à pesquisa' }));
     expect(screen.getByRole('searchbox', { name: /Nome da organização/ })).toBeInTheDocument();
+  });
+
+  it('organização com um só local: escolher leva logo às notas (sem perguntar o local)', async () => {
+    const { user } = show(viewport);
+    await user.type(screen.getByRole('searchbox', { name: /Nome da organização/ }), 'oficina sete');
+    await user.click(await screen.findByRole('button', { name: /Oficina Sete/ }));
+    expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
+    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/notas');
+    expect(screen.getByTestId('draft').textContent).toMatch(/^oficina-sete\|.+/);
+  });
+
+  it('?q= (vindo da página inicial): a pesquisa já vem escrita', async () => {
+    show(viewport, '/avaliar?q=padaria');
+    expect(screen.getByRole('searchbox', { name: /Nome da organização/ })).toHaveValue('padaria');
+    expect(await screen.findByRole('button', { name: /Padaria Ribeira/ })).toBeInTheDocument();
+  });
+
+  it('?org= com um só local: começa logo nas notas', async () => {
+    show(viewport, '/avaliar?org=oficina-sete');
+    expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
+    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/notas');
+    expect(screen.getByTestId('draft').textContent).toMatch(/^oficina-sete\|/);
   });
 
   it('pré-seleção por ?org=: abre logo a escolha do local', async () => {

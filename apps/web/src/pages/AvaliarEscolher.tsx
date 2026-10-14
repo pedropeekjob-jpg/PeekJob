@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
@@ -17,19 +18,25 @@ export default function AvaliarEscolher() {
   const add = useAddOrg();
   const { step, chosen } = picker;
 
+  // vindo da página da organização, com um só local: não há nada a escolher
+  useEffect(() => {
+    if (picker.autoStart && picker.confirm()) nav('/avaliar/notas', { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só na entrada
+  }, []);
+
   const startAdd = () => {
     add.start(picker.q);
     picker.setStep('add');
   };
   const next = async () => {
     const ok = step === 'add' ? await add.submit() : picker.confirm();
-    if (ok) nav('/avaliar/verificar');
+    if (ok) nav('/avaliar/notas');
   };
   const nextLabel = step === 'add' ? tr('Adicionar e continuar', 'Add and continue') : tr('Continuar', 'Continue');
 
   const search = <OrgSearchBox value={picker.query} onChange={picker.setQuery} />;
   const results = (
-    <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={picker.pick} />
+    <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={(o) => picker.pick(o) && nav('/avaliar/notas')} />
   );
   const detail = (
     <>

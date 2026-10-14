@@ -23,7 +23,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     expect(peekDoor()).toHaveAttribute('aria-expanded', 'false');
     expect(jobDoor()).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Avaliar onde trabalho' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Avaliar onde trabalho' })).not.toBeInTheDocument();
   });
 
   it('espreitar: a zona de cima ocupa o ecrã e mostra a pesquisa; pesquisar leva aos resultados', async () => {
@@ -46,14 +46,23 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     expect(where()).toBe('/pesquisa');
   });
 
-  it('o teu trabalho: a zona de baixo ocupa o ecrã com o convite para avaliar', async () => {
+  it('o teu trabalho: a zona de baixo ocupa o ecrã e pesquisa onde trabalhas; Enter leva a avaliar com o termo', async () => {
     const { user } = show(viewport);
     await user.click(jobDoor());
     expect(where()).toBe('/?lado=avaliar');
     const panel = screen.getByRole('region', { name: 'Conta como é. Sem dar a cara.' });
-    const cta = within(panel).getByRole('link', { name: 'Avaliar onde trabalho' });
-    expect(cta).toHaveAttribute('href', '/avaliar');
-    if (desktop) expect(cta).toHaveFocus();
+    const box = within(panel).getByRole('searchbox', { name: 'Onde trabalhas?' });
+    if (desktop) expect(box).toHaveFocus();
+    else expect(box).not.toHaveFocus();
+    expect(within(panel).getByRole('link', { name: 'Escolher da lista' })).toHaveAttribute('href', '/avaliar');
+    await user.type(box, 'padaria{Enter}');
+    expect(where()).toBe('/avaliar?q=padaria');
+  });
+
+  it('o teu trabalho: sem termo, avaliar vai para a lista', async () => {
+    const { user } = show(viewport, '/?lado=avaliar');
+    await user.click(screen.getByRole('button', { name: 'Avaliar onde trabalho' }));
+    expect(where()).toBe('/avaliar');
   });
 
   it('a zona aberta ocupa a página: a outra retrai-se e não tem nada clicável', async () => {
@@ -80,7 +89,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
 
   it('ligação direta para uma zona abre-a logo', () => {
     show(viewport, '/?lado=avaliar');
-    expect(screen.getByRole('link', { name: 'Avaliar onde trabalho' })).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Onde trabalhas?' })).toBeInTheDocument();
     show(viewport, '/?lado=outra-coisa');
     expect(screen.getAllByRole('button', { name: /^Espreitar/ }).length).toBeGreaterThan(0);
   });

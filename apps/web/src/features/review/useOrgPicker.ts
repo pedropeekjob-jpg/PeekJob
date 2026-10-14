@@ -19,9 +19,11 @@ export function useOrgPicker(desktop: boolean) {
   const orgs = useOrgs();
   const { draft, startDraft } = useStore();
 
-  const initialId = params.get('org') ?? draft.orgId;
+  const fromLink = params.get('org');
+  const initialId = fromLink ?? draft.orgId;
   const initialOrg = initialId ? orgs.find((o) => o.id === initialId) : undefined;
-  const [query, setQueryState] = useState('');
+  // ?q= vem da página inicial ("O teu trabalho"): a pesquisa já vem escrita
+  const [query, setQueryState] = useState(params.get('q') ?? '');
   const [step, setStep] = useState<PickStep>(initialOrg ? 'confirm' : 'pick');
   const [chosenId, setChosenId] = useState<string | null>(initialOrg?.id ?? null);
   const [locationId, setLocationId] = useState<string | null>(
@@ -47,14 +49,27 @@ export function useOrgPicker(desktop: boolean) {
     [desktop],
   );
 
+  /**
+   * Escolher uma organização. Com um só local não há nada a perguntar: grava no rascunho e devolve true
+   * (o ecrã segue logo para as notas). Com vários, pergunta o local.
+   */
   const pick = useCallback(
-    (o: Org) => {
+    (o: Org): boolean => {
+      const loc = o.id === draft.orgId && draft.locationId ? draft.locationId : o.locations[0]?.id ?? null;
       setChosenId(o.id);
-      setLocationId(o.id === draft.orgId && draft.locationId ? draft.locationId : o.locations[0]?.id ?? null);
+      setLocationId(loc);
+      if (o.locations.length <= 1) {
+        startDraft(o.id, loc);
+        return true;
+      }
       setStep('confirm');
+      return false;
     },
-    [draft.locationId, draft.orgId],
+    [draft.locationId, draft.orgId, startDraft],
   );
+
+  /** Vindo de "Avaliar esta organização" (?org=) com um só local: segue logo para as notas */
+  const autoStart = !!fromLink && !!initialOrg && initialOrg.locations.length <= 1;
 
   /** Grava a organização e o local escolhidos no rascunho */
   const confirm = useCallback((): boolean => {
@@ -63,5 +78,5 @@ export function useOrgPicker(desktop: boolean) {
     return true;
   }, [chosen, effectiveLocation, startDraft, step]);
 
-  return { query, q, setQuery, results, visible, step, setStep, chosen, effectiveLocation, setLocationId, pick, confirm };
+  return { query, q, setQuery, results, visible, step, setStep, chosen, effectiveLocation, setLocationId, pick, confirm, autoStart };
 }

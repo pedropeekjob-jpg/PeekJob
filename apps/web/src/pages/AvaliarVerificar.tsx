@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Icon } from '../components/Icon';
@@ -9,29 +9,34 @@ import styles from '../features/verify/Verify.module.css';
 import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
-import { DeskSteps, FlowHead } from '../features/review/FlowParts';
+import { FlowHead } from '../features/review/FlowParts';
 
-/** Avaliar · passo 2 (opcional): confirmar que trabalha lá, por email do trabalho ou documento */
+/**
+ * Confirmar que trabalha lá. Desde 14/10 é depois de publicar (?org=, a partir do ecrã "publicado"):
+ * a avaliação fica verificada sem atrasar quem avalia. Sem ?org= usa o rascunho (ligações antigas).
+ */
 export default function AvaliarVerificar() {
   const { draft, remote } = useStore();
-  const org = useOrg(draft.orgId);
-  if (apiMode && draft.orgId && !org && !remote.ready) return null;
-  if (!draft.orgId || !org) return <Navigate to="/avaliar" replace />;
-  return <Verify orgId={org.id} orgName={org.name} locationLabel={org.locations.find((l) => l.id === draft.locationId)?.label} />;
+  const [params] = useSearchParams();
+  const after = params.get('org');
+  const orgId = after ?? draft.orgId;
+  const org = useOrg(orgId);
+  if (apiMode && orgId && !org && !remote.ready) return null;
+  if (!orgId || !org) return <Navigate to="/avaliar" replace />;
+  return <Verify orgId={org.id} orgName={org.name} after={!!after} />;
 }
 
-function Verify({ orgId, orgName, locationLabel }: { orgId: string; orgName: string; locationLabel?: string }) {
+function Verify({ orgId, orgName, after }: { orgId: string; orgName: string; after: boolean }) {
   const desktop = useIsDesktop();
   const nav = useNavigate();
   const v = useVerification(orgId);
-  const toScores = () => nav('/avaliar/notas');
+  // depois de publicar volta ao ecrã "publicado"; antes (ligações antigas) segue para as notas
+  const toScores = () => nav(after ? '/avaliar/feito' : '/avaliar/notas');
 
   const sendingEmail = v.isEmail && !v.codeStep;
   const primaryDisabled = !sendingEmail && !v.canFinish && !v.alreadyVerified;
   const ctaLabel = v.codeStep
-    ? desktop
-      ? tr('Confirmar e continuar', 'Confirm and continue')
-      : tr('Confirmar e começar', 'Confirm and start')
+    ? tr('Confirmar', 'Confirm')
     : v.isEmail
       ? tr('Enviar código', 'Send code')
       : v.file
@@ -63,16 +68,9 @@ function Verify({ orgId, orgName, locationLabel }: { orgId: string; orgName: str
     return (
       <Shell chrome="header">
         <div className={`container ${styles.desktop}`}>
-          <DeskSteps
-            current={2}
-            right={
-              <Link to="/avaliar" className={`plain row ${styles.orgLink}`}>
-                <span className={styles.orgName}>{orgName}</span>
-                {locationLabel && <span className="muted">{locationLabel}</span>}
-                <span className={styles.orgChange}>{tr('Mudar', 'Change')}</span>
-              </Link>
-            }
-          />
+          <div className={`row ${styles.orgLink}`}>
+            <span className={styles.orgName}>{orgName}</span>
+          </div>
           <div className={styles.columns}>
             <section className={styles.main}>
               <div className={styles.intro}>
@@ -94,11 +92,8 @@ function Verify({ orgId, orgName, locationLabel }: { orgId: string; orgName: str
                   </button>
                 )}
                 <button type="button" data-ev="verification" data-ev-method="none" data-ev-step="skipped" className={`link ${styles.quiet}`} onClick={toScores}>
-                  {tr('Avaliar sem verificar', 'Review without verifying')}
+                  {tr('Agora não', 'Not now')}
                 </button>
-                <Link to="/avaliar" className={`link ${styles.back}`}>
-                  <Icon name="back" size={16} /> {tr('Voltar', 'Back')}
-                </Link>
               </div>
             </section>
             <AnonymityCard />
@@ -114,14 +109,11 @@ function Verify({ orgId, orgName, locationLabel }: { orgId: string; orgName: str
         <FlowHead
           icon="back"
           label={tr('Voltar', 'Back')}
-          onClick={() => nav('/avaliar')}
+          onClick={toScores}
           right={
-            <>
-              <span className="small muted">{tr('Antes de começar', 'Before you start')}</span>
-              <button type="button" onClick={toScores} data-ev="verification" data-ev-method="none" data-ev-step="skipped" className={styles.skip}>
-                {tr('Saltar', 'Skip')}
-              </button>
-            </>
+            <button type="button" onClick={toScores} data-ev="verification" data-ev-method="none" data-ev-step="skipped" className={styles.skip}>
+              {tr('Agora não', 'Not now')}
+            </button>
           }
         />
         <div className={styles.mobileIntro}>
