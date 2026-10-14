@@ -6,17 +6,19 @@
   --mark-above: calc(var(--mark-h) * 0.482);
   --mark-below: calc(var(--mark-h) * 0.518);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  /* Paleta "branco e menta" (14/10, pedido do cliente: mais leve): o verde-água fica para a linha, o logo e os detalhes.
+  /* Paleta "uma zona com cor" (14/10): o cliente achou o verde-água a cheio + preto pesado e o branco e menta
+     sem força. Espreitar fica branco; O teu trabalho em verde-água da marca, com texto em tinta.
      A estrutura e a animação não dependem destas variáveis */
   --mint: #eef8f8;
   --peek-bg: var(--surface);
   --peek-fg: var(--ink);
   --peek-glow: rgba(0, 169, 175, 0.14);
-  --job-bg: var(--mint);
+  --job-bg: var(--teal);
   --job-fg: var(--ink);
-  --job-glow: rgba(101, 45, 144, 0.1);
+  --job-glow: rgba(255, 255, 255, 0.24);
   --rule: var(--teal);
   --label: var(--teal-dark);
+  --job-label: var(--ink);
   --hint-peek-bg: var(--ink);
   --hint-peek-fg: #fff;
   --hint-job-bg: var(--ink);
@@ -34,9 +36,9 @@
   --mk-top-bg: #ffffff;
   --mk-top-road: rgba(1, 11, 19, 0.18);
   --mk-bot-ink: #010b13;
-  --mk-bot-accent: #00a9af;
-  --mk-bot-bg: #eef8f8;
-  --mk-bot-road: #c5dfe0;
+  --mk-bot-accent: #ffffff;
+  --mk-bot-bg: #00a9af;
+  --mk-bot-road: rgba(1, 11, 19, 0.25);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -107,7 +109,7 @@
   background: radial-gradient(closest-side, var(--peek-glow), transparent);
 }
 .job .glow::before {
-  /* roxo da marca: respeito, direitos humanos e diversidade */
+  /* luz branca suave sobre o verde-água (antes roxo, sobre a menta) */
   background: radial-gradient(closest-side, var(--job-glow), transparent);
 }
 @media (hover: none) {
@@ -172,6 +174,7 @@
   animation: up 0.8s var(--ease) both;
 }
 .job .label {
+  color: var(--job-label);
   animation-delay: 0.3s;
 }
 /* ecrãs táteis: o que acontece ao tocar fica escrito (com rato, a dica segue o cursor) */

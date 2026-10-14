@@ -47,7 +47,7 @@ export default function Sobre() {
     <Shell nav footer>
       {!desktop && <MobileHomeHeader />}
       <div className={desktop ? 'container info-page' : 'info-page page-x'}>
-        <section className="info-hero">
+        <section className="info-hero zone zone-band">
           <span className="info-eyebrow">{tr('Sobre a PeekJob', 'About PeekJob')}</span>
           <h1 className="info-title">
             {tr('Damos voz a quem trabalha nas organizações pequenas.', 'We give a voice to people who work at small organisations.')}
@@ -80,7 +80,7 @@ export default function Sobre() {
             <strong>{tr('Explorar organizações', 'Explore organisations')}</strong>
             <Icon name="arrow" size={20} />
           </Link>
-          <Link to="/avaliar" className="info-door info-door-job" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="sobre">
+          <Link to="/avaliar" className="info-door info-door-job zone" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="sobre">
             <span className="info-eyebrow">{tr('O teu trabalho', 'Your job')}</span>
             <strong>{tr('Avaliar onde trabalho', 'Review where I work')}</strong>
             <Icon name="arrow" size={20} />

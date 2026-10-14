@@ -17,7 +17,7 @@ export default function Metodologia() {
     return (
       <Shell>
         <div className={`container ${styles.container}`}>
-          <div className={`row wrap ${styles.top}`}>
+          <div className={`row wrap zone zone-band ${styles.top}`}>
             <div className={styles.intro}>
               <h1 className={`h1 ${styles.title}`}>{tr('A nota não está à venda.', 'The score is not for sale.')}</h1>
               <p className={`lead ${styles.lead}`}>{tr('A fórmula é pública e igual para todas.', 'The formula is public and the same for everyone.')}</p>
@@ -46,7 +46,7 @@ export default function Metodologia() {
     <Shell>
       <div className="page no-nav">
         <TopBar back="/ranking" />
-        <div className={styles.mobileHead}>
+        <div className={`zone zone-band ${styles.mobileHead}`}>
           <h1 className={`h1 ${styles.mobileTitle}`}>{tr('A nota não está à venda.', 'The score is not for sale.')}</h1>
           <p className={`body ${styles.mobileLead}`}>{tr('Fórmula pública. Ninguém paga para subir ou esconder avaliações.', 'Public formula. Nobody pays to rank higher or hide reviews.')}</p>
         </div>

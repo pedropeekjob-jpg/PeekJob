@@ -13,7 +13,7 @@ import styles from './Explore.module.css';
 
 function BigAction({ to, icon, title, sub, primary = false }: { to: string; icon: string; title: string; sub: string; primary?: boolean }) {
   return (
-    <Link to={to} className={`plain row lift ${styles.action}`} data-primary={primary || undefined}>
+    <Link to={to} className={`plain row lift ${primary ? 'zone ' : ''}${styles.action}`} data-primary={primary || undefined}>
       <span className={styles.actionIcon}>
         <Icon name={icon} size={18} stroke={2.2} />
       </span>

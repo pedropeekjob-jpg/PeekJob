@@ -193,7 +193,7 @@ function ForYou() {
 
 function NotForSale() {
   return (
-    <section className={`row wrap ${styles.promise}`}>
+    <section className={`row wrap zone ${styles.promise}`}>
       <div className={styles.promiseHead}>
         <h2 className={`display ${styles.promiseTitle}`}>{tr('A nota não está à venda.', 'The score is not for sale.')}</h2>
         <Link to="/metodologia" className={`link ${styles.promiseLink}`}>

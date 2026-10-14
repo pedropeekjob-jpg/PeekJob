@@ -17,7 +17,7 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 - **O que acontece ao clicar:** com rato, uma dica segue o cursor ("Espreitar organizações" / "Avaliar onde trabalho"); em ecrãs táteis o texto está fixo em cada zona ("Toca para…").
 - **Voltar às duas zonas:** botão ✕, tecla Escape ou o "voltar" do browser. A zona aberta fica no endereço (`/?lado=espreitar`, `/?lado=avaliar`), por isso também se pode partilhar.
 - **Atalhos:** com rato, o campo de pesquisa fica logo pronto a escrever (no telemóvel não abre o teclado sem a pessoa tocar); começar a escrever nas duas zonas abre a pesquisa com o que se escreveu.
-- **Cores (14/10, "branco e menta"):** o cliente achou o verde-água a cheio pesado. O verde-água fica só na linha da fronteira, no logo, nos detalhes e nas duas palavras grandes (Jost 400 em verde-água escuro, mais suave que o preto e legível: 7,6:1); os botões principais são tinta. As cores estão em variáveis no topo de `features/home/Home.module.css` (trocar de paleta não mexe na estrutura nem na animação).
+- **Cores (14/10, "uma zona com cor"):** o verde-água a cheio com preto era pesado e o branco e menta ficou "sem força" (cliente). Espreitar fica branco; O teu trabalho em verde-água da marca com texto em tinta. As palavras grandes são Jost 400 (verde-água escuro em cima, tinta em baixo). As cores estão em variáveis no topo de `features/home/Home.module.css`.
 - **Animação:** uma mancha de luz suave segue o cursor (verde-água em cima, roxa em baixo, a cor do respeito); os olhos do logo olham para a zona onde está o cursor; em telemóvel as manchas deslizam sozinhas. Quem prefere menos movimento vê a troca sem animação.
 - **Medição:** `cta_click` com `cta=abrir_espreitar` / `abrir_avaliar` (o primeiro clique), `pesquisar`, `explorar` e `avaliar` (o segundo), sempre com `area=home`.
 - **Cabeçalho:** Explorar, Ranking e Sobre (o Contacto está no rodapé). **Rodapé:** Facebook e Instagram ao centro, e por baixo as ligações secundárias e o idioma.
@@ -26,6 +26,8 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 ## Fluxos
 
 **Primeira visita (14/10):** Página inicial (Espreitar → "Ver todas as organizações", agora um botão com a largura do campo) → Explorar logo, com as **mais bem avaliadas** (sem "% para ti", porque ainda não há prioridades) e o convite "Ordenar pelo que importa para ti" → Preferências (3 prioridades) → A preparar → Explorar "Para ti". O questionário deixou de ser obrigatório antes de ver organizações.
+
+**Cor no resto da app (14/10):** a mesma regra da página inicial — em cada ecrã uma zona em verde-água com texto em tinta (classes globais `.zone` e `.zone-band`): faixa do título em Ranking, Pesquisa, Guardadas, A tua conta, Sobre, Contacto, Como calculamos e Setores; a ação "Avaliar onde trabalho" e "A nota não está à venda" no Explorar; a porta "O teu trabalho" no Sobre; o cartão "Para os outros és anónimo/a" no perfil. Os botões principais passam a verde-água com texto em tinta. Listas e conteúdo ficam em branco; o fluxo de avaliar fica sem faixa (foco na tarefa). Contraste verificado com o axe em todos os ecrãs.
 
 **Menu (14/10):** Explorar · Ranking · Sobre no cabeçalho (computador e página inicial no telemóvel), para o Explorar ficar a um clique de qualquer ecrã; o Contacto passou para o rodapé. No telemóvel, o Explorar mostra 3 organizações e "Ver mais organizações".
 

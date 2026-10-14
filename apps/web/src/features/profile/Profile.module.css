@@ -203,15 +203,14 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  background: var(--ink);
-  color: #fff;
   border-radius: 26px;
   padding: 28px 120px 28px 28px;
   gap: 8px;
 }
 .anonDeco {
   composes: inviteDeco;
-  opacity: 0.9;
+  /* anel branco sobre o verde-água da zona */
+  border-color: rgba(255, 255, 255, 0.55);
 }
 .anonTitle {
   composes: display;
@@ -224,7 +223,7 @@
   position: relative;
   font-size: 15px;
   line-height: 1.5;
-  color: #c9cdd0;
+  color: var(--body);
 }
 .messages {
   gap: 16px;

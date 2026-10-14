@@ -18,7 +18,7 @@ export default function Setores() {
   return (
     <Shell nav>
       <div className={desktop ? `container ${styles.container}` : `page ${styles.page}`}>
-        <div className={styles.head}>
+        <div className={`zone zone-band ${styles.head}`}>
           <h1 className={`h1 ${styles.title}`}>{tr('Encontra o teu tipo de lugar.', 'Find your kind of place.')}</h1>
           <p className={`lead ${styles.lead}`}>{tr('Escolhe um tipo e compara os setores.', 'Pick a type and compare sectors.')}</p>
         </div>

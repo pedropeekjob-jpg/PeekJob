@@ -19,7 +19,7 @@ export default function Guardadas() {
     return (
       <Shell nav>
         <div className={`container ${styles.container}`}>
-          <div className={`row wrap between ${styles.desktopHead}`}>
+          <div className={`row wrap between zone zone-band ${styles.desktopHead}`}>
             <div className={styles.desktopTitleBlock}>
               <h1 className={`h1 ${styles.desktopTitle}`}>{tr('Guardadas', 'Saved')}</h1>
               <p className={`lead ${styles.lead}`}>
@@ -40,7 +40,7 @@ export default function Guardadas() {
   return (
     <Shell nav>
       <div className={`page ${styles.page}`}>
-        <div className={styles.head}>
+        <div className={`zone zone-band ${styles.head}`}>
           <h1 className={`h1 ${styles.title}`}>{tr('Guardadas', 'Saved')}</h1>
           <div className="small muted">
             {items.length > 0 ? `${orgCount(items.length)} · ` : ''}

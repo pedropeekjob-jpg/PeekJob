@@ -48,7 +48,7 @@ export function RankingDesktop({ ranked, F, prefs }: { ranked: RankedRow[]; F: R
 
   return (
     <div className={`container ${styles.container}`}>
-      <div className={`row wrap between ${styles.head}`}>
+      <div className={`row wrap between zone zone-band ${styles.head}`}>
         <div className={styles.titleBlock}>
           <h1 className={`h1 ${styles.title}`}>Ranking</h1>
           <p className={`body ${styles.sub}`}>

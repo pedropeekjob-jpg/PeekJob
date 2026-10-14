@@ -59,7 +59,7 @@ export function SearchDesktop({ s }: { s: SearchState }) {
   const shown = s.more ? s.results : s.results.slice(0, LIMIT);
   return (
     <div className={`container ${styles.desktop}`}>
-      <section className={styles.head}>
+      <section className={`zone zone-band ${styles.head}`}>
         <h1 className={`display ${styles.title}`}>{tr('Procurar uma organização', 'Find an organisation')}</h1>
         <div className="row">
           <SearchBox id="dq" text={s.text} onText={s.onText} clear={s.clear} large />

@@ -14,7 +14,7 @@ export default function Contacto() {
     <Shell nav footer>
       {!desktop && <MobileHomeHeader />}
       <div className={desktop ? 'container info-page' : 'info-page page-x'}>
-        <section className="info-hero">
+        <section className="info-hero zone zone-band">
           <span className="info-eyebrow">{tr('Contacto', 'Contact')}</span>
           <h1 className="info-title">{tr('Fala connosco.', 'Talk to us.')}</h1>
           <p className="info-lead">

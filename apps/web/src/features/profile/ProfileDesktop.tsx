@@ -13,10 +13,10 @@ import styles from './Profile.module.css';
 export function ProfileDesktop({ p, email }: { p: Profile; email: string }) {
   return (
     <div className={`container ${styles.desktop}`}>
-      <h1 className={styles.desktopTitle}>{tr('A tua conta', 'Your account')}</h1>
+      <h1 className={`zone zone-band ${styles.desktopTitle}`}>{tr('A tua conta', 'Your account')}</h1>
       <div className={`row wrap between ${styles.columns}`}>
         <div className={styles.left}>
-          <div className={styles.anonCard}>
+          <div className={`zone ${styles.anonCard}`}>
             <div aria-hidden="true" className={`float ${styles.anonDeco}`} />
             <div className={styles.anonTitle}>{tr('Para os outros és anónimo/a', 'To others you’re anonymous')}</div>
             <div className={styles.anonText}>{tr('Nem a PeekJob liga o teu email às avaliações.', 'Not even PeekJob links your email to your reviews.')}</div>

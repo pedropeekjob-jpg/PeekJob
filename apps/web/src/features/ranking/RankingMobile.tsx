@@ -48,7 +48,7 @@ export function RankingMobile({ ranked, F }: { ranked: RankedRow[]; F: RankingFi
   const chips = filterChips(F.f);
   return (
     <div className={`page ${styles.page}`}>
-      <div className={`row between ${styles.head}`}>
+      <div className={`row between zone zone-band ${styles.head}`}>
         <h1 className="h1">Ranking</h1>
         <Link to="/metodologia" className={`link ${styles.how}`}>
           {tr('Como calculamos', 'How we score')}

@@ -121,12 +121,9 @@
 .info-door-peek .info-eyebrow {
   color: var(--ink);
 }
-.info-door-job {
-  background: var(--mint);
-  color: var(--ink);
-}
 .info-door-job .info-eyebrow {
-  color: var(--teal-text);
+  /* fundo e cores da zona com cor (.zone) */
+  color: var(--ink);
 }
 .info-more {
   display: flex;

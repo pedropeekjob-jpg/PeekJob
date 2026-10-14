@@ -312,12 +312,12 @@ a.plain {
   transform: scale(0.98);
 }
 .btn-primary {
-  /* principal a tinta; o verde-água fica para acentos (anéis, seleção, linha) */
-  background: var(--ink);
-  color: #fff;
+  /* verde-água da marca com texto em tinta (14/10: mais vida, como a zona "O teu trabalho") */
+  background: var(--teal);
+  color: var(--ink);
 }
 .btn-primary:hover {
-  background: #1b252d;
+  background: #14b6bc;
 }
 .btn-dark {
   background: var(--ink);
@@ -942,5 +942,48 @@ main h1:focus,
   .site-header.is-home .icon-btn {
     width: 40px;
     height: 40px;
+  }
+}
+
+/* ---------- Zona com cor (14/10) ----------
+   Como "O teu trabalho" na página inicial: em cada ecrã uma zona em verde-água da marca, com texto em tinta.
+   O cliente achou o branco e menta "sem força" e o verde-água a cheio com preto pesado: uma zona por ecrã é o meio-termo.
+   Dentro da zona, o texto secundário, as linhas e as ligações passam a tons de tinta (contraste AA sobre o verde-água). */
+:root {
+  --zone-bg: var(--teal);
+  --zone-fg: var(--ink);
+  --zone-soft: #052a2e;
+  --zone-line: rgba(1, 11, 19, 0.22);
+}
+.zone {
+  background: var(--zone-bg);
+  color: var(--zone-fg);
+  --muted: var(--zone-soft);
+  --body: var(--zone-soft);
+  --title: var(--zone-fg);
+  --teal-text: var(--zone-fg);
+  --teal-dark: var(--zone-fg);
+  --line: var(--zone-line);
+}
+.zone .btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+/* Faixa: o fundo vai de lado a lado do ecrã sem mudar a estrutura (o elemento continua no contentor) */
+.zone-band {
+  box-shadow: 0 0 0 100vmax var(--zone-bg);
+  clip-path: inset(0 -100vmax);
+  padding-top: 28px;
+  padding-bottom: 28px;
+  margin-bottom: 12px;
+}
+/* telemóvel: faixa no topo do ecrã (sem cabeçalho por cima) sobe até à borda, sem tira branca */
+.page > .zone-band:first-child {
+  clip-path: inset(-28px -100vmax 0);
+}
+@media (min-width: 900px) {
+  .zone-band {
+    padding-top: 40px;
+    padding-bottom: 40px;
   }
 }

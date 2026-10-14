@@ -40,9 +40,10 @@
   border: 1px solid var(--line);
 }
 .action[data-primary] {
-  /* menta em vez de verde-água a cheio (visual leve, 14/10) */
-  background: var(--mint);
-  border-color: var(--mint);
+  /* zona com cor (.zone): verde-água da marca, como "O teu trabalho" na página inicial
+     (o fundo repete-se aqui porque o .action do módulo ganha ao .zone global) */
+  background: var(--zone-bg);
+  border-color: var(--zone-bg);
 }
 .actionIcon {
   flex: none;
@@ -411,8 +412,6 @@
 /* A nota não está à venda */
 .promise {
   margin-top: 48px;
-  background: var(--mint);
-  color: var(--ink);
   border-radius: 28px;
   padding: 40px 48px;
   gap: 32px 48px;

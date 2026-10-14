@@ -14,7 +14,7 @@ export function ProfileMobile({ p, email }: { p: Profile; email: string }) {
   const [mineOpen, toggleMine] = useToggle();
   return (
     <div className={`page ${styles.mobilePage}`}>
-      <div className={styles.mobileHead}>
+      <div className={`zone zone-band ${styles.mobileHead}`}>
         <h1 className={styles.mobileTitle}>{tr('A tua conta', 'Your account')}</h1>
         <div className={`row small muted ${styles.anonLine}`}>
           <Icon name="lock" size={14} />
