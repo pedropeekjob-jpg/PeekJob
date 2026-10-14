@@ -741,6 +741,21 @@ a.plain {
   }
 }
 
+/* ---- Cabeçalho ---- */
+.site-header {
+  background: var(--ground);
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0;
+}
+.site-header.is-home {
+  padding: 12px 0;
+}
+@media (min-width: 900px) {
+  .site-header.is-home {
+    padding: 18px 0;
+  }
+}
+
 /* ---- Navegação do cliente (Sobre, Ranking, Contacto), idioma e rodapé ---- */
 .page-x {
   padding-left: 16px;

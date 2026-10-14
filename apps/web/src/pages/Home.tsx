@@ -1,25 +1,25 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { LogoAnimated } from '../components/Brand';
-import { Icon } from '../components/Icon';
+import { useCallback, useState, type PointerEvent, type ReactNode } from 'react';
 import { DesktopHeader, MobileHomeHeader, SiteFooter } from '../components/Layout';
+import type { Zone } from '../features/home/home';
+import { CursorHint, Door, HomeMark, JobPanel, PeekPanel } from '../features/home/HomeParts';
+import styles from '../features/home/Home.module.css';
+import { useHomeZone } from '../features/home/useHomeZone';
 import { tr } from '../i18n';
-import { useIsDesktop } from '../lib/useMedia';
-import '../styles/home.css';
-
-type Door = 'peek' | 'job' | null;
+import { useMedia, useIsDesktop } from '../lib/useMedia';
 
 /**
- * Página inicial (esboço do cliente): duas zonas de cor, cada uma um botão inteiro,
- * e o logo na fronteira, a mudar de cor ao atravessar a linha.
- * - Em cima, "peek": espreitar organizações (explorar e pesquisar).
- * - Em baixo, "Job": o teu trabalho (avaliar).
+ * Página inicial (pedido do cliente): duas zonas de cor e o logo na fronteira.
+ * O primeiro clique escolhe: a zona clicada estende-se até ocupar a página (a linha desliza para o fundo ou para o topo)
+ * enquanto a outra se retrai, e só então mostra o que fazer (pesquisar ou avaliar). Com rato, uma dica segue o cursor.
  */
 export default function Home() {
   const desktop = useIsDesktop();
-  const [door, setDoor] = useState<Door>(null);
+  // só com rato/trackpad o campo recebe logo o foco (no telemóvel abriria o teclado sem a pessoa pedir)
+  const finePointer = useMedia('(hover: hover) and (pointer: fine)');
+  const { zone, open, close, typed, closed } = useHomeZone();
+  const [hover, setHover] = useState<Zone | null>(null);
 
-  // A mancha de luz segue o cursor (em ecrãs táteis anda sozinha, devagar)
+  // a mancha de luz e a dica seguem o cursor (variáveis CSS, sem re-render)
   const follow = useCallback((e: PointerEvent<HTMLElement>) => {
     if (e.pointerType !== 'mouse') return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -27,94 +27,34 @@ export default function Home() {
     e.currentTarget.style.setProperty('--gy', `${e.clientY - r.top}px`);
   }, []);
 
-  const enter = (d: Door) => () => setDoor(d);
-  const leave = () => setDoor(null);
+  const half = (z: Zone) => ({
+    className: `${styles.half} ${z === 'peek' ? styles.peek : styles.job}`,
+    onPointerMove: follow,
+    onPointerEnter: () => setHover(z),
+    onPointerLeave: () => setHover(null),
+  });
+  // a zona que se retrai fica vazia (só a cor, enquanto encolhe)
+  const content = (z: Zone, panel: ReactNode) => (zone === z ? panel : zone === null ? <Door zone={z} onOpen={open} focusOnMount={closed === z} /> : null);
 
   return (
-    <div className="home">
+    <div className={styles.home}>
       {desktop ? <DesktopHeader home /> : <MobileHomeHeader />}
-      <main id="conteudo" tabIndex={-1} className="home-split" data-door={door ?? ''}>
-        <Link
-          to="/explorar"
-          className="home-door home-peek"
-          onPointerEnter={enter('peek')}
-          onPointerLeave={leave}
-          onPointerMove={follow}
-          onFocus={enter('peek')}
-          onBlur={leave}
-          data-ev="cta_click"
-          data-ev-cta="explorar"
-          data-ev-area="home"
-        >
-          <span className="home-glow" aria-hidden />
-          <span className="home-copy">
-            <span className="home-eyebrow">{tr('Espreitar', 'Peek inside')}</span>
-            <h1 className="home-title">{tr('Como é trabalhar lá dentro?', 'What’s it really like to work there?')}</h1>
-            <span className="home-sub">
-              {tr('Procura uma organização e vê o que dizem as pessoas que lá trabalham.', 'Find an organisation and see what the people who work there say.')}
-            </span>
-            <span className="home-cta home-cta-field">
-              <Icon name="search" size={20} />
-              <span className="grow">{tr('Empresa, associação ou cidade', 'Company, association or city')}</span>
-              <Icon name="arrow" size={20} className="home-arrow" />
-            </span>
-          </span>
-        </Link>
-
-        <Link
-          to="/avaliar"
-          className="home-door home-job"
-          onPointerEnter={enter('job')}
-          onPointerLeave={leave}
-          onPointerMove={follow}
-          onFocus={enter('job')}
-          onBlur={leave}
-          data-ev="cta_click"
-          data-ev-cta="avaliar"
-          data-ev-area="home"
-        >
-          <span className="home-glow" aria-hidden />
-          <span className="home-rule" aria-hidden />
-          <HomeMark width={desktop ? 264 : 206} />
-          <span className="home-copy">
-            <span className="home-eyebrow">{tr('O teu trabalho', 'Your job')}</span>
-            <h2 className="home-title">{tr('Conta como é. Sem dar a cara.', 'Tell it like it is. Stay anonymous.')}</h2>
-            <span className="home-sub">
-              {tr('Avaliação anónima em 3 minutos. A organização nunca sabe quem escreveu.', 'An anonymous review in 3 minutes. The organisation never knows who wrote it.')}
-            </span>
-            <span className="home-cta home-cta-solid">
-              {tr('Avaliar onde trabalho', 'Review where I work')}
-              <Icon name="arrow" size={20} className="home-arrow" />
-            </span>
-          </span>
-        </Link>
+      <main id="conteudo" tabIndex={-1} className={styles.split} data-zone={zone ?? 'none'} data-hover={(zone === null && hover) || undefined}>
+        <h1 className="sr-only">{tr('PeekJob: como é trabalhar lá dentro, contado por quem lá trabalha', 'PeekJob: what it’s like to work there, told by the people who do')}</h1>
+        <div {...half('peek')}>
+          <span className={styles.glow} aria-hidden="true" />
+          {content('peek', <PeekPanel typed={typed} autoFocus={finePointer || typed !== ''} onClose={close} />)}
+          {zone === null && <CursorHint zone="peek" />}
+        </div>
+        <div {...half('job')}>
+          <span className={styles.glow} aria-hidden="true" />
+          <span className={styles.rule} aria-hidden="true" />
+          <HomeMark />
+          {content('job', <JobPanel autoFocus={finePointer} onClose={close} />)}
+          {zone === null && <CursorHint zone="job" />}
+        </div>
       </main>
       <SiteFooter />
     </div>
-  );
-}
-
-/**
- * Logo na fronteira: duas cópias sincronizadas, cortadas na linha.
- * Em cima (fundo teal): "peek" a tinta, perna do k a branco. Em baixo (fundo ink): "Job" a teal, "o" a branco.
- * A linha da fronteira desenha-se a partir do pino do "k".
- */
-function HomeMark({ width }: { width: number }) {
-  const label = 'PeekJob';
-  const ref = useRef<HTMLSpanElement>(null);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const t = requestAnimationFrame(() => setReady(true));
-    return () => cancelAnimationFrame(t);
-  }, []);
-  return (
-    <span ref={ref} className={'home-mark' + (ready ? ' is-ready' : '')} aria-hidden>
-      <span className="mk mk-top">
-        <LogoAnimated width={width} label={label} />
-      </span>
-      <span className="mk mk-bot">
-        <LogoAnimated width={width} label={label} />
-      </span>
-    </span>
   );
 }

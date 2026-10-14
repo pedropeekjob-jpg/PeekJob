@@ -37,6 +37,8 @@ async function openOrg(p) {
 /** { name, path, mobileOnly?, full?, state?, run?(page) } — `state` junta-se ao estado inicial da loja; — `run` prepara um estado depois de abrir a página; `full` fotografa a página toda */
 export const SCENARIOS = [
   { name: 'inicio', path: '/' },
+  { name: 'inicio-espreitar', path: '/?lado=espreitar' },
+  { name: 'inicio-avaliar', path: '/?lado=avaliar' },
   { name: 'explorar', path: '/explorar' },
   { name: 'explorar-inicio', path: '/explorar', full: true, state: { onboarded: true } },
   {

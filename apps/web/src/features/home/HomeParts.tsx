@@ -1,0 +1,160 @@
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { LogoAnimated } from '../../components/Brand';
+import { Icon } from '../../components/Icon';
+import { tr } from '../../i18n';
+import { searchHref, type Zone } from './home';
+import styles from './Home.module.css';
+
+/** Textos de cada zona: rótulo, dica que segue o rato e texto fixo nos ecrãs táteis */
+export const ZONE_TEXT = {
+  peek: {
+    label: () => tr('Espreitar', 'Peek inside'),
+    hint: () => tr('Espreitar organizações', 'Peek at organisations'),
+    tap: () => tr('Toca para procurar uma organização', 'Tap to find an organisation'),
+  },
+  job: {
+    label: () => tr('O teu trabalho', 'Your job'),
+    hint: () => tr('Avaliar onde trabalho', 'Review where I work'),
+    tap: () => tr('Toca para avaliar onde trabalhas', 'Tap to review where you work'),
+  },
+} as const;
+
+interface DoorProps {
+  zone: Zone;
+  onOpen: (z: Zone) => void;
+  focusOnMount: boolean;
+}
+
+/** Uma zona fechada: um botão que ocupa a zona inteira */
+export function Door({ zone, onOpen, focusOnMount }: DoorProps) {
+  const ref = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (focusOnMount) ref.current?.focus();
+  }, [focusOnMount]);
+  const t = ZONE_TEXT[zone];
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={styles.door}
+      aria-expanded={false}
+      aria-controls={`zona-${zone}`}
+      onClick={() => onOpen(zone)}
+      data-ev="cta_click"
+      data-ev-cta={zone === 'peek' ? 'abrir_espreitar' : 'abrir_avaliar'}
+      data-ev-area="home"
+    >
+      <span className={styles.label}>{t.label()}</span>
+      <span className={styles.tap} aria-hidden="true">
+        {t.tap()}
+      </span>
+      <span className="sr-only">: {t.hint()}</span>
+    </button>
+  );
+}
+
+/** Dica que acompanha o rato (só com rato; nos ecrãs táteis o texto está fixo na zona) */
+export function CursorHint({ zone }: { zone: Zone }) {
+  return (
+    <span className={styles.hint} aria-hidden="true">
+      {ZONE_TEXT[zone].hint()}
+      <Icon name="arrow" size={16} />
+    </span>
+  );
+}
+
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return (
+    <button type="button" className={`icon-btn ${styles.close}`} aria-label={tr('Voltar ao início', 'Back to the start')} onClick={onClose}>
+      <Icon name="close" size={18} />
+    </button>
+  );
+}
+
+/** Espreitar aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
+export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFocus: boolean; onClose: () => void }) {
+  const nav = useNavigate();
+  const [q, setQ] = useState(typed);
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    nav(searchHref(q));
+  };
+  return (
+    <section id="zona-peek" aria-labelledby="zona-peek-t" className={styles.panel}>
+      <CloseButton onClose={onClose} />
+      <span className={styles.eyebrow}>{ZONE_TEXT.peek.label()}</span>
+      <h2 id="zona-peek-t" className={styles.title}>
+        {tr('Como é trabalhar lá dentro?', 'What’s it really like to work there?')}
+      </h2>
+      <p className={styles.sub}>{tr('Procura uma organização e vê o que dizem as pessoas que lá trabalham.', 'Find an organisation and see what the people who work there say.')}</p>
+      <form role="search" className={`row ${styles.search}`} onSubmit={submit} data-ev="cta_click" data-ev-cta="pesquisar" data-ev-area="home">
+        <Icon name="search" size={20} className={styles.searchIcon} />
+        <label htmlFor="home-q" className="sr-only">
+          {tr('Pesquisar organização', 'Search organisations')}
+        </label>
+        <input
+          id="home-q"
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={tr('Empresa, associação ou cidade', 'Company, association or city')}
+          autoComplete="off"
+          enterKeyHint="search"
+          // eslint-disable-next-line jsx-a11y/no-autofocus -- a pessoa acabou de escolher pesquisar (só com teclado físico/rato)
+          autoFocus={autoFocus}
+        />
+        <button type="submit" className={styles.go} aria-label={tr('Procurar', 'Search')}>
+          <Icon name="arrow" size={20} />
+        </button>
+      </form>
+      <Link to="/explorar" className={`link ${styles.all}`} data-ev="cta_click" data-ev-cta="explorar" data-ev-area="home">
+        {tr('Ver todas as organizações', 'See all organisations')}
+      </Link>
+    </section>
+  );
+}
+
+/** O teu trabalho aberto: convite para avaliar */
+export function JobPanel({ autoFocus, onClose }: { autoFocus: boolean; onClose: () => void }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (autoFocus) ref.current?.focus();
+  }, [autoFocus]);
+  return (
+    <section id="zona-job" aria-labelledby="zona-job-t" className={styles.panel}>
+      <CloseButton onClose={onClose} />
+      <span className={styles.eyebrow}>{ZONE_TEXT.job.label()}</span>
+      <h2 id="zona-job-t" className={styles.title}>
+        {tr('Conta como é. Sem dar a cara.', 'Tell it like it is. Stay anonymous.')}
+      </h2>
+      <p className={styles.sub}>{tr('Avaliação anónima em 3 minutos. A organização nunca sabe quem escreveu.', 'An anonymous review in 3 minutes. The organisation never knows who wrote it.')}</p>
+      <Link ref={ref} to="/avaliar" className={`row ${styles.cta}`} data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="home">
+        {tr('Avaliar onde trabalho', 'Review where I work')}
+        <Icon name="arrow" size={20} />
+      </Link>
+    </section>
+  );
+}
+
+/**
+ * Logo na fronteira: duas cópias sincronizadas, cortadas na linha.
+ * Em cima (fundo teal): "peek" a tinta, perna do k a branco. Em baixo (fundo ink): "Job" a teal, "o" a branco.
+ */
+export function HomeMark() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
+  return (
+    <span className={styles.mark} data-ready={ready || undefined} aria-hidden="true">
+      <span className={`${styles.mk} ${styles.mkTop}`}>
+        <LogoAnimated width={264} label="PeekJob" />
+      </span>
+      <span className={`${styles.mk} ${styles.mkBot}`}>
+        <LogoAnimated width={264} label="PeekJob" />
+      </span>
+    </span>
+  );
+}

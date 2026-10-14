@@ -24,7 +24,7 @@ Verificado no browser num fluxo completo (entrar, pesquisar, avaliar, publicar):
 | `search` | Pesquisa estabilizada | `context` (pesquisa / avaliar), `search_term` (só pesquisa), `results_count`, `type_filter` | Falhas do catálogo (`results_count = 0`), linguagem das pessoas |
 | `select_org` | Clique numa organização | `source` (página), `org_type`, `match` | Que listas funcionam (início, ranking, pesquisa, guardadas) |
 | `nav_click` | Menu, barra inferior, rodapé | `area` (header, tabbar, footer), `item` | Arquitetura da informação: o que se usa e o que ninguém usa |
-| `cta_click` | "Avaliar onde trabalho" | `cta`, `area`, `source` | Onde colocar o botão principal |
+| `cta_click` | "Avaliar onde trabalho"; na página inicial também o primeiro clique (`abrir_espreitar`, `abrir_avaliar`) | `cta`, `area`, `source` | Onde colocar o botão principal; que zona da página inicial atrai mais (o "engagement" pedido pelo cliente) |
 | `login_link_requested` / `login` | Link mágico | `result` (sent, rate_limited, success, link_expired…) | Atrito no login |
 | `review_org_created` | Nova organização | `org_type`, `result` (created, existing…) | Qualidade do catálogo, duplicados |
 | `verification` | Verificação | `method` (email, document, none), `step` (code_sent, confirmed, nif_not_found, skipped…) | Que verificação as pessoas preferem; onde falha |

@@ -9,22 +9,22 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 - **Mobile first:** abaixo de 900 px, barra inferior com botão central "Avaliar"; a partir de 900 px, cabeçalho com navegação.
 - **Dois idiomas:** português por omissão e inglês (UK), com o seletor PT · EN no cabeçalho, rodapé e Perfil. O conteúdo escrito pelas pessoas fica no idioma original.
 
-## Página inicial (esboço do cliente)
-- **Estrutura:** duas zonas de cor, cada uma é um botão inteiro.
-  - **Em cima, "peek" (teal):** espreitar, ou seja, explorar e pesquisar organizações.
-  - **Em baixo, "Job" (ink):** avaliar onde trabalho.
-- **Logo:** fica na fronteira e muda de cor ao atravessar a linha, que se desenha da esquerda para a direita.
-- **Animação:**
-  - Uma mancha de luz segue o cursor: branca em cima; em baixo é roxa, a cor do respeito e dos direitos humanos.
-  - Os olhos do logo olham para a zona escolhida.
-  - Em telemóvel, as manchas deslizam sozinhas.
-  - Quem prefere menos movimento vê tudo parado.
+## Página inicial (esboço do cliente, revisto a 14/10)
+- **Primeiro passo:** duas zonas de cor, cada uma um botão inteiro, só com uma palavra: **Espreitar** (em cima, teal) e **O teu trabalho** (em baixo, ink). O logo fica na fronteira e muda de cor ao atravessar a linha.
+- **O primeiro clique escolhe** (telemóvel e computador): a zona clicada estende-se até ocupar a página (a linha desliza para o fundo ou para o topo) enquanto a outra se retrai; o logo sai (já está no cabeçalho) e só então aparece o conteúdo:
+  - **Espreitar:** "Como é trabalhar lá dentro?", pesquisa a sério (Enter leva aos resultados) e "Ver todas as organizações" (`/explorar`).
+  - **O teu trabalho:** "Conta como é. Sem dar a cara." e o botão "Avaliar onde trabalho" (`/avaliar`).
+- **O que acontece ao clicar:** com rato, uma dica segue o cursor ("Espreitar organizações" / "Avaliar onde trabalho"); em ecrãs táteis o texto está fixo em cada zona ("Toca para…").
+- **Voltar às duas zonas:** botão ✕, tecla Escape ou o "voltar" do browser. A zona aberta fica no endereço (`/?lado=espreitar`, `/?lado=avaliar`), por isso também se pode partilhar.
+- **Atalhos:** com rato, o campo de pesquisa fica logo pronto a escrever (no telemóvel não abre o teclado sem a pessoa tocar); começar a escrever nas duas zonas abre a pesquisa com o que se escreveu.
+- **Animação:** a mancha de luz segue o cursor (branca em cima, roxa em baixo, a cor do respeito); os olhos do logo olham para a zona onde está o cursor; em telemóvel as manchas deslizam sozinhas. Quem prefere menos movimento vê a troca sem animação.
+- **Medição:** `cta_click` com `cta=abrir_espreitar` / `abrir_avaliar` (o primeiro clique), `pesquisar`, `explorar` e `avaliar` (o segundo), sempre com `area=home`.
 - **Cabeçalho:** Sobre, Ranking e Contacto. **Rodapé:** Facebook e Instagram ao centro, e por baixo as ligações secundárias e o idioma.
 - **Para onde foi o resto:** o início anterior, com a lista "Para ti", passa para **Explorar** (`/explorar`), o primeiro separador da barra inferior.
 
 ## Fluxos
 
-**Primeira visita:** Página inicial (explorar ou avaliar) → Preferências (3 prioridades) → A preparar (logo animado) → Explorar "Para ti".
+**Primeira visita:** Página inicial (Espreitar → Ver todas, ou O teu trabalho → Avaliar) → Preferências (3 prioridades) → A preparar (logo animado) → Explorar "Para ti".
 
 **Descobrir:** Explorar → Pesquisa / Ranking (Para mim · Nota geral, filtros) / Tipos e setores → Organização (Avaliações · Entrevistas · Salários) → Denunciar avaliação.
 

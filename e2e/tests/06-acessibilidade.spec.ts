@@ -23,7 +23,7 @@ const report = (found: Found[]) => found.map((f) => `${f.page} · ${f.rule} (${f
 
 test('páginas públicas sem falhas de acessibilidade (WCAG 2.1 AA)', async ({ page }) => {
   const found: Found[] = [];
-  for (const path of ['/', '/explorar', '/ranking', '/pesquisa', '/sobre', '/contacto', '/metodologia', '/setores', '/para-organizacoes', '/entrar', '/isto-nao-existe', '/?lang=en']) {
+  for (const path of ['/', '/?lado=espreitar', '/?lado=avaliar', '/explorar', '/ranking', '/pesquisa', '/sobre', '/contacto', '/metodologia', '/setores', '/para-organizacoes', '/entrar', '/isto-nao-existe', '/?lang=en']) {
     await page.goto(path);
     if (page.url().endsWith('/preferencias')) await audit(page, '/preferencias', found);
     await audit(page, path, found);

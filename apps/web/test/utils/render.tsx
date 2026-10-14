@@ -10,7 +10,8 @@ export function setViewport(kind: 'mobile' | 'desktop') {
   const width = kind === 'desktop' ? 1440 : 390;
   window.matchMedia = ((query: string) => {
     const min = /min-width:\s*(\d+)px/.exec(query);
-    const matches = min ? width >= Number(min[1]) : /prefers-reduced-motion/.test(query);
+    // computador = rato (hover e pointer: fine); telemóvel = toque
+    const matches = min ? width >= Number(min[1]) : /prefers-reduced-motion/.test(query) || (kind === 'desktop' && /pointer:\s*fine/.test(query));
     return { matches, media: query, onchange: null, addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false };
   }) as typeof window.matchMedia;
 }

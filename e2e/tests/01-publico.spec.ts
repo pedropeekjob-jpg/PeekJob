@@ -15,7 +15,10 @@ test.describe('Visita pública', () => {
 
   test('da página inicial a uma organização', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: /Como é trabalhar lá dentro/ }).click();
+    // primeiro clique: a zona de cima ocupa a página; depois ver todas as organizações
+    await page.getByRole('button', { name: /^Espreitar/ }).click();
+    await expect(page).toHaveURL(/\/\?lado=espreitar$/);
+    await page.getByRole('link', { name: 'Ver todas as organizações' }).click();
     // na primeira visita pergunta as prioridades (pode saltar)
     await page.waitForURL(/\/(explorar|preferencias)$/);
     if (page.url().endsWith('/preferencias')) {
@@ -35,6 +38,22 @@ test.describe('Visita pública', () => {
     await page.getByText('Padaria Ribeira').first().click();
     await page.waitForURL(/\/org\//);
     await expect(page.getByText('Turnos mal planeados e chefia desorganizada.')).toBeVisible();
+  });
+
+  test('página inicial: pesquisar a partir da zona de cima, voltar e escolher avaliar', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: /^Espreitar/ }).click();
+    await page.getByRole('searchbox', { name: 'Pesquisar organização' }).fill('padaria');
+    await page.keyboard.press('Enter');
+    await page.waitForURL(/\/pesquisa\?q=padaria$/);
+    await page.goBack();
+    await expect(page.getByRole('searchbox', { name: 'Pesquisar organização' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page).toHaveURL(/\/$/);
+    await page.getByRole('button', { name: /^O teu trabalho/ }).click();
+    await page.getByRole('link', { name: 'Avaliar onde trabalho' }).click();
+    await page.waitForURL(/\/avaliar$/);
+    await expectNoHorizontalScroll(page);
   });
 
   test('caminho que não existe: página 404 (e estado 404, sem "soft 404")', async ({ page }) => {

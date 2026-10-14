@@ -1,0 +1,463 @@
+/* Página inicial em dois passos: as duas zonas; ao escolher uma, a linha desliza e a zona ocupa o ecrã */
+
+.home {
+  --mark-w: 206px;
+  --mark-h: calc(var(--mark-w) * 0.5493);
+  --mark-above: calc(var(--mark-h) * 0.482);
+  --mark-below: calc(var(--mark-h) * 0.518);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ground);
+}
+
+.split {
+  flex: none;
+  height: max(600px, calc(100svh - 64px));
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- As duas zonas ---------- */
+.half {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  isolation: isolate;
+  transition:
+    flex-grow 0.7s var(--ease),
+    flex-basis 0.7s var(--ease);
+}
+.peek {
+  --gx: 72vw;
+  --gy: 120px;
+  background: var(--teal);
+  color: var(--ink);
+}
+.job {
+  --gx: 22vw;
+  --gy: 240px;
+  background: var(--ink);
+  color: #fff;
+}
+/* a zona escolhida estende-se até ocupar a página; a outra retrai-se até desaparecer */
+.split[data-zone='peek'] .job,
+.split[data-zone='job'] .peek {
+  flex-grow: 0;
+  overflow: hidden;
+}
+
+/* Mancha de luz: segue o cursor; em ecrãs táteis desliza sozinha */
+.glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+.glow::before {
+  content: '';
+  position: absolute;
+  width: 640px;
+  height: 640px;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  transform: translate(calc(var(--gx) - 320px), calc(var(--gy) - 320px));
+  transition:
+    transform 0.9s var(--ease),
+    opacity 0.6s;
+  opacity: 0.85;
+}
+.peek .glow::before {
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0));
+}
+.job .glow::before {
+  /* roxo da marca: respeito, direitos humanos e diversidade */
+  background: radial-gradient(closest-side, rgba(101, 45, 144, 0.7), rgba(101, 45, 144, 0));
+}
+@media (hover: none) {
+  .peek .glow::before {
+    animation: driftA 16s ease-in-out infinite alternate;
+  }
+  .job .glow::before {
+    animation: driftB 18s ease-in-out infinite alternate;
+  }
+}
+@keyframes driftA {
+  from {
+    transform: translate(40vw, -260px);
+  }
+  to {
+    transform: translate(-200px, -80px);
+  }
+}
+@keyframes driftB {
+  from {
+    transform: translate(-260px, -40px);
+  }
+  to {
+    transform: translate(30vw, -260px);
+  }
+}
+
+/* Zona fechada: um botão que ocupa a zona inteira */
+.door {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.peek .door {
+  padding: 32px 20px calc(var(--mark-above) + 20px);
+}
+.job .door {
+  padding: calc(var(--mark-below) + 20px) 20px 32px;
+}
+.door:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: -12px;
+}
+.label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(44px, 12vw, 88px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  animation: up 0.8s var(--ease) both;
+}
+.job .label {
+  animation-delay: 0.3s;
+}
+/* ecrãs táteis: o que acontece ao tocar fica escrito (com rato, a dica segue o cursor) */
+.tap {
+  font-size: 15px;
+  font-weight: 500;
+  opacity: 0.85;
+  animation: up 0.8s var(--ease) 0.1s both;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tap {
+    display: none;
+  }
+}
+
+/* Dica que acompanha o rato */
+.hint {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hint {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(calc(var(--gx) + 18px), calc(var(--gy) + 18px));
+    transition:
+      opacity 0.2s,
+      transform 0.08s linear;
+  }
+  .peek .hint {
+    background: var(--ink);
+    color: #fff;
+  }
+  .job .hint {
+    background: var(--teal);
+    color: var(--ink);
+  }
+  .split[data-zone='none'] .half:hover .hint {
+    opacity: 1;
+  }
+}
+
+/* A linha do esboço: desenha-se da esquerda para a direita e desliza com a zona */
+.rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -0.75px;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.55);
+  transform-origin: left center;
+  animation: rule 1.4s var(--ease) 0.2s both;
+  z-index: 2;
+  pointer-events: none;
+}
+@keyframes rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Logo na fronteira; sai quando uma zona abre (já está no cabeçalho) */
+.mark {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--mark-w);
+  aspect-ratio: 142 / 78;
+  transform: translate(-50%, -48.2%);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+.mark[data-ready] {
+  opacity: 1;
+}
+.split[data-zone='peek'] .mark,
+.split[data-zone='job'] .mark {
+  opacity: 0;
+}
+.mk {
+  position: absolute;
+  inset: 0;
+}
+.mk > div {
+  width: 100%;
+}
+.mkTop {
+  clip-path: inset(0 0 51.8% 0);
+  --pj-ink: #010b13;
+  --pj-accent: #ffffff;
+  --pj-bg: #00a9af;
+  --pj-node: #00a9af;
+  --pj-road: rgba(1, 11, 19, 0.25);
+}
+.mkBot {
+  clip-path: inset(48.2% 0 0 0);
+  --pj-ink: #ffffff;
+  --pj-accent: #00a9af;
+  --pj-bg: #010b13;
+  --pj-node: #010b13;
+  --pj-road: #2a3238;
+}
+/* Os olhos olham para a zona onde está o cursor */
+.mark :global(.pj-eyes),
+.mark :global(.pj-pupil) {
+  transition: transform 0.45s var(--ease);
+}
+.split[data-hover='peek'] .mark :global(.pj-eyes) {
+  animation: none;
+  transform: translate(1px, -1.5px);
+}
+.split[data-hover='job'] .mark :global(.pj-eyes) {
+  animation: none;
+  transform: translate(1.6px, 1.2px);
+}
+.split[data-hover] .mark :global(.pj-pupil) {
+  animation: none;
+  transform: scale(1);
+}
+
+/* ---------- Zona aberta ---------- */
+.panel {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 64px 20px 40px;
+}
+/* o conteúdo aparece depois de a linha deslizar */
+.panel > * {
+  animation: up 0.6s var(--ease) both;
+  animation-delay: 0.35s;
+}
+.panel > :nth-child(3) {
+  animation-delay: 0.42s;
+}
+.panel > :nth-child(4) {
+  animation-delay: 0.49s;
+}
+.panel > :nth-child(5),
+.panel > :nth-child(6) {
+  animation-delay: 0.56s;
+}
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.title {
+  margin: 0;
+  max-width: 860px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(30px, 8vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.sub {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  max-width: 440px;
+  opacity: 0.86;
+  text-wrap: pretty;
+}
+
+/* Pesquisa a sério */
+.search {
+  margin-top: 10px;
+  width: min(100%, 480px);
+  height: 60px;
+  gap: 8px;
+  padding: 0 6px 0 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgba(1, 11, 19, 0.14);
+}
+.search:focus-within {
+  box-shadow:
+    0 10px 30px rgba(1, 11, 19, 0.14),
+    0 0 0 4px rgba(1, 11, 19, 0.3);
+}
+.searchIcon {
+  flex: none;
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  /* 16 px: cabe o texto de ajuda a 360 px e o iPhone não faz zoom ao tocar no campo */
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
+}
+.search input::placeholder {
+  color: var(--muted);
+}
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+.go {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+/* .link global é verde-água: no fundo verde-água fica escuro e sublinhado */
+.all {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 15px;
+}
+
+/* Avaliar */
+.cta {
+  margin-top: 10px;
+  gap: 12px;
+  height: 56px;
+  padding: 0 22px;
+  border-radius: 18px;
+  background: var(--teal);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  transition:
+    transform 0.4s var(--ease),
+    background 0.3s;
+}
+.cta:hover {
+  background: #14b6bc;
+  transform: translateY(-2px);
+}
+.cta:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@keyframes up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .half,
+  .glow::before,
+  .label,
+  .tap,
+  .hint,
+  .rule,
+  .mark,
+  .panel > *,
+  .cta {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .home {
+    --mark-w: 264px;
+  }
+  .split {
+    height: max(640px, calc(100svh - 83px));
+  }
+  .peek .door {
+    padding-top: 28px;
+  }
+  .title {
+    font-size: 50px;
+  }
+  .search {
+    gap: 10px;
+    padding-left: 18px;
+  }
+  .search input {
+    font-size: 17px;
+  }
+}
