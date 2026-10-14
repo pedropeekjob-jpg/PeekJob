@@ -242,6 +242,19 @@ export class OrganizationsService {
         [sourceId, targetId],
       );
       await c.query(`UPDATE reviews SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
+      // entrevistas e salários: um por pessoa; fica o mais recente
+      await c.query(
+        `DELETE FROM interviews r USING interviews o
+          WHERE r.author_ref = o.author_ref AND r.org_id IN ($1, $2) AND o.org_id IN ($1, $2) AND r.org_id <> o.org_id AND r.created_at < o.created_at`,
+        [sourceId, targetId],
+      );
+      await c.query(`UPDATE interviews SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
+      await c.query(
+        `DELETE FROM salaries r USING salaries o
+          WHERE r.author_ref = o.author_ref AND r.org_id IN ($1, $2) AND o.org_id IN ($1, $2) AND r.org_id <> o.org_id AND r.updated_at < o.updated_at`,
+        [sourceId, targetId],
+      );
+      await c.query(`UPDATE salaries SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
       await c.query(`UPDATE org_locations SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
       await c.query(`UPDATE org_aliases SET org_id = $2 WHERE org_id = $1 AND alias NOT IN (SELECT alias FROM org_aliases WHERE org_id = $2)`, [sourceId, targetId]);
       await c.query(`INSERT INTO org_aliases (org_id, alias) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [targetId, src.name]);

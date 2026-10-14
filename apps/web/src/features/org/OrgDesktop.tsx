@@ -28,7 +28,7 @@ function BackToRanking() {
 
 /** Computador: cabeçalho, separadores e duas colunas (conteúdo + lateral) */
 export function OrgDesktop({ org, tab }: { org: Org; tab: OrgTab }) {
-  const { has, m, startReview } = useOrgActions(org);
+  const { has, m, startReview, share } = useOrgActions(org);
 
   if (tab !== 'avaliacoes') {
     return (
@@ -40,7 +40,7 @@ export function OrgDesktop({ org, tab }: { org: Org; tab: OrgTab }) {
             <h1 className={`h1 ${styles.name}`}>{org.name}</h1>
             {has && <span className={`pill pill-match ${styles.matchPill}`}>{tr(`${m}% para ti`, `${m}% for you`)}</span>}
           </div>
-          <button type="button" className={`btn btn-primary lift ${styles.cta}`} onClick={startReview}>
+          <button type="button" className={`btn btn-primary lift ${styles.cta}`} onClick={() => share(tab)}>
             {shareCta(tab, org.type)}
           </button>
         </section>

@@ -32,6 +32,7 @@ Verificado no browser num fluxo completo (entrar, pesquisar, avaliar, publicar):
 | `review_rewrite` | Reescrever com IA | `step` (requested, accepted, dismissed, failed), `trigger` (blocked, tone, manual), `source` (ai, rules) | Quantas pessoas escrevem com raiva, e se a proposta da IA é aceite ou recusada |
 | `save_org`, `mark_helpful` | Guardar, "útil" | `saved` / `helpful` | Interesse e confiança no conteúdo |
 | `moderation_appeal` | Pedido de revisão de uma decisão enviado | `result` | Quantas decisões são contestadas (qualidade da moderação) |
+| `share` | Entrevista ou salário partilhado (ou a falha) | `kind` (`interview`/`salary`), `result` | Quantas pessoas partilham entrevistas e salários, e onde falha |
 | `web_vitals` | LCP, INP, CLS | `metric_name`, `value`, `rating`, `page_path` | Que ecrãs refatorar por desempenho |
 
 Propriedades do utilizador: `ui_lang` (pt/en), `app_version` (commit publicado, para comparar antes/depois de cada mudança) e `app_mode` (api ou demo).

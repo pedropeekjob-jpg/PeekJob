@@ -39,6 +39,8 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 
 ![Avaliar: antes e agora](ecras/avaliar-antes-agora.png)
 
+**Partilhar entrevista ou salário (14/10):** nos separadores Entrevistas e Salários da organização, o botão abre um só ecrã (`/partilhar/entrevista` ou `/partilhar/salario`). Entrevista: função, correu bem ou mal, passos (conversa, entrevista, prova prática, teste escrito, dia de experiência, dinâmica de grupo), oferta, resposta (só se não houve oferta), dificuldade 1–5 e comentário opcionais — 4 toques além da função. Salário: função, bruto mensal e se chega a horas. Sem nomes nem insultos. Uma função só mostra valores com 3 salários; os extremos são percentis, nunca o salário de alguém. Depois, "Ver na página da organização" volta ao separador (e o "voltar" seguinte não reabre o formulário).
+
 **Institucional:** Sobre (missão e princípios) · Contacto (email, organizações, redes sociais e, à parte, ajuda urgente com ACT, CITE, APAV e 112).
 
 **Conta:** Entrar (link mágico, sem palavra-passe) · Perfil (anonimato, mensagens, o que valorizo, as minhas avaliações) · Guardadas · Apoio.

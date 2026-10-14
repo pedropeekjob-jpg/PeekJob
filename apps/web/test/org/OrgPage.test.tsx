@@ -116,6 +116,8 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     await user.click(screen.getByRole('button', { name: 'Ver todas as 3 entrevistas' }));
     expect(screen.getAllByRole('article')).toHaveLength(3);
     expect(screen.getAllByRole('button', { name: 'Partilhar a minha entrevista' }).length).toBe(1);
+    await user.click(screen.getByRole('button', { name: 'Partilhar a minha entrevista' }));
+    expect(screen.getByTestId('probe').textContent).toMatch(/\|\/partilhar\/entrevista\?org=padaria-ribeira$/);
   });
 
   it('salários: faixas por função, pontualidade e nota sobre o anonimato', async () => {
@@ -129,13 +131,15 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     } else {
       expect(screen.getByText(/Valor grande = valor do meio/)).toBeInTheDocument();
     }
-    expect(screen.getByRole('button', { name: 'Partilhar o meu salário' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Partilhar o meu salário' }));
+    expect(screen.getByTestId('probe').textContent).toMatch(/\|\/partilhar\/salario\?org=padaria-ribeira$/);
   });
 
   it('voluntariado: sem salários e o botão é avaliar', async () => {
-    show(viewport, 'rede-vizinha', 'salarios');
+    const { user } = show(viewport, 'rede-vizinha', 'salarios');
     expect(await screen.findByText('Aqui o trabalho é voluntário.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Avaliar esta organização' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Avaliar esta organização' }));
+    expect(screen.getByTestId('probe').textContent).toMatch(/\/avaliar\?org=rede-vizinha$/);
   });
 
   it('organização nova: sem nota, convite para ser a primeira', async () => {

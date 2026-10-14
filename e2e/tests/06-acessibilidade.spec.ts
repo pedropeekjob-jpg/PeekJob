@@ -80,6 +80,19 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   await page.getByRole('link', { name: 'Confirmar agora' }).click();
   await page.waitForURL(/\/avaliar\/verificar/);
   await audit(page, '/avaliar/verificar', found);
+  await page.goto('/pesquisa');
+  await page.getByRole('searchbox').first().fill('oficina sete');
+  await page.getByText('Oficina Sete', { exact: true }).first().click();
+  await page.waitForURL(/\/org\//);
+  const orgUrl = page.url();
+  for (const tab of ['salarios', 'entrevistas'] as const) {
+    await page.goto(`${orgUrl}/${tab}`);
+    await page.getByRole('button', { name: tab === 'salarios' ? 'Partilhar o meu salário' : 'Partilhar a minha entrevista' }).click();
+    await page.waitForURL(/\/partilhar\//);
+    await audit(page, `/partilhar (${tab})`, found);
+  }
+  await page.getByLabel(/Como foi o processo/).fill('O Ricardo é um idiota.');
+  await audit(page, 'partilhar: texto bloqueado', found);
   for (const path of ['/perfil', '/perfil/dados', '/guardadas', '/apoio', '/preferencias']) {
     await page.goto(path);
     await audit(page, path, found);

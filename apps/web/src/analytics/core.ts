@@ -28,6 +28,7 @@ export interface EventMap {
   save_org: { saved: boolean; source?: string };
   mark_helpful: { helpful: boolean };
   moderation_appeal: { result: 'sent' };
+  share: { kind: 'interview' | 'salary'; result: string };
   web_vitals: { metric_name: string; value: number; rating: string; page_path: string };
 }
 export type EventName = keyof EventMap;

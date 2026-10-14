@@ -50,7 +50,15 @@ export function useOrgActions(org: Org) {
     // entra no fluxo novo: com um só local segue logo para as notas; a verificação é depois de publicar
     nav(`/avaliar?org=${encodeURIComponent(org.id)}`);
   }, [nav, org.id, org.locations, startDraft]);
-  return { has, m, startReview };
+  // entrevistas e salários têm o seu próprio ecrã (no voluntariado não há salários: avalia-se)
+  const share = useCallback(
+    (tab: OrgTab) => {
+      if (tab === 'salarios' && org.type === 'Voluntariado') return startReview();
+      nav(`/partilhar/${tab === 'entrevistas' ? 'entrevista' : 'salario'}?org=${encodeURIComponent(org.id)}`);
+    },
+    [nav, org.id, org.type, startReview],
+  );
+  return { has, m, startReview, share };
 }
 
 /** Critérios: prioridades da pessoa primeiro, os outros à parte */

@@ -18,7 +18,7 @@ import styles from './OrgMobile.module.css';
 
 /** Telemóvel: entrevistas e salários com cabeçalho curto; avaliações com resumo, critérios e mapa */
 export function OrgMobile({ org, tab }: { org: Org; tab: OrgTab }) {
-  const { has, m, startReview } = useOrgActions(org);
+  const { has, m, startReview, share } = useOrgActions(org);
   const [active, setActive] = useState(org.locations[0]?.id ?? '');
 
   if (tab !== 'avaliacoes') {
@@ -34,7 +34,7 @@ export function OrgMobile({ org, tab }: { org: Org; tab: OrgTab }) {
         <OrgTabs org={org} tab={tab} desktop={false} />
         {tab === 'entrevistas' ? <MobileInterviews org={org} /> : <MobileSalaries org={org} />}
         <div className={`sticky-cta ${styles.sticky}`}>
-          <button type="button" className={`btn btn-primary btn-block ${styles.cta}`} onClick={startReview}>
+          <button type="button" className={`btn btn-primary btn-block ${styles.cta}`} onClick={() => share(tab)}>
             {shareCta(tab, org.type)}
           </button>
         </div>

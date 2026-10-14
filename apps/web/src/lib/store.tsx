@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, API_URL, ApiError, apiMode, errorText } from '../api/http';
-import { toMessage, toMyReview, toOrg, type ApiOrg, type ApiReview } from '../api/mappers';
+import { toMessage, toMyReview, toOrg, type ApiInterviews, type ApiOrg, type ApiReview, type ApiSalaries } from '../api/mappers';
 import { bumpHelpful, loadEngagement, syncOnLogin } from './engagement';
 import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
 import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
 import { detectRedFlags } from './moderation';
 import { getLang, tr } from '../i18n';
+import { stepsLabel, type CreateInterviewInput, type CreateSalaryInput } from '@peekjob/shared';
+import { emptyShared, type SharedLocal } from '../features/share/share';
 
 /**
  * Estado da aplicação.
@@ -80,6 +82,8 @@ interface State {
   added: AddedOrg[];
   replies: Record<string, string>;
   lastPublished: string | null;
+  /** demonstração: entrevista e salário partilhados por organização */
+  shared: SharedLocal;
 }
 
 export type Failure = { ok: false; status: number; message: string; body: Record<string, any> | null };
@@ -119,7 +123,7 @@ const initial = (): State =>
   apiMode
     ? {
         prefs: DEFAULT_PREFS, onboarded: false, user: null, saved: [], useful: {}, myReviews: [], messages: [],
-        draft: emptyDraft(), added: [], replies: {}, lastPublished: null,
+        draft: emptyDraft(), added: [], replies: {}, lastPublished: null, shared: emptyShared(),
       }
     : {
         prefs: DEFAULT_PREFS,
@@ -139,6 +143,7 @@ const initial = (): State =>
         added: [],
         replies: {},
         lastPublished: null,
+        shared: emptyShared(),
       };
 
 const KEY = apiMode ? 'peekjob-api-v1' : 'peekjob-poc-v1';
@@ -228,8 +233,14 @@ function useAppState() {
     loadingRef.current[id] = true;
     setRemote((x) => ({ ...x, loading: { ...x.loading, [id]: true } }));
     try {
-      const [o, revs] = await Promise.all([api<ApiOrg>(`/orgs/${id}`), api<{ items: ApiReview[] }>(`/orgs/${id}/reviews`)]);
-      setRemote((x) => ({ ...x, details: { ...x.details, [id]: toOrg(o, revs.items) }, loading: { ...x.loading, [id]: false } }));
+      // entrevistas e salários são extra: se falharem, a página abre na mesma
+      const [o, revs, interviews, salaries] = await Promise.all([
+        api<ApiOrg>(`/orgs/${id}`),
+        api<{ items: ApiReview[] }>(`/orgs/${id}/reviews`),
+        api<ApiInterviews>(`/orgs/${id}/interviews`).catch(() => undefined),
+        api<ApiSalaries>(`/orgs/${id}/salaries`).catch(() => undefined),
+      ]);
+      setRemote((x) => ({ ...x, details: { ...x.details, [id]: toOrg(o, revs.items, { interviews, salaries }) }, loading: { ...x.loading, [id]: false } }));
     } catch {
       setRemote((x) => ({ ...x, missing: { ...x.missing, [id]: true }, loading: { ...x.loading, [id]: false } }));
     }
@@ -505,6 +516,42 @@ function useAppState() {
           return { ok: true };
         } catch (e) {
           return fail(e);
+        }
+      },
+
+      /** Partilhar uma entrevista (uma por organização); na demonstração fica no browser */
+      shareInterview: async (orgId: string, input: CreateInterviewInput): Promise<Result> => {
+        if (!apiMode) {
+          if (stRef.current.shared.interviews[orgId]) return { ok: false, status: 409, message: '', body: null };
+          const mine = { id: `eu-${orgId}`, role: input.role, when: tr('hoje', 'today'), positive: input.positive, offer: input.offer, steps: stepsLabel(input.steps), body: input.text };
+          set((s) => ({ shared: { ...s.shared, interviews: { ...s.shared.interviews, [orgId]: mine } } }));
+          track('share', { kind: 'interview', result: 'ok' });
+          return { ok: true };
+        }
+        try {
+          await api(`/orgs/${orgId}/interviews`, { body: input });
+          track('share', { kind: 'interview', result: 'ok' });
+          void loadOrg(orgId, true);
+          return { ok: true };
+        } catch (e) {
+          const f = fail(e);
+          track('share', { kind: 'interview', result: failKind(f) });
+          return f;
+        }
+      },
+
+      /** Partilhar o salário (voltar a partilhar substitui o anterior) */
+      shareSalary: async (orgId: string, input: CreateSalaryInput): Promise<Result> => {
+        try {
+          if (apiMode) await api(`/orgs/${orgId}/salaries`, { body: input });
+          else set((s) => ({ shared: { ...s.shared, salaries: { ...s.shared.salaries, [orgId]: input } } }));
+          track('share', { kind: 'salary', result: 'ok' });
+          if (apiMode) void loadOrg(orgId, true);
+          return { ok: true };
+        } catch (e) {
+          const f = fail(e);
+          track('share', { kind: 'salary', result: failKind(f) });
+          return f;
         }
       },
 

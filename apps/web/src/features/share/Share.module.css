@@ -1,0 +1,92 @@
+.page {
+  padding-bottom: 120px;
+}
+.desktop {
+  max-width: 640px;
+  padding-top: 40px;
+  padding-bottom: 80px;
+}
+.title {
+  margin: 8px 0 4px;
+  font-size: 28px;
+  line-height: 1.1;
+}
+.desktop .title {
+  font-size: 40px;
+}
+.lead {
+  margin: 0 0 24px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.question {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.choices {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.choice,
+.number {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--field);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 15px;
+}
+.number {
+  width: 44px;
+  padding: 0;
+}
+.choice[aria-pressed='true'],
+.number[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+.chip {
+  height: 44px;
+}
+.money {
+  max-width: 220px;
+}
+.hint {
+  margin: 0;
+}
+.error {
+  color: var(--warn-text);
+  font-size: 14px;
+}
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.done {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 24px;
+}
+.doneActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}

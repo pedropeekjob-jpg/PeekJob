@@ -72,7 +72,7 @@ export interface Org {
   locations: OrgLocation[];
   reviews: Review[];
   interviews: Interview[];
-  interviewStats?: { positivePct: number; offerPct: number; answeredPct: number; difficulty: number; usualSteps: string };
+  interviewStats?: { positivePct: number; offerPct: number; answeredPct: number; difficulty?: number; usualSteps: string };
   salaries: SalaryBand[];
   paidOnTimePct?: number;
   claimed: boolean;

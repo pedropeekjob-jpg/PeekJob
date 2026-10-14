@@ -43,6 +43,16 @@ export class AccountController {
       [ref],
     );
 
+    const interviews = await q(
+      `SELECT o.name AS org_name, i.role, i.positive, i.offer, i.answered, i.difficulty, i.steps, i.text, i.status, i.created_at
+         FROM interviews i JOIN organizations o ON o.id = i.org_id WHERE i.author_ref = $1 ORDER BY i.created_at`,
+      [ref],
+    );
+    const salaries = await q(
+      `SELECT o.name AS org_name, s.role, s.monthly_gross, s.paid_on_time, s.updated_at FROM salaries s JOIN organizations o ON o.id = s.org_id WHERE s.author_ref = $1 ORDER BY s.created_at`,
+      [ref],
+    );
+
     const date = new Date().toISOString().slice(0, 10);
     res.setHeader('content-disposition', `attachment; filename="peekjob-os-meus-dados-${date}.json"`);
     return {
@@ -71,6 +81,19 @@ export class AccountController {
       appeals: appeals.map((a) => ({ decision: a.original_decision, text: a.text, status: a.status, answer: a.decision_note, createdAt: a.created_at, decidedAt: a.decided_at })),
       saved: saved.map((s) => ({ orgName: s.org_name, savedAt: s.created_at })),
       helpful: helpful.map((h) => ({ orgName: h.org_name, markedAt: h.created_at })),
+      interviews: interviews.map((i) => ({
+        orgName: i.org_name,
+        role: i.role,
+        positive: i.positive,
+        offer: i.offer,
+        answered: i.answered,
+        difficulty: i.difficulty,
+        steps: i.steps,
+        text: i.text,
+        status: i.status,
+        createdAt: i.created_at,
+      })),
+      salaries: salaries.map((s) => ({ orgName: s.org_name, role: s.role, monthlyGross: s.monthly_gross, paidOnTime: s.paid_on_time, updatedAt: s.updated_at })),
     };
   }
 
@@ -87,6 +110,8 @@ export class AccountController {
       const u = await c.query(`SELECT email_hash FROM users WHERE id = $1`, [user.id]);
       if (keepReviews) await c.query(`UPDATE reviews SET author_ref = 'apagado:' || gen_random_uuid() WHERE author_ref = $1`, [ref]);
       else await c.query(`DELETE FROM reviews WHERE author_ref = $1`, [ref]);
+      await c.query(`DELETE FROM interviews WHERE author_ref = $1`, [ref]);
+      await c.query(`DELETE FROM salaries WHERE author_ref = $1`, [ref]);
       await c.query(`DELETE FROM support_messages WHERE user_ref = $1`, [ref]);
       await c.query(`DELETE FROM appeals WHERE appellant_ref = $1`, [ref]);
       await c.query(`DELETE FROM saved_orgs WHERE user_ref = $1`, [ref]);

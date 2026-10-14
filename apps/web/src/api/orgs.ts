@@ -5,6 +5,7 @@ import { match } from '../lib/match';
 import { useStore, type AddedOrg } from '../lib/store';
 import { api, apiMode } from './http';
 import { toOrg, type ApiOrg } from './mappers';
+import { withShared } from '../features/share/share';
 
 /**
  * Camada de dados dos ecrãs.
@@ -27,9 +28,9 @@ function fromAdded(a: AddedOrg): Org {
 
 /** Todas as organizações (incluindo as adicionadas por quem avalia) */
 export function useOrgs(): Org[] {
-  const { added, remote } = useStore();
+  const { added, remote, shared } = useStore();
   return useMemo(() => {
-    if (!apiMode) return [...ORGS, ...added.map(fromAdded)];
+    if (!apiMode) return [...ORGS, ...added.map(fromAdded)].map((o) => withShared(o, shared));
     const list = (remote.orgs ?? []).map((o) => remote.details[o.id] ?? o);
     const ids = new Set(list.map((o) => o.id));
     const extra: Org[] = [];
@@ -40,7 +41,7 @@ export function useOrgs(): Org[] {
       }
     }
     return [...list, ...extra];
-  }, [added, remote]);
+  }, [added, remote, shared]);
 }
 
 export function useOrg(id: string | null | undefined): Org | undefined {
@@ -52,7 +53,7 @@ export function useOrg(id: string | null | undefined): Org | undefined {
     if (apiMode && id && !detailed && !missing && !id.startsWith('nova-')) void loadOrg(id);
   }, [id, detailed, missing, loadOrg]);
   if (!id) return undefined;
-  if (!apiMode) return ORG_BY_ID[id] ?? all.find((o) => o.id === id);
+  if (!apiMode) return all.find((o) => o.id === id);
   return detailed ?? all.find((o) => o.id === id);
 }
 

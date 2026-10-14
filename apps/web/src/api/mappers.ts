@@ -1,4 +1,5 @@
-import type { Org, OrgLocation, OrgType, Review, Scores } from '../data/orgs';
+import { stepsLabel } from '@peekjob/shared';
+import type { Interview, Org, OrgLocation, OrgType, Review, SalaryBand, Scores } from '../data/orgs';
 import { ago } from '../lib/format';
 import type { MyReview, SupportMessage } from '../lib/store';
 
@@ -33,6 +34,33 @@ export interface ApiReview {
   createdAt: string;
 }
 
+export interface ApiInterview {
+  id: string;
+  role: string;
+  positive: boolean;
+  offer: boolean;
+  answered: boolean;
+  difficulty: number | null;
+  steps: string[];
+  text: string;
+  createdAt: string;
+}
+export interface ApiInterviews {
+  items: ApiInterview[];
+  stats: { positivePct: number; offerPct: number; answeredPct: number; difficulty: number | null; usualSteps: string } | null;
+}
+/** Funções com menos de 3 salários vêm só com a contagem (anonimato) */
+export interface ApiSalaries {
+  bands: { role: string; count: number; min?: number; max?: number; median?: number }[];
+  paidOnTimePct: number | null;
+  total: number;
+}
+/** Entrevistas e salários: pedidos à parte da organização */
+export interface OrgExtras {
+  interviews?: ApiInterviews;
+  salaries?: ApiSalaries;
+}
+
 export const when = (iso: string) => ago(Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 
 const KEYS: (keyof Scores)[] = ['salario', 'equilibrio', 'respeito', 'ambiente', 'lideranca', 'estabilidade', 'progressao', 'proposito'];
@@ -60,7 +88,14 @@ export function toReview(r: ApiReview): Review {
 }
 
 /** Converte uma organização da API para o modelo usado pelos ecrãs (campos sem dados ficam vazios) */
-export function toOrg(o: ApiOrg, reviews: ApiReview[] = []): Org {
+export function toInterview(i: ApiInterview): Interview {
+  return { id: i.id, role: i.role, when: when(i.createdAt), positive: i.positive, offer: i.offer, steps: stepsLabel(i.steps), body: i.text };
+}
+
+const toBand = (b: ApiSalaries['bands'][number]): SalaryBand => ({ role: b.role, count: b.count, min: b.min ?? 0, max: b.max ?? 0, median: b.median ?? 0 });
+
+export function toOrg(o: ApiOrg, reviews: ApiReview[] = [], extras: OrgExtras = {}): Org {
+  const stats = extras.interviews?.stats;
   const scores = Object.fromEntries(KEYS.map((k) => [k, o.criteria?.[k] ?? null])) as Scores;
   return {
     id: o.id,
@@ -82,8 +117,10 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = []): Org {
     harassmentReports: o.harassmentReports ?? 0,
     locations: mapLocations(o.locations, o.city),
     reviews: reviews.map(toReview),
-    interviews: [],
-    salaries: [],
+    interviews: extras.interviews?.items.map(toInterview) ?? [],
+    interviewStats: stats ? { ...stats, difficulty: stats.difficulty ?? undefined } : undefined,
+    salaries: extras.salaries?.bands.map(toBand) ?? [],
+    paidOnTimePct: extras.salaries?.paidOnTimePct ?? undefined,
     claimed: false,
   };
 }

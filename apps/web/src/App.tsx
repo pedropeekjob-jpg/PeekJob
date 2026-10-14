@@ -106,6 +106,7 @@ export default function App() {
           {/* o comentário passou para o ecrã das notas: ligações antigas vão para lá */}
           <Route path="/avaliar/texto" element={<Navigate to="/avaliar/notas" replace />} />
           <Route path="/avaliar/feito" element={<Pages.AvaliarFeito />} />
+          <Route path="/partilhar/:kind" element={<Pages.Partilhar />} />
           <Route path="/apoio" element={<Pages.Apoio />} />
           <Route path="/guardadas" element={<Pages.Guardadas />} />
           <Route path="/perfil" element={<Pages.Perfil />} />

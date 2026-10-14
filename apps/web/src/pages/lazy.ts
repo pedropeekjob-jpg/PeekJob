@@ -28,6 +28,7 @@ export const Pages = {
   Entrar: lazyPage(() => import('./Entrar')),
   ParaOrganizacoes: lazyPage(() => import('./ParaOrganizacoes')),
   Painel: lazyPage(() => import('./Painel')),
+  Partilhar: lazyPage(() => import('./Partilhar')),
   NotFound: lazyPage(() => import('./NotFound')),
 };
 

@@ -69,6 +69,10 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | POST | `/orgs/:id/merge` | moderador | Funde um duplicado (`{ targetId }`) |
 | POST | `/orgs/:id/reviews` | sessão | Publica uma avaliação |
 | GET | `/orgs/:id/reviews` | todos | Avaliações públicas, sem pseudónimos, com `helpful` (quantas pessoas acharam útil, sem dizer quem) |
+| POST | `/orgs/:id/interviews` | sessão | Partilhar uma entrevista (função, correu bem?, passos, oferta, resposta, dificuldade 1–5, comentário opcional); uma por pessoa e organização (409); nomes e insultos → 422 com sugestão |
+| GET | `/orgs/:id/interviews` | todos | Entrevistas públicas (sem pseudónimos) e o resumo: % boa experiência, % oferta, % resposta, dificuldade média, passos mais comuns |
+| POST | `/orgs/:id/salaries` | sessão | Partilhar o salário bruto mensal (100–50 000 €) e se chega a horas; voltar a partilhar substitui |
+| GET | `/orgs/:id/salaries` | todos | Salários por função: com menos de 3 só a contagem; a partir de 3, percentis 10/50/90 arredondados às dezenas (nunca o valor de alguém). "Pagam a horas" em % com pelo menos 3 respostas |
 | PUT, DELETE | `/reviews/:id/helpful` | sessão | Marcar/tirar "útil" (uma vez por pessoa; nunca na própria avaliação → 403) |
 | GET | `/me/helpful` | sessão | As avaliações que marquei como úteis |
 | GET | `/me/saved` | sessão | Organizações guardadas (mais recentes primeiro) |
@@ -200,8 +204,8 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - O GitHub desliga os workflows agendados ao fim de 60 dias sem atividade no repositório. Para produção, juntar o UptimeRobot ou o Better Stack (gratuitos) a avisar por SMS.
 
 ## RGPD
-- **Acesso:** `GET /me/export` (inclui as guardadas e os "úteis") e o ecrã *Perfil → Privacidade e dados → Descarregar*.
-- **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
+- **Acesso:** `GET /me/export` (inclui as guardadas, os "úteis", as entrevistas e os salários) e o ecrã *Perfil → Privacidade e dados → Descarregar*.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
 
 ## Correr localmente
 
