@@ -42,7 +42,8 @@ export interface SupportMessage {
   /** 'moderation': aviso de uma decisão da moderação (avaliação removida ou denúncia analisada) */
   type?: 'support' | 'moderation';
   orgName?: string;
-  details?: { decision: 'removed' | 'upheld' | 'rejected' | 'appeal_reversed' | 'appeal_confirmed'; note: string; orgName?: string } | null;
+  /** kind: sobre uma avaliação (sem kind, nos avisos antigos) ou uma entrevista */
+  details?: { decision: 'removed' | 'upheld' | 'rejected' | 'appeal_reversed' | 'appeal_confirmed'; note: string; orgName?: string; kind?: 'review' | 'interview' } | null;
   /** Contestar a decisão (DSA art. 20.º): disponível até quando, prazo terminado, ou o estado do pedido */
   appeal?: AppealState;
 }
@@ -472,13 +473,14 @@ function useAppState() {
         }
       },
 
-      /** Denunciar uma avaliação (modo API). Contacto opcional para quem não tem sessão. */
-      reportReview: async (
-        reviewId: string,
+      /** Denunciar uma avaliação ou entrevista (modo API). Contacto opcional para quem não tem sessão. */
+      reportContent: async (
+        kind: 'review' | 'interview',
+        id: string,
         body: { reason: string; details: string; contactName?: string; contactEmail?: string },
       ): Promise<Result<{ reference: string }>> => {
         try {
-          const r = await api<{ reference: string }>(`/reviews/${reviewId}/reports`, { body: { ...body, lang: getLang() } });
+          const r = await api<{ reference: string }>(`/${kind === 'review' ? 'reviews' : 'interviews'}/${id}/reports`, { body: { ...body, lang: getLang() } });
           return { ok: true, value: r };
         } catch (e) {
           return fail(e);

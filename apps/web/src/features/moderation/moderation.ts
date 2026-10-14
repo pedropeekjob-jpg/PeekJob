@@ -36,10 +36,15 @@ export const rejectTemplates = () => [
 
 export type Decision = 'remove' | 'keep';
 
-export const decisionNotice = (action: Decision) =>
-  action === 'remove'
-    ? tr('Avaliação removida. Avisámos quem escreveu e quem denunciou.', 'Review removed. We let the author and the reporters know.')
-    : tr('Avaliação mantida. Avisámos quem denunciou.', 'Review kept. We let the reporters know.');
+export function decisionNotice(action: Decision, kind: 'review' | 'interview' = 'review') {
+  const interview = kind === 'interview';
+  if (action === 'remove') {
+    return interview
+      ? tr('Entrevista removida. Avisámos quem escreveu e quem denunciou.', 'Interview removed. We let the author and the reporters know.')
+      : tr('Avaliação removida. Avisámos quem escreveu e quem denunciou.', 'Review removed. We let the author and the reporters know.');
+  }
+  return interview ? tr('Entrevista mantida. Avisámos quem denunciou.', 'Interview kept. We let the reporters know.') : tr('Avaliação mantida. Avisámos quem denunciou.', 'Review kept. We let the reporters know.');
+}
 
 export type AppealAction = 'reverse' | 'confirm';
 

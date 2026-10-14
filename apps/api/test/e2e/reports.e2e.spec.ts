@@ -81,7 +81,8 @@ describe('Denúncias e moderação', () => {
       const res = await t.http().get('/moderation/reports').set(mod).expect(200);
       expect(res.body.items).toHaveLength(1);
       expect(res.body.items[0]).toMatchObject({
-        reviewId,
+        kind: 'review',
+        contentId: reviewId,
         orgName: 'Padaria Ribeira',
         text: goodReview.text,
         count: 2,

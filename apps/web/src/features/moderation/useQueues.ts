@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useModeration, type PendingOrg } from '../../api/moderation';
+import { useModeration, type PendingOrg, type ReportedContent } from '../../api/moderation';
 import { tr } from '../../i18n';
 import { appealNotice, decisionNotice, NOTICE_MS, type AppealAction, type Decision } from './moderation';
 
@@ -38,7 +38,7 @@ export function useQueues() {
     tab,
     setTab,
     notice,
-    decide: (reviewId: string, action: Decision, note: string) => withNotice(decide(reviewId, action, note), decisionNotice(action)),
+    decide: (item: ReportedContent, action: Decision, note: string) => withNotice(decide(item, action, note), decisionNotice(action, item.kind)),
     decideAppeal: (id: string, action: AppealAction, note: string) => withNotice(decideAppeal(id, action, note), appealNotice(action)),
     approve: (o: PendingOrg) => withNotice(approve(o.id), tr(`${o.name} está agora pública.`, `${o.name} is now public.`)),
     reject: (o: PendingOrg, note: string) => withNotice(reject(o.id, note), tr(`${o.name} foi rejeitada.`, `${o.name} was rejected.`)),

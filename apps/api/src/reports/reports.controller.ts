@@ -7,6 +7,7 @@ import { readCookie, SESSION_COOKIE } from '../auth/session';
 import { Lang } from '../common/lang';
 import { privacySecret, userRef } from '../common/privacy';
 import { parse } from '../common/zod';
+import type { ContentKind } from './content';
 import { REPORT_REASONS, ReportsService } from './reports.service';
 
 const ReportBody = z.object({
@@ -31,11 +32,22 @@ export class ReportsController {
   /** Denunciar uma avaliação: com ou sem conta */
   @Post('reviews/:id/reports')
   @HttpCode(201)
-  async report(@Param('id') id: string, @Body() body: unknown, @Req() req: Request) {
+  report(@Param('id') id: string, @Body() body: unknown, @Req() req: Request) {
+    return this.create('review', id, body, req);
+  }
+
+  /** Denunciar uma entrevista: com ou sem conta */
+  @Post('interviews/:id/reports')
+  @HttpCode(201)
+  reportInterview(@Param('id') id: string, @Body() body: unknown, @Req() req: Request) {
+    return this.create('interview', id, body, req);
+  }
+
+  private async create(kind: ContentKind, id: string, body: unknown, req: Request) {
     const b = parse(ReportBody, body);
     const user = await this.auth.userForSession(readCookie(req, SESSION_COOKIE));
     const ref = user ? userRef(privacySecret(), user.id) : null;
-    const r = await this.reports.create(id, b, ref, req.ip ?? 'desconhecido');
+    const r = await this.reports.create(kind, id, b, ref, req.ip ?? 'desconhecido');
     return { reference: r.reference };
   }
 
@@ -52,6 +64,15 @@ export class ReportsController {
   @Roles('moderator')
   decide(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: AuthUser) {
     const b = parse(DecisionBody, body);
-    return this.reports.decide(id, b.action, b.note, user.id);
+    return this.reports.decide('review', id, b.action, b.note, user.id);
+  }
+
+  @Post('moderation/interviews/:id/decision')
+  @HttpCode(200)
+  @UseGuards(AuthGuard)
+  @Roles('moderator')
+  decideInterview(@Param('id') id: string, @Body() body: unknown, @CurrentUser() user: AuthUser) {
+    const b = parse(DecisionBody, body);
+    return this.reports.decide('interview', id, b.action, b.note, user.id);
   }
 }

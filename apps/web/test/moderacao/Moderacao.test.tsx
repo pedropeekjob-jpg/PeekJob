@@ -12,7 +12,7 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, demonstração (%s)'
   it('filas com contagem; denúncias com motivos e citação', async () => {
     show(viewport);
     const tabs = await screen.findByRole('tablist', { name: 'Filas' });
-    expect(within(tabs).getByRole('tab', { name: /Denúncias 2/ })).toHaveAttribute('aria-selected', 'true');
+    expect(within(tabs).getByRole('tab', { name: /Denúncias 3/ })).toHaveAttribute('aria-selected', 'true');
     expect(within(tabs).getByRole('tab', { name: /Organizações novas 2/ })).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByText(/Demonstração: dados de exemplo/)).toBeInTheDocument();
     const card = screen.getByRole('article', { name: 'Denúncias sobre uma avaliação de Padaria Ribeira' });
@@ -25,7 +25,7 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, demonstração (%s)'
 
   it('decidir exige justificação (10+ caracteres); remover e manter tiram da fila', async () => {
     const { user } = show(viewport);
-    const card = await screen.findByRole('article', { name: /Padaria Ribeira/ });
+    const card = await screen.findByRole('article', { name: 'Denúncias sobre uma avaliação de Padaria Ribeira' });
     const remove = within(card).getByRole('button', { name: 'Remover avaliação' });
     expect(remove).toBeDisabled();
     expect(within(card).getByText('Escreve ou escolhe uma justificação.')).toBeInTheDocument();
@@ -36,13 +36,19 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, demonstração (%s)'
     expect(within(card).getByRole('textbox')).toHaveValue(REASON);
     await user.click(remove);
     expect(await screen.findByRole('status')).toHaveTextContent('Avaliação removida. Avisámos quem escreveu e quem denunciou.');
-    expect(screen.getByRole('tab', { name: /Denúncias 1/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Denúncias 2/ })).toBeInTheDocument();
 
     const other = screen.getAllByRole('article')[0];
     await user.type(within(other).getByRole('textbox'), 'Crítica ao trabalho, sem ataques.');
     await user.click(within(other).getByRole('button', { name: 'Manter' }));
     expect(await screen.findByText('Avaliação mantida. Avisámos quem denunciou.')).toBeInTheDocument();
-    expect(screen.getByText('Sem denúncias por analisar.')).toBeInTheDocument();
+
+    // a entrevista denunciada (com a função)
+    const interview = screen.getByRole('article', { name: 'Denúncias sobre uma entrevista de Padaria Ribeira' });
+    expect(within(interview).getByText('Entrevista · Balcão')).toBeInTheDocument();
+    await user.type(within(interview).getByRole('textbox'), 'Identifica uma pessoa pelo nome.');
+    await user.click(within(interview).getByRole('button', { name: 'Remover entrevista' }));
+    expect(await screen.findByText('Sem denúncias por analisar.')).toBeInTheDocument();
   });
 
   it('organizações novas: aprovar, fundir num duplicado e rejeitar com motivo', async () => {

@@ -43,6 +43,13 @@ describe('apoio: regras e textos', () => {
     expect(noticeTitle(msg({ details: null }))).toMatch(/a avaliação mantém-se\.$/);
   });
 
+  it('título do aviso sobre uma entrevista', () => {
+    const d = (decision: 'removed' | 'upheld' | 'rejected') => ({ decision, note: '', orgName: 'Loja', kind: 'interview' as const });
+    expect(noticeTitle(msg({ details: d('removed') }))).toBe('A tua entrevista de Loja foi removida.');
+    expect(noticeTitle(msg({ details: d('upheld') }))).toBe('A tua denúncia sobre Loja foi aceite: a entrevista foi removida.');
+    expect(noticeTitle(msg({ details: d('rejected') }))).toBe('Analisámos a tua denúncia sobre Loja: a entrevista mantém-se.');
+  });
+
   it('conselhos: mais um no computador; aviso legal', () => {
     expect(tips(true)).toHaveLength(tips(false).length + 1);
     expect(tips(true).at(-1)).toMatch(/^Confirma horários/);

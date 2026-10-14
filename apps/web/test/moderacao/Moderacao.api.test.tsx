@@ -23,12 +23,16 @@ const { ApiError } = await import('../../src/api/http');
 const { default: Moderacao } = await import('../../src/pages/Moderacao');
 
 const REPORT = {
-  reviewId: 'r9', orgId: 'o1', orgName: 'Oficina Nove', text: '', tags: [], count: 1, firstReportedAt: new Date().toISOString(),
+  kind: 'review', contentId: 'r9', orgId: 'o1', orgName: 'Oficina Nove', text: '', tags: [], count: 1, firstReportedAt: new Date().toISOString(),
   reports: [{ id: 'x', reason: 'ilegal', details: '', createdAt: new Date().toISOString() }],
+};
+const INTERVIEW_REPORT = {
+  kind: 'interview', contentId: 'i7', role: 'Balcão', orgId: 'o1', orgName: 'Oficina Nove', text: 'A Dona Rosa foi rude.', tags: [], count: 1, firstReportedAt: new Date().toISOString(),
+  reports: [{ id: 'y', reason: 'nome', details: '', createdAt: new Date().toISOString() }],
 };
 const APPEAL = {
   id: 'a1', side: 'reporter', originalDecision: 'rejected', originalNote: 'Não viola as regras.', text: 'Tem o nome da gerente.', createdAt: new Date().toISOString(),
-  orgName: 'Oficina Nove', review: { id: 'r9', text: 'A Dona Rosa não paga.', tags: [], avg: 2, status: 'published' },
+  orgName: 'Oficina Nove', content: { kind: 'review', id: 'r9', text: 'A Dona Rosa não paga.', tags: [], avg: 2, status: 'published' },
 };
 const ORG = { id: 'p1', name: 'Loja Nova', type: 'PME', city: 'Faro', nif: '500697256', address: null, createdAt: new Date().toISOString(), reviewers: 0, duplicates: [] };
 
@@ -94,6 +98,17 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, modo API (%s)', (vie
     await user.type(within(appeal).getByRole('textbox'), 'Tem mesmo um nome: remover.');
     await user.click(within(appeal).getByRole('button', { name: 'Reverter a decisão' }));
     expect(api).toHaveBeenCalledWith('/moderation/appeals/a1/decision', { body: { action: 'reverse', note: 'Tem mesmo um nome: remover.' } });
+  });
+
+  it('entrevistas denunciadas: com a função, e a decisão vai para a entrevista', async () => {
+    routes({ '/moderation/reports': { items: [INTERVIEW_REPORT] } });
+    const { user } = show(viewport);
+    const card = await screen.findByRole('article', { name: 'Denúncias sobre uma entrevista de Oficina Nove' });
+    expect(within(card).getByText('Entrevista · Balcão')).toBeInTheDocument();
+    await user.type(within(card).getByRole('textbox'), 'Identifica uma pessoa pelo nome.');
+    await user.click(within(card).getByRole('button', { name: 'Remover entrevista' }));
+    expect(api).toHaveBeenCalledWith('/moderation/interviews/i7/decision', { body: { action: 'remove', note: 'Identifica uma pessoa pelo nome.' } });
+    expect(await screen.findByText('Entrevista removida. Avisámos quem escreveu e quem denunciou.')).toBeInTheDocument();
   });
 
   it('erro ao carregar e erro numa decisão', async () => {

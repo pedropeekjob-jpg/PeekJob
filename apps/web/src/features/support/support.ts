@@ -34,9 +34,10 @@ export function noticeTitle(n: SupportMessage) {
   const org = n.orgName ?? n.details?.orgName ?? tr('uma organização', 'an organisation');
   if (n.details?.decision === 'appeal_confirmed') return tr(`Revimos a tua contestação sobre ${org}: a decisão mantém-se.`, `We reviewed your appeal about ${org}: the decision stands.`);
   if (n.details?.decision === 'appeal_reversed') return tr(`Revimos a tua contestação sobre ${org}: a decisão foi revertida.`, `We reviewed your appeal about ${org}: the decision was reversed.`);
-  if (n.details?.decision === 'removed') return tr(`A tua avaliação de ${org} foi removida.`, `Your review of ${org} was removed.`);
-  if (n.details?.decision === 'upheld') return tr(`A tua denúncia sobre ${org} foi aceite: a avaliação foi removida.`, `Your report about ${org} was upheld: the review was removed.`);
-  return tr(`Analisámos a tua denúncia sobre ${org}: a avaliação mantém-se.`, `We reviewed your report about ${org}: the review stays.`);
+  const [pt, en] = n.details?.kind === 'interview' ? ['entrevista', 'interview'] : ['avaliação', 'review'];
+  if (n.details?.decision === 'removed') return tr(`A tua ${pt} de ${org} foi removida.`, `Your ${en} of ${org} was removed.`);
+  if (n.details?.decision === 'upheld') return tr(`A tua denúncia sobre ${org} foi aceite: a ${pt} foi removida.`, `Your report about ${org} was upheld: the ${en} was removed.`);
+  return tr(`Analisámos a tua denúncia sobre ${org}: a ${pt} mantém-se.`, `We reviewed your report about ${org}: the ${en} stays.`);
 }
 
 /** Conselhos (no computador há espaço para mais um) */

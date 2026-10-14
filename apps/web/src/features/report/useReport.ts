@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { apiMode } from '../../api/http';
 import { REPORT_REASONS } from '../../data/content';
 import { useStore } from '../../lib/store';
-import { demoReference, reportErrorText } from './report';
+import { demoReference, reportErrorText, type ReportTarget } from './report';
 
 /** Estado e envio de uma denúncia (modo API: servidor; demonstração: referência local) */
-export function useReport(orgId: string | undefined, itemId: string | undefined) {
-  const { user, reportReview } = useStore();
+export function useReport(orgId: string | undefined, itemId: string | undefined, kind: ReportTarget['kind'] = 'avaliação') {
+  const { user, reportContent } = useStore();
   /** sem conta (modo API): pode deixar contacto para saber a decisão (Regulamento dos Serviços Digitais) */
   const anonymous = apiMode && !user;
   const [reason, setReasonState] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export function useReport(orgId: string | undefined, itemId: string | undefined)
     if (apiMode && itemId) {
       setBusy(true);
       setError('');
-      const r = await reportReview(itemId, {
+      const r = await reportContent(kind === 'entrevista' ? 'interview' : 'review', itemId, {
         reason,
         details: detail.trim(),
         contactName: anonymous && contactName.trim() ? contactName.trim() : undefined,
@@ -40,7 +40,7 @@ export function useReport(orgId: string | undefined, itemId: string | undefined)
       });
       setBusy(false);
       if (!r.ok) {
-        setError(reportErrorText(r.status, r.message));
+        setError(reportErrorText(r.status, r.message, kind));
         return;
       }
       setSent(`PJ-${r.value!.reference}`);

@@ -78,7 +78,7 @@ function QueueBody({ q }: { q: ReturnType<typeof useQueues> }) {
     return (
       <div className={styles.list}>
         {q.reports.map((r) => (
-          <ReportCard key={r.reviewId} item={r} onDecide={(action, note) => q.decide(r.reviewId, action, note)} />
+          <ReportCard key={r.contentId} item={r} onDecide={(action, note) => q.decide(r, action, note)} />
         ))}
       </div>
     );

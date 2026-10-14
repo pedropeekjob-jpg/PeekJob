@@ -85,7 +85,9 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | GET | `/me/reviews` | sessão | As minhas avaliações |
 | POST | `/reviews/rewrite` | todos | Reescrever com IA: proposta publicável (sem nomes nem insultos, com os mesmos factos); não guarda o texto; 20 pedidos/10 min por pessoa |
 | POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
-| GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação |
+| POST | `/interviews/:id/reports` | todos | Denunciar uma entrevista (como as avaliações) |
+| GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação ou entrevista (`kind`, `contentId`; nas entrevistas, a função) |
+| POST | `/moderation/interviews/:id/decision` | moderador | `remove` ou `keep` uma entrevista, com justificação; avisos e contestação como nas avaliações |
 | POST | `/moderation/reviews/:id/decision` | moderador | `remove` ou `keep`, com justificação; avisa quem escreveu e quem denunciou |
 | POST | `/me/messages/:id/appeal` | sessão | Contestar a decisão desse aviso (texto 10–2000; 6 meses; uma vez) |
 | GET | `/moderation/appeals` | moderador | Pedidos de revisão em aberto (sem pseudónimos) |

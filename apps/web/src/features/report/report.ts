@@ -26,8 +26,12 @@ export function findTarget(org: Org | undefined, itemId: string | undefined): Re
 }
 
 /** Erro do servidor em texto para a pessoa */
-export function reportErrorText(status: number | undefined, message: string) {
-  if (status === 409) return tr('Já denunciaste esta avaliação. A moderação está a analisar.', 'You’ve already reported this review. Moderation is looking at it.');
+export function reportErrorText(status: number | undefined, message: string, kind: ReportTarget['kind'] = 'avaliação') {
+  if (status === 409) {
+    return kind === 'entrevista'
+      ? tr('Já denunciaste esta entrevista. A moderação está a analisar.', 'You’ve already reported this interview. Moderation is looking at it.')
+      : tr('Já denunciaste esta avaliação. A moderação está a analisar.', 'You’ve already reported this review. Moderation is looking at it.');
+  }
   if (status === 400) return tr('Verifica o email (ou deixa-o em branco).', 'Check the email address (or leave it blank).');
   return message;
 }

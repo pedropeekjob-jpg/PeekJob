@@ -34,6 +34,35 @@ test('denúncia sem conta e decisão da moderação', async ({ page, browser }, 
   expect(r.status).toBe('removed');
 });
 
+test('entrevistas também se denunciam e moderam', async ({ page, browser }, info) => {
+  const text = `Nunca chegaram a responder (${info.project.name} ${Date.now()}).`;
+  const [org] = await sql<{ id: string }>(`SELECT id FROM organizations WHERE name = 'Clínica Foz'`);
+  const [iv] = await sql<{ id: string }>(
+    `INSERT INTO interviews (org_id, author_ref, role, positive, offer, answered, steps, text) VALUES ($1, $2, 'Receção', false, false, false, '{Conversa}', $3) RETURNING id`,
+    [org.id, `e2e-${Date.now()}`, text],
+  );
+  await page.goto(`/org/${org.id}/entrevistas`);
+  await page.locator(`a[href$="/denunciar/${iv.id}"]`).first().click();
+  await page.getByRole('radio', { name: /Parece falsa/ }).click();
+  await page.getByRole('button', { name: /Enviar denúncia/ }).click();
+  await expect(page.getByText(/Recebemos a tua denúncia/)).toBeVisible();
+
+  const ctx = await browser.newContext({ viewport: info.project.use.viewport ?? undefined });
+  const mod = await ctx.newPage();
+  const email = uniqueEmail('moderadora');
+  await login(mod, email);
+  await makeModerator(email);
+  await mod.goto('/moderacao');
+  const card = mod.locator('article').filter({ hasText: text }).first();
+  await expect(card.getByText('Entrevista · Receção')).toBeVisible();
+  await card.getByPlaceholder(/Ou escreve a justificação/).fill('Remoção de teste: não descreve o processo.');
+  await card.getByRole('button', { name: 'Remover entrevista' }).click();
+  await expect(mod.getByText(/Entrevista removida/)).toBeVisible();
+  await ctx.close();
+  const [r] = await sql<{ status: string }>(`SELECT status FROM interviews WHERE id = $1`, [iv.id]);
+  expect(r.status).toBe('removed');
+});
+
 test('quem não é moderador não vê a moderação', async ({ page }) => {
   await login(page, uniqueEmail('curioso'));
   await page.goto('/moderacao');

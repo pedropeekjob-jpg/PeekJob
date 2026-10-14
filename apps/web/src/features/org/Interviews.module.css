@@ -66,6 +66,9 @@
 .foot {
   gap: 12px;
 }
+.reportRow {
+  align-self: flex-start;
+}
 
 /* Lista */
 .list {

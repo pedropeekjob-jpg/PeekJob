@@ -62,6 +62,9 @@ function InterviewItem({ i, org, desktop }: { i: Interview; org: Org; desktop: b
         {i.steps} · {whenLabel(i.when)}
       </span>
       <p className={`body ${styles.body}`}>{i.body}</p>
+      <div className={styles.reportRow}>
+        <ReportLink org={org} itemId={i.id} />
+      </div>
     </article>
   );
 }

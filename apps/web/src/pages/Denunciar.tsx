@@ -13,7 +13,7 @@ export default function Denunciar() {
   const org = useOrg(id);
   const target = findTarget(org, reviewId);
   const desktop = useIsDesktop();
-  const r = useReport(id, reviewId);
+  const r = useReport(id, reviewId, target?.kind);
   const orgPath = org ? `/org/${org.id}` : '/ranking';
 
   if (!org || !target) {

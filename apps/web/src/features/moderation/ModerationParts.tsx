@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import type { Appeal, PendingOrg, ReportedReview } from '../../api/moderation';
+import type { Appeal, ContentKind, PendingOrg, ReportedContent } from '../../api/moderation';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { orgTypeLabel, tagLabel } from '../../i18n/labels';
@@ -75,14 +75,23 @@ function NoteBox({ value, onChange, groups, label }: { value: string; onChange: 
   );
 }
 
-/** Denúncias sobre uma avaliação: texto, motivos e decisão com justificação */
-export function ReportCard({ item, onDecide }: { item: ReportedReview; onDecide: (a: Decision, note: string) => Promise<string | null> }) {
+/** "uma avaliação" ou "uma entrevista" (nos nomes dos cartões) */
+const what = (kind: ContentKind) => (kind === 'review' ? tr('uma avaliação', 'a review') : tr('uma entrevista', 'an interview'));
+
+/** Na entrevista, a função por cima do texto */
+function ContentMeta({ kind, role }: { kind: ContentKind; role?: string }) {
+  if (kind === 'review') return null;
+  return <p className="small muted">{tr(`Entrevista · ${role ?? ''}`, `Interview · ${role ?? ''}`)}</p>;
+}
+
+/** Denúncias sobre uma avaliação ou entrevista: texto, motivos e decisão com justificação */
+export function ReportCard({ item, onDecide }: { item: ReportedContent; onDecide: (a: Decision, note: string) => Promise<string | null> }) {
   const [note, setNote] = useState('');
   const { busy, error, run } = useCardAction();
   const ok = note.trim().length >= NOTE_MIN;
   const go = (a: Decision) => ok && run(() => onDecide(a, note.trim()));
   return (
-    <article className={`card ${styles.card}`} aria-label={tr(`Denúncias sobre uma avaliação de ${item.orgName}`, `Reports about a review of ${item.orgName}`)}>
+    <article className={`card ${styles.card}`} aria-label={tr(`Denúncias sobre ${what(item.kind)} de ${item.orgName}`, `Reports about ${what(item.kind)} of ${item.orgName}`)}>
       <div className={`row wrap between ${styles.cardHead}`}>
         <Link to={`/org/${item.orgId}`} className={styles.org}>
           {item.orgName}
@@ -91,6 +100,7 @@ export function ReportCard({ item, onDecide }: { item: ReportedReview; onDecide:
           <span className={styles.badge}>{reportsText(item.count)}</span> · {tr('primeira', 'first')} {sinceIso(item.firstReportedAt)}
         </span>
       </div>
+      <ContentMeta kind={item.kind} role={item.role} />
       <blockquote className={styles.quote}>“{item.text || tr('(sem texto)', '(no text)')}”</blockquote>
       {item.tags.length > 0 && (
         <div className="chips">
@@ -122,7 +132,7 @@ export function ReportCard({ item, onDecide }: { item: ReportedReview; onDecide:
       {error && <ErrorText text={error} />}
       <div className={`row wrap ${styles.actions}`}>
         <button type="button" className={`btn ${styles.remove}`} disabled={!ok || busy} onClick={() => go('remove')}>
-          {tr('Remover avaliação', 'Remove review')}
+          {item.kind === 'review' ? tr('Remover avaliação', 'Remove review') : tr('Remover entrevista', 'Remove interview')}
         </button>
         <button type="button" className="btn btn-ghost" disabled={!ok || busy} onClick={() => go('keep')}>
           {tr('Manter', 'Keep')}
@@ -213,14 +223,15 @@ export function AppealCard({ item, onDecide }: { item: Appeal; onDecide: (a: App
   const ok = note.trim().length >= NOTE_MIN;
   const go = (a: AppealAction) => ok && run(() => onDecide(a, note.trim()));
   return (
-    <article className={`card ${styles.card}`} aria-label={tr(`Pedido de revisão sobre uma avaliação de ${item.orgName}`, `Appeal about a review of ${item.orgName}`)}>
+    <article className={`card ${styles.card}`} aria-label={tr(`Pedido de revisão sobre ${what(item.content.kind)} de ${item.orgName}`, `Appeal about ${what(item.content.kind)} of ${item.orgName}`)}>
       <div className={`row wrap between ${styles.cardHead}`}>
         <strong className={styles.org}>{item.orgName}</strong>
         <span className="small muted">
           <span className={styles.badge}>{appealSide(item.side)}</span> · {sinceIso(item.createdAt)}
         </span>
       </div>
-      <blockquote className={styles.quote}>“{item.review.text || tr('(sem texto)', '(no text)')}”</blockquote>
+      <ContentMeta kind={item.content.kind} role={item.content.role} />
+      <blockquote className={styles.quote}>“{item.content.text || tr('(sem texto)', '(no text)')}”</blockquote>
       <p className="small body">
         {tr('Decisão original: ', 'Original decision: ')}
         {item.originalNote ?? '—'}

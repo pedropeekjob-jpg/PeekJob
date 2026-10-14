@@ -57,7 +57,7 @@ describe('Contestar decisões de moderação', () => {
 
     const queue = (await t.http().get('/moderation/appeals').set(mod).expect(200)).body.items;
     expect(queue).toHaveLength(1);
-    expect(queue[0]).toMatchObject({ side: 'author', originalDecision: 'removed', text: expect.stringContaining('trabalhei lá'), review: { text: goodReview.text } });
+    expect(queue[0]).toMatchObject({ side: 'author', originalDecision: 'removed', text: expect.stringContaining('trabalhei lá'), content: { kind: 'review', text: goodReview.text } });
     expect(JSON.stringify(queue)).not.toMatch(/autora|_ref/);
 
     await decideAppeal(queue[0].id, 'reverse').expect(200);
