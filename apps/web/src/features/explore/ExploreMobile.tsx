@@ -95,8 +95,14 @@ export function ExploreMobile() {
         <Link to="/ranking" className={`label ${styles.pulseLabel}`}>
           {tr('Pulso', 'Pulse')}
         </Link>
-        {/* desliza na horizontal: focável para se poder percorrer com o teclado (WCAG 2.1.1) */}
-        <div role="group" tabIndex={0} aria-label={tr('Subidas, descidas e temas da semana', 'This week’s rises, falls and topics')} className={`grow row ${styles.strip}`}>
+        {/* desliza na horizontal: focável para se poder percorrer com o teclado (WCAG 2.1.1, regra do axe
+            "scrollable-region-focusable"); a regra S6845 do Sonar não prevê este caso */}
+        <div
+          role="group"
+          tabIndex={0} // NOSONAR: região que desliza tem de receber foco (WCAG 2.1.1)
+          aria-label={tr('Subidas, descidas e temas da semana', 'This week’s rises, falls and topics')}
+          className={`grow row ${styles.strip}`}
+        >
           {moved.map((o) => (
             <Link key={o.id} to={`/org/${o.id}`} data-ev="select_org" data-ev-org-type={o.type} className={`plain row ${styles.stripItem} ${styles.stripOrg}`}>
               {o.name}

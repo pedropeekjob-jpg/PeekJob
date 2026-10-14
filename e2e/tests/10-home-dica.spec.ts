@@ -21,4 +21,5 @@ test('a frase que segue o rato esconde-se por cima do logo', async ({ page, isMo
 
   await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.8);
   await expect.poll(() => opacity('job')).toBe(1);
+  expect(await opacity('peek')).toBe(0); // só a frase da zona onde está o rato
 });

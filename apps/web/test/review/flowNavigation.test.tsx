@@ -48,7 +48,8 @@ function show(viewport: 'mobile' | 'desktop', entries = ['/pesquisa', '/org/x'])
   );
   return user;
 }
-const at = (name: string) => screen.findByRole('heading', { level: 1, name });
+/** Espera pelo ecrã (pelo título) e confirma que está lá */
+const at = async (name: string) => expect(await screen.findByRole('heading', { level: 1, name })).toBeInTheDocument();
 const closeLabel = /^(Fechar|Cancelar)/;
 
 describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para onde se estava (%s)', (viewport) => {
