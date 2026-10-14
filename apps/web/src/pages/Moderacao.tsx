@@ -6,6 +6,7 @@ import { Empty, TopBar } from '../components/UI';
 import { AppealCard, LoadingCards, Notice, OrgCard, QueueTabs, ReportCard, Skeleton } from '../features/moderation/ModerationParts';
 import styles from '../features/moderation/Moderation.module.css';
 import { useQueues } from '../features/moderation/useQueues';
+import { ClaimCard, ManagedList } from '../features/moderation/ClaimParts';
 import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
@@ -59,7 +60,7 @@ function Queues({ desktop }: { desktop: boolean }) {
         {!apiMode && <span className="small muted">{tr('Demonstração: dados de exemplo; as decisões não são guardadas.', 'Demo: sample data; decisions are not saved.')}</span>}
       </header>
 
-      <QueueTabs tab={q.tab} reports={q.reports.length} orgs={q.orgs.length} appeals={q.appeals.length} onChange={q.setTab} />
+      <QueueTabs tab={q.tab} reports={q.reports.length} orgs={q.orgs.length} appeals={q.appeals.length} claims={q.claims.length} onChange={q.setTab} />
       {q.notice && <Notice text={q.notice} />}
       {q.error && (
         <div role="alert" className={styles.error}>
@@ -80,6 +81,18 @@ function QueueBody({ q }: { q: ReturnType<typeof useQueues> }) {
         {q.reports.map((r) => (
           <ReportCard key={r.contentId} item={r} onDecide={(action, note) => q.decide(r, action, note)} />
         ))}
+      </div>
+    );
+  }
+  if (q.tab === 'claims') {
+    return (
+      <div className={styles.list}>
+        {q.claims.length ? (
+          q.claims.map((c) => <ClaimCard key={c.id} item={c} onDecide={(action, note) => q.decideClaim(c, action, note)} />)
+        ) : (
+          <Empty title={tr('Sem pedidos para gerir páginas.', 'No requests to manage pages.')} body={tr('Quem representa uma organização pede aqui para gerir a página dela.', 'People who represent an organisation ask here to manage its page.')} />
+        )}
+        <ManagedList items={q.managed} onPlan={q.setPlan} />
       </div>
     );
   }

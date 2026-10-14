@@ -135,6 +135,13 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     expect(screen.getByTestId('probe').textContent).toMatch(/\|\/partilhar\/salario\?org=padaria-ribeira$/);
   });
 
+  it('página gerida pela organização, ou convite para a gerir', async () => {
+    show(viewport);
+    expect(await screen.findByText('Página gerida pela organização')).toBeInTheDocument();
+    show(viewport, 'lavandaria-sol');
+    expect(await screen.findByRole('link', { name: 'É a tua organização? Gerir esta página' })).toHaveAttribute('href', '/painel?org=lavandaria-sol');
+  });
+
   it('voluntariado: sem salários e o botão é avaliar', async () => {
     const { user } = show(viewport, 'rede-vizinha', 'salarios');
     expect(await screen.findByText('Aqui o trabalho é voluntário.')).toBeInTheDocument();

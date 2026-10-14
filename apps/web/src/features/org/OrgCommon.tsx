@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { Icon } from '../../components/Icon';
-import type { Org } from '../../data/orgs';
+import { apiMode } from '../../api/http';
+import type { Org, Review } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { useStore } from '../../lib/store';
@@ -86,10 +87,26 @@ export function RespeitoTags({ org }: { org: Org }) {
   );
 }
 
-/** Resposta da organização a uma avaliação */
-export function OrgReply({ org, reviewId }: { org: Org; reviewId: string }) {
+/** Página gerida pela organização, ou convite a quem a representa para a gerir */
+export function ManagedLine({ org }: { org: Org }) {
+  if (org.claimed) {
+    return (
+      <span className={`row small ${styles.managed}`}>
+        <Icon name="check" size={14} stroke={2.4} /> {tr('Página gerida pela organização', 'Page managed by the organisation')}
+      </span>
+    );
+  }
+  return (
+    <Link to={`/painel?org=${encodeURIComponent(org.id)}`} className={`small ${styles.claim}`}>
+      {tr('É a tua organização? Gerir esta página', 'Is this your organisation? Manage this page')}
+    </Link>
+  );
+}
+
+/** Resposta da organização a uma avaliação (modo API: vem com a avaliação; demonstração: no browser) */
+export function OrgReply({ org, review }: { org: Org; review: Review }) {
   const { replies } = useStore();
-  const text = replies[reviewId];
+  const text = review.reply ?? (apiMode ? undefined : replies[review.id]);
   if (!text) return null;
   return (
     <div className={`stack ${styles.reply}`}>

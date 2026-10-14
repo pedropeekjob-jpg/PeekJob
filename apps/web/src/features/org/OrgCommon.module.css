@@ -164,3 +164,18 @@
     font-size: 40px;
   }
 }
+
+/* Página gerida pela organização */
+.managed {
+  gap: 6px;
+  color: var(--teal-text);
+  font-weight: 600;
+  margin-top: 6px;
+}
+.claim {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--teal-text);
+  font-weight: 600;
+  min-height: 24px;
+}

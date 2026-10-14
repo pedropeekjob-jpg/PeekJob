@@ -91,6 +91,12 @@ export class AccountsController {
     return this.claims.decide(id, b.action, b.note, user.id);
   }
 
+  @Get('moderation/managed')
+  @Roles('moderator')
+  managed() {
+    return this.claims.managed();
+  }
+
   @Put('moderation/orgs/:id/plan')
   @Roles('moderator')
   plan(@Param('id') id: string, @Body() body: unknown) {

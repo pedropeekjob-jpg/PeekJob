@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { PendingClaim, Plan } from '../../api/accounts';
 import { useModeration, type PendingOrg, type ReportedContent } from '../../api/moderation';
 import { tr } from '../../i18n';
 import { appealNotice, decisionNotice, NOTICE_MS, type AppealAction, type Decision } from './moderation';
 
-export type Queue = 'reports' | 'orgs' | 'appeals';
+export type Queue = 'reports' | 'orgs' | 'appeals' | 'claims';
 
 /** Aviso de decisão tomada, que desaparece sozinho */
 function useNotice() {
@@ -32,7 +33,7 @@ export function useQueues() {
     [setNotice],
   );
 
-  const { decide, approve, reject, merge, decideAppeal } = m;
+  const { decide, approve, reject, merge, decideAppeal, decideClaim, setPlan } = m;
   return {
     ...m,
     tab,
@@ -42,6 +43,12 @@ export function useQueues() {
     decideAppeal: (id: string, action: AppealAction, note: string) => withNotice(decideAppeal(id, action, note), appealNotice(action)),
     approve: (o: PendingOrg) => withNotice(approve(o.id), tr(`${o.name} está agora pública.`, `${o.name} is now public.`)),
     reject: (o: PendingOrg, note: string) => withNotice(reject(o.id, note), tr(`${o.name} foi rejeitada.`, `${o.name} was rejected.`)),
+    decideClaim: (c: PendingClaim, action: 'approve' | 'reject', note: string) =>
+      withNotice(
+        decideClaim(c, action, note),
+        action === 'approve' ? tr(`Pedido aprovado: a página de ${c.orgName} passa a ser gerida.`, `Request approved: ${c.orgName}'s page is now managed.`) : tr('Pedido recusado. A pessoa vê o motivo no painel.', 'Request declined. The person sees the reason in the dashboard.'),
+      ),
+    setPlan: (id: string, plan: Plan) => withNotice(setPlan(id, plan), plan === 'pro' ? tr('Plano Pro ligado.', 'Pro plan on.') : tr('Plano Pro desligado.', 'Pro plan off.')),
     merge: (o: PendingOrg, targetId: string, targetName: string) =>
       withNotice(merge(o.id, targetId), tr(`Fundida em ${targetName}. O nome antigo continua a ser encontrado.`, `Merged into ${targetName}. The old name can still be found.`)),
   };

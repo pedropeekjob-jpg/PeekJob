@@ -180,6 +180,9 @@ describe('Contas das organizações', () => {
       expect((await t.http().put(`/moderation/orgs/${orgId}/plan`).set(rosa).send({ plan: 'pro' })).status).toBe(403);
       expect((await t.http().put(`/moderation/orgs/${orgId}/plan`).set(mod).send({ plan: 'gold' })).status).toBe(400);
       await t.http().put(`/moderation/orgs/${orgId}/plan`).set(mod).send({ plan: 'pro' }).expect(200);
+      expect((await t.http().get('/moderation/managed').set(mod).expect(200)).body.items).toEqual([{ id: orgId, name: 'Padaria Ribeira', city: 'Porto', plan: 'pro', members: 1 }]);
+      expect((await t.http().get('/moderation/managed').set(rosa)).status).toBe(403);
+      expect((await t.http().put('/moderation/orgs/00000000-0000-0000-0000-000000000000/plan').set(mod).send({ plan: 'pro' })).status).toBe(404);
 
       const d = (await t.http().get(`/orgs/${orgId}/dashboard`).set(rosa).expect(200)).body;
       expect(d.org.plan).toBe('pro');

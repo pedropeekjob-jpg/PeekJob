@@ -29,6 +29,8 @@ export interface Review {
   useful: number;
   verified: boolean;
   tags?: string[];
+  /** resposta pública da organização (modo API) */
+  reply?: string;
 }
 
 export interface Interview {

@@ -11,7 +11,7 @@ import { BigRing } from '../../components/Score';
 import { DesktopCriteria, DesktopRespeito } from './Criteria';
 import { DesktopInterviews } from './Interviews';
 import { locationsSuffix, osmLink, scoreAria, shareCta, type OrgTab } from './org';
-import { LocationList, OrgTabs, SaveButton } from './OrgCommon';
+import { LocationList, ManagedLine, OrgTabs, SaveButton } from './OrgCommon';
 import { useToggle } from '../../lib/useToggle';
 import { ReviewsSection } from './Reviews';
 import { DesktopSalaries } from './Salaries';
@@ -60,6 +60,7 @@ export function OrgDesktop({ org, tab }: { org: Org; tab: OrgTab }) {
             {orgTypeLabel(org.type)} · {sectorLabel(org.sector)} · {org.city}
             {locationsSuffix(org.locations.length)}
           </span>
+          <ManagedLine org={org} />
           <p className={`body ${styles.lead}`}>{org.summary}</p>
           <div className={`row wrap ${styles.actions}`}>
             <button type="button" className={`btn btn-primary lift ${styles.review}`} onClick={startReview}>

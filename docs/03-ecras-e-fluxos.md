@@ -47,6 +47,8 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 
 **Organizações:** Para organizações (planos Grátis / Pro, "nunca vendemos posição") → Painel (responder publicamente, pulso da semana).
 
+**Contas das organizações (14/10):** na página pública, "É a tua organização? Gerir esta página" (ou "Para organizações" → Painel). Sem sessão, o Painel pede para entrar; sem página, mostra o pedido: escolher a organização, nome e cargo, e provar com o email do domínio (código de 6 dígitos; não servem emails pessoais) ou com um documento com o NIF (lido e apagado). A moderação aprova ou recusa no separador "Páginas de organizações", com justificação que a pessoa vê no Painel. Aprovado: a página pública diz "Página gerida pela organização" e o Painel mostra dados reais — semana (novas, respondidas, variação da nota), posição na cidade, etiquetas do mês e avaliações por responder; as respostas aparecem por baixo da avaliação. Pro (ligado pela moderação enquanto o preço não está decidido): variação de cada critério face à semana passada e média do setor; nunca mexe no ranking. Quem gere várias páginas escolhe-a no topo.
+
 ## Capturas
 
 | Ecrã | Mobile | Desktop |

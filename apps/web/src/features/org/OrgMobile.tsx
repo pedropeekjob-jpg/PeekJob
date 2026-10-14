@@ -10,7 +10,7 @@ import { BackButton } from '../../components/UI';
 import { MobileCriteria } from './Criteria';
 import { MobileInterviews } from './Interviews';
 import { locationsSuffix, orgMetaLine, scoreAria, shareCta, type OrgTab } from './org';
-import { LocationList, OrgTabs, SaveButton } from './OrgCommon';
+import { LocationList, ManagedLine, OrgTabs, SaveButton } from './OrgCommon';
 import { ReviewsSection } from './Reviews';
 import { MobileSalaries } from './Salaries';
 import { useOrgActions } from './useOrgPage';
@@ -56,6 +56,7 @@ export function OrgMobile({ org, tab }: { org: Org; tab: OrgTab }) {
             {orgMetaLine(org)}
             {locationsSuffix(org.locations.length)}
           </div>
+          <ManagedLine org={org} />
         </div>
         <div className={`row ${styles.scoreRow}`}>
           <BigRing value={org.score} size={112} thickness={11} muted={!has} ariaLabel={scoreAria(org)}>

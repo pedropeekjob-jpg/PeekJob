@@ -96,4 +96,24 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, demonstração (%s)'
     await user.click(within(screen.getByRole('article', { name: 'Horta Comunitária da Sé' })).getByRole('button', { name: 'Aprovar' }));
     expect(await screen.findByText('Horta Comunitária da Sé está agora pública.')).toBeInTheDocument();
   });
+
+  it('páginas de organizações: aprovar o pedido com justificação; ligar e desligar o Pro', async () => {
+    const { user } = show(viewport);
+    await user.click(await screen.findByRole('tab', { name: /Páginas de organizações 1/ }));
+    const card = screen.getByRole('article', { name: /Pedido para gerir/ });
+    expect(within(card).getByText('Marta Vinha')).toBeInTheDocument();
+    expect(within(card).getByText(/@cafevinha\.pt — confirma o domínio/)).toBeInTheDocument();
+    const approve = within(card).getByRole('button', { name: 'Aprovar' });
+    expect(approve).toBeDisabled();
+    await user.click(within(card).getByRole('button', { name: /Domínio do email confirmado/ }));
+    await user.click(approve);
+    expect(await screen.findByRole('status')).toHaveTextContent(/Pedido aprovado/);
+    expect(screen.getByText('Sem pedidos para gerir páginas.')).toBeInTheDocument();
+    const pro = screen.getByRole('button', { name: 'Plano Pro para Padaria Ribeira' });
+    expect(pro).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getAllByRole('button', { name: /^Plano Pro para / })).toHaveLength(2);
+    await user.click(pro);
+    expect(await screen.findByText('Plano Pro desligado.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Plano Pro para Padaria Ribeira' })).toHaveAttribute('aria-pressed', 'false');
+  });
 });

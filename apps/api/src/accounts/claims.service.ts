@@ -186,6 +186,16 @@ export class ClaimsService {
     });
   }
 
+  /** Páginas geridas (para a moderação ligar o Pro): nº de pessoas que gerem e o plano */
+  async managed() {
+    const { rows } = await this.pool.query(
+      `SELECT o.id, o.name, o.city, o.plan, count(m.member_ref)::int AS members
+         FROM organizations o JOIN org_members m ON m.org_id = o.id
+        WHERE o.status = 'active' GROUP BY o.id ORDER BY o.name LIMIT 500`,
+    );
+    return { items: rows.map((o) => ({ id: o.id, name: o.name, city: o.city, plan: o.plan, members: o.members })) };
+  }
+
   /** Plano da organização (até haver pagamentos, ligado pela moderação). Nunca mexe no ranking. */
   async setPlan(orgId: string, plan: 'free' | 'pro') {
     if (!isUuid(orgId)) throw new NotFoundException();

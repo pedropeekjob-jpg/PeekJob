@@ -3,13 +3,13 @@ import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { BigRing, CritLine } from '../../components/Score';
 import { MoreToggle } from '../../components/UI';
-import { WEEK_TAGS } from '../../data/content';
 import type { Org, Review } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel, whenLabel } from '../../i18n/labels';
 import { fmt } from '../../lib/format';
 import { useToggle } from '../../lib/useToggle';
-import { CRITERIA_ORDER, direction, harassmentNote, SEAL_MIN, WEEK_DELTA, weekChange } from './painel';
+import type { CriterionKey } from '../../data/criteria';
+import { CRITERIA_ORDER, direction, harassmentNote, SEAL_MIN, weekChange } from './painel';
 import { useReply } from './usePainel';
 import styles from './Painel.module.css';
 
@@ -25,14 +25,14 @@ export function ScoreRing({ org, desktop }: { org: Org; desktop: boolean }) {
   );
 }
 
-export function HeadInfo({ org, pulseOpen, onTogglePulse }: { org: Org; pulseOpen: boolean; onTogglePulse: () => void }) {
+export function HeadInfo({ org, weekDelta, pulseOpen, onTogglePulse }: { org: Org; weekDelta: number; pulseOpen: boolean; onTogglePulse: () => void }) {
   return (
     <div className={styles.head}>
       <span className="label">{tr('O teu painel', 'Your dashboard')}</span>
       <h1 className={`h1 ${styles.name}`}>{org.name}</h1>
       <span className={`body ${styles.week}`}>
-        <strong className={styles.change} data-dir={direction(org.weekDelta)}>
-          {weekChange(org.weekDelta)}
+        <strong className={styles.change} data-dir={direction(weekDelta)}>
+          {weekChange(weekDelta)}
         </strong>{' '}
         · {org.reviewsCount} {tr('avaliações', 'reviews')}
       </span>
@@ -58,7 +58,7 @@ export function PublicLink({ org, desktop }: { org: Org; desktop: boolean }) {
 }
 
 /** Pulso da semana: números e etiquetas mais usadas */
-export function Pulse({ stats }: { stats: { value: string; label: string }[] }) {
+export function Pulse({ stats, tags }: { stats: { value: string; label: string }[]; tags: { label: string; n: number; up: boolean }[] }) {
   return (
     <section id="pulso" className={`fade-up row wrap ${styles.pulse}`} aria-label={tr('Pulso da semana', 'This week’s pulse')}>
       {stats.map((s) => (
@@ -68,7 +68,7 @@ export function Pulse({ stats }: { stats: { value: string; label: string }[] }) 
         </div>
       ))}
       <ul className={`chips ${styles.weekTags}`} aria-label={tr('Etiquetas mais usadas esta semana', 'Most used tags this week')}>
-        {WEEK_TAGS.map((t) => (
+        {tags.map((t) => (
           <li key={t.label} className={`row ${styles.weekTag}`}>
             {tagLabel(t.label)}
             <span className={`mono ${styles.weekTagCount}`} data-dir={t.up ? 'up' : 'down'} aria-label={tr(`${t.n} menções, ${t.up ? 'a subir' : 'a descer'}`, `${t.n} mentions, ${t.up ? 'going up' : 'going down'}`)}>
@@ -82,8 +82,9 @@ export function Pulse({ stats }: { stats: { value: string; label: string }[] }) 
 }
 
 /** Uma avaliação por responder: texto, resposta publicada ou caixa para responder */
-function PendingReview({ review, desktop }: { review: Review; desktop: boolean }) {
+function PendingReview({ review, orgId, desktop }: { review: Review; orgId: string; desktop: boolean }) {
   const r = useReply(review);
+  const title = review.title || review.tags?.map(tagLabel).join(' · ');
   const id = `resp-${review.id}`;
   const meta = `${review.role} · ${whenLabel(review.when)}`;
   return (
@@ -91,7 +92,7 @@ function PendingReview({ review, desktop }: { review: Review; desktop: boolean }
       <div className={`row ${styles.reviewHead}`}>
         <Ring value={review.score} size={40} inner="var(--ground)" fontSize={13} />
         <span className={`grow ${styles.reviewTitleBlock}`}>
-          <span className={styles.reviewTitle}>{review.title}</span>
+          {title && <span className={styles.reviewTitle}>{title}</span>}
           {!desktop && <span className="small muted">{meta}</span>}
         </span>
         {desktop && <span className={`small muted ${styles.nowrap}`}>{meta}</span>}
@@ -114,8 +115,13 @@ function PendingReview({ review, desktop }: { review: Review; desktop: boolean }
             {tr('Resposta pública, visível para todos', 'Public reply, visible to everyone')}
           </label>
           <textarea id={id} className={`textarea ${styles.textarea}`} rows={3} value={r.draft} onChange={(e) => r.setDraft(e.target.value)} placeholder={tr('Obrigado pela avaliação…', 'Thanks for your review…')} />
+          {r.error && (
+            <span role="alert" className={`small ${styles.replyError}`}>
+              {r.error}
+            </span>
+          )}
           <div className={`row wrap ${styles.composeActions}`}>
-            <button type="button" className={`btn btn-dark ${styles.publish}`} disabled={!r.canPublish} onClick={r.publish}>
+            <button type="button" className={`btn btn-dark ${styles.publish}`} disabled={!r.canPublish} onClick={() => void r.publish(orgId)}>
               {tr('Publicar resposta', 'Publish reply')}
             </button>
             <button type="button" className={`btn ${styles.cancel}`} onClick={r.cancel}>
@@ -134,7 +140,7 @@ function PendingReview({ review, desktop }: { review: Review; desktop: boolean }
   );
 }
 
-export function PendingSection({ reviews, unanswered, desktop }: { reviews: Review[]; unanswered: number; desktop: boolean }) {
+export function PendingSection({ reviews, orgId, unanswered, desktop }: { reviews: Review[]; orgId: string; unanswered: number; desktop: boolean }) {
   return (
     <section aria-labelledby="pr" className={styles.pending}>
       <div className={`row between ${styles.sectionHead}`}>
@@ -146,23 +152,28 @@ export function PendingSection({ reviews, unanswered, desktop }: { reviews: Revi
         </span>
       </div>
       {reviews.map((r) => (
-        <PendingReview key={r.id} review={r} desktop={desktop} />
+        <PendingReview key={r.id} review={r} orgId={orgId} desktop={desktop} />
       ))}
     </section>
   );
 }
 
-/** Critérios com a variação face à semana passada: 3 principais e "ver todos" */
-export function WeekCriteria({ org }: { org: Org }) {
+type Peers = { sector: string; count: number; score: number } | null;
+
+/**
+ * Critérios: 3 principais e "ver todos". Com o Pro, a variação de cada um e a média do setor;
+ * sem o Pro, só as notas (e o que o Pro acrescenta).
+ */
+export function WeekCriteria({ org, delta, peers }: { org: Org; delta: Partial<Record<CriterionKey, number>> | null; peers: Peers }) {
   const [all, toggleAll] = useToggle();
-  const line = (k: (typeof CRITERIA_ORDER)[number]) => <CritLine key={k} k={k} value={org.scores[k]} delta={WEEK_DELTA[k]} minHeight={36} />;
+  const line = (k: CriterionKey) => <CritLine key={k} k={k} value={org.scores[k]} delta={delta ? (delta[k] ?? 0) : undefined} minHeight={36} />;
   return (
     <section aria-labelledby="cr" className={styles.criteria}>
       <div className={`row between ${styles.criteriaHead}`}>
         <h2 id="cr" className={`h2 ${styles.sectionTitle}`}>
           {tr('Critérios', 'Criteria')}
         </h2>
-        <span className="small muted">{tr('vs. semana passada', 'vs. last week')}</span>
+        {delta && <span className="small muted">{tr('vs. semana passada', 'vs. last week')}</span>}
       </div>
       {CRITERIA_ORDER.slice(0, 3).map(line)}
       {all && (
@@ -171,6 +182,20 @@ export function WeekCriteria({ org }: { org: Org }) {
         </div>
       )}
       <MoreToggle open={all} onToggle={toggleAll} label={tr('Ver todos os 8', 'Show all 8')} openLabel={tr('Ver só os 3 principais', 'Show top 3 only')} controls="crit-all" />
+      {peers && (
+        <p className={`small body ${styles.peers}`}>
+          {tr(`Média do setor (${peers.sector}): `, `Sector average (${peers.sector}): `)}
+          <strong className="num">{fmt(peers.score)}</strong> · {tr(`${peers.count} organizações`, `${peers.count} organisations`)}
+        </p>
+      )}
+      {!delta && (
+        <p className={`small ${styles.proNote}`}>
+          {tr('Com o plano Pro: a variação de cada critério e a comparação com o setor. Nunca muda a posição no ranking.', 'With the Pro plan: how each criterion changes and how you compare with your sector. It never changes your ranking.')}{' '}
+          <Link to="/para-organizacoes" className="link">
+            {tr('Ver planos', 'See plans')}
+          </Link>
+        </p>
+      )}
     </section>
   );
 }

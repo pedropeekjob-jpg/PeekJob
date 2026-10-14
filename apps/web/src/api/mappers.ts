@@ -19,6 +19,8 @@ export interface ApiOrg {
   locations?: { id: string; label: string | null; address: string; lat: number | null; lng: number | null }[];
   nifVerified?: boolean;
   harassmentReports?: number;
+  /** a página é gerida pela organização */
+  claimed?: boolean;
 }
 export interface ApiReview {
   id: string;
@@ -32,6 +34,8 @@ export interface ApiReview {
   /** quantas pessoas acharam útil (sem dizer quem) */
   helpful?: number;
   createdAt: string;
+  /** resposta pública da organização */
+  reply?: { text: string; createdAt: string; updatedAt: string } | null;
 }
 
 export interface ApiInterview {
@@ -84,7 +88,7 @@ function mapLocations(locs: ApiOrg['locations'], city: string): OrgLocation[] {
 }
 
 export function toReview(r: ApiReview): Review {
-  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags };
+  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags, reply: r.reply?.text };
 }
 
 /** Converte uma organização da API para o modelo usado pelos ecrãs (campos sem dados ficam vazios) */
@@ -121,7 +125,7 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = [], extras: OrgExtras = 
     interviewStats: stats ? { ...stats, difficulty: stats.difficulty ?? undefined } : undefined,
     salaries: extras.salaries?.bands.map(toBand) ?? [],
     paidOnTimePct: extras.salaries?.paidOnTimePct ?? undefined,
-    claimed: false,
+    claimed: !!o.claimed,
   };
 }
 

@@ -105,6 +105,7 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | PUT, DELETE | `/reviews/:id/reply` | quem gere | Resposta pública da organização (2–600 caracteres, sem nomes nem insultos); aparece em `GET /orgs/:id/reviews` como `reply` |
 | GET | `/moderation/claims` | moderador | Pedidos para gerir páginas (método, domínio e se é conhecido, nome e cargo) |
 | POST | `/moderation/claims/:id/decision` | moderador | `approve` ou `reject`, com justificação |
+| GET | `/moderation/managed` | moderador | Páginas geridas: nº de pessoas e plano |
 | PUT | `/moderation/orgs/:id/plan` | moderador | Plano `free` ou `pro` (até haver pagamentos); nunca mexe no ranking |
 | GET | `/me/export` | sessão | Os meus dados (JSON) |
 | DELETE | `/me` | sessão | Apagar a conta (`keepReviews` mantém as avaliações, desligadas da pessoa) |

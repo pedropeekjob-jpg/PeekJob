@@ -8,7 +8,7 @@ import { appealSide, keepTemplates, NOTE_MIN, orgDetails, reasonLabel, rejectTem
 import { useCardAction, type Queue } from './useQueues';
 import styles from './Moderation.module.css';
 
-export function QueueTabs({ tab, reports, orgs, appeals, onChange }: { tab: Queue; reports: number; orgs: number; appeals: number; onChange: (q: Queue) => void }) {
+export function QueueTabs({ tab, reports, orgs, appeals, claims, onChange }: { tab: Queue; reports: number; orgs: number; appeals: number; claims: number; onChange: (q: Queue) => void }) {
   return (
     <div role="tablist" aria-label={tr('Filas', 'Queues')} className={styles.tabs}>
       <button type="button" role="tab" aria-selected={tab === 'reports'} onClick={() => onChange('reports')}>
@@ -19,6 +19,9 @@ export function QueueTabs({ tab, reports, orgs, appeals, onChange }: { tab: Queu
       </button>
       <button type="button" role="tab" aria-selected={tab === 'appeals'} onClick={() => onChange('appeals')}>
         {tr('Pedidos de revisão', 'Appeals')} <span className={styles.count}>{appeals}</span>
+      </button>
+      <button type="button" role="tab" aria-selected={tab === 'claims'} onClick={() => onChange('claims')}>
+        {tr('Páginas de organizações', 'Organisation pages')} <span className={styles.count}>{claims}</span>
       </button>
     </div>
   );
@@ -54,7 +57,7 @@ export function Skeleton() {
 }
 
 /** Justificação: modelos frequentes (em grupos) ou texto livre */
-function NoteBox({ value, onChange, groups, label }: { value: string; onChange: (v: string) => void; groups: { title?: string; items: string[] }[]; label: string }) {
+export function NoteBox({ value, onChange, groups, label }: { value: string; onChange: (v: string) => void; groups: { title?: string; items: string[] }[]; label: string }) {
   return (
     <div className={styles.note}>
       <span className={`small ${styles.noteLabel}`}>{label}</span>

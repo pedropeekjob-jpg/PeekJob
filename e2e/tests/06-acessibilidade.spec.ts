@@ -93,7 +93,7 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   }
   await page.getByLabel(/Como foi o processo/).fill('O Ricardo é um idiota.');
   await audit(page, 'partilhar: texto bloqueado', found);
-  for (const path of ['/perfil', '/perfil/dados', '/guardadas', '/apoio', '/preferencias']) {
+  for (const path of ['/perfil', '/perfil/dados', '/guardadas', '/apoio', '/preferencias', '/painel']) {
     await page.goto(path);
     await audit(page, path, found);
   }

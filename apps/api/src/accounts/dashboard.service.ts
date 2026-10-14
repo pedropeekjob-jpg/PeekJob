@@ -80,11 +80,11 @@ export class DashboardService {
         .filter((r) => !r.answered)
         .slice(0, 20)
         .map((r) => ({ id: r.id, avg: Number(r.avg), scores: r.scores, tags: r.tags, text: r.text, createdAt: r.created_at })),
-      pro: org.plan === 'pro' ? await this.pro(org, reviews, monthAgo) : null,
+      pro: org.plan === 'pro' ? await this.pro(org, reviews, weekAgo) : null,
     };
   }
 
-  /** Só no Pro: tendências por critério (face a há 30 dias) e a média do setor */
+  /** Só no Pro: tendências por critério (face à semana passada) e a média do setor */
   private async pro(org: { id: string; sector: string | null }, reviews: { scores: Record<string, number>; created_at: Date }[], since: Date) {
     const criteria = criteriaTrend(
       reviews.map((r) => ({ scores: r.scores, createdAt: r.created_at })),

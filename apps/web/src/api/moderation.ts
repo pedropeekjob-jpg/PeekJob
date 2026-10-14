@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ORGS } from '../data/orgs';
+import type { ManagedOrg, PendingClaim, Plan } from './accounts';
 import { api, apiMode, errorText } from './http';
 
 /** Tipos da API de moderação */
@@ -56,7 +57,7 @@ export interface Summary {
 const daysAgo = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
 
 /** Demonstração: filas de exemplo, para se ver o ecrã sem API */
-function demoData(): { reports: ReportedContent[]; orgs: PendingOrg[]; appeals: Appeal[] } {
+function demoData(): { reports: ReportedContent[]; orgs: PendingOrg[]; appeals: Appeal[]; claims: PendingClaim[]; managed: ManagedOrg[] } {
   const ribeira = ORGS.find((o) => o.id === 'padaria-ribeira') ?? ORGS[0];
   const other = ORGS[3] ?? ORGS[1];
   return {
@@ -99,7 +100,21 @@ function demoData(): { reports: ReportedContent[]; orgs: PendingOrg[]; appeals: 
         content: { kind: 'review', id: 'demo-r3', text: 'A chefia muda os turnos sem avisar e não paga as horas extra.', tags: ['Horas extra não pagas'], avg: 2.1, status: 'removed' },
       },
 ],
+    claims: [
+      {
+        id: 'demo-c1', orgId: other.id, orgName: other.name, city: other.city, nif: null, method: 'email', emailDomain: 'cafevinha.pt', domainKnown: false,
+        name: 'Marta Vinha', role: 'Sócia-gerente', members: 0, createdAt: daysAgo(1),
+      },
+    ],
+    managed: [{ id: ribeira.id, name: ribeira.name, city: ribeira.city, plan: 'pro', members: 1 }],
   };
+}
+
+/** Depois de aprovar um pedido, a página passa a gerida (por ordem alfabética) */
+export function withManaged(list: ManagedOrg[], c: PendingClaim): ManagedOrg[] {
+  if (list.some((m) => m.id === c.orgId)) return list;
+  const added: ManagedOrg = { id: c.orgId, name: c.orgName, city: c.city, plan: 'free', members: 1 };
+  return [...list, added].sort((a, b) => a.name.localeCompare(b.name, 'pt'));
 }
 
 /** Filas da moderação e ações (API ou demonstração) */
@@ -107,6 +122,8 @@ export function useModeration() {
   const [reports, setReports] = useState<ReportedContent[]>([]);
   const [orgs, setOrgs] = useState<PendingOrg[]>([]);
   const [appeals, setAppeals] = useState<Appeal[]>([]);
+  const [claims, setClaims] = useState<PendingClaim[]>([]);
+  const [managed, setManaged] = useState<ManagedOrg[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -119,15 +136,21 @@ export function useModeration() {
         setReports(d.reports);
         setOrgs(d.orgs);
         setAppeals(d.appeals);
+        setClaims(d.claims);
+        setManaged(d.managed);
       } else {
-        const [r, o, a] = await Promise.all([
+        const [r, o, a, c, m] = await Promise.all([
           api<{ items: ReportedContent[] }>('/moderation/reports'),
           api<{ items: PendingOrg[] }>('/moderation/orgs'),
           api<{ items: Appeal[] }>('/moderation/appeals'),
+          api<{ items: PendingClaim[] }>('/moderation/claims'),
+          api<{ items: ManagedOrg[] }>('/moderation/managed'),
         ]);
         setReports(r.items);
         setOrgs(o.items);
         setAppeals(a.items);
+        setClaims(c.items);
+        setManaged(m.items);
       }
     } catch (e) {
       setError(errorText(e));
@@ -154,6 +177,8 @@ export function useModeration() {
     reports,
     orgs,
     appeals,
+    claims,
+    managed,
     loading,
     error,
     reload,
@@ -166,6 +191,19 @@ export function useModeration() {
     reject: (id: string, note: string) => run(() => api(`/orgs/${id}/reject`, { body: { note } }), () => setOrgs((x) => x.filter((o) => o.id !== id))),
     decideAppeal: (id: string, action: 'reverse' | 'confirm', note: string) =>
       run(() => api(`/moderation/appeals/${id}/decision`, { body: { action, note } }), () => setAppeals((x) => x.filter((a) => a.id !== id))),
+    decideClaim: (c: PendingClaim, action: 'approve' | 'reject', note: string) =>
+      run(
+        () => api(`/moderation/claims/${c.id}/decision`, { body: { action, note } }),
+        () => {
+          setClaims((x) => x.filter((y) => y.id !== c.id));
+          if (action === 'approve') setManaged((x) => withManaged(x, c));
+        },
+      ),
+    setPlan: (id: string, plan: Plan) =>
+      run(
+        () => api(`/moderation/orgs/${id}/plan`, { method: 'PUT', body: { plan } }),
+        () => setManaged((x) => x.map((m) => (m.id === id ? { ...m, plan } : m))),
+      ),
     merge: (id: string, targetId: string) => run(() => api(`/orgs/${id}/merge`, { body: { targetId } }), () => setOrgs((x) => x.filter((o) => o.id !== id))),
   };
 }

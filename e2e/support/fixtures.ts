@@ -30,6 +30,14 @@ export async function login(page: Page, email: string) {
   await openMagicLink(page, email);
 }
 
+/** Texto do último email enviado para este endereço (ex.: um código) */
+export async function lastMail(email: string) {
+  const mails = (await (await fetch(`${MAIL}/__mails`)).json()) as { to: string[]; text: string }[];
+  const mail = mails.filter((m) => m.to[0] === email).at(-1);
+  expect(mail, `email para ${email}`).toBeTruthy();
+  return mail!.text;
+}
+
 /** Abre o último link de acesso enviado para este email (como quem o abre no email) */
 export async function openMagicLink(page: Page, email: string) {
   const mails = (await (await fetch(`${MAIL}/__mails`)).json()) as { to: string[]; text: string }[];

@@ -36,3 +36,13 @@ describe('entrevistas e salários vindos da API', () => {
     expect(toOrg(api, [], { salaries: { bands: [], paidOnTimePct: null, total: 0 } }).paidOnTimePct).toBeUndefined();
   });
 });
+
+describe('contas das organizações vindas da API', () => {
+  it('página gerida pela organização e resposta pública nas avaliações', () => {
+    const review = { id: 'r1', scores: {}, avg: 4, recommend: true, tags: [], text: 'Bom.', flagged: false, verified: false, createdAt: iso };
+    const o = toOrg({ ...api, claimed: true }, [{ ...review, reply: { text: 'Obrigado!', createdAt: iso, updatedAt: iso } }, { ...review, id: 'r2', reply: null }]);
+    expect(o.claimed).toBe(true);
+    expect(o.reviews.map((r) => r.reply)).toEqual(['Obrigado!', undefined]);
+    expect(toOrg(api).claimed).toBe(false);
+  });
+});

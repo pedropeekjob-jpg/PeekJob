@@ -104,7 +104,7 @@ function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean
           </span>
         </div>
         <p className={`body ${styles.reviewDesktopBody}`}>{r.body}</p>
-        <OrgReply org={org} reviewId={r.id} />
+        <OrgReply org={org} review={r} />
         {actions}
       </article>
     );
@@ -120,7 +120,7 @@ function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean
       </div>
       <h3 className={`h3 ${styles.reviewTitle}`}>{r.title}</h3>
       <p className={`body ${styles.reviewBody}`}>{r.body}</p>
-      <OrgReply org={org} reviewId={r.id} />
+      <OrgReply org={org} review={r} />
       {actions}
     </article>
   );

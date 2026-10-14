@@ -337,3 +337,93 @@
     align-items: center;
   }
 }
+
+/* Pro e setor */
+.peers {
+  margin: 12px 0 0;
+}
+.proNote {
+  margin: 12px 0 0;
+  color: var(--body);
+}
+.replyError {
+  color: var(--warn-text);
+}
+
+/* Entrar, reivindicar e escolher a página */
+.gate {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 24px;
+  padding-bottom: 80px;
+}
+.gateTitle {
+  margin: 0;
+}
+.claims {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.claimItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.claimStatus[data-status='approved'] {
+  color: var(--up);
+}
+.claimStatus[data-status='rejected'] {
+  color: var(--warn-text);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.result {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+.result[aria-pressed='true'] {
+  border-color: var(--ink);
+}
+.methods {
+  gap: 8px;
+}
+.method {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--field);
+  background: var(--surface);
+}
+.method[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+.switcher {
+  max-width: 320px;
+}

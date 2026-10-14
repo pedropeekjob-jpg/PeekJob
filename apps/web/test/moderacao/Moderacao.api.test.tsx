@@ -34,6 +34,10 @@ const APPEAL = {
   id: 'a1', side: 'reporter', originalDecision: 'rejected', originalNote: 'Não viola as regras.', text: 'Tem o nome da gerente.', createdAt: new Date().toISOString(),
   orgName: 'Oficina Nove', content: { kind: 'review', id: 'r9', text: 'A Dona Rosa não paga.', tags: [], avg: 2, status: 'published' },
 };
+const CLAIM = {
+  id: 'c1', orgId: 'o1', orgName: 'Oficina Nove', city: 'Porto', nif: '501442600', method: 'document', emailDomain: null, domainKnown: false,
+  name: 'Rui Nove', role: 'Sócio', members: 0, createdAt: new Date().toISOString(),
+};
 const ORG = { id: 'p1', name: 'Loja Nova', type: 'PME', city: 'Faro', nif: '500697256', address: null, createdAt: new Date().toISOString(), reviewers: 0, duplicates: [] };
 
 function routes(overrides: Record<string, unknown> = {}) {
@@ -46,6 +50,8 @@ function routes(overrides: Record<string, unknown> = {}) {
     if (path === '/moderation/reports') return { items: [REPORT] };
     if (path === '/moderation/orgs') return { items: [ORG] };
     if (path === '/moderation/appeals') return { items: [APPEAL] };
+    if (path === '/moderation/claims') return { items: [CLAIM] };
+    if (path === '/moderation/managed') return { items: [{ id: 'm1', name: 'Loja Velha', city: 'Faro', plan: 'free', members: 2 }] };
     return { items: [] };
   });
 }
@@ -109,6 +115,19 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, modo API (%s)', (vie
     await user.click(within(card).getByRole('button', { name: 'Remover entrevista' }));
     expect(api).toHaveBeenCalledWith('/moderation/interviews/i7/decision', { body: { action: 'remove', note: 'Identifica uma pessoa pelo nome.' } });
     expect(await screen.findByText('Entrevista removida. Avisámos quem escreveu e quem denunciou.')).toBeInTheDocument();
+  });
+
+  it('páginas: recusar um pedido e ligar o Pro vão para o servidor', async () => {
+    const { user } = show(viewport);
+    await user.click(await screen.findByRole('tab', { name: /Páginas de organizações 1/ }));
+    const card = screen.getByRole('article', { name: 'Pedido para gerir Oficina Nove' });
+    expect(within(card).getByText(/Documento com o NIF da organização/)).toBeInTheDocument();
+    await user.type(within(card).getByRole('textbox'), 'Não confirmámos o cargo.');
+    await user.click(within(card).getByRole('button', { name: 'Recusar' }));
+    expect(api).toHaveBeenCalledWith('/moderation/claims/c1/decision', { body: { action: 'reject', note: 'Não confirmámos o cargo.' } });
+    await user.click(screen.getByRole('button', { name: 'Plano Pro para Loja Velha' }));
+    expect(api).toHaveBeenCalledWith('/moderation/orgs/m1/plan', { method: 'PUT', body: { plan: 'pro' } });
+    expect(await screen.findByText('Plano Pro ligado.')).toBeInTheDocument();
   });
 
   it('erro ao carregar e erro numa decisão', async () => {
