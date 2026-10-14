@@ -13,3 +13,4 @@ coverage
 .scannerwork
 e2e/.nyc_output
 visual-report
+react-profile.json

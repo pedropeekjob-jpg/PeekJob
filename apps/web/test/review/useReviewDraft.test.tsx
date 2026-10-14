@@ -21,6 +21,19 @@ describe('useReviewDraft: estado e ações do texto da avaliação', () => {
     expect(result.current).toMatchObject({ done: 1, insult: false, canPublish: true });
   });
 
+  it('as ações não mudam ao dar notas ou escolher etiquetas (as linhas memorizadas não voltam a correr)', () => {
+    const { result } = renderHook(() => useReviewDraft(), { wrapper });
+    const { setScore, toggleTag, setRecommend } = result.current;
+    act(() => setScore('ambiente', 4));
+    act(() => setScore('salario', 3));
+    act(() => toggleTag('Horários cumpridos'));
+    expect(result.current.scores).toEqual({ ambiente: 4, salario: 3 });
+    expect(result.current.tags).toEqual(['Horários cumpridos']);
+    expect(result.current.setScore).toBe(setScore);
+    expect(result.current.toggleTag).toBe(toggleTag);
+    expect(result.current.setRecommend).toBe(setRecommend);
+  });
+
   it('nomes ou insultos bloqueiam; possíveis ilegalidades são assinaladas mas não bloqueiam', () => {
     const { result } = renderHook(() => useReviewDraft(), { wrapper });
     act(() => result.current.setScore('ambiente', 2));

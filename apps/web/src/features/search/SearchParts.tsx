@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties } from 'react';
+import { memo, useRef, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoAnimated } from '../../components/Brand';
 import { Ring } from '../../components/Data';
@@ -50,7 +50,8 @@ export function SearchBox({ id, text, onText, clear, large = false }: SearchBoxP
   );
 }
 
-export function TypeChips({ type, pickType, small = false }: { type: TypeFilter; pickType: (t: TypeFilter) => void; small?: boolean }) {
+/** memo: não volta a correr a cada tecla no campo (pickType é estável) */
+export const TypeChips = memo(function TypeChips({ type, pickType, small = false }: { type: TypeFilter; pickType: (t: TypeFilter) => void; small?: boolean }) {
   return (
     <div role="group" aria-label={tr('Tipo de organização', 'Type of organisation')} className="chips">
       {TYPES.map((t) => (
@@ -60,7 +61,7 @@ export function TypeChips({ type, pickType, small = false }: { type: TypeFilter;
       ))}
     </div>
   );
-}
+});
 
 function Compatibility({ value, desktop }: { value: number | null; desktop: boolean }) {
   if (value == null) return <span className={`small muted ${styles.none}`}>{tr('Sem avaliações', 'No reviews')}</span>;
@@ -73,8 +74,8 @@ function Compatibility({ value, desktop }: { value: number | null; desktop: bool
   );
 }
 
-/** Um resultado: nota, nome, tipo e cidade, compatibilidade */
-export function ResultRow({ r, desktop = false }: { r: Result; desktop?: boolean }) {
+/** Um resultado: nota, nome, tipo e cidade, compatibilidade (memo: os resultados são memorizados no hook) */
+export const ResultRow = memo(function ResultRow({ r, desktop = false }: { r: Result; desktop?: boolean }) {
   const { org } = r;
   return (
     <Link to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} className={`plain row ${desktop ? styles.resultWide : styles.result}`}>
@@ -96,10 +97,10 @@ export function ResultRow({ r, desktop = false }: { r: Result; desktop?: boolean
       <Compatibility value={r.match} desktop={desktop} />
     </Link>
   );
-}
+});
 
-/** Estado "a procurar": logótipo animado pequeno e cartões esqueleto */
-export function Searching({ total, desktop = false }: { total: number; desktop?: boolean }) {
+/** Estado "a procurar": logótipo animado pequeno e cartões esqueleto (memo: não muda enquanto se escreve) */
+export const Searching = memo(function Searching({ total, desktop = false }: { total: number; desktop?: boolean }) {
   return (
     <div className={`fade-up ${styles.searching}`}>
       <div role="status" className={desktop ? styles.statusWide : styles.status}>
@@ -120,4 +121,4 @@ export function Searching({ total, desktop = false }: { total: number; desktop?:
       </div>
     </div>
   );
-}
+});

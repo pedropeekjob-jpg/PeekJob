@@ -293,7 +293,7 @@ function useAppState() {
         track('mark_helpful', { helpful: !stRef.current.useful[id] });
         set((s) => ({ useful: { ...s.useful, [id]: !s.useful[id] } }));
       },
-      updateDraft: (patch: Partial<Draft>) => set((s) => ({ draft: { ...s.draft, ...patch } })),
+      updateDraft: (patch: Partial<Draft> | ((d: Draft) => Partial<Draft>)) => set((s) => ({ draft: { ...s.draft, ...(typeof patch === 'function' ? patch(s.draft) : patch) } })),
       startDraft: (orgId: string, locationId: string | null) =>
         set((s) => ({ draft: s.draft.orgId === orgId ? { ...s.draft, locationId } : { ...emptyDraft(), orgId, locationId } })),
       resetDraftToExample: () => set({ draft: apiMode ? emptyDraft() : exampleDraft() }),

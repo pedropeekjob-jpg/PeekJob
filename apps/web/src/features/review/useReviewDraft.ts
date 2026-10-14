@@ -3,7 +3,7 @@ import type { CriterionKey } from '../../data/criteria';
 import { tr } from '../../i18n';
 import { detectRedFlags, hasInsultOrName } from '../../lib/moderation';
 import { avgOf, useStore, type Failure } from '../../lib/store';
-import { countDone } from './flow';
+import { countDone, toggleIn, withScore } from './flow';
 
 export const REVIEW_TEXT_MAX = 600;
 
@@ -42,20 +42,10 @@ export function useReviewDraft() {
 
   const setText = useCallback((t: string) => updateDraft({ text: t.slice(0, REVIEW_TEXT_MAX) }), [updateDraft]);
 
-  const toggleTag = useCallback(
-    (tag: string) => updateDraft({ tags: tags.includes(tag) ? tags.filter((x) => x !== tag) : [...tags, tag] }),
-    [tags, updateDraft],
-  );
+  // funções do rascunho atual: as ações não mudam a cada nota/etiqueta (as linhas memorizadas não voltam a correr)
+  const toggleTag = useCallback((tag: string) => updateDraft((d) => ({ tags: toggleIn(d.tags, tag) })), [updateDraft]);
 
-  const setScore = useCallback(
-    (k: CriterionKey, n: number) => {
-      const next = { ...scores };
-      if (n) next[k] = n;
-      else delete next[k];
-      updateDraft({ scores: next });
-    },
-    [scores, updateDraft],
-  );
+  const setScore = useCallback((k: CriterionKey, n: number) => updateDraft((d) => ({ scores: withScore(d.scores, k, n) })), [updateDraft]);
 
   const setRecommend = useCallback((v: boolean | null) => updateDraft({ recommend: v }), [updateDraft]);
 

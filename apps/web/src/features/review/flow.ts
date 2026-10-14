@@ -14,6 +14,17 @@ export const scoreOf = (scores: Partial<Scores>, k: CriterionKey) => {
   const v = scores[k];
   return typeof v === 'number' && v > 0 ? v : 0;
 };
+/** Notas com a do critério k mudada (0 tira a nota) */
+export function withScore(scores: Partial<Scores>, k: CriterionKey, n: number): Partial<Scores> {
+  const next = { ...scores };
+  if (n) next[k] = n;
+  else delete next[k];
+  return next;
+}
+
+/** Junta ou tira uma etiqueta */
+export const toggleIn = (list: string[], item: string) => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
+
 export const countDone = (scores: Partial<Scores>) => DESKTOP_ORDER.filter((k) => scoreOf(scores, k) > 0).length;
 
 /** Nota de destino de uma tecla num grupo 1–5 (setas, Home, End); null para outras teclas */

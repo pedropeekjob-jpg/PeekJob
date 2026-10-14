@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dots, Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
@@ -15,6 +15,25 @@ import type { RankingFilters } from './useRanking';
 import styles from './RankingDesktop.module.css';
 
 /** Computador: lista à esquerda e pré-visualização da escolhida à direita */
+/** Uma linha do ranking (memo: escolher outra só volta a correr as duas linhas que mudam de estado) */
+const RankRow = memo(function RankRow({ org, match, position, selected, onChoose }: { org: Org; match: number; position: number; selected: boolean; onChoose: (id: string) => void }) {
+  return (
+    <button type="button" aria-pressed={selected} onClick={() => onChoose(org.id)} className={`row ${styles.row}`}>
+      <span className={`num ${styles.position}`} data-top={position <= 3 || undefined}>
+        {position}
+      </span>
+      <Ring value={org.score} size={48} fontSize={15} />
+      <span className={`grow ${styles.rowText}`}>
+        <span className={`ellipsis ${styles.rowName}`}>{org.name}</span>
+        <span className="small muted">
+          {orgTypeLabel(org.type)} · {org.district}
+        </span>
+      </span>
+      <span className={`pill pill-match ${styles.rowMatch}`}>{tr(`${match}% para ti`, `${match}% for you`)}</span>
+    </button>
+  );
+});
+
 export function RankingDesktop({ ranked, F, prefs }: { ranked: RankedRow[]; F: RankingFilters; prefs: CriterionKey[] }) {
   // com filtros vindos do endereço o painel começa aberto
   const [showFilters, toggleFilters] = useToggle(F.active > 0);
@@ -22,10 +41,10 @@ export function RankingDesktop({ ranked, F, prefs }: { ranked: RankedRow[]; F: R
   const [more, setMore] = useState(false);
   const [allCriteria, setAllCriteria] = useState(false);
   const { index, selected, shown } = desktopWindow(ranked, pick, more);
-  const choose = (id: string) => {
+  const choose = useCallback((id: string) => {
     setPick(id);
     setAllCriteria(false);
-  };
+  }, []);
 
   return (
     <div className={`container ${styles.container}`}>
@@ -73,19 +92,7 @@ export function RankingDesktop({ ranked, F, prefs }: { ranked: RankedRow[]; F: R
           </span>
           {ranked.length === 0 && <EmptyFilters F={F} />}
           {shown.map(({ org, match }, i) => (
-            <button key={org.id} type="button" aria-pressed={i === index} onClick={() => choose(org.id)} className={`row ${styles.row}`}>
-              <span className={`num ${styles.position}`} data-top={i < 3 || undefined}>
-                {i + 1}
-              </span>
-              <Ring value={org.score} size={48} fontSize={15} />
-              <span className={`grow ${styles.rowText}`}>
-                <span className={`ellipsis ${styles.rowName}`}>{org.name}</span>
-                <span className="small muted">
-                  {orgTypeLabel(org.type)} · {org.district}
-                </span>
-              </span>
-              <span className={`pill pill-match ${styles.rowMatch}`}>{tr(`${match}% para ti`, `${match}% for you`)}</span>
-            </button>
+            <RankRow key={org.id} org={org} match={match} position={i + 1} selected={i === index} onChoose={choose} />
           ))}
           {shown.length < ranked.length && (
             <button type="button" className={`btn btn-ghost ${styles.more}`} onClick={() => setMore(true)}>

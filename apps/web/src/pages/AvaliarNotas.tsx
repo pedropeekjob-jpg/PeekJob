@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
@@ -48,6 +48,7 @@ const recommendLabel = (v: boolean | null) =>
 function MobileNotas({ org, locationLabel, review }: ViewProps) {
   const nav = useNavigate();
   const [help, setHelp] = useState<CriterionKey | null>(null);
+  const toggleHelp = useCallback((k: CriterionKey) => setHelp((h) => (h === k ? null : k)), []);
   const { done } = review;
   return (
     <Shell>
@@ -66,7 +67,7 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
 
         <div className="stack">
           {MOBILE_ORDER.map((k) => (
-            <ScoreRow key={k} k={k} value={scoreOf(review.scores, k)} onPick={(n) => review.setScore(k, n)} help={{ open: help === k, toggle: () => setHelp(help === k ? null : k) }} />
+            <ScoreRow key={k} k={k} value={scoreOf(review.scores, k)} onPick={review.setScore} helpOpen={help === k} onHelp={toggleHelp} />
           ))}
         </div>
 
@@ -114,7 +115,7 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
 
             <section aria-label={tr('Notas por critério', 'Scores by criterion')} className={styles.scores}>
               {DESKTOP_ORDER.map((k) => (
-                <ScoreRow key={k} k={k} desktop value={scoreOf(review.scores, k)} onPick={(n) => review.setScore(k, n)} />
+                <ScoreRow key={k} k={k} desktop value={scoreOf(review.scores, k)} onPick={review.setScore} />
               ))}
               <div className={`row wrap between ${styles.scoresFoot}`}>
                 <span className={styles.scoresFootLabel}>{tr('Recomendavas a um amigo?', 'Would you recommend it to a friend?')}</span>

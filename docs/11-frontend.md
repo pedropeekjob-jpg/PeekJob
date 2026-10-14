@@ -44,7 +44,26 @@ apps/web/src/
 
 - **`useMemo`:** para cálculos que correm muitas vezes e custam (moderação local a cada tecla, ordenar listas de organizações, rankings, compatibilidade). Não se usa para contas triviais (somar notas de 8 critérios).
 - **`useCallback`:** nas ações que os hooks devolvem, porque são passadas a componentes e listas e as ações da loja já são estáveis (`useMemo` no `StoreProvider`). Não se usa em funções criadas e usadas no mesmo componente.
-- **Medir antes:** em dúvida, o React Profiler decide. Memorizar tem custo (memória e comparação de dependências).
+- **`React.memo`:** só em componentes que se repetem e cujas props ficam iguais na interação mais comum: `ScoreRow` (dar uma nota só volta a correr essa linha), `TagPicker`, `RecommendButtons`, `MiniSteps` (não correm a cada tecla do comentário), `ResultRow`, `TypeChips`, `Searching` (não correm a cada tecla na pesquisa) e as linhas do ranking. Para o memo funcionar, as ações têm de ser estáveis: o `updateDraft` aceita uma função do rascunho atual (`updateDraft((d) => ({ scores: withScore(d.scores, k, n) }))`), por isso `setScore` e `toggleTag` não dependem das notas nem das etiquetas.
+- **Medir antes:** `npm run react:profile -- <commit>` constrói as duas versões com o React de profiling e corre as mesmas interações (`e2e/visual/profile-scenarios.mjs`) com o CPU 4× mais lento, 7 vezes cada. Compara as medianas de commits, componentes que correram mesmo (os saltados por memo não contam) e tempo de render. Memorizar tem custo (memória e comparação de props); sem ganho medido, não se memoriza.
+
+**Medição (14/10, antes do refactoring `78dcf8c` → agora, medianas de 7 repetições, CPU 4×):**
+
+| Interação | Ecrã | Componentes | Render |
+|---|---|---|---|
+| Pesquisa: escrever "padaria porto" | telemóvel | 301 → 238 (−21%) | 68,8 → 51,3 ms (−25%) |
+| | computador | 764 → 710 (−7%) | 96,1 → 85,8 ms (−11%) |
+| Avaliar: nota aos 8 critérios | telemóvel | 128 → 72 (−44%) | 38,7 → 17,3 ms (−55%) |
+| | computador | 376 → 328 (−13%) | 72,9 → 54,1 ms (−26%) |
+| Avaliar: escrever o comentário (60 teclas) | telemóvel | 684 → 684 | 90,4 → 85,3 ms (−6%) |
+| Ranking: mudar a ordem 4 vezes | telemóvel | 204 → 204 | 38,7 → 34,5 ms (−11%) |
+| | computador | 252 → 280 (+11%) | 44,3 → 43,8 ms (−1%) |
+| Organização: critérios, útil, guardar | telemóvel | 194 → 203 (+5%) | 35,5 → 28,2 ms (−21%) |
+| | computador | 283 → 298 (+5%) | 46,4 → 40,5 ms (−13%) |
+| Preferências: 6 escolhas | telemóvel | 45 → 51 (+13%) | 15,6 → 14,6 ms (−6%) |
+| | computador | 69 → 75 (+9%) | 20,2 → 16,5 ms (−18%) |
+
+O número de commits é igual em todas (o refactoring não acrescentou atualizações). Onde há mais componentes é porque agora são mais pequenos (ex.: cada linha do ranking é um componente); o tempo não piorou em nenhuma interação. Variações abaixo de ~10% estão dentro do ruído. O que sobra a cada tecla no computador é sobretudo o cabeçalho e o rodapé: as ligações do React Router voltam a correr quando o endereço muda (`?q=`), e o memo não evita isso.
 
 ## Testes
 

@@ -10,7 +10,7 @@ const inRouter = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRo
 
 function Score({ desktop = false }: { desktop?: boolean }) {
   const [v, setV] = useState(0);
-  return <ScoreRow k="salario" value={v} onPick={setV} desktop={desktop} />;
+  return <ScoreRow k="salario" value={v} onPick={(_k, n) => setV(n)} desktop={desktop} />;
 }
 
 describe('partes do fluxo de avaliar', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BAD_TAGS, REVIEW_TAGS } from '../../src/data/content';
-import { countDone, DESKTOP_ORDER, isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, stepState, tagOrder, visibleTags } from '../../src/features/review/flow';
+import { countDone, DESKTOP_ORDER, isBadTag, toggleIn, withScore, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, stepState, tagOrder, visibleTags } from '../../src/features/review/flow';
 
 describe('fluxo de avaliar: regras', () => {
   it('as duas ordens têm os mesmos 8 critérios; respeito primeiro no telemóvel', () => {
@@ -40,5 +40,16 @@ describe('fluxo de avaliar: regras', () => {
     expect(isBadTag('Ambiente seguro')).toBe(false);
     expect(visibleTags(['a', 'b', 'c', 'd'], ['d'], 2, false)).toEqual(['a', 'b', 'd']);
     expect(visibleTags(['a', 'b', 'c'], [], 1, true)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('mudar uma nota e alternar uma etiqueta sem alterar o original', () => {
+    const scores = { salario: 3 };
+    expect(withScore(scores, 'ambiente', 4)).toEqual({ salario: 3, ambiente: 4 });
+    expect(withScore(scores, 'salario', 0)).toEqual({});
+    expect(scores).toEqual({ salario: 3 });
+    const tags = ['a'];
+    expect(toggleIn(tags, 'b')).toEqual(['a', 'b']);
+    expect(toggleIn(tags, 'a')).toEqual([]);
+    expect(tags).toEqual(['a']);
   });
 });

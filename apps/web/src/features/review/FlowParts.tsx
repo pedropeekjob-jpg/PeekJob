@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent, type ReactNode } from 'react';
+import { memo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
@@ -25,7 +25,7 @@ export function FlowHead({ icon, label, onClick, right }: { icon: 'close' | 'bac
 }
 
 /** Indicador de passos do telemóvel (3 barras + 1/3) */
-export function MiniSteps({ current, done = false }: { current: number; done?: boolean }) {
+export const MiniSteps = memo(function MiniSteps({ current, done = false }: { current: number; done?: boolean }) {
   return (
     <div role="img" aria-label={tr(`Passo ${current} de 3${done ? ', concluído' : ''}`, `Step ${current} of 3${done ? ', done' : ''}`)} className={`row ${styles.mini}`}>
       <span className={`row ${styles.bars}`}>
@@ -36,7 +36,7 @@ export function MiniSteps({ current, done = false }: { current: number; done?: b
       <span className="mono small muted">{current}/3</span>
     </div>
   );
-}
+});
 
 /** Indicador de passos do computador: passos feitos são ligações, o atual a verde-água, os seguintes a cinzento */
 export function DeskSteps({ current, right }: { current: 1 | 2 | 3; right?: ReactNode }) {
@@ -77,19 +77,25 @@ function HelpToggle({ label, open, toggle }: { label: string; open: boolean; tog
 interface ScoreRowProps {
   k: CriterionKey;
   value: number;
-  onPick: (n: number) => void;
+  /** Recebe o critério: a mesma função serve as 8 linhas (estável, para o memo) */
+  onPick: (k: CriterionKey, n: number) => void;
   desktop?: boolean;
-  help?: { open: boolean; toggle: () => void };
+  /** Ajuda "o que conta": aberta ou não, e a função que a alterna (recebe o critério) */
+  helpOpen?: boolean;
+  onHelp?: (k: CriterionKey) => void;
 }
 
-/** Um critério com os botões 1–5 (rádio: um só Tab; setas, Home e End mudam a nota) */
-export function ScoreRow({ k, value, onPick, desktop = false, help }: ScoreRowProps) {
+/**
+ * Um critério com os botões 1–5 (rádio: um só Tab; setas, Home e End mudam a nota).
+ * memo: ao dar uma nota só a linha desse critério volta a correr (medido com scripts/react-profile.mjs).
+ */
+export const ScoreRow = memo(function ScoreRow({ k, value, onPick, desktop = false, helpOpen = false, onHelp }: ScoreRowProps) {
   const c = CRITERION[k];
   const onKey = (e: KeyboardEvent<HTMLButtonElement>, n: number) => {
     const to = scoreForKey(e.key, n);
     if (to == null) return;
     e.preventDefault();
-    onPick(to);
+    onPick(k, to);
     (e.currentTarget.parentElement?.children[to - 1] as HTMLElement | undefined)?.focus();
   };
   return (
@@ -97,7 +103,7 @@ export function ScoreRow({ k, value, onPick, desktop = false, help }: ScoreRowPr
       <div role="radiogroup" aria-label={c.label} className={styles.scoreGroup}>
         <span className={`row ${styles.scoreName}`}>
           <span className={styles.scoreLabel}>{c.label}</span>
-          {help && <HelpToggle label={c.label} open={help.open} toggle={help.toggle} />}
+          {onHelp && <HelpToggle label={c.label} open={helpOpen} toggle={() => onHelp(k)} />}
         </span>
         <span className={`row ${styles.dots}`}>
           {[1, 2, 3, 4, 5].map((n) => (
@@ -110,7 +116,7 @@ export function ScoreRow({ k, value, onPick, desktop = false, help }: ScoreRowPr
               aria-label={tr(`${c.label}, ${n} de 5`, `${c.label}, ${n} of 5`)}
               tabIndex={isTabStop(n, value) ? 0 : -1}
               onKeyDown={(e) => onKey(e, n)}
-              onClick={() => onPick(n === value ? 0 : n)}
+              onClick={() => onPick(k, n === value ? 0 : n)}
             >
               <span className={styles.dot} data-on={n <= value || undefined}>
                 {n}
@@ -119,13 +125,13 @@ export function ScoreRow({ k, value, onPick, desktop = false, help }: ScoreRowPr
           ))}
         </span>
       </div>
-      {help?.open && <div className={`fade-up ${styles.hint}`}>{c.hint}.</div>}
+      {helpOpen && <div className={`fade-up ${styles.hint}`}>{c.hint}.</div>}
     </div>
   );
-}
+});
 
-/** Sim / Não de "Recomendavas a um amigo?" (tocar de novo tira) */
-export function RecommendButtons({ value, onChange, desktop = false }: { value: boolean | null; onChange: (v: boolean | null) => void; desktop?: boolean }) {
+/** Sim / Não de "Recomendavas a um amigo?" (tocar de novo tira; memo: onChange é estável) */
+export const RecommendButtons = memo(function RecommendButtons({ value, onChange, desktop = false }: { value: boolean | null; onChange: (v: boolean | null) => void; desktop?: boolean }) {
   const options = [
     { l: tr('Sim', 'Yes'), v: true },
     { l: tr('Não', 'No'), v: false },
@@ -142,7 +148,7 @@ export function RecommendButtons({ value, onChange, desktop = false }: { value: 
       })}
     </div>
   );
-}
+});
 
 interface TagPickerProps {
   tags: string[];
@@ -152,8 +158,8 @@ interface TagPickerProps {
   desktop?: boolean;
 }
 
-/** Etiquetas (as más ficam a roxo quando escolhidas): `visible` + as escolhidas, e um botão +N */
-export function TagPicker({ tags, onToggle, visible, badFirst = false, desktop = false }: TagPickerProps) {
+/** Etiquetas (as más ficam a roxo quando escolhidas): `visible` + as escolhidas, e um botão +N (memo: não corre a cada tecla do comentário) */
+export const TagPicker = memo(function TagPicker({ tags, onToggle, visible, badFirst = false, desktop = false }: TagPickerProps) {
   const [more, setMore] = useState(false);
   const all = tagOrder(badFirst);
   const shown = visibleTags(all, tags, visible, more);
@@ -178,7 +184,7 @@ export function TagPicker({ tags, onToggle, visible, badFirst = false, desktop =
       )}
     </div>
   );
-}
+});
 
 /** Grelha das 8 notas (bolinhas) */
 export function NotesGrid({ scores, desktop = false }: { scores: Partial<Scores>; desktop?: boolean }) {

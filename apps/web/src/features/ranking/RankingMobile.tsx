@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { Sheet, Switch } from '../../components/UI';
 import { tr } from '../../i18n';
+import type { Org } from '../../data/orgs';
 import { orgTypeLabel } from '../../i18n/labels';
 import { fmt, plural } from '../../lib/format';
 import { countLine, filterChips, trendInfo, VERIFIED_MIN, type RankedRow } from './ranking';
@@ -11,8 +12,8 @@ import { EmptyFilters, FilterGroups, SetorChip, SortToggle } from './RankingCont
 import type { RankingFilters } from './useRanking';
 import styles from './RankingMobile.module.css';
 
-function RankingItem({ row, position }: { row: RankedRow; position: number }) {
-  const { org, match } = row;
+/** Uma linha do ranking (memo: ao mudar a ordem só correm as linhas cuja posição ou compatibilidade mudou) */
+const RankingItem = memo(function RankingItem({ org, match, position }: { org: Org; match: number; position: number }) {
   const t = trendInfo(org.trend);
   return (
     <Link to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} className={`plain row ${styles.item}`}>
@@ -37,7 +38,7 @@ function RankingItem({ row, position }: { row: RankedRow; position: number }) {
       </span>
     </Link>
   );
-}
+});
 
 /** Telemóvel: ordem, chips de resumo que abrem a folha de filtros, e a lista */
 export function RankingMobile({ ranked, F }: { ranked: RankedRow[]; F: RankingFilters }) {
@@ -78,7 +79,7 @@ export function RankingMobile({ ranked, F }: { ranked: RankedRow[]; F: RankingFi
         <span className={`small muted ${styles.count}`} aria-live="polite">
           {countLine(ranked.length)}
         </span>
-        {ranked.length === 0 ? <EmptyFilters F={F} /> : ranked.map((row, i) => <RankingItem key={row.org.id} row={row} position={i + 1} />)}
+        {ranked.length === 0 ? <EmptyFilters F={F} /> : ranked.map((row, i) => <RankingItem key={row.org.id} org={row.org} match={row.match} position={i + 1} />)}
       </div>
 
       <Sheet

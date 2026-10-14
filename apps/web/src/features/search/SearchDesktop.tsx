@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { CRITERION, type CriterionKey } from '../../data/criteria';
 import { tr } from '../../i18n';
@@ -24,8 +24,8 @@ function NoResults({ applied, reset }: { applied: string; reset: () => void }) {
   );
 }
 
-/** Lateral: como está ordenado e o caminho para adicionar */
-function SortAside({ prefs }: { prefs: CriterionKey[] }) {
+/** Lateral: como está ordenado e o caminho para adicionar (memo: só muda com as prioridades) */
+const SortAside = memo(function SortAside({ prefs }: { prefs: CriterionKey[] }) {
   return (
     <aside className={styles.aside}>
       <div className={styles.sorted}>
@@ -51,7 +51,7 @@ function SortAside({ prefs }: { prefs: CriterionKey[] }) {
       </div>
     </aside>
   );
-}
+});
 
 /** Computador: cabeçalho com campo grande, resultados à esquerda e lateral à direita */
 export function SearchDesktop({ s }: { s: SearchState }) {

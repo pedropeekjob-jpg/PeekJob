@@ -17,6 +17,7 @@
     "e2e:coverage": "rm -rf e2e/.nyc_output && E2E_COVERAGE=1 playwright test -c e2e/playwright.config.ts; s=$?; nyc report --temp-dir ../../e2e/.nyc_output --cwd apps/web --report-dir coverage/e2e --reporter=lcov --reporter=text-summary --exclude-after-remap=false; exit $s",
     "build:e2e:coverage": "npm run build -w @peekjob/shared && npm run build -w @peekjob/api && VITE_COVERAGE=true VITE_API_URL=/ VITE_ROUTER=browser npm run build -w @peekjob/web",
     "visual:compare": "node scripts/visual-compare.mjs",
+    "react:profile": "node scripts/react-profile.mjs",
     "sonar:local": "bash scripts/sonar-local.sh"
   },
   "engines": {
