@@ -1,4 +1,4 @@
-import { createTestApp, goodReview, insertOrg, makePdf, resetDb, TestCtx } from '../helpers';
+import { createTestApp, makePhoto, goodReview, insertOrg, makePdf, resetDb, TestCtx } from '../helpers';
 
 /**
  * Verificação anónima: prova-se que se trabalha lá, mas guarda-se só o "sim".
@@ -128,9 +128,13 @@ describe('Verificação anónima', () => {
       expect(res.body.code).toBe('ORG_WITHOUT_NIF');
     });
 
-    it('só aceita PDF (415)', async () => {
+    it('só aceita PDF ou fotografia JPG/PNG/WebP, e confirma pelo conteúdo, não pelo nome (415)', async () => {
       const me = await t.login('u1');
-      expect((await upload(me, Buffer.from('GIF89a'), orgId, 'image/gif')).status).toBe(415);
+      const res = await upload(me, Buffer.from('GIF89a'), orgId, 'image/gif');
+      expect(res.status).toBe(415);
+      expect(res.body.message).toBe('Envia o recibo ou contrato em PDF ou numa fotografia (JPG, PNG ou WebP).');
+      // diz que é JPEG mas não é
+      expect((await upload(me, Buffer.from('isto não é uma imagem'), orgId, 'image/jpeg')).status).toBe(415);
     });
 
     it('confirma o NIF da organização e ativa-a se estava pendente', async () => {
@@ -140,6 +144,25 @@ describe('Verificação anónima', () => {
       const org = await t.pool.query('SELECT status, nif_verified FROM organizations WHERE id = $1', [pendente]);
       expect(org.rows[0]).toEqual({ status: 'active', nif_verified: true });
     });
+  });
+
+  describe('por fotografia do recibo (OCR no servidor, só em memória)', () => {
+    const photo = (cookie: { Cookie: string }, img: Buffer, type: string, id = orgId) =>
+      t.http().post('/verifications/document').set(cookie).field('orgId', id).attach('file', img, { filename: 'IMG_2041.jpg', contentType: type });
+    const RECIBO = ['RECIBO DE VENCIMENTO - SETEMBRO 2026', 'Padaria Ribeira, Lda', 'NIF 501 442 600', 'Trabalhador: Joana Silva', 'Contribuinte 123456789'];
+
+    it('fotografia (JPEG, ligeiramente torta) com o NIF da organização: verificada', async () => {
+      const me = await t.login('u1');
+      const res = await photo(me, makePhoto(RECIBO), 'image/jpeg').expect(200);
+      expect(res.body).toEqual({ verified: true, method: 'document' });
+    }, 60000);
+
+    it('PNG sem o NIF da organização: recusada (422) e nada fica guardado', async () => {
+      const me = await t.login('u1');
+      const res = await photo(me, makePhoto(['Outra Empresa, Lda', 'NIF 500000000', 'Trabalhador: Joana Silva'], 'image/png'), 'image/png').expect(422);
+      expect(res.body.code).toBe('NIF_NOT_FOUND');
+      expect(await dump()).not.toMatch(/Joana|IMG_2041/i);
+    }, 60000);
   });
 
   describe('avaliações verificadas', () => {

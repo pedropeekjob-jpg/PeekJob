@@ -91,3 +91,27 @@ export function makePdf(lines: string[]): Promise<Buffer> {
     doc.end();
   });
 }
+
+/**
+ * "Fotografia" de um recibo (para testar o OCR): fundo de papel, texto escuro, ligeiramente torto,
+ * em JPEG (como sai de um telemóvel) ou PNG
+ */
+export function makePhoto(lines: string[], type: 'image/jpeg' | 'image/png' = 'image/jpeg', angle = 1.5): Buffer {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createCanvas } = require('@napi-rs/canvas');
+  const W = 1400;
+  const H = 260 + lines.length * 70;
+  const c = createCanvas(W, H);
+  const x = c.getContext('2d');
+  x.fillStyle = '#d8d4cc';
+  x.fillRect(0, 0, W, H);
+  x.translate(W / 2, H / 2);
+  x.rotate((angle * Math.PI) / 180);
+  x.translate(-W / 2, -H / 2);
+  x.fillStyle = '#fbfaf6';
+  x.fillRect(60, 60, W - 120, H - 120);
+  x.fillStyle = '#1a1a1a';
+  x.font = '38px DejaVu Sans, sans-serif';
+  lines.forEach((l, i) => x.fillText(l, 110, 150 + i * 70));
+  return c.toBuffer(type === 'image/png' ? 'image/png' : 'image/jpeg', 82);
+}

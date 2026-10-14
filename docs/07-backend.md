@@ -76,7 +76,7 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | POST | `/me/saved/merge` | sessão | Ao entrar: junta as guardadas no browser às da conta (até 200 ids; ignora os que não existem) |
 | POST | `/verifications/email` | sessão | Envia um código de 6 dígitos ao email de trabalho (não é guardado) → 202 |
 | POST | `/verifications/email/confirm` | sessão | Confirma o código (10 min, máx. 5 tentativas) |
-| POST | `/verifications/document` | sessão | PDF em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
+| POST | `/verifications/document` | sessão | PDF ou fotografia (JPG, PNG, WebP; tipo confirmado pelo conteúdo) em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
 | GET | `/me/verifications` | sessão | As minhas verificações |
 | GET | `/me/reviews` | sessão | As minhas avaliações |
 | POST | `/reviews/rewrite` | todos | Reescrever com IA: proposta publicável (sem nomes nem insultos, com os mesmos factos); não guarda o texto; 20 pedidos/10 min por pessoa |
@@ -262,7 +262,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - **Falta (manual):** testar com leitores de ecrã reais (VoiceOver no iPhone, NVDA no Windows) e com pessoas que os usam no dia a dia. Os testes automáticos apanham cerca de metade dos problemas.
 
 ## Próxima fatia
-- Verificação por fotografia do recibo (OCR); hoje só PDF com texto.
+- PDFs digitalizados (só imagem, sem texto): hoje só se leem PDFs com texto e fotografias.
 - Locais adicionados à mão: geocodificação em segundo plano (até lá não entram no mapa real).
 
 ## Guardadas e "útil" (14/10)
@@ -276,3 +276,11 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - **Privacidade:** pedir mosaicos envia o IP da pessoa ao fornecedor. Por isso o mapa real só carrega quando a pessoa toca em "Ver no mapa" (até lá, uma ilustração sem pedidos a outros sites); a escolha fica nesse browser. A política de privacidade deve mencionar o fornecedor do mapa.
 - O Leaflet vem num ficheiro à parte (≈44 kB comprimidos), só descarregado quando se abre o mapa.
 - Entram no mapa os locais com coordenadas (os importados do OpenStreetMap e os de demonstração); a escolha do local com teclado faz-se na lista ao lado.
+
+## Verificação por fotografia do recibo (14/10)
+- **OCR no próprio servidor** (Tesseract, via `tesseract.js`, com os dados de português instalados com a app: `@tesseract.js-data/por`). A fotografia não sai para nenhum serviço externo e fica só em memória durante o pedido (é apagada no fim).
+- O tipo confirma-se pelo conteúdo do ficheiro (assinatura), não pelo nome. Aceita JPG, PNG e WebP; o iPhone converte HEIC em JPEG ao escolher.
+- Fotografias grandes são reduzidas (lado maior até 2200 px) antes do OCR; a rotação é corrigida automaticamente.
+- O OCR troca letras parecidas por algarismos (O→0, I/l→1, S→5, B→8…) nos grupos que já são quase só algarismos; o dígito de controlo do NIF filtra o resto.
+- Um só *worker* de OCR, criado no primeiro pedido e desligado ao fim de 1 minuto sem uso (≈100–150 MB enquanto ligado). Tempo: ~1,5 s no primeiro pedido, ~0,6 s nos seguintes (medido nos testes).
+- Limitações: fotografias muito escuras, desfocadas ou em perspetiva forte podem não ser lidas; a pessoa pode tentar outra fotografia, um PDF ou o email do trabalho.

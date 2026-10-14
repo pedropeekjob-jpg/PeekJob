@@ -80,9 +80,11 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · verificar (%s)', (view
     await user.click(screen.getByRole('tab', { name: /Documento|Contrato ou recibo/ }));
     const panel = screen.getByRole('tabpanel');
     expect(within(panel).getByText(/Escolher foto ou PDF/)).toBeInTheDocument();
+    // aceita PDF e fotografias (o telemóvel converte HEIC em JPEG)
+    expect(within(panel).getByLabelText(/Escolher foto ou PDF/)).toHaveAttribute('accept', 'application/pdf,image/jpeg,image/png,image/webp');
     await user.upload(within(panel).getByLabelText(/Escolher foto ou PDF/), new File(['%PDF'], 'recibo.pdf', { type: 'application/pdf' }));
     expect(within(panel).getByText('recibo.pdf')).toBeInTheDocument();
-    expect(within(panel).getByRole('status')).toHaveTextContent(/Só lemos o NIF e a data/);
+    expect(within(panel).getByRole('status')).toHaveTextContent(/Só procuramos o NIF da organização/);
     await user.click(screen.getByRole('button', { name: /^Continuar/ }));
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
     expect(screen.getByTestId('verified')).toHaveTextContent('documento');

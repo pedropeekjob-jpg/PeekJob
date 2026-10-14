@@ -10,3 +10,16 @@ export function extractNifs(text: string): string[] {
   }
   return [...out];
 }
+
+/** Letras que o OCR costuma ler no lugar de algarismos */
+const LOOKALIKE: Record<string, string> = { O: '0', o: '0', D: '0', Q: '0', I: '1', l: '1', '|': '1', i: '1', Z: '2', S: '5', s: '5', B: '8', G: '6' };
+const C = '[0-9OoDQIl|iZSsBG]';
+const GROUP = new RegExp(`${C}{3}[ .-]?${C}{3}[ .-]?${C}{3}`, 'g');
+
+/**
+ * Texto de fotografias (OCR): nos grupos de 9 que já têm pelo menos 6 algarismos, troca as letras parecidas
+ * por algarismos (e hífenes por espaços). O dígito de controlo do NIF continua a filtrar o que não for NIF.
+ */
+export function fixOcrDigits(text: string): string {
+  return text.replace(GROUP, (m) => ((m.match(/\d/g) ?? []).length >= 6 ? m.replace(/[^\d .]/g, (c) => (c === '-' ? ' ' : LOOKALIKE[c] ?? c)) : m));
+}

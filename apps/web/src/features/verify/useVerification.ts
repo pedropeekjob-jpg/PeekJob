@@ -10,12 +10,12 @@ export type Method = 'email' | 'documento';
 /** Mensagem para uma falha da API ao verificar */
 export function verificationError(status: number, message: string): string {
   if (status === 401) return tr('Entra primeiro para verificar.', 'Sign in first to verify.');
-  if (status === 415) return tr('Envia o recibo ou contrato em PDF.', 'Send the payslip or contract as a PDF.');
+  if (status === 415) return tr('Envia o recibo ou contrato em PDF ou numa fotografia (JPG, PNG ou WebP).', 'Send the payslip or contract as a PDF or a photo (JPG, PNG or WebP).');
   return message;
 }
 
 /**
- * Verificação anónima: email do trabalho (código de 6 dígitos) ou documento (PDF).
+ * Verificação anónima: email do trabalho (código de 6 dígitos) ou documento (PDF ou fotografia).
  * Na demonstração não há servidor: aceita qualquer código ou ficheiro.
  */
 export function useVerification(orgId: string) {

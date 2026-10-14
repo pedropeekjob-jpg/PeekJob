@@ -1,10 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, type OnApplicationShutdown, Post, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, type AuthUser } from '../auth/auth.guard';
 import { privacySecret, userRef } from '../common/privacy';
 import { parse } from '../common/zod';
+import { fileKind, imageText, stopOcr } from './image-text';
+import { fixOcrDigits } from './nif-extract';
 import { pdfText } from './pdf-text';
 import { VerificationService } from './verification.service';
 import { Lang } from '../common/lang';
@@ -16,8 +18,13 @@ const MAX_BYTES = 5 * 1024 * 1024;
 
 @Controller()
 @UseGuards(AuthGuard)
-export class VerificationController {
+export class VerificationController implements OnApplicationShutdown {
   constructor(private readonly v: VerificationService) {}
+
+  /** Ao fechar a app, desliga o OCR (se estiver ligado) */
+  onApplicationShutdown() {
+    return stopOcr();
+  }
 
   private ref(user: AuthUser) {
     return userRef(privacySecret(), user.id);
@@ -44,8 +51,10 @@ export class VerificationController {
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: MAX_BYTES, files: 1 } }))
   async document(@UploadedFile() file: Express.Multer.File | undefined, @Body() body: unknown, @CurrentUser() user: AuthUser) {
     const b = parse(DocBody, body);
-    if (!file || file.mimetype !== 'application/pdf') throw new UnsupportedMediaTypeException('Envia o recibo ou contrato em PDF.');
-    const text = await pdfText(file.buffer);
+    // o tipo vê-se pelo conteúdo (assinatura do ficheiro), não pelo que o browser diz
+    const kind = file ? fileKind(file.buffer) : null;
+    if (!file || !kind) throw new UnsupportedMediaTypeException('Envia o recibo ou contrato em PDF ou numa fotografia (JPG, PNG ou WebP).');
+    const text = kind === 'pdf' ? await pdfText(file.buffer) : fixOcrDigits(await imageText(file.buffer));
     file.buffer.fill(0);
     return this.v.verifyDocument(this.ref(user), b.orgId, text);
   }

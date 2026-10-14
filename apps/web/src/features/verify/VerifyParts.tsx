@@ -1,6 +1,5 @@
 import { useEffect, useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { Link } from 'react-router';
-import { apiMode } from '../../api/http';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { CODE_LENGTH, codeStatus, writeDigits, type Code } from './code';
@@ -160,7 +159,10 @@ export function CodeInput({ email, code, resent, onChange, onResend, onChangeEma
   );
 }
 
-/** Documento (contrato ou recibo): só se lê o NIF e a data; o ficheiro não é guardado */
+/** PDF ou fotografia (o telemóvel converte HEIC em JPEG quando o HEIC não está na lista) */
+const ACCEPT = 'application/pdf,image/jpeg,image/png,image/webp';
+
+/** Documento (contrato ou recibo): só se procura o NIF da organização; o ficheiro não é guardado */
 export function DocumentPicker({ file, desktop, onChange }: { file: File | null; desktop: boolean; onChange: (f: File | null) => void }) {
   return (
     <div className={`fade-up ${styles.docBlock}`}>
@@ -174,15 +176,15 @@ export function DocumentPicker({ file, desktop, onChange }: { file: File | null;
             {file ? tr('Tocar para escolher outro ficheiro', 'Tap to choose another file') : desktop ? tr('Contrato ou recibo · foto ou PDF', 'Contract or payslip · photo or PDF') : tr('Contrato, recibo ou declaração', 'Contract, payslip or statement')}
           </span>
         </span>
-        <input id="vf" type="file" accept={apiMode ? 'application/pdf' : 'image/*,application/pdf'} onChange={(e) => onChange(e.target.files?.[0] ?? null)} className={styles.fileInput} />
+        <input id="vf" type="file" accept={ACCEPT} onChange={(e) => onChange(e.target.files?.[0] ?? null)} className={styles.fileInput} />
       </label>
       {file ? (
         <div role="status" className={`row fade-up ${styles.fileOk}`}>
           <Icon name="shield" size={18} className={styles.fileOkIcon} />
-          <span>{tr('Só lemos o NIF e a data. O ficheiro é apagado logo a seguir.', 'We only read the NIF (Portuguese tax number) and the date. The file is deleted straight after.')}</span>
+          <span>{tr('Só procuramos o NIF da organização. O ficheiro é apagado logo a seguir.', 'We only look for the organisation’s NIF (tax number). The file is deleted straight after.')}</span>
         </div>
       ) : (
-        <span className="small muted">{tr('Só lemos o NIF e a data, e depois o ficheiro é apagado. Podes tapar o resto.', 'We only read the NIF (Portuguese tax number) and the date, then the file is deleted. You can cover the rest.')}</span>
+        <span className="small muted">{tr('Só procuramos o NIF da organização e depois o ficheiro é apagado. Podes tapar o resto (o teu nome, por exemplo).', 'We only look for the organisation’s NIF (tax number), then the file is deleted. You can cover the rest (your name, for example).')}</span>
       )}
     </div>
   );
