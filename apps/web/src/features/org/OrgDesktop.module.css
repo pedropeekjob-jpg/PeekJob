@@ -122,3 +122,35 @@
 .osm {
   align-self: flex-start;
 }
+
+/* Onde fica: uma linha que abre o mapa */
+.mapToggle {
+  gap: 10px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+.pin {
+  color: var(--teal-text);
+  flex: none;
+}
+.mapLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+.mapAction {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal-text);
+}
+.mapBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

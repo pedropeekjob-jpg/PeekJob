@@ -12,6 +12,7 @@ import { DesktopCriteria, DesktopRespeito } from './Criteria';
 import { DesktopInterviews } from './Interviews';
 import { locationsSuffix, osmLink, scoreAria, shareCta, type OrgTab } from './org';
 import { LocationList, OrgTabs, SaveButton } from './OrgCommon';
+import { useToggle } from '../../lib/useToggle';
 import { ReviewsSection } from './Reviews';
 import { DesktopSalaries } from './Salaries';
 import { useOrgActions } from './useOrgPage';
@@ -98,17 +99,29 @@ export function OrgDesktop({ org, tab }: { org: Org; tab: OrgTab }) {
 function WhereItIs({ org }: { org: Org }) {
   const [active, setActive] = useState(org.locations[0]?.id ?? '');
   const cur = org.locations.find((l) => l.id === active) ?? org.locations[0];
+  const [open, toggle] = useToggle();
+  const many = org.locations.length > 1;
   return (
     <section aria-labelledby="onde-fica" className={styles.where}>
       <h2 id="onde-fica" className={`h2 ${styles.whereTitle}`}>
         {tr('Onde fica', 'Where it is')}
       </h2>
-      <MapView locations={org.locations} active={active} onPick={org.locations.length > 1 ? setActive : undefined} height={190} showLink={false} />
-      <LocationList org={org} active={active} onPick={setActive} />
-      {cur && (
-        <a className={`link ${styles.osm}`} href={osmLink(cur)} target="_blank" rel="noreferrer">
-          {tr('Abrir no mapa', 'Open in map')} <Icon name="external" size={14} />
-        </a>
+      {/* uma linha; o mapa e os locais abrem a pedido (ecrã mais limpo, 14/10) */}
+      <button type="button" aria-expanded={open} aria-controls="org-map-d" onClick={toggle} className={`row ${styles.mapToggle}`}>
+        <Icon name="pin" size={18} className={styles.pin} />
+        <span className={`grow ellipsis ${styles.mapLabel}`}>{many ? tr(`${org.locations.length} locais · ${org.city}`, `${org.locations.length} locations · ${org.city}`) : cur?.address}</span>
+        <span className={styles.mapAction}>{open ? tr('Fechar', 'Close') : tr('Ver mapa', 'See map')}</span>
+      </button>
+      {open && (
+        <div id="org-map-d" className={`fade-up ${styles.mapBody}`}>
+          <MapView locations={org.locations} active={active} onPick={many ? setActive : undefined} height={190} showLink={false} />
+          <LocationList org={org} active={active} onPick={setActive} />
+          {cur && (
+            <a className={`link ${styles.osm}`} href={osmLink(cur)} target="_blank" rel="noreferrer">
+              {tr('Abrir no mapa', 'Open in map')} <Icon name="external" size={14} />
+            </a>
+          )}
+        </div>
       )}
     </section>
   );

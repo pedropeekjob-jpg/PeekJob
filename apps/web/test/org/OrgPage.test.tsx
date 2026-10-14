@@ -88,7 +88,8 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
 
   it('locais: dois locais para escolher', async () => {
     const { user } = show(viewport);
-    if (!desktop) await user.click(await screen.findByRole('button', { name: /Ver mapa/ }));
+    // o mapa abre a pedido nos dois tamanhos (ecrã mais limpo)
+    await user.click(await screen.findByRole('button', { name: /Ver mapa/ }));
     const radios = within(await screen.findByRole('radiogroup', { name: 'Locais' })).getAllByRole('radio');
     expect(radios).toHaveLength(2);
     await user.click(radios[1]);

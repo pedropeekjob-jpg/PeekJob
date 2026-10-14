@@ -5,6 +5,10 @@
   --teal-text: #00747a;
   --teal-dark: #00585d;
   --teal-tint: #e3f5f5;
+  /* Visual leve (14/10): fundo branco, menta para zonas suaves, títulos menos carregados */
+  --mint: #eef8f8;
+  --title: #10242a;
+  --display-weight: 500;
   --purple: #652d90;
   --purple-text: #4e2270;
   --purple-tint: #f3ecf8;
@@ -12,7 +16,7 @@
   --grey: #a7a9ac;
   --muted: #6d6e71;
   --body: #4a4d50;
-  --ground: #f6f7f7;
+  --ground: #ffffff;
   --surface: #ffffff;
   --line: #e2e5e6;
   --field: #d5d9db;
@@ -87,14 +91,15 @@ button {
 /* ---------- Tipografia ---------- */
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
   letter-spacing: -0.01em;
   line-height: 1.02;
   margin: 0;
 }
 .h1 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
+  color: var(--title);
   font-size: 34px;
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -102,7 +107,8 @@ button {
 }
 .h2 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
+  color: var(--title);
   font-size: 22px;
   line-height: 1.15;
   margin: 0;
@@ -306,11 +312,12 @@ a.plain {
   transform: scale(0.98);
 }
 .btn-primary {
-  background: var(--teal);
-  color: var(--ink);
+  /* principal a tinta; o verde-água fica para acentos (anéis, seleção, linha) */
+  background: var(--ink);
+  color: #fff;
 }
 .btn-primary:hover {
-  background: #14b6bc;
+  background: #1b252d;
 }
 .btn-dark {
   background: var(--ink);
@@ -541,7 +548,7 @@ a.plain {
   align-items: center;
   gap: 8px;
   background: var(--surface);
-  border: 2px solid var(--ink);
+  border: 1px solid var(--field);
   border-radius: var(--r-md);
   padding: 0 8px 0 14px;
   height: 54px;

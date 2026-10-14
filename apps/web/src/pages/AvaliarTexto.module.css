@@ -4,7 +4,7 @@
 }
 .title {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
   margin: 0;
   font-size: 32px;
   line-height: 1.05;

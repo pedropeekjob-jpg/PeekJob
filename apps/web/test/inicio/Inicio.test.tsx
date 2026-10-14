@@ -37,8 +37,8 @@ describe.each(['mobile', 'desktop'] as const)('Início (%s)', (viewport) => {
     seedStore({ onboarded: true, prefs: [] });
     show(viewport);
     await screen.findByRole('heading', { level: 1 });
-    if (desktop) expect(screen.getByText('Sem escolhas: ordenado pela nota')).toBeInTheDocument();
-    else expect(screen.getByText('Sem prioridades: ordenado pela nota')).toBeInTheDocument();
+    // a mesma linha nos dois tamanhos; no computador as opções abrem com "Mudar"
+    expect(screen.getByText('Sem prioridades: ordenado pela nota')).toBeInTheDocument();
     // a % passa a ser a nota em percentagem: Rede Vizinha (4,7) primeiro
     expect(forYou('x')[0]).toHaveTextContent('Rede Vizinha');
     expect(forYou('x')[0]).toHaveTextContent('94%');
@@ -86,7 +86,11 @@ describe('Início no computador', () => {
   it('escolher prioridades (até 3) reordena; a 4.ª fica bloqueada', async () => {
     seedStore({ onboarded: true, prefs: [] });
     const { user } = show('desktop');
-    const group = await screen.findByRole('group', { name: 'O que valorizas, até 3' });
+    // fechadas por omissão: o ecrã mostra só a linha com o que valorizas
+    await screen.findByText('Sem prioridades: ordenado pela nota');
+    expect(screen.queryByRole('group', { name: 'O que valorizas, até 3' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Mudar' }));
+    const group = screen.getByRole('group', { name: 'O que valorizas, até 3' });
     await user.click(within(group).getByRole('button', { name: /^Salário justo/ }));
     expect(within(group).getByRole('button', { name: /^Salário justo/ })).toHaveAttribute('aria-pressed', 'true');
     expect(within(group).getByText('1 de 3')).toBeInTheDocument();

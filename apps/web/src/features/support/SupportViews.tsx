@@ -20,8 +20,8 @@ export function SupportDesktop({ intro, found, notices, onBack }: SupportViewPro
     <>
       <section aria-labelledby="apoio-titulo" className={styles.hero}>
         <svg aria-hidden="true" viewBox="0 0 520 520" width="440" height="440" className={styles.heroArt}>
-          <circle cx="260" cy="260" r="200" fill="none" stroke="#7B45A6" strokeWidth="40" />
-          <circle cx="260" cy="260" r="110" fill="none" stroke="#8E5BB5" strokeWidth="22" />
+          <circle cx="260" cy="260" r="200" fill="none" stroke="#E6D6F2" strokeWidth="40" />
+          <circle cx="260" cy="260" r="110" fill="none" stroke="#DCC8EA" strokeWidth="22" />
         </svg>
         <div className={`container stack ${styles.heroInner}`}>
           <div className={`row wrap ${styles.heroTop}`}>

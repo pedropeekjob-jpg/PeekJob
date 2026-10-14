@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
   font-size: var(--fs);
 }
 .ring[data-muted] .ringInner {

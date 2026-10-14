@@ -26,7 +26,7 @@ export default function ParaOrganizacoes() {
               <Link to="/painel" className={`btn btn-primary lift ${styles.cta} ${styles.ctaMain}`}>
                 {tr('Reivindicar a minha página', 'Claim my page')}
               </Link>
-              <Link to="/metodologia" className={`btn btn-dark lift ${styles.cta}`}>
+              <Link to="/metodologia" className={`btn btn-ghost lift ${styles.cta}`}>
                 {tr('Como calculamos', 'How we score')}
               </Link>
             </div>

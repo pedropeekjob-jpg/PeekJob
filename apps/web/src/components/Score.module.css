@@ -25,7 +25,7 @@
   justify-content: center;
   gap: 2px;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
   line-height: 1;
 }
 .ring[data-muted] .ringInner {

@@ -9,7 +9,9 @@ import { tr } from '../../i18n';
 import { orgTypeLabel } from '../../i18n/labels';
 import { useStore } from '../../lib/store';
 import { useFlip } from '../../lib/useFlip';
-import { MAX_PREFS, prefsStatus, promises, pulseTicks, STARS, type Tick } from './explore';
+import { useToggle } from '../../lib/useToggle';
+import { MoreToggle } from '../../components/UI';
+import { MAX_PREFS, prefsLine, prefsStatus, promises, pulseTicks, STARS, type Tick } from './explore';
 import { useForYou, useMovers } from './useExplore';
 import styles from './Explore.module.css';
 
@@ -136,6 +138,25 @@ function PrefPicker() {
   );
 }
 
+/** O que valorizas numa linha; escolher fica a um clique (as 8 opções só aparecem quando se pedem) */
+function PrefsSummary() {
+  const { prefs } = useStore();
+  const [open, toggle] = useToggle();
+  return (
+    <div className={styles.prefsSummary}>
+      <div className={`row wrap ${styles.prefsLine}`}>
+        <span className="small muted">{prefsLine(prefs)}</span>
+        <MoreToggle open={open} onToggle={toggle} label={tr('Mudar', 'Change')} openLabel={tr('Fechar', 'Close')} controls="prefs-picker" />
+      </div>
+      {open && (
+        <div id="prefs-picker" className="fade-up">
+          <PrefPicker />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ForYou() {
   const list = useForYou().slice(0, 4);
   const flip = useFlip(list.map((x) => x.org.id).join('|'));
@@ -145,11 +166,8 @@ function ForYou() {
         <h2 id="para-ti-d" className={`display ${styles.forYouTitle}`}>
           {tr('Para ti', 'For you')}
         </h2>
-        <Link to="/preferencias" className={`link ${styles.small15}`}>
-          {tr('Mudar o que valorizo →', 'Change what I value →')}
-        </Link>
       </div>
-      <PrefPicker />
+      <PrefsSummary />
       <div className={styles.grid}>
         {list.map(({ org, match }) => (
           <Link key={org.id} ref={flip(org.id)} to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} className={`plain card lift row ${styles.gridCard}`}>
@@ -204,12 +222,6 @@ export function ExploreDesktop() {
           <h1 className={`display ${styles.heroTitle}`}>{tr('Como é trabalhar lá dentro, contado por quem lá trabalha.', 'What it’s like to work there, told by the people who do.')}</h1>
           <p className={`body ${styles.heroLead}`}>{tr('Avaliações anónimas de PME, associações e voluntariado.', 'Anonymous reviews of SMEs, associations and volunteering.')}</p>
           <HeroSearch />
-          <div className={`row wrap ${styles.heroActions}`}>
-            <Link to="/avaliar" className={`btn btn-primary lift ${styles.reviewButton}`}>
-              {tr('Avaliar onde trabalho', 'Review where I work')}
-            </Link>
-            <span className="small muted">{tr('2 minutos · anónimo', '2 minutes · anonymous')}</span>
-          </div>
         </div>
         <Stars />
       </section>

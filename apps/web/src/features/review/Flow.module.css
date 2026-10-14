@@ -59,7 +59,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
   font-size: 16px;
   border: 2px solid var(--field);
   color: var(--muted);

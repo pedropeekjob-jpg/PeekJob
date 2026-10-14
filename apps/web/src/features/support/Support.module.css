@@ -2,7 +2,7 @@
 
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--display-weight);
   margin: 0;
 }
 .strong {
@@ -20,17 +20,18 @@
   padding: 6px 10px;
   border-radius: 999px;
   background: var(--purple-text);
+  color: #fff;
 }
 .found {
   margin: 0;
   font-size: 13px;
-  color: #e0ccee;
+  color: var(--purple-text);
 }
 .intro {
   margin: 0;
   font-size: 15px;
   line-height: 1.45;
-  color: #f0e6f7;
+  color: var(--body);
 }
 .title {
   composes: display;
@@ -97,8 +98,9 @@
 
 /* ---------- Telemóvel ---------- */
 .header {
-  background: var(--purple);
-  color: #fff;
+  /* lilás claro em vez de roxo a cheio (visual leve, 14/10): calmo, mantém a cor do respeito */
+  background: var(--purple-tint);
+  color: var(--purple-text);
 }
 .headerInner {
   display: flex;
@@ -110,8 +112,8 @@
 }
 .iconBack {
   background: transparent;
-  border-color: #8e5bb5;
-  color: #fff;
+  border-color: var(--purple-line);
+  color: var(--purple-text);
 }
 /* .page.no-nav só define o padding de baixo: aqui basta o de cima e o espaçamento */
 .body {
@@ -211,8 +213,9 @@ a.call {
 .hero {
   position: relative;
   overflow: hidden;
-  background: var(--purple);
-  color: #fff;
+  /* lilás claro em vez de roxo a cheio (visual leve, 14/10): calmo, mantém a cor do respeito */
+  background: var(--purple-tint);
+  color: var(--purple-text);
   margin-top: 8px;
 }
 .heroArt {
@@ -233,10 +236,10 @@ a.call {
   height: 44px;
   padding: 0 16px 0 12px;
   border-radius: 22px;
-  border: 1px solid #a47bc4;
+  border: 1px solid var(--purple-line);
   background: transparent;
   gap: 8px;
-  color: #fff;
+  color: var(--purple-text);
   font-size: 14px;
   font-weight: 600;
 }
@@ -252,7 +255,7 @@ a.call {
   max-width: 620px;
   font-size: 16px;
   line-height: 1.55;
-  color: #f0e6f7;
+  color: var(--body);
 }
 .content {
   padding-bottom: 64px;
