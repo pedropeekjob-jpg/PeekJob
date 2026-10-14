@@ -1,0 +1,1 @@
+function a(i){const t=i.trim();if(!t||t.length>254||/\s/.test(t))return!1;const n=t.indexOf("@");if(n<1||n!==t.lastIndexOf("@"))return!1;const e=t.slice(n+1),s=e.lastIndexOf(".");return s>0&&s<e.length-1}export{a as i};
