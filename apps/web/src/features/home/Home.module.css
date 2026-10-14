@@ -16,6 +16,7 @@
   --job-fg: var(--ink);
   --job-glow: rgba(101, 45, 144, 0.1);
   --rule: var(--teal);
+  --label: var(--teal-dark);
   --hint-peek-bg: var(--ink);
   --hint-peek-fg: #fff;
   --hint-job-bg: var(--ink);
@@ -161,10 +162,12 @@
 }
 .label {
   font-family: var(--font-display);
-  font-weight: 500;
+  /* verde-água escuro em vez de preto (14/10): legível (7,6:1), mais suave, liga-se ao logo */
+  font-weight: 400;
+  color: var(--label);
   font-size: clamp(44px, 12vw, 88px);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   animation: up 0.8s var(--ease) both;
 }
 .job .label {
