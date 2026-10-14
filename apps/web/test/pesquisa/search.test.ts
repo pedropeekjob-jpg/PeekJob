@@ -57,6 +57,7 @@ describe('useAppliedQuery', () => {
     act(() => vi.advanceTimersByTime(1));
     expect(result.current).toEqual({ applied: 'porto', loading: false });
     expect(onSettle).toHaveBeenCalledTimes(1);
+    expect(onSettle).toHaveBeenCalledWith('porto');
 
     rerender({ q: 'porto ' }); // só espaços: não procura
     expect(result.current.loading).toBe(false);

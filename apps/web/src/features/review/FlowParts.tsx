@@ -209,12 +209,12 @@ export function NotesGrid({ scores, desktop = false }: { scores: Partial<Scores>
   );
 }
 
-/** Linha com cadeado (ex.: "Publicação anónima") */
-export function LockLine({ children, center = false }: { children: ReactNode; center?: boolean }) {
+/** Linha com cadeado (ex.: "Publicação anónima"); memo: o texto é sempre o mesmo */
+export const LockLine = memo(function LockLine({ children, center = false }: { children: ReactNode; center?: boolean }) {
   return (
     <span className={`row small muted ${styles.lock}`} data-center={center || undefined}>
       <Icon name="lock" size={14} />
       {children}
     </span>
   );
-}
+});

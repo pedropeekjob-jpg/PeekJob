@@ -9,6 +9,7 @@
  *
  *   npm run react:profile -- 78dcf8c            # referência = commit antes do refactoring
  *   PJ_RUNS=9 npm run react:profile -- 78dcf8c  # mais repetições
+ *   PJ_NAMES=1 PJ_ONLY=pesquisa npm run react:profile -- HEAD   # que componentes correm (build sem minificar)
  *
  * Mede-se pelo gancho que o React chama a cada commit (o mesmo das React DevTools), sem tocar no código da app.
  */
@@ -49,7 +50,7 @@ function serve(dir) {
 
 /** Gancho das DevTools: conta commits, componentes que correram e tempo de render enquanto __PJ.on */
 function hook() {
-  const s = { on: false, commits: 0, comps: 0, ms: 0, last: 0, profiling: false };
+  const s = { on: false, commits: 0, comps: 0, ms: 0, last: 0, profiling: false, names: {} };
   window.__PJ = s;
   const COMPONENT = new Set([0, 1, 11, 14, 15]); // função, classe, forwardRef, memo
   window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
@@ -70,7 +71,12 @@ function hook() {
           let f = stack.pop();
           while (f) {
             // correu mesmo neste commit: começou depois do anterior e tem PerformedWork (1); um memo que saltou não tem
-            if (COMPONENT.has(f.tag) && f.actualStartTime > s.last && (f.flags & 1) === 1) n++;
+            if (COMPONENT.has(f.tag) && f.actualStartTime > s.last && (f.flags & 1) === 1) {
+              n++;
+              const t = f.type?.type ?? f.type?.render ?? f.type;
+              const name = t?.displayName ?? t?.name ?? '?';
+              s.names[name] = (s.names[name] ?? 0) + 1;
+            }
             if (f.child) stack.push(f.child);
             f = f.sibling;
           }
@@ -129,6 +135,7 @@ try {
     await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
     for (const sc of PROFILE_SCENARIOS) {
       if (sc.mobileOnly && !isMobile) continue;
+      if (process.env.PJ_ONLY && !sc.name.includes(process.env.PJ_ONLY)) continue;
       const res = { ref: [], cur: [] };
       for (let i = 0; i < RUNS; i++) {
         // alterna as versões para que o ruído da máquina as afete por igual
@@ -137,6 +144,10 @@ try {
       const m = (v, k) => median(res[v].map((r) => r[k]));
       rows.push({ tag, name: sc.name, ref: { commits: m('ref', 'commits'), comps: m('ref', 'comps'), ms: m('ref', 'ms') }, cur: { commits: m('cur', 'commits'), comps: m('cur', 'comps'), ms: m('cur', 'ms') } });
       const r = rows.at(-1);
+      if (process.env.PJ_NAMES === '1') {
+        const top = (rs) => Object.entries(rs.at(-1).names).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => `${k}×${v}`).join(' ');
+        console.log(`\n${tag} · ${sc.name}\n  ref: ${top(res.ref)}\n  cur: ${top(res.cur)}`);
+      }
       console.log(`${tag.padEnd(10)} ${sc.name.padEnd(46)} commits ${r.ref.commits}→${r.cur.commits} · componentes ${r.ref.comps}→${r.cur.comps} (${pct(r.ref.comps, r.cur.comps)}) · render ${r.ref.ms.toFixed(1)}→${r.cur.ms.toFixed(1)} ms (${pct(r.ref.ms, r.cur.ms)})`);
     }
     await ctx.close();

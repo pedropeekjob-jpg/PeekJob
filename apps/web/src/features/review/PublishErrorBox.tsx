@@ -1,9 +1,10 @@
+import { memo } from 'react';
 import { tr } from '../../i18n';
 import styles from './PublishErrorBox.module.css';
 import type { PublishError } from './useReviewDraft';
 
 /** Erro ao publicar, com a versão sugerida pela API quando existe (422) */
-export function PublishErrorBox({ error, onUseSuggestion }: { error: PublishError | null; onUseSuggestion: (text: string) => void }) {
+export const PublishErrorBox = memo(function PublishErrorBox({ error, onUseSuggestion }: { error: PublishError | null; onUseSuggestion: (text: string) => void }) {
   if (!error) return null;
   return (
     <div role="alert" className={`card warn ${styles.box}`}>
@@ -15,4 +16,4 @@ export function PublishErrorBox({ error, onUseSuggestion }: { error: PublishErro
       )}
     </div>
   );
-}
+});

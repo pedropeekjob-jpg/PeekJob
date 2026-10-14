@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { analytics } from '../analytics';
 import { SOCIAL } from '../config';
@@ -44,7 +44,11 @@ function ProfileButton({ area }: { area: string }) {
   );
 }
 
-export function DesktopHeader({ home = false }: { home?: boolean }) {
+/**
+ * memo: o cabeçalho não volta a correr quando só a página muda (ex.: dar uma nota).
+ * As ligações continuam a reagir ao endereço (ativa/não ativa) e as mensagens por ler à loja.
+ */
+export const DesktopHeader = memo(function DesktopHeader({ home = false }: { home?: boolean }) {
   return (
     <header className={'site-header' + (home ? ' is-home' : '')}>
       <div className={`container row ${styles.header}`}>
@@ -76,7 +80,7 @@ export function DesktopHeader({ home = false }: { home?: boolean }) {
       </div>
     </header>
   );
-}
+});
 
 /** Cabeçalho da página inicial em mobile (esboço do cliente: logo à esquerda, três ligações à direita) */
 export function MobileHomeHeader() {
@@ -126,8 +130,8 @@ function FooterLinks() {
   );
 }
 
-/** Rodapé: redes sociais ao centro (esboço do cliente), ligações secundárias e idioma */
-export function SiteFooter({ compact = false }: { compact?: boolean }) {
+/** Rodapé: redes sociais ao centro (esboço do cliente), ligações secundárias e idioma (memo, como o cabeçalho) */
+export const SiteFooter = memo(function SiteFooter({ compact = false }: { compact?: boolean }) {
   return (
     <footer className={'site-footer' + (compact ? ' is-compact' : '')}>
       <div className={`container stack ${styles.footer}`}>
@@ -143,7 +147,7 @@ export function SiteFooter({ compact = false }: { compact?: boolean }) {
       </div>
     </footer>
   );
-}
+});
 
 export function BottomNav() {
   const { pathname } = useLocation();

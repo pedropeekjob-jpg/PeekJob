@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
@@ -12,6 +13,12 @@ import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { FlowHead, LockLine, MiniSteps, TagPicker } from '../features/review/FlowParts';
 import styles from './AvaliarTexto.module.css';
+
+/** Cabeçalho do passo (memo, sem props: não volta a correr a cada tecla) */
+const TextHead = memo(function TextHead() {
+  const nav = useNavigate();
+  return <FlowHead icon="back" label={tr('Voltar às notas', 'Back to scores')} onClick={() => nav('/avaliar/notas')} right={<MiniSteps current={2} />} />;
+});
 
 /** Avaliar · passo 2 no telemóvel: etiquetas, texto, avisos e publicar (no computador está no ecrã das notas) */
 export default function AvaliarTexto() {
@@ -35,7 +42,7 @@ export default function AvaliarTexto() {
   return (
     <Shell>
       <div className={`page ${styles.page}`}>
-        <FlowHead icon="back" label={tr('Voltar às notas', 'Back to scores')} onClick={() => nav('/avaliar/notas')} right={<MiniSteps current={2} />} />
+        <TextHead />
         <h1 className={styles.title}>{tr('Conta como é, em poucas linhas', 'Tell us what it’s like, in a few lines')}</h1>
 
         <fieldset className={styles.tags}>

@@ -10,4 +10,6 @@ export default defineConfig({
   logLevel: 'error',
   resolve: { alias: [{ find: /^react-dom$/, replacement: 'react-dom/profiling' }] },
   define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify('profile') },
+  // PJ_NAMES=1: sem minificar, para listar os componentes pelo nome
+  build: { minify: process.env.PJ_NAMES !== '1' },
 });

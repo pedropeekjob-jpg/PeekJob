@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { tr } from '../../i18n';
 import { flagLabel } from '../../i18n/labels';
@@ -17,7 +18,12 @@ export function flagSentence(rf: Pick<RedFlagResult, 'found' | 'kinds'>): string
  * Aviso de possível ilegalidade com ligação ao apoio. Não bloqueia a publicação.
  * `compact`: linha (telemóvel); `card`: cartão com a frase do que foi encontrado (computador).
  */
-export function SupportAlert({ redFlags, variant = 'compact' }: { redFlags: Pick<RedFlagResult, 'found' | 'kinds'>; variant?: 'compact' | 'card' }) {
+type SupportAlertProps = { redFlags: Pick<RedFlagResult, 'found' | 'kinds'>; variant?: 'compact' | 'card' };
+const sameList = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((x, i) => x === b[i]);
+/** O resultado da moderação é um objeto novo a cada tecla; o aviso só muda quando muda o que foi encontrado */
+export const sameFlags = (a: SupportAlertProps, b: SupportAlertProps) => a.variant === b.variant && sameList(a.redFlags.found, b.redFlags.found) && sameList(a.redFlags.kinds, b.redFlags.kinds);
+
+export const SupportAlert = memo(function SupportAlert({ redFlags, variant = 'compact' }: SupportAlertProps) {
   const text =
     variant === 'card'
       ? `${flagSentence(redFlags)} ${tr('A organização não é avisada.', 'The organisation is not told.')}`
@@ -33,4 +39,4 @@ export function SupportAlert({ redFlags, variant = 'compact' }: { redFlags: Pick
       </Link>
     </section>
   );
-}
+}, sameFlags);

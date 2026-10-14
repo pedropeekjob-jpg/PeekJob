@@ -7,9 +7,9 @@ import { needsSearch, rankResults, SEARCH_MS, type TypeFilter } from './search';
 
 /**
  * Cada mudança do termo mostra "a procurar" durante SEARCH_MS e só depois aplica-o.
- * `onSettle` corre quando o termo é aplicado.
+ * `onSettle` corre quando o termo é aplicado, com o termo.
  */
-export function useAppliedQuery(q: string, onSettle: () => void) {
+export function useAppliedQuery(q: string, onSettle: (applied: string) => void) {
   const [applied, setApplied] = useState(q);
   const [loading, setLoading] = useState(q.trim() !== '');
   const latest = useRef({ applied, loading, onSettle });
@@ -23,7 +23,7 @@ export function useAppliedQuery(q: string, onSettle: () => void) {
     const t = window.setTimeout(() => {
       setApplied(q);
       setLoading(false);
-      latest.current.onSettle();
+      latest.current.onSettle(q);
     }, SEARCH_MS);
     return () => window.clearTimeout(t);
   }, [q]);
@@ -31,7 +31,10 @@ export function useAppliedQuery(q: string, onSettle: () => void) {
   return { applied, loading };
 }
 
-/** Estado do ecrã de pesquisa: o termo vive no endereço (?q=) */
+/**
+ * Estado do ecrã de pesquisa. O termo aplicado vive no endereço (?q=), que só muda quando a pesquisa é aplicada:
+ * mudar o endereço a cada tecla fazia voltar a correr a app inteira, do router ao rodapé (medido com react:profile).
+ */
 export function useSearchPage() {
   const [params, setParams] = useSearchParams();
   const urlQ = params.get('q') ?? '';
@@ -41,22 +44,28 @@ export function useSearchPage() {
   const [text, setText] = useState(urlQ);
   const [type, setType] = useState<TypeFilter>('Todas');
   const [more, setMore] = useState(false);
-  const hideMore = useCallback(() => setMore(false), []);
   const showMore = useCallback(() => setMore(true), []);
-  const { applied, loading } = useAppliedQuery(urlQ, hideMore);
 
-  // o endereço manda: se mudar por fora (voltar atrás, ligação do início), atualiza o campo
+  const urlRef = useRef(urlQ);
+  useEffect(() => {
+    urlRef.current = urlQ;
+  });
+  // termo aplicado → endereço (sem entrada nova no histórico) e volta a mostrar só os primeiros
+  const onSettle = useCallback(
+    (q: string) => {
+      setMore(false);
+      if (q !== urlRef.current) setParams(q ? { q } : {}, { replace: true });
+    },
+    [setParams],
+  );
+  const { applied, loading } = useAppliedQuery(text, onSettle);
+
+  // o endereço mudou por fora (voltar atrás, ligação do início): atualiza o campo
   useEffect(() => {
     setText(urlQ);
   }, [urlQ]);
 
-  const onText = useCallback(
-    (v: string) => {
-      setText(v);
-      setParams(v ? { q: v } : {}, { replace: true });
-    },
-    [setParams],
-  );
+  const onText = useCallback((v: string) => setText(v), []);
   const clear = useCallback(() => onText(''), [onText]);
   const pickType = useCallback((t: TypeFilter) => {
     setType(t);
