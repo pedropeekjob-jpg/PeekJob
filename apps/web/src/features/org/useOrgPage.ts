@@ -45,7 +45,8 @@ export function useOrgActions(org: Org) {
   const m = useMemo(() => match(org, prefs), [org, prefs]);
   const startReview = useCallback(() => {
     startDraft(org.id, org.locations[0]?.id ?? null);
-    nav('/avaliar/verificar');
+    // entra no fluxo novo: com um só local segue logo para as notas; a verificação é depois de publicar
+    nav(`/avaliar?org=${encodeURIComponent(org.id)}`);
   }, [nav, org.id, org.locations, startDraft]);
   return { has, m, startReview };
 }

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Ring } from '../components/Data';
@@ -11,6 +11,7 @@ import type { Org } from '../data/orgs';
 import { PublishErrorBox } from '../features/review/PublishErrorBox';
 import { SupportAlert } from '../features/review/SupportAlert';
 import { ReviewTextMobile } from '../features/review/ReviewTextMobile';
+import { useFlowNav } from '../features/review/useFlowNav';
 import { REVIEW_TEXT_MAX, useReviewDraft } from '../features/review/useReviewDraft';
 import { tr } from '../i18n';
 import { fmt } from '../lib/format';
@@ -47,17 +48,18 @@ const recommendLabel = (v: boolean | null) =>
   v === true ? tr('recomendas', 'you recommend it') : v === false ? tr('não recomendas', 'you don’t recommend it') : tr('sem resposta', 'no answer');
 
 function MobileNotas({ org, locationLabel, review }: ViewProps) {
-  const nav = useNavigate();
+  const { go, leave } = useFlowNav();
   const [help, setHelp] = useState<CriterionKey | null>(null);
   const toggleHelp = useCallback((k: CriterionKey) => setHelp((h) => (h === k ? null : k)), []);
   const { done, insult } = review;
+  // "publicado" substitui as notas: voltar atrás nunca cai num rascunho já publicado
   const publish = async () => {
-    if (await review.publish()) nav('/avaliar/feito');
+    if (await review.publish()) go('/avaliar/feito', { replace: true });
   };
   return (
     <Shell>
       <div className={`page ${styles.mobile}`}>
-        <FlowHead icon="close" label={tr('Fechar (o rascunho fica guardado)', 'Close (your draft is saved)')} onClick={() => nav(`/org/${org.id}`)} right={<MiniSteps current={2} />} />
+        <FlowHead icon="close" label={tr('Fechar (o rascunho fica guardado)', 'Close (your draft is saved)')} onClick={() => leave(`/org/${org.id}`)} right={<MiniSteps current={2} />} />
         <div className={styles.titleBlock}>
           <h1 className={styles.title}>{tr('Dá uma nota de 1 a 5', 'Score from 1 to 5')}</h1>
           <div className="small muted">
@@ -96,11 +98,11 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
 }
 
 function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
-  const nav = useNavigate();
+  const { go } = useFlowNav();
   const { text, redFlags, insult, done, average } = review;
   const textClass = insult ? styles.textBlocked : redFlags.flagged ? styles.textFlagged : styles.text;
   const publish = async () => {
-    if (await review.publish()) nav('/avaliar/feito');
+    if (await review.publish()) go('/avaliar/feito', { replace: true });
   };
   return (
     <Shell chrome="header">

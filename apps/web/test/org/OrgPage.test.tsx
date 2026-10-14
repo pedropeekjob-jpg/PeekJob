@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import { screen, within } from '@testing-library/react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -13,7 +14,8 @@ const show = (viewport: 'mobile' | 'desktop', id = 'padaria-ribeira', tab: Tab =
 
 function Probe() {
   const { draft, saved } = useStore();
-  return <output data-testid="probe">{`${draft.orgId ?? ''}|${saved.join(',')}`}</output>;
+  const { pathname, search } = useLocation();
+  return <output data-testid="probe">{`${draft.orgId ?? ''}|${saved.join(',')}|${pathname}${search}`}</output>;
 }
 
 /** Cria uma organização nova (sem avaliações) e mostra a página dela */
@@ -50,6 +52,8 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     expect(screen.getByTestId('probe').textContent!.split('|')[1].includes('padaria-ribeira')).toBe(!was);
     await user.click(screen.getAllByRole('button', { name: 'Avaliar esta organização' })[0]);
     expect(screen.getByTestId('probe')).toHaveTextContent(/^padaria-ribeira\|/);
+    // entra no fluxo de avaliar (a verificação é depois de publicar)
+    expect(screen.getByTestId('probe')).toHaveTextContent(/\|\/avaliar\?org=padaria-ribeira$/);
   });
 
   it('avaliações: 2 primeiro, depois todas; útil conta mais um; denunciar', async () => {

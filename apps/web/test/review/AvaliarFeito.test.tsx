@@ -80,11 +80,11 @@ describe.each(['mobile', 'desktop'] as const)('Avaliação publicada (%s)', (vie
     expect(screen.getByRole('link', { name: 'Ver na página da organização' })).toHaveAttribute('href', '/');
   });
 
-  it('fechar volta ao início (telemóvel)', async () => {
+  it('aberto diretamente: fechar vai para o início (telemóvel)', async () => {
     if (desktop) return;
     seedStore({ lastPublished: 'novo-1', myReviews: [mine(false)] });
     const { user } = show(viewport);
-    await user.click(await screen.findByRole('button', { name: 'Fechar e voltar ao início' }));
+    await user.click(await screen.findByRole('button', { name: 'Fechar' }));
     expect(screen.getByTestId('outra-rota')).toBeInTheDocument();
   });
 });

@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
 import styles from '../features/review/OrgPicker.module.css';
 import { AddOrgForm, LocationPicker, OrgResults, OrgSearchBox, PickIllustration } from '../features/review/OrgPickerParts';
 import { useAddOrg } from '../features/review/useAddOrg';
+import { useFlowNav } from '../features/review/useFlowNav';
 import { useOrgPicker } from '../features/review/useOrgPicker';
 import { tr } from '../i18n';
 import { useIsDesktop } from '../lib/useMedia';
@@ -13,14 +13,14 @@ import { DeskSteps, FlowHead, LockLine } from '../features/review/FlowParts';
 /** Avaliar · passo 1: escolher a organização (e o local) ou adicionar uma que falta */
 export default function AvaliarEscolher() {
   const desktop = useIsDesktop();
-  const nav = useNavigate();
+  const { go, leave } = useFlowNav();
   const picker = useOrgPicker(desktop);
   const add = useAddOrg();
   const { step, chosen } = picker;
 
   // vindo da página da organização, com um só local: não há nada a escolher
   useEffect(() => {
-    if (picker.autoStart && picker.confirm()) nav('/avaliar/notas', { replace: true });
+    if (picker.autoStart && picker.confirm()) go('/avaliar/notas', { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- só na entrada
   }, []);
 
@@ -30,13 +30,13 @@ export default function AvaliarEscolher() {
   };
   const next = async () => {
     const ok = step === 'add' ? await add.submit() : picker.confirm();
-    if (ok) nav('/avaliar/notas');
+    if (ok) go('/avaliar/notas');
   };
   const nextLabel = step === 'add' ? tr('Adicionar e continuar', 'Add and continue') : tr('Continuar', 'Continue');
 
   const search = <OrgSearchBox value={picker.query} onChange={picker.setQuery} />;
   const results = (
-    <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={(o) => picker.pick(o) && nav('/avaliar/notas')} />
+    <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={(o) => picker.pick(o) && go('/avaliar/notas')} />
   );
   const detail = (
     <>
@@ -52,7 +52,7 @@ export default function AvaliarEscolher() {
           <DeskSteps
             current={1}
             right={
-              <button type="button" className={`row ${styles.cancel}`} onClick={() => nav('/')}>
+              <button type="button" className={`row ${styles.cancel}`} onClick={() => leave('/')}>
                 <Icon name="close" size={18} />
                 {tr('Cancelar', 'Cancel')}
               </button>
@@ -104,7 +104,7 @@ export default function AvaliarEscolher() {
   return (
     <Shell>
       <div className={`page ${styles.mobilePage}`}>
-        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => nav('/')} right={<span className="small muted">{tr('Antes de começar', 'Before you start')}</span>} />
+        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => leave('/')} right={<span className="small muted">{tr('Antes de começar', 'Before you start')}</span>} />
         {step === 'pick' && (
           <div className={`fade-up ${styles.mobilePick}`}>
             <h1 className={styles.title}>{tr('Onde trabalhas ou trabalhaste?', 'Where do you or did you work?')}</h1>

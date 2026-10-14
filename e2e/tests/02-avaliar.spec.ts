@@ -52,4 +52,19 @@ test.describe('Avaliar onde trabalho', () => {
     await page.waitForURL(/\/avaliar\/notas/);
     await expect(page.getByRole('radiogroup', { name: 'Salário justo' })).toBeVisible();
   });
+
+  test('lista → organização → avaliar → fechar → voltar: volta à lista (não à avaliação)', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'o "fechar" das notas é do telemóvel');
+    await page.goto('/pesquisa');
+    await page.getByRole('searchbox').first().fill('oficina sete');
+    await page.getByText('Oficina Sete', { exact: true }).first().click();
+    await page.waitForURL(/\/org\//);
+    const orgUrl = page.url();
+    await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
+    await page.waitForURL(/\/avaliar\/notas/);
+    await page.getByRole('button', { name: /^Fechar/ }).click();
+    await expect(page).toHaveURL(orgUrl);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/pesquisa/);
+  });
 });

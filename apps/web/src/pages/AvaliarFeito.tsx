@@ -10,6 +10,7 @@ import { tr } from '../i18n';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { useToggle } from '../lib/useToggle';
+import { useFlowNav } from '../features/review/useFlowNav';
 import { FlowHead, MiniSteps, NotesGrid } from '../features/review/FlowParts';
 
 /** Avaliação publicada: agradecer, mostrar a nota e, se houve relato grave, o apoio */
@@ -20,7 +21,10 @@ export default function AvaliarFeito() {
   const review = publishedReview(myReviews, lastPublished);
   const org = useOrg(review?.orgId);
   const [open, toggleOpen] = useToggle();
+  const { leave } = useFlowNav();
   const goHome = () => nav('/');
+  // ✕: sai do fluxo para onde se estava antes de avaliar (ex.: a organização); aberto diretamente, para o início
+  const close = () => leave('/');
 
   if (!review) {
     return (
@@ -84,7 +88,7 @@ export default function AvaliarFeito() {
   return (
     <Shell>
       <div className={`page ${styles.mobilePage}`}>
-        <FlowHead icon="close" label={tr('Fechar e voltar ao início', 'Close and go back home')} onClick={goHome} right={<MiniSteps current={2} done />} />
+        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={close} right={<MiniSteps current={2} done />} />
         <div className={styles.hero}>
           <DoneRing avg={review.avg} desktop={false} />
           <h1 className={styles.heroTitle}>{tr('Publicado. Obrigado.', 'Published. Thank you.')}</h1>
