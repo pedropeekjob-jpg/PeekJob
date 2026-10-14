@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Regras de domínio partilhadas entre a web e a API (NIF, moderação, compatibilidade, validação).",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
@@ -8,32 +8,9 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { SkipLink } from './components/SkipLink';
 import { StoreProvider } from './lib/store';
 import { LangRoot } from './i18n';
-import Inicio from './pages/Inicio';
 import Home from './pages/Home';
-import Sobre from './pages/Sobre';
-import Contacto from './pages/Contacto';
-import Preferencias from './pages/Preferencias';
-import APreparar from './pages/APreparar';
-import Pesquisa from './pages/Pesquisa';
-import Ranking from './pages/Ranking';
-import Setores from './pages/Setores';
-import Metodologia from './pages/Metodologia';
-import OrgPage from './pages/OrgPage';
-import Denunciar from './pages/Denunciar';
-import AvaliarEscolher from './pages/AvaliarEscolher';
-import AvaliarVerificar from './pages/AvaliarVerificar';
-import AvaliarNotas from './pages/AvaliarNotas';
-import AvaliarTexto from './pages/AvaliarTexto';
-import AvaliarFeito from './pages/AvaliarFeito';
-import Apoio from './pages/Apoio';
-import Guardadas from './pages/Guardadas';
-import Perfil from './pages/Perfil';
-import MeusDados from './pages/MeusDados';
-import Moderacao from './pages/Moderacao';
-import Entrar from './pages/Entrar';
-import ParaOrganizacoes from './pages/ParaOrganizacoes';
-import Painel from './pages/Painel';
-import NotFound from './pages/NotFound';
+import { Pages } from './pages/lazy';
+import { PageLoading } from './components/PageLoading';
 
 /**
  * Em cada mudança de ecrã: volta ao topo e põe o foco no título (o leitor de ecrã anuncia a página nova;
@@ -48,18 +25,23 @@ function ScrollTop() {
       first.current = false;
       return;
     }
-    // espera pelo ecrã novo (dados que chegam a seguir)
-    const t = setTimeout(() => {
+    // espera pelo ecrã novo: dados que chegam a seguir, ou a página carregada a pedido (até ~3 s)
+    let tries = 0;
+    const t = setInterval(() => {
       const main = document.getElementById('conteudo');
+      const loading = main?.getAttribute('aria-busy') === 'true';
+      const h1 = document.querySelector<HTMLElement>('main h1');
+      if ((loading || !h1) && ++tries < 50) return;
+      clearInterval(t);
       const active = document.activeElement;
       // a pessoa já está a usar o ecrã novo: não lhe roubar o foco
       if (main && active && active !== main && main.contains(active)) return;
-      const target = document.querySelector<HTMLElement>('main h1') ?? main;
+      const target = h1 ?? main;
       if (!target) return;
       if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
       target.focus({ preventScroll: true });
     }, 60);
-    return () => clearTimeout(t);
+    return () => clearInterval(t);
   }, [pathname]);
   return null;
 }
@@ -93,43 +75,45 @@ export default function App() {
   return (
     <StoreProvider>
       <LangRoot>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SkipLink />
         <EnvRibbon />
         <ScrollTop />
         <PageTracking />
         <ConsentBanner />
         <ScreenBoundary>
+        <Suspense fallback={<PageLoading />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/explorar" element={<Inicio />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="/contacto" element={<Contacto />} />
-          <Route path="/preferencias" element={<Preferencias />} />
-          <Route path="/a-preparar" element={<APreparar />} />
-          <Route path="/pesquisa" element={<Pesquisa />} />
-          <Route path="/ranking" element={<Ranking />} />
-          <Route path="/setores" element={<Setores />} />
-          <Route path="/metodologia" element={<Metodologia />} />
-          <Route path="/org/:id" element={<OrgPage tab="avaliacoes" />} />
-          <Route path="/org/:id/entrevistas" element={<OrgPage tab="entrevistas" />} />
-          <Route path="/org/:id/salarios" element={<OrgPage tab="salarios" />} />
-          <Route path="/org/:id/denunciar/:reviewId" element={<Denunciar />} />
-          <Route path="/avaliar" element={<AvaliarEscolher />} />
-          <Route path="/avaliar/verificar" element={<AvaliarVerificar />} />
-          <Route path="/avaliar/notas" element={<AvaliarNotas />} />
-          <Route path="/avaliar/texto" element={<AvaliarTexto />} />
-          <Route path="/avaliar/feito" element={<AvaliarFeito />} />
-          <Route path="/apoio" element={<Apoio />} />
-          <Route path="/guardadas" element={<Guardadas />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/perfil/dados" element={<MeusDados />} />
-          <Route path="/moderacao" element={<Moderacao />} />
-          <Route path="/entrar" element={<Entrar />} />
-          <Route path="/para-organizacoes" element={<ParaOrganizacoes />} />
-          <Route path="/painel" element={<Painel />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/explorar" element={<Pages.Inicio />} />
+          <Route path="/sobre" element={<Pages.Sobre />} />
+          <Route path="/contacto" element={<Pages.Contacto />} />
+          <Route path="/preferencias" element={<Pages.Preferencias />} />
+          <Route path="/a-preparar" element={<Pages.APreparar />} />
+          <Route path="/pesquisa" element={<Pages.Pesquisa />} />
+          <Route path="/ranking" element={<Pages.Ranking />} />
+          <Route path="/setores" element={<Pages.Setores />} />
+          <Route path="/metodologia" element={<Pages.Metodologia />} />
+          <Route path="/org/:id" element={<Pages.OrgPage tab="avaliacoes" />} />
+          <Route path="/org/:id/entrevistas" element={<Pages.OrgPage tab="entrevistas" />} />
+          <Route path="/org/:id/salarios" element={<Pages.OrgPage tab="salarios" />} />
+          <Route path="/org/:id/denunciar/:reviewId" element={<Pages.Denunciar />} />
+          <Route path="/avaliar" element={<Pages.AvaliarEscolher />} />
+          <Route path="/avaliar/verificar" element={<Pages.AvaliarVerificar />} />
+          <Route path="/avaliar/notas" element={<Pages.AvaliarNotas />} />
+          <Route path="/avaliar/texto" element={<Pages.AvaliarTexto />} />
+          <Route path="/avaliar/feito" element={<Pages.AvaliarFeito />} />
+          <Route path="/apoio" element={<Pages.Apoio />} />
+          <Route path="/guardadas" element={<Pages.Guardadas />} />
+          <Route path="/perfil" element={<Pages.Perfil />} />
+          <Route path="/perfil/dados" element={<Pages.MeusDados />} />
+          <Route path="/moderacao" element={<Pages.Moderacao />} />
+          <Route path="/entrar" element={<Pages.Entrar />} />
+          <Route path="/para-organizacoes" element={<Pages.ParaOrganizacoes />} />
+          <Route path="/painel" element={<Pages.Painel />} />
+          <Route path="*" element={<Pages.NotFound />} />
         </Routes>
+        </Suspense>
         </ScreenBoundary>
       </Router>
       </LangRoot>

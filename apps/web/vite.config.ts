@@ -16,7 +16,15 @@ export default defineConfig({
     ...(coverage ? [istanbul({ include: 'src/**/*', exclude: ['node_modules', 'test/'], extension: ['.ts', '.tsx'], requireEnv: false, forceBuildInstrument: true })] : []),
   ],
   base: browser ? '/' : './',
-  build: coverage ? { sourcemap: true } : undefined,
+  build: {
+    sourcemap: coverage,
+    rollupOptions: {
+      output: {
+        // React e o router mudam pouco: ficheiro próprio, que fica em cache entre publicações
+        manualChunks: (id) => (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom|@remix-run)\//.test(id) ? 'vendor' : undefined),
+      },
+    },
+  },
   define: {
     'import.meta.env.VITE_APP_VERSION': JSON.stringify((process.env.VITE_APP_VERSION || process.env.npm_package_version || 'dev').slice(0, 12)),
   },

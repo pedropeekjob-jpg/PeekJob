@@ -1,0 +1,6 @@
+.wrap {
+  min-height: 70svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
