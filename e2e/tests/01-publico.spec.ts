@@ -19,8 +19,10 @@ test.describe('Visita pública', () => {
     await page.getByRole('button', { name: /^Espreitar/ }).click();
     await expect(page).toHaveURL(/\/\?lado=espreitar$/);
     await page.getByRole('link', { name: 'Ver todas as organizações' }).click();
-    // na primeira visita pergunta as prioridades (pode saltar)
+    // na primeira visita pergunta as prioridades (pode saltar). O explorar carrega a pedido e só então redireciona:
+    // esperar pelo título do ecrã final antes de decidir
     await page.waitForURL(/\/(explorar|preferencias)$/);
+    await expect(page.locator('main h1')).toBeVisible();
     if (page.url().endsWith('/preferencias')) {
       await page.getByRole('button', { name: /^Saltar( por agora)?$/ }).first().click();
       await page.waitForURL(/\/explorar$/);
