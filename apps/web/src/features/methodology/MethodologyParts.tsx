@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { analytics } from '../../analytics';
 import { openConsent } from '../../components/ConsentBanner';
 import { Dots, Ring } from '../../components/Data';

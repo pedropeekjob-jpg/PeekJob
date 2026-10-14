@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef } from 'react';
-import { BrowserRouter, HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import { analytics, routeTemplate, setCurrentTemplate } from './analytics';
 import { applyPageMeta, browserRouting } from './analytics/seo';
 import { ConsentBanner } from './components/ConsentBanner';
@@ -75,7 +75,7 @@ export default function App() {
   return (
     <StoreProvider>
       <LangRoot>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Router>
         <SkipLink />
         <EnvRibbon />
         <ScrollTop />

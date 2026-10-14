@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { tr } from '../i18n';
 import { reportError } from '../lib/monitoring';
 import { Icon } from './Icon';

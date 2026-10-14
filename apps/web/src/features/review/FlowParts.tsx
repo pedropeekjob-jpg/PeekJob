@@ -1,5 +1,5 @@
 import { memo, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { CRITERION, type CriterionKey } from '../../data/criteria';

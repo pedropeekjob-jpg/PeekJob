@@ -1,5 +1,5 @@
 import { memo, type CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { CRITERION, type CriterionKey } from '../../data/criteria';
 import { tr } from '../../i18n';
 import { countText, emptyTitle, LIMIT } from './search';

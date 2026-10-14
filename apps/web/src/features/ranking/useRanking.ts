@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { useOrgs } from '../../api/orgs';
 import { useStore } from '../../lib/store';
 import { activeCount, NO_FILTERS, rank, readFilters, toggleIn, writeFilters, type Filters, type GroupKey, type Sort } from './ranking';

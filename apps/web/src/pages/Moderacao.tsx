@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { apiMode } from '../api/http';
 import { Shell } from '../components/Layout';
 import { Empty, TopBar } from '../components/UI';

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { tr } from '../../i18n';
 import { flagLabel } from '../../i18n/labels';
 import type { RedFlagResult } from '../../lib/moderation';

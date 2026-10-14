@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useOrgs } from '../../api/orgs';
 import { useStore } from '../../lib/store';
 import { lastMessageWhen, orgNameOf, settingsLinks, unreadCount, verificationValue } from './profile';

@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { CRITERIA } from '../../data/criteria';

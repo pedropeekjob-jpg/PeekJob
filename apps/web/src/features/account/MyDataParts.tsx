@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { deletedText, deleteLabel, downloadLabel, KEPT } from './myData';

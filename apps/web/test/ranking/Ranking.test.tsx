@@ -1,5 +1,5 @@
 import { screen, within } from '@testing-library/react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import Ranking from '../../src/pages/Ranking';
 import { renderScreen } from '../utils/render';

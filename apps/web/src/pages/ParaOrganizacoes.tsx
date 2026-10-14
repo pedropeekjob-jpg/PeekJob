@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Shell } from '../components/Layout';
 import { ORG_BY_ID } from '../data/orgs';
 import { Faq, HeroRing, HowItWorks, Plans } from '../features/organizations/ForOrgsParts';

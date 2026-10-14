@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { AnalyticsSwitch } from '../../components/ConsentBanner';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';

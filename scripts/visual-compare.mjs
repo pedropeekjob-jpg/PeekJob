@@ -98,8 +98,16 @@ try {
   console.log(`Referência: ${ref} (${sha})`);
   const wt = join(tmp, 'ref');
   sh('git', ['worktree', 'add', '--detach', wt, sha]);
-  symlinkSync(join(root, 'node_modules'), join(wt, 'node_modules'));
-  if (existsSync(join(root, 'apps/web/node_modules'))) symlinkSync(join(root, 'apps/web/node_modules'), join(wt, 'apps/web/node_modules'));
+  // Mesmas dependências: reutiliza as instaladas (rápido). Dependências diferentes (ex.: depois de atualizar
+  // uma biblioteca): instala as da referência à parte, para a referência ser construída como era.
+  const sameDeps = readFileSync(join(wt, 'package-lock.json'), 'utf8') === readFileSync(join(root, 'package-lock.json'), 'utf8');
+  if (sameDeps) {
+    symlinkSync(join(root, 'node_modules'), join(wt, 'node_modules'));
+    if (existsSync(join(root, 'apps/web/node_modules'))) symlinkSync(join(root, 'apps/web/node_modules'), join(wt, 'apps/web/node_modules'));
+  } else {
+    console.log('A referência tem outras dependências: a instalar as dela…');
+    execFileSync('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: wt, stdio: 'ignore', env: { ...process.env, PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' } });
+  }
   if (existsSync(join(root, 'packages/shared/dist'))) sh('cp', ['-r', join(root, 'packages/shared/dist'), join(wt, 'packages/shared/dist')]);
 
   console.log('A construir as duas versões…');

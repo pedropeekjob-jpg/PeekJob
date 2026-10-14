@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 /** Voltar ao ecrã anterior; sem histórico (ex.: link aberto diretamente), ir para `fallback` */
 export function useBack(fallback: string) {

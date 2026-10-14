@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { apiMode } from '../../api/http';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';

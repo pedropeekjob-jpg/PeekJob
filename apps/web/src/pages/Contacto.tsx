@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Icon } from '../components/Icon';
 import { MobileHomeHeader, Shell } from '../components/Layout';
 import { CONTACT_EMAIL, SOCIAL } from '../config';

@@ -1,5 +1,5 @@
 import { memo, useMemo, type ReactNode } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router';
 import { analytics } from '../analytics';
 import { SOCIAL } from '../config';
 import { LangSwitch, tr } from '../i18n';

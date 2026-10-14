@@ -169,10 +169,12 @@ Somam-se aos limites que já existiam por pessoa: 3 links por email, 5 tentativa
 
 Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca em disco. Chega para uma instância; com várias, passar para Redis ou PostgreSQL. Atrás do proxy do Render o IP real vem de `X-Forwarded-For` (`trust proxy`).
 
-**Dependências:** `npm audit --omit=dev`. Corrigido o que tinha correção na mesma versão principal: Nest 10.4.22, Express 4.22.3, Multer 2.4.0, qs, body-parser e React Router 6.30.6. Fica para uma tarefa à parte, porque exige mudar de versão principal:
-- **Nest 11:** aviso moderado sobre saída não escapada.
-- **pdfjs 4+:** a falha de execução de JavaScript já está mitigada com `isEvalSupported: false`, a mitigação oficial. O `canvas` e o `tar` são opcionais e não são instalados.
-- **React Router 7:** redirecionamento aberto através de `<Link>` com valores vindos do utilizador. A web não usa valores do utilizador em navegações.
+**Dependências (14/10):** `npm audit --omit=dev` → **0 vulnerabilidades** (antes 10, uma crítica). Atualizadas as versões principais:
+- **Node 22** na imagem Docker e no CI (o Node 20 deixou de ter suporte em abril de 2026; o pdf.js 6 exige ≥ 22.13).
+- **Nest 11.2.7 com Express 5.2** (o Nest 12 é só ESM; a linha 11.2 já corrige os avisos, incluindo o Multer 2.4). As rotas e o middleware não precisaram de mudanças; os 233 testes da API passaram sem alterações.
+- **pdf.js 6.4** (o 3.x tinha execução de JavaScript em PDFs e dependências opcionais `canvas`/`tar` vulneráveis). Só existe em ESM: carrega-se com `import()` a partir de `src/verification/pdfjs-loader.cjs` (JavaScript simples, copiado para `dist` no build), porque o TypeScript em CommonJS trocaria o `import()` por `require`. Os testes da API correm com `NODE_OPTIONS=--experimental-vm-modules` para o Jest aceitar esse `import()`.
+- **React Router 7.18** (ver [11 · Frontend](11-frontend.md)).
+- Ferramentas de desenvolvimento: Vite 6.4.3 e ts-jest 29.4.14. Ficam para uma tarefa à parte as versões principais das ferramentas de teste (Jest 30, Vitest 4, jsdom 29, nyc 18): só correm nos testes, nunca em produção.
 
 ## Monitorização
 

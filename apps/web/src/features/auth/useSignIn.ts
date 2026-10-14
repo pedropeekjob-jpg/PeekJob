@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { apiMode } from '../../api/http';
 import { tr } from '../../i18n';
 import { useStore } from '../../lib/store';

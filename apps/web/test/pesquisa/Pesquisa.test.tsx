@@ -1,5 +1,5 @@
-import { screen, within } from '@testing-library/react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { screen, waitFor, within } from '@testing-library/react';
+import { useLocation, useNavigate } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CRITERION } from '../../src/data/criteria';
 import Pesquisa from '../../src/pages/Pesquisa';
@@ -60,14 +60,15 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
     await user.type(box, 'maia');
     expect(search()).toBe(''); // ainda a procurar: o endereço não muda a cada tecla
     expect(await screen.findByText(desktop ? '1 resultado, por compatibilidade' : '1 resultado, ordenado para ti', undefined, SLOW)).toBeInTheDocument();
-    expect(search()).toBe('?q=maia');
+    // o endereço muda numa transição do React (React Router 7): chega logo a seguir aos resultados
+    await waitFor(() => expect(search()).toBe('?q=maia'));
     expect(names()).toEqual(['Norte Logística']);
     await user.click(screen.getByRole('button', { name: 'Limpar pesquisa' }));
     expect(box).toHaveValue('');
     expect(box).toHaveFocus();
     expect(screen.queryByRole('button', { name: 'Limpar pesquisa' })).not.toBeInTheDocument();
     expect(await screen.findByText(count(12), undefined, SLOW)).toBeInTheDocument();
-    expect(search()).toBe('');
+    await waitFor(() => expect(search()).toBe(''));
   });
 
   it('filtrar por tipo (sem esperar)', async () => {
@@ -93,7 +94,7 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
       await user.click(screen.getByRole('button', { name: 'Limpar filtros' }));
       expect(screen.getByRole('searchbox')).toHaveValue('');
       expect(await screen.findByText(count(12), undefined, SLOW)).toBeInTheDocument();
-      expect(search()).toBe('');
+      await waitFor(() => expect(search()).toBe(''));
     } else {
       expect(screen.getByText('Confirma o nome ou adiciona-a ao avaliar.')).toBeInTheDocument();
       expect(screen.getByText('Não encontras a tua?')).toBeInTheDocument();

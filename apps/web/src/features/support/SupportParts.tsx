@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Icon } from '../../components/Icon';
 import { Accordion } from '../../components/UI';
 import { SUPPORT } from '../../data/content';

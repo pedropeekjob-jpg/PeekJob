@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { MapView } from '../../components/MapView';

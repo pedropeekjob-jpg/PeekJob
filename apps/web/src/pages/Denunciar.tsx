@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useOrg } from '../api/orgs';
 import { Shell } from '../components/Layout';
 import { findTarget } from '../features/report/report';

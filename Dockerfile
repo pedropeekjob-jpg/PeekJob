@@ -1,5 +1,5 @@
 # PeekJob: API (NestJS) + web (React) numa só imagem. A API serve a web na mesma origem.
-FROM node:20-slim AS build
+FROM node:22-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/
@@ -15,7 +15,7 @@ RUN npm run build -w @peekjob/shared \
  && npm run build -w @peekjob/api \
  && VITE_API_URL=/ VITE_ROUTER=browser VITE_APP_VERSION=$RENDER_GIT_COMMIT npm run build -w @peekjob/web
 
-FROM node:20-slim
+FROM node:22-slim
 ENV NODE_ENV=production WEB_DIST=/app/web PORT=3000
 WORKDIR /app
 COPY package.json package-lock.json ./

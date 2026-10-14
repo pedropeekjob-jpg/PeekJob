@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Icon } from '../../components/Icon';
 import { REPORT_REASONS } from '../../data/content';
 import { tr } from '../../i18n';

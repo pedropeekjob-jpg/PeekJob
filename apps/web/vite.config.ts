@@ -21,7 +21,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // React e o router mudam pouco: ficheiro próprio, que fica em cache entre publicações
-        manualChunks: (id) => (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom|@remix-run)\//.test(id) ? 'vendor' : undefined),
+        manualChunks: (id) => (/node_modules\/(react|react-dom|scheduler|react-router)\//.test(id) ? 'vendor' : undefined),
       },
     },
   },

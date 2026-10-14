@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { isTypingKey, ZONE_PARAM, zoneFromParam, zoneParam, type Zone } from './home';
 
 /** Estado de navegação: abrir a partir das duas zonas permite fechar com "voltar" (sem entradas a mais no histórico) */

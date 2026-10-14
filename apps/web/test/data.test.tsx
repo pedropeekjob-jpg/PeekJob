@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { CriterionRow, Dots, MatchPill, OrgCard, OrgRow, Ring, Trend } from '../src/components/Data';
 import { ORG_BY_ID } from '../src/data/orgs';

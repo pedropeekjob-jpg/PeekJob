@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { LogoAnimated } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';

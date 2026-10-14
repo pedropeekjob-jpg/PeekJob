@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 /**
  * Âncoras (#secção) vindas de outra página: faz scroll até à secção depois do scroll-to-top da mudança de ecrã.

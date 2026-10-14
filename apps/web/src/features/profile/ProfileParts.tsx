@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Icon } from '../../components/Icon';
 import { CRITERION, type CriterionKey } from '../../data/criteria';
 import { tr } from '../../i18n';

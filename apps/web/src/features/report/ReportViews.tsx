@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { Icon } from '../../components/Icon';
 import type { Org } from '../../data/orgs';
 import { tr } from '../../i18n';

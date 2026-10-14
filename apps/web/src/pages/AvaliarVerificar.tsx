@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Icon } from '../components/Icon';

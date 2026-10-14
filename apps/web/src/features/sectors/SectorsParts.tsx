@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Ring } from '../../components/Data';
 import type { OrgType } from '../../data/orgs';
 import { tr } from '../../i18n';

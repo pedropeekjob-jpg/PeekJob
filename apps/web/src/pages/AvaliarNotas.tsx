@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Ring } from '../components/Data';

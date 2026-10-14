@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import type { Appeal, PendingOrg, ReportedReview } from '../../api/moderation';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';

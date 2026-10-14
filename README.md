@@ -21,7 +21,7 @@ docker compose up -d db               # PostgreSQL para a API
 npm test                              # domínio partilhado + API (precisa de TEST_DATABASE_URL)
 ```
 
-Requisitos: Node 20 ou superior. Cada push corre os testes no GitHub Actions e publica a demo.
+Requisitos: Node 22.13 ou superior (o Node 20 deixou de ter suporte em abril de 2026; o pdf.js 6 exige 22.13). Cada push corre os testes no GitHub Actions e publica a demo.
 
 ## Web: o que está incluído
 

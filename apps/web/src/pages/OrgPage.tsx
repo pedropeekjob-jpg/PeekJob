@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useOrg, useOrgStatus } from '../api/orgs';
 import { Shell } from '../components/Layout';
 import type { OrgTab } from '../features/org/org';

@@ -1,5 +1,5 @@
 import { memo, useRef, type CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { LogoAnimated } from '../../components/Brand';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';

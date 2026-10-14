@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Logo } from '../../components/Brand';
 import { CRITERION } from '../../data/criteria';
 import { tr } from '../../i18n';

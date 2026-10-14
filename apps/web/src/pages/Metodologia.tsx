@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Shell } from '../components/Layout';
 import { TopBar } from '../components/UI';
 import { FormulaCard, FormulaDesktop, Ideas, Privacy, RespeitoSupport, Rules, ScoreDemo } from '../features/methodology/MethodologyParts';

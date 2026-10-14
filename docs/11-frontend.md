@@ -75,6 +75,13 @@ O que fica, por desenho: no ranking os filtros e a ordem vivem no endereço (par
 
 `PJ_NAMES=1 PJ_ONLY=<interação> npm run react:profile -- HEAD` lista os componentes que correm, pelo nome.
 
+## React Router 7 (14/10)
+
+- Importa-se de `react-router` (o `react-router-dom` passou a ser só uma reexportação e saiu das dependências).
+- As opções `v7_startTransition` e `v7_relativeSplatPath` passaram a ser o comportamento normal: o `future` saiu do `<Router>`.
+- **Nos testes:** mudar o endereço (ex.: `setSearchParams` quando a pesquisa é aplicada) é uma transição do React e chega um instante depois do resto do ecrã. Verifica-se com `await waitFor(() => expect(where()).toBe(...))`.
+- O bloco comum (`vendor`) passou de 54 para 60 kB comprimidos.
+
 ## Testes
 
 | Camada | Ferramenta | O quê |

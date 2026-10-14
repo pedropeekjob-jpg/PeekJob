@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { REVIEW_TAGS } from '../../src/data/content';
 import { DeskSteps, FlowHead, LockLine, MiniSteps, NotesGrid, RecommendButtons, ScoreRow, TagPicker } from '../../src/features/review/FlowParts';

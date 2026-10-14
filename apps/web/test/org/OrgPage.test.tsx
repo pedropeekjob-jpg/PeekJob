@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { screen, within } from '@testing-library/react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it } from 'vitest';

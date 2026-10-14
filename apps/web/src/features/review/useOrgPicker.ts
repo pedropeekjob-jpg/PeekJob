@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { useSearchTracking } from '../../analytics/useSearchTracking';
 import { useOrg, useOrgs, useSearch } from '../../api/orgs';
 import type { Org } from '../../data/orgs';

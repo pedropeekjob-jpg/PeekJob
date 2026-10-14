@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { apiMode } from '../../api/http';
 import { applyPageMeta, setOrgStructuredData } from '../../analytics/seo';
 import type { CriterionKey } from '../../data/criteria';

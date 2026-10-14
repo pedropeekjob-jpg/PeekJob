@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { Shell } from '../components/Layout';
 import { RINGS_DESKTOP, RINGS_MOBILE } from '../features/auth/signIn';
 import { DecorRings, ExploreWithoutAccount, HomeLogo, LinkStatus, OpenDemoLink, SentBlock, SignInForm, Tagline } from '../features/auth/SignInParts';

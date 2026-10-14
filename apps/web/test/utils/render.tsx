@@ -1,7 +1,7 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import { LangRoot } from '../../src/i18n';
 import { StoreProvider, useStore, type Draft } from '../../src/lib/store';
 

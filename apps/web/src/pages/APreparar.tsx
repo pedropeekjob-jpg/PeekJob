@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, type CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { LogoAnimated } from '../components/Brand';
 import { Shell } from '../components/Layout';
 import { CRITERION } from '../data/criteria';
