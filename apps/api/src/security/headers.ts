@@ -1,3 +1,4 @@
+import { mapTiles } from '../web/map-tiles';
 import type { AppEnv } from '../common/config';
 
 /** Cabeçalhos em todas as respostas */
@@ -22,13 +23,14 @@ const GA = ['https://*.google-analytics.com', 'https://*.analytics.google.com', 
  * CSP da web: só scripts do próprio site e do Google Analytics (carregado só com consentimento).
  * Sem scripts inline (a configuração vem de /pj-config.js). Estilos inline permitidos (atributos style do React).
  */
-export function htmlCsp(env: AppEnv): string {
+export function htmlCsp(env: AppEnv, vars: Record<string, string | undefined> = process.env): string {
   const d = [
     "default-src 'self'",
     "script-src 'self' https://www.googletagmanager.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    `img-src 'self' data: blob: ${GA.join(' ')}`,
+    // mosaicos do mapa: só os do fornecedor configurado (só carregam quando a pessoa abre o mapa)
+    `img-src 'self' data: blob: ${GA.join(' ')} ${mapTiles(vars).origin}`,
     `connect-src 'self' ${GA.join(' ')}`,
     "manifest-src 'self'",
     "frame-ancestors 'none'",

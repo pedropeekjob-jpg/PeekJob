@@ -1,13 +1,15 @@
 import { appEnv } from '../common/config';
+import { mapTiles } from './map-tiles';
 
 type Env = Record<string, string | undefined>;
 
 const GA_ID = /^G-[A-Z0-9]{4,20}$/;
 const GSC_TOKEN = /^[A-Za-z0-9_-]{10,100}$/;
 
-/** Configuração da web em tempo de execução (window.__PJ__): ID do Analytics e ambiente. Servida em /pj-config.js. */
+/** Configuração da web em tempo de execução (window.__PJ__): ID do Analytics, ambiente e mosaicos do mapa. Servida em /pj-config.js. */
 export function configScript(env: Env = process.env): string {
-  const cfg: { gaId?: string; env?: 'uat' } = {};
+  const { url, attribution } = mapTiles(env);
+  const cfg: { gaId?: string; env?: 'uat'; tiles: { url: string; attribution: string } } = { tiles: { url, attribution } };
   const ga = env.GA_MEASUREMENT_ID?.trim();
   if (ga && GA_ID.test(ga)) cfg.gaId = ga;
   // Na UAT a web mostra a faixa "ambiente de testes"

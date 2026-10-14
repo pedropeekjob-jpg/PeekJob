@@ -263,10 +263,16 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 ## Próxima fatia
 - Verificação por fotografia do recibo (OCR); hoje só PDF com texto.
-- Locais e mapa: geocodificação em segundo plano.
+- Locais adicionados à mão: geocodificação em segundo plano (até lá não entram no mapa real).
 
 ## Guardadas e "útil" (14/10)
 - Ficam na conta, ligadas ao pseudónimo da pessoa (tabelas `saved_orgs` e `review_helpful`), por isso acompanham a pessoa entre aparelhos.
 - Sem sessão continuam a funcionar no browser; ao entrar, juntam-se à conta (`/me/saved/merge` e um `PUT` por "útil"). Com sessão, ao abrir a app, a conta manda: o que foi tirado noutro aparelho não volta do browser.
 - No ecrã a mudança é imediata; se o servidor recusar, volta atrás. Ao sair, as guardadas e os "úteis" saem do browser.
 - A contagem pública de "útil" vem do servidor e não diz quem marcou; não se pode marcar a própria avaliação.
+
+## Mapa real (14/10)
+- Leaflet com mosaicos configuráveis (`MAP_TILES_URL`, por omissão OpenStreetMap). O endereço chega à web por `/pj-config.js` e a origem entra na CSP (`img-src`): o browser só carrega imagens desse fornecedor.
+- **Privacidade:** pedir mosaicos envia o IP da pessoa ao fornecedor. Por isso o mapa real só carrega quando a pessoa toca em "Ver no mapa" (até lá, uma ilustração sem pedidos a outros sites); a escolha fica nesse browser. A política de privacidade deve mencionar o fornecedor do mapa.
+- O Leaflet vem num ficheiro à parte (≈44 kB comprimidos), só descarregado quando se abre o mapa.
+- Entram no mapa os locais com coordenadas (os importados do OpenStreetMap e os de demonstração); a escolha do local com teclado faz-se na lista ao lado.

@@ -61,7 +61,7 @@ describe('Segurança', () => {
       const cfg = await t.http().get('/pj-config.js').expect(200);
       expect(cfg.headers['content-type']).toMatch(/javascript/);
       expect(cfg.headers['cache-control']).toMatch(/no-cache/);
-      expect(cfg.text).toBe('window.__PJ__={"gaId":"G-TEST123"};');
+      expect(cfg.text).toBe('window.__PJ__={"tiles":{"url":"https://tile.openstreetmap.org/{z}/{x}/{y}.png","attribution":"© OpenStreetMap"},"gaId":"G-TEST123"};');
     });
 
     it('as respostas da API não carregam nada (CSP mínima)', async () => {

@@ -12,3 +12,21 @@
   padding: 0;
   min-height: 32px;
 }
+
+/* Mapa real (Leaflet): mesma forma da ilustração */
+.real {
+  height: var(--h);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #e9eeef;
+  /* por baixo dos menus e da barra de navegação (o Leaflet usa z-index até 1000) */
+  position: relative;
+  z-index: 0;
+}
+.realCta {
+  gap: 6px 12px;
+  align-items: center;
+}
+.realButton {
+  gap: 6px;
+}

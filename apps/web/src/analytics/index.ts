@@ -12,7 +12,7 @@ export { cleanSearchTerm, routeTemplate, textLengthBucket } from './privacy';
  */
 declare global {
   interface Window {
-    __PJ__?: { gaId?: string; env?: 'uat' };
+    __PJ__?: { gaId?: string; env?: 'uat'; tiles?: { url: string; attribution: string } };
     dataLayer?: unknown[];
   }
 }
