@@ -41,6 +41,7 @@ export const SCENARIOS = [
   { name: 'inicio-avaliar', path: '/?lado=avaliar' },
   { name: 'explorar', path: '/explorar' },
   { name: 'explorar-inicio', path: '/explorar', full: true, state: { onboarded: true } },
+  { name: 'explorar-primeira', path: '/explorar', full: true, state: { onboarded: false } },
   {
     name: 'explorar-prioridades',
     path: '/explorar',

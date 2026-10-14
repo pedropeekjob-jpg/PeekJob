@@ -78,6 +78,11 @@
 .prefsLine {
   margin-top: -8px;
 }
+.more {
+  align-self: flex-start;
+  margin-top: 10px;
+  font-weight: 500;
+}
 .cards {
   display: flex;
   flex-direction: column;
@@ -132,6 +137,9 @@
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: none;
+}
+.strip:focus-visible {
+  outline-offset: -3px; /* o anel fica dentro da fita (que corta o que sai, por deslizar) */
 }
 .strip::-webkit-scrollbar {
   display: none;
@@ -465,4 +473,40 @@
 .prefsLine {
   gap: 4px 12px;
   align-items: baseline;
+}
+/* o MoreToggle alinha-se ao topo (align-self): aqui fica na linha do texto */
+.prefsLine > button {
+  align-self: baseline;
+}
+
+/* Primeira visita: convite para ordenar por prioridades (menta, como as ações principais) */
+.invite {
+  gap: 12px;
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--mint);
+  border: 1px solid var(--line);
+}
+.inviteText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.inviteTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+.inviteIcon {
+  flex: none;
+  color: var(--teal-dark);
+}
+@media (min-width: 900px) {
+  .invite {
+    align-self: flex-start;
+    min-width: 420px;
+    padding: 16px 20px;
+  }
 }

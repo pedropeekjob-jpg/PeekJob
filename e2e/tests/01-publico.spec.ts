@@ -19,19 +19,21 @@ test.describe('Visita pública', () => {
     await page.getByRole('button', { name: /^Espreitar/ }).click();
     await expect(page).toHaveURL(/\/\?lado=espreitar$/);
     await page.getByRole('link', { name: 'Ver todas as organizações' }).click();
-    // na primeira visita pergunta as prioridades (pode saltar). O explorar carrega a pedido e só então redireciona:
-    // esperar pelo título do ecrã final antes de decidir
-    await page.waitForURL(/\/(explorar|preferencias)$/);
-    await expect(page.locator('main h1')).toBeVisible();
-    if (page.url().endsWith('/preferencias')) {
-      await page.getByRole('button', { name: /^Saltar( por agora)?$/ }).first().click();
-      await page.waitForURL(/\/explorar$/);
-    }
+    // a primeira visita abre logo a lista (as prioridades são um convite, não um passo obrigatório)
+    await page.waitForURL(/\/explorar$/);
+    await expect(page.getByRole('heading', { name: 'Mais bem avaliadas' })).toBeVisible();
     // (o ranking só mostra organizações com 5 ou mais avaliações; o explorar mostra todas)
     await page.locator('main a[href^="/org/"]').first().click();
     await page.waitForURL(/\/org\/[0-9a-f-]{36}$/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expectNoHorizontalScroll(page);
+  });
+
+  test('Explorar está no menu de qualquer ecrã', async ({ page }) => {
+    await page.goto('/sobre');
+    await page.getByRole('navigation', { name: 'Principal', exact: true }).getByRole('link', { name: 'Explorar' }).click();
+    await page.waitForURL(/\/explorar$/);
+    await expect(page.locator('main h1')).toBeVisible();
   });
 
   test('a avaliação publicada aparece na página da organização', async ({ page }) => {

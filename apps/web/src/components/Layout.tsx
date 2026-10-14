@@ -16,9 +16,10 @@ const nav = (area: string, item: string) => ({ 'data-ev': 'nav_click', 'data-ev-
 function MainLinks({ area }: { area: string }) {
   return (
     <>
-      <NavLink className="caps-link" to="/sobre" {...nav(area, 'sobre')}>{tr('Sobre', 'About')}</NavLink>
+      {/* Explorar primeiro: a lista de organizações fica a um clique de qualquer ecrã (14/10); o Contacto foi para o rodapé */}
+      <NavLink className="caps-link" to="/explorar" {...nav(area, 'explorar')}>{tr('Explorar', 'Explore')}</NavLink>
       <NavLink className="caps-link" to="/ranking" {...nav(area, 'ranking')}>Ranking</NavLink>
-      <NavLink className="caps-link" to="/contacto" {...nav(area, 'contacto')}>{tr('Contacto', 'Contact')}</NavLink>
+      <NavLink className="caps-link" to="/sobre" {...nav(area, 'sobre')}>{tr('Sobre', 'About')}</NavLink>
     </>
   );
 }
@@ -117,6 +118,7 @@ function SocialLinks() {
 function FooterLinks() {
   return (
     <nav aria-label={tr('Rodapé', 'Footer')} className="row wrap footer-links">
+      <Link to="/contacto" {...nav('footer', 'contacto')}>{tr('Contacto', 'Contact')}</Link>
       <Link to="/setores" {...nav('footer', 'setores')}>{tr('Tipos e setores', 'Types and sectors')}</Link>
       <Link to="/metodologia" {...nav('footer', 'metodologia')}>{tr('Como calculamos', 'How we score')}</Link>
       <Link to="/para-organizacoes" {...nav('footer', 'para-organizacoes')}>{tr('Para organizações', 'For organisations')}</Link>

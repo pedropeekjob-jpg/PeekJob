@@ -12,6 +12,7 @@ import { useFlip } from '../../lib/useFlip';
 import { useToggle } from '../../lib/useToggle';
 import { MoreToggle } from '../../components/UI';
 import { MAX_PREFS, prefsLine, prefsStatus, promises, pulseTicks, STARS, type Tick } from './explore';
+import { PrioritiesInvite } from './PrioritiesInvite';
 import { useForYou, useMovers } from './useExplore';
 import styles from './Explore.module.css';
 
@@ -158,16 +159,17 @@ function PrefsSummary() {
 }
 
 function ForYou() {
-  const list = useForYou().slice(0, 4);
+  const forYou = useForYou();
+  const list = forYou.list.slice(0, 4);
   const flip = useFlip(list.map((x) => x.org.id).join('|'));
   return (
     <section className={styles.forYou} aria-labelledby="para-ti-d">
       <div className={`row wrap between ${styles.forYouHead}`}>
         <h2 id="para-ti-d" className={`display ${styles.forYouTitle}`}>
-          {tr('Para ti', 'For you')}
+          {forYou.chosen ? tr('Para ti', 'For you') : tr('Mais bem avaliadas', 'Top rated')}
         </h2>
       </div>
-      <PrefsSummary />
+      {forYou.chosen ? <PrefsSummary /> : <PrioritiesInvite />}
       <div className={styles.grid}>
         {list.map(({ org, match }) => (
           <Link key={org.id} ref={flip(org.id)} to={`/org/${org.id}`} data-ev="select_org" data-ev-org-type={org.type} className={`plain card lift row ${styles.gridCard}`}>
@@ -178,7 +180,7 @@ function ForYou() {
                 {orgTypeLabel(org.type)} · {org.city}
               </span>
             </span>
-            <span className={`pill pill-match ${styles.gridPill}`}>{tr(`${match}% para ti`, `${match}% for you`)}</span>
+            {forYou.personal && <span className={`pill pill-match ${styles.gridPill}`}>{tr(`${match}% para ti`, `${match}% for you`)}</span>}
           </Link>
         ))}
       </div>

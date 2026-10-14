@@ -20,12 +20,14 @@ O design completo está no **canvas** (privado): https://claude.ai/artifact/16d6
 - **Cores (14/10, "branco e menta"):** o cliente achou o verde-água a cheio pesado. O verde-água fica só na linha da fronteira, no logo, nos detalhes e nas duas palavras grandes (Jost 400 em verde-água escuro, mais suave que o preto e legível: 7,6:1); os botões principais são tinta. As cores estão em variáveis no topo de `features/home/Home.module.css` (trocar de paleta não mexe na estrutura nem na animação).
 - **Animação:** uma mancha de luz suave segue o cursor (verde-água em cima, roxa em baixo, a cor do respeito); os olhos do logo olham para a zona onde está o cursor; em telemóvel as manchas deslizam sozinhas. Quem prefere menos movimento vê a troca sem animação.
 - **Medição:** `cta_click` com `cta=abrir_espreitar` / `abrir_avaliar` (o primeiro clique), `pesquisar`, `explorar` e `avaliar` (o segundo), sempre com `area=home`.
-- **Cabeçalho:** Sobre, Ranking e Contacto. **Rodapé:** Facebook e Instagram ao centro, e por baixo as ligações secundárias e o idioma.
+- **Cabeçalho:** Explorar, Ranking e Sobre (o Contacto está no rodapé). **Rodapé:** Facebook e Instagram ao centro, e por baixo as ligações secundárias e o idioma.
 - **Para onde foi o resto:** o início anterior, com a lista "Para ti", passa para **Explorar** (`/explorar`), o primeiro separador da barra inferior.
 
 ## Fluxos
 
-**Primeira visita:** Página inicial (Espreitar → Ver todas, ou O teu trabalho → Avaliar) → Preferências (3 prioridades) → A preparar (logo animado) → Explorar "Para ti".
+**Primeira visita (14/10):** Página inicial (Espreitar → "Ver todas as organizações", agora um botão com a largura do campo) → Explorar logo, com as **mais bem avaliadas** (sem "% para ti", porque ainda não há prioridades) e o convite "Ordenar pelo que importa para ti" → Preferências (3 prioridades) → A preparar → Explorar "Para ti". O questionário deixou de ser obrigatório antes de ver organizações.
+
+**Menu (14/10):** Explorar · Ranking · Sobre no cabeçalho (computador e página inicial no telemóvel), para o Explorar ficar a um clique de qualquer ecrã; o Contacto passou para o rodapé. No telemóvel, o Explorar mostra 3 organizações e "Ver mais organizações".
 
 **Descobrir:** Explorar → Pesquisa / Ranking (Para mim · Nota geral, filtros) / Tipos e setores → Organização (Avaliações · Entrevistas · Salários) → Denunciar avaliação.
 

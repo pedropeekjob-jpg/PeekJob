@@ -426,6 +426,15 @@
   font-size: 15px;
 }
 
+/* Espreitar: "Ver todas as organizações" com a largura do campo, como segunda opção clara */
+.browse {
+  width: min(100%, 480px);
+  height: 52px;
+  gap: 8px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+
 /* Avaliar */
 .cta {
   margin-top: 10px;

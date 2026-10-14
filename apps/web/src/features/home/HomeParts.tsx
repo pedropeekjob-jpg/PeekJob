@@ -135,8 +135,10 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
         href={searchHref}
         cta="pesquisar"
       />
-      <Link to="/explorar" className={`link ${styles.all}`} data-ev="cta_click" data-ev-cta="explorar" data-ev-area="home">
+      {/* porta para o Explorar com o peso de um botão (14/10): era uma ligação pequena e passava despercebida */}
+      <Link to="/explorar" className={`btn btn-ghost ${styles.browse}`} data-ev="cta_click" data-ev-cta="explorar" data-ev-area="home">
         {tr('Ver todas as organizações', 'See all organisations')}
+        <Icon name="next" size={18} />
       </Link>
     </section>
   );

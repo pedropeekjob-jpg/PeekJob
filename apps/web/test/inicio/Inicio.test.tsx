@@ -15,10 +15,19 @@ describe.each(['mobile', 'desktop'] as const)('Início (%s)', (viewport) => {
   const desktop = viewport === 'desktop';
   beforeEach(() => localStorage.clear());
 
-  it('na primeira visita vai primeiro escolher as prioridades', async () => {
+  it('na primeira visita abre logo (sem questionário): as mais bem avaliadas e um convite para ordenar por prioridades', async () => {
     seedStore({ onboarded: false });
-    show(viewport);
-    expect(await screen.findByTestId('where')).toHaveTextContent('/preferencias');
+    const { user } = show(viewport);
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+    expect(screen.getByTestId('where')).toHaveTextContent('/explorar');
+    const section = screen.getByRole('heading', { name: 'Mais bem avaliadas' }).closest('section')!;
+    const links = section.querySelectorAll('a[href^="/org/"]');
+    expect(links[0]).toHaveTextContent('Rede Vizinha');
+    // sem prioridades escolhidas não há "% para ti" (a nota já está no anel)
+    expect(section).not.toHaveTextContent(/\d+%/);
+    expect(screen.queryByRole('heading', { name: 'Para ti' })).not.toBeInTheDocument();
+    await user.click(within(section as HTMLElement).getByRole('link', { name: /Ordenar pelo que importa para ti/ }));
+    expect(screen.getByTestId('where')).toHaveTextContent('/preferencias');
   });
 
   it('para ti: organizações com a compatibilidade, pela ordem das prioridades', async () => {
@@ -27,6 +36,8 @@ describe.each(['mobile', 'desktop'] as const)('Início (%s)', (viewport) => {
     expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
     const links = forYou('d');
     expect(links).toHaveLength(desktop ? 4 : 3);
+    // mais organizações a um toque, nos dois tamanhos
+    expect(screen.getByRole('link', { name: 'Ver mais organizações →' })).toHaveAttribute('href', '/pesquisa');
     expect(links[0]).toHaveTextContent(/\d+%/);
     const pct = [...links].map((a) => Number(/(\d+)%/.exec(a.textContent!)![1]));
     expect([...pct].sort((a, b) => b - a)).toEqual(pct);
@@ -39,9 +50,9 @@ describe.each(['mobile', 'desktop'] as const)('Início (%s)', (viewport) => {
     await screen.findByRole('heading', { level: 1 });
     // a mesma linha nos dois tamanhos; no computador as opções abrem com "Mudar"
     expect(screen.getByText('Sem prioridades: ordenado pela nota')).toBeInTheDocument();
-    // a % passa a ser a nota em percentagem: Rede Vizinha (4,7) primeiro
+    // pela nota: Rede Vizinha (4,7) primeiro, sem "% para ti"
     expect(forYou('x')[0]).toHaveTextContent('Rede Vizinha');
-    expect(forYou('x')[0]).toHaveTextContent('94%');
+    expect(forYou('x')[0]).not.toHaveTextContent('%');
   });
 
   it('pulso da semana: subidas e descidas e temas', async () => {
@@ -111,5 +122,15 @@ describe('Início no computador', () => {
     expect(await screen.findByRole('heading', { name: 'A nota não está à venda.' })).toBeInTheDocument();
     expect(screen.getByText('Ninguém paga para subir')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Ver como calculamos/ })).toHaveAttribute('href', '/metodologia');
+  });
+});
+
+describe('Início (telemóvel): a fita do pulso', () => {
+  beforeEach(() => localStorage.clear());
+  it('desliza na horizontal e chega-se lá com o teclado', async () => {
+    seedStore({ onboarded: true });
+    show('mobile');
+    const strip = await screen.findByRole('group', { name: 'Subidas, descidas e temas da semana' });
+    expect(strip).toHaveAttribute('tabindex', '0');
   });
 });
