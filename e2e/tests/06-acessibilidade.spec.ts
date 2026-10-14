@@ -11,8 +11,19 @@ type Found = { page: string; rule: string; impact: string; help: string; targets
 
 async function audit(page: Page, label: string, found: Found[]) {
   await page.waitForLoadState('networkidle');
-  // animações de entrada (fade-up): o contraste só conta no estado final; as infinitas (anéis a flutuar) não acabam
-  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))));
+  // as páginas chegam a pedido: esperar que a nova esteja montada (sem o "a carregar")
+  await page.waitForFunction(() => !document.querySelector('main[aria-busy="true"]'));
+  // animações de entrada (fade-up): o contraste só conta no estado final; as infinitas (anéis a flutuar) não acabam.
+  // Repete até não começar nenhuma nova (um ecrã que acabou de montar pode arrancar animações a seguir)
+  await page.evaluate(async () => {
+    const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    for (let i = 0; i < 10; i++) {
+      await frame();
+      const running = document.getAnimations().filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations !== Infinity);
+      if (!running.length) return;
+      await Promise.all(running.map((a) => a.finished.catch(() => undefined)));
+    }
+  });
   const r = await new AxeBuilder({ page }).withTags(TAGS).analyze();
   for (const v of r.violations) {
     found.push({ page: label, rule: v.id, impact: v.impact ?? '?', help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) });
