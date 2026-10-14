@@ -263,7 +263,6 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 ## Próxima fatia
 - PDFs digitalizados (só imagem, sem texto): hoje só se leem PDFs com texto e fotografias.
-- Locais adicionados à mão: geocodificação em segundo plano (até lá não entram no mapa real).
 
 ## Guardadas e "útil" (14/10)
 - Ficam na conta, ligadas ao pseudónimo da pessoa (tabelas `saved_orgs` e `review_helpful`), por isso acompanham a pessoa entre aparelhos.
@@ -275,7 +274,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - Leaflet com mosaicos configuráveis (`MAP_TILES_URL`, por omissão OpenStreetMap). O endereço chega à web por `/pj-config.js` e a origem entra na CSP (`img-src`): o browser só carrega imagens desse fornecedor.
 - **Privacidade:** pedir mosaicos envia o IP da pessoa ao fornecedor. Por isso o mapa real só carrega quando a pessoa toca em "Ver no mapa" (até lá, uma ilustração sem pedidos a outros sites); a escolha fica nesse browser. A política de privacidade deve mencionar o fornecedor do mapa.
 - O Leaflet vem num ficheiro à parte (≈44 kB comprimidos), só descarregado quando se abre o mapa.
-- Entram no mapa os locais com coordenadas (os importados do OpenStreetMap e os de demonstração); a escolha do local com teclado faz-se na lista ao lado.
+- Entram no mapa os locais com coordenadas: os importados do OpenStreetMap, os de demonstração e os adicionados à mão depois de geocodificados (ver abaixo); a escolha do local com teclado faz-se na lista ao lado.
 
 ## Verificação por fotografia do recibo (14/10)
 - **OCR no próprio servidor** (Tesseract, via `tesseract.js`, com os dados de português instalados com a app: `@tesseract.js-data/por`). A fotografia não sai para nenhum serviço externo e fica só em memória durante o pedido (é apagada no fim).
@@ -284,3 +283,9 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - O OCR troca letras parecidas por algarismos (O→0, I/l→1, S→5, B→8…) nos grupos que já são quase só algarismos; o dígito de controlo do NIF filtra o resto.
 - Um só *worker* de OCR, criado no primeiro pedido e desligado ao fim de 1 minuto sem uso (≈100–150 MB enquanto ligado). Tempo: ~1,5 s no primeiro pedido, ~0,6 s nos seguintes (medido nos testes).
 - Limitações: fotografias muito escuras, desfocadas ou em perspetiva forte podem não ser lidas; a pessoa pode tentar outra fotografia, um PDF ou o email do trabalho.
+
+## Geocodificação dos locais adicionados à mão (14/10)
+- **Nominatim** (OpenStreetMap), em segundo plano: logo que se adiciona uma organização com morada e numa ronda a cada 15 min (`GEOCODE_INTERVAL_MIN`; 0 desliga). Regras do Nominatim: 1 pedido por segundo e identificação da app (`GEOCODER_USER_AGENT`, por omissão `PeekJob (https://peekjob.com)`; em produção convém pôr um contacto real). Outro serviço compatível: `GEOCODER_URL`; `off` desliga.
+- Só se envia a morada da organização (pública), nunca dados de quem avalia. Resultados fora de Portugal (continente, Açores, Madeira) são ignorados.
+- Morada não encontrada: tenta no dia seguinte, no máximo 3 vezes. Serviço em baixo: tenta dentro de 1 hora, sem contar como tentativa.
+- **Correção (14/10):** os locais de uma organização passam a ativos quando ela fica ativa (aprovada, NIF confirmado ou pessoas suficientes a avaliar), por um trigger na base de dados. Antes ficavam pendentes e nunca apareciam na página; a migração 010 corrige os que já existiam.

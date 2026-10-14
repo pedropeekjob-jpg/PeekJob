@@ -64,6 +64,9 @@ Cada push para `main` publica uma nova versão (o CI corre os testes e constrói
 | `GA_MEASUREMENT_ID` | não | Google Analytics 4 (`G-…`), ver [09 · Medição](09-medicao.md) |
 | `MAP_TILES_URL` | não | Mosaicos do mapa (https, com `{z}/{x}/{y}`). Por omissão o OpenStreetMap, que aceita pouco tráfego: em produção, um fornecedor com conta (ex.: MapTiler, Stadia). Entra na CSP |
 | `MAP_TILES_ATTRIBUTION` | não | Atribuição obrigatória do fornecedor (por omissão `© OpenStreetMap`) |
+| `GEOCODER_USER_AGENT` | não | Identificação nos pedidos ao Nominatim (regra de uso): pôr um contacto real, ex. `PeekJob (ola@peekjob.pt)` |
+| `GEOCODER_URL` | não | Outro serviço compatível com o Nominatim; `off` desliga a geocodificação |
+| `GEOCODE_INTERVAL_MIN` | não | Minutos entre rondas de geocodificação (por omissão 15; 0 desliga as rondas) |
 | `GSC_VERIFICATION` | não | Código da etiqueta HTML do Search Console |
 | `COOKIE_SAMESITE` | não | Só se a web ficar noutro domínio (`none`); não é o caso desta configuração |
 

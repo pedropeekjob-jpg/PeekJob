@@ -37,9 +37,14 @@ await db.query(`INSERT INTO reviews (org_id, author_ref, scores, avg, recommend,
     FROM organizations WHERE name = 'Padaria Ribeira'`);
 await db.end();
 
-// 2) servidor de email falso (no lugar do Resend): guarda os emails, GET /__mails devolve-os
+// 2) servidor de email falso (no lugar do Resend): guarda os emails, GET /__mails devolve-os; e Nominatim falso
 const mails = [];
 createServer((req, res) => {
+  // Nominatim falso (geocodificação): qualquer morada fica no centro do Porto
+  if (req.method === 'GET' && req.url.startsWith('/search')) {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    return res.end(JSON.stringify([{ lat: '41.1496', lon: '-8.6109' }]));
+  }
   if (req.method === 'GET') {
     res.writeHead(200, { 'content-type': 'application/json' });
     return res.end(JSON.stringify(mails));
@@ -67,6 +72,9 @@ const api = spawn('node', ['apps/api/dist/main.js'], {
     RESEND_API_URL: `http://localhost:${MAIL_PORT}`,
     MAIL_FROM: 'PeekJob <ola@peekjob.pt>',
     VIES_URL: 'off',
+    // geocodificação contra o Nominatim falso acima (nunca o real); uma ronda por minuto
+    GEOCODER_URL: `http://localhost:${MAIL_PORT}`,
+    GEOCODE_INTERVAL_MIN: '1',
     RATE_LIMIT_SCALE: '50',
     ANTHROPIC_API_KEY: '',
     GA_MEASUREMENT_ID: '',

@@ -1,3 +1,4 @@
+import { GeocodingService } from '../geocoding/geocoding.service';
 import { ConflictException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CRITERION_KEYS, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery } from '@peekjob/shared';
 import { Pool } from 'pg';
@@ -67,6 +68,7 @@ export class OrganizationsService {
   constructor(
     @Inject(PG_POOL) private readonly pool: Pool,
     @Inject(VIES) private readonly vies: ViesClient,
+    private readonly geocoding: GeocodingService,
   ) {}
 
   /** Consulta ao VIES para preencher o formulário. Para NIFs de pessoas só diz se existe. */
@@ -112,7 +114,7 @@ export class OrganizationsService {
   async create(input: CreateOrganizationInput, creatorRef: string) {
     // Rede fora da transação: o VIES pode demorar (até 5 s) e nunca bloqueia a criação.
     const vies: ViesResult | null = input.nif ? await this.vies.check(input.nif) : null;
-    return tx(this.pool, async (c) => {
+    const created = await tx(this.pool, async (c) => {
       if (input.nif) {
         const dup = await c.query(`SELECT id FROM organizations WHERE nif = $1 AND status <> 'merged'`, [input.nif]);
         if (dup.rowCount) throw new ConflictException({ message: 'Esta organização já existe', existingId: dup.rows[0].id });
@@ -146,6 +148,9 @@ export class OrganizationsService {
       const nifCheck = vies && input.nif ? await this.applyVies(c, rows[0].id, input.name, input.nif, vies) : undefined;
       return { ...rows[0], possibleDuplicates: dups.rows, ...(nifCheck ? { nifCheck } : {}) };
     });
+    // coordenadas da morada em segundo plano (não atrasa a resposta)
+    if (input.address) this.geocoding.kick();
+    return created;
   }
 
   private async applyVies(c: { query: Pool['query'] }, orgId: string, name: string, nif: string, r: ViesResult): Promise<NifCheck> {
