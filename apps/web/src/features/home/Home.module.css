@@ -165,7 +165,8 @@
   /* verde-água escuro em vez de preto (14/10): legível (7,6:1), mais suave, liga-se ao logo */
   font-weight: 400;
   color: var(--label);
-  font-size: clamp(44px, 12vw, 88px);
+  /* mais pequena (14/10): presença sem peso; 36 px no telemóvel, 64 px no computador */
+  font-size: clamp(36px, 9vw, 64px);
   line-height: 1;
   letter-spacing: -0.025em;
   animation: up 0.8s var(--ease) both;
