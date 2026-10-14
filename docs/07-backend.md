@@ -68,7 +68,12 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | POST | `/orgs/:id/approve` | moderador | Ativa uma organização pendente |
 | POST | `/orgs/:id/merge` | moderador | Funde um duplicado (`{ targetId }`) |
 | POST | `/orgs/:id/reviews` | sessão | Publica uma avaliação |
-| GET | `/orgs/:id/reviews` | todos | Avaliações públicas, sem pseudónimos |
+| GET | `/orgs/:id/reviews` | todos | Avaliações públicas, sem pseudónimos, com `helpful` (quantas pessoas acharam útil, sem dizer quem) |
+| PUT, DELETE | `/reviews/:id/helpful` | sessão | Marcar/tirar "útil" (uma vez por pessoa; nunca na própria avaliação → 403) |
+| GET | `/me/helpful` | sessão | As avaliações que marquei como úteis |
+| GET | `/me/saved` | sessão | Organizações guardadas (mais recentes primeiro) |
+| PUT, DELETE | `/me/saved/:orgId` | sessão | Guardar/tirar uma organização |
+| POST | `/me/saved/merge` | sessão | Ao entrar: junta as guardadas no browser às da conta (até 200 ids; ignora os que não existem) |
 | POST | `/verifications/email` | sessão | Envia um código de 6 dígitos ao email de trabalho (não é guardado) → 202 |
 | POST | `/verifications/email/confirm` | sessão | Confirma o código (10 min, máx. 5 tentativas) |
 | POST | `/verifications/document` | sessão | PDF em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
@@ -184,8 +189,8 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - O GitHub desliga os workflows agendados ao fim de 60 dias sem atividade no repositório. Para produção, juntar o UptimeRobot ou o Better Stack (gratuitos) a avisar por SMS.
 
 ## RGPD
-- **Acesso:** `GET /me/export` e o ecrã *Perfil → Privacidade e dados → Descarregar*.
-- **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
+- **Acesso:** `GET /me/export` (inclui as guardadas e os "úteis") e o ecrã *Perfil → Privacidade e dados → Descarregar*.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, verificações, mensagens, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
 
 ## Correr localmente
 
@@ -250,3 +255,9 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 - Guardadas e "útil" no servidor (hoje ficam no browser).
 - Verificação por fotografia do recibo (OCR); hoje só PDF com texto.
 - Locais e mapa: geocodificação em segundo plano.
+
+## Guardadas e "útil" (14/10)
+- Ficam na conta, ligadas ao pseudónimo da pessoa (tabelas `saved_orgs` e `review_helpful`), por isso acompanham a pessoa entre aparelhos.
+- Sem sessão continuam a funcionar no browser; ao entrar, juntam-se à conta (`/me/saved/merge` e um `PUT` por "útil"). Com sessão, ao abrir a app, a conta manda: o que foi tirado noutro aparelho não volta do browser.
+- No ecrã a mudança é imediata; se o servidor recusar, volta atrás. Ao sair, as guardadas e os "úteis" saem do browser.
+- A contagem pública de "útil" vem do servidor e não diz quem marcou; não se pode marcar a própria avaliação.

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { apiMode } from '../../api/http';
 import { applyPageMeta, setOrgStructuredData } from '../../analytics/seo';
 import type { CriterionKey } from '../../data/criteria';
 import type { Org, Review } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { orgTypeLabel } from '../../i18n/labels';
+import { helpfulShown } from '../../lib/engagement';
 import { fmt, plural } from '../../lib/format';
 import { match } from '../../lib/match';
 import { useStore } from '../../lib/store';
@@ -60,10 +62,11 @@ export function useCriteria(org: Org) {
 
 /** "Útil": marcado por mim e contagem com o meu voto */
 export function useUseful() {
-  const { useful, toggleUseful } = useStore();
+  const { useful, toggleUseful, user } = useStore();
   return {
     isOn: (r: Review) => !!useful[r.id],
-    count: (r: Review) => r.useful + (useful[r.id] ? 1 : 0),
+    // com conta a contagem já vem do servidor (inclui o meu); sem conta soma-se o meu aqui
+    count: (r: Review) => helpfulShown(r.useful, !!useful[r.id], apiMode && !!user),
     toggle: (r: Review) => toggleUseful(r.id),
   };
 }

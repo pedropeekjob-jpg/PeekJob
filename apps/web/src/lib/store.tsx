@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, API_URL, ApiError, apiMode, errorText } from '../api/http';
 import { toMessage, toMyReview, toOrg, type ApiOrg, type ApiReview } from '../api/mappers';
+import { bumpHelpful, loadEngagement, syncOnLogin } from './engagement';
 import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
 import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
@@ -204,6 +205,11 @@ function useAppState() {
     set({ messages: msgs.items.map(toMessage), myReviews: revs.items.map(toMyReview) });
   }, [set]);
 
+  /** Guardadas e "útil" da conta (com sessão, a conta manda) */
+  const loadSaved = useCallback(async () => {
+    set(await loadEngagement(api));
+  }, [set]);
+
   const loadOrgs = useCallback(async () => {
     const r = await api<{ items: ApiOrg[] }>('/orgs');
     setRemote((x) => ({ ...x, orgs: r.items.map((o) => toOrg(o)) }));
@@ -228,7 +234,7 @@ function useAppState() {
       try {
         const me = await api<{ user: { role: 'user' | 'moderator' } }>('/auth/me');
         set({ user: { email: '', role: me.user.role } });
-        await loadMine();
+        await Promise.all([loadMine(), loadSaved()]);
       } catch {
         set({ user: null });
       }
@@ -239,7 +245,7 @@ function useAppState() {
       }
       setRemote((x) => ({ ...x, ready: true }));
     })();
-  }, [set, loadMine, loadOrgs]);
+  }, [set, loadMine, loadSaved, loadOrgs]);
 
   /* ---------------- Ações ---------------- */
 
@@ -274,6 +280,13 @@ function useAppState() {
           const r = await api<{ user: { role: 'user' | 'moderator' } }>('/auth/verify', { body: { token } });
           track('login', { method: 'magic_link', result: 'success' });
           set({ user: { email: '', role: r.user.role } });
+          // o que foi guardado ou marcado como útil antes de entrar passa para a conta
+          const { saved, useful } = stRef.current;
+          const synced = await syncOnLogin(api, { saved, useful }).catch(() => null);
+          if (synced) {
+            set({ saved: synced.saved, useful: synced.useful });
+            if (synced.pushed.length) setRemote((x) => ({ ...x, details: synced.pushed.reduce((d, id) => bumpHelpful(d, id, 1), x.details) }));
+          }
           await loadMine();
           return { ok: true };
         } catch (e) {
@@ -284,16 +297,32 @@ function useAppState() {
       },
       logout: async () => {
         if (apiMode) await api('/auth/logout', { method: 'POST' }).catch(() => undefined);
-        set({ user: null, ...(apiMode ? { myReviews: [], messages: [] } : {}) });
+        // as guardadas e os úteis são da conta: não ficam no browser depois de sair
+        set({ user: null, ...(apiMode ? { myReviews: [], messages: [], saved: [], useful: {} } : {}) });
       },
 
+      /** Guardar: muda logo no ecrã; com sessão grava na conta e, se falhar, volta atrás */
       toggleSave: (id: string) => {
-        track('save_org', { saved: !stRef.current.saved.includes(id) });
-        set((s) => ({ saved: s.saved.includes(id) ? s.saved.filter((x) => x !== id) : [...s.saved, id] }));
+        const on = !stRef.current.saved.includes(id);
+        track('save_org', { saved: on });
+        const apply = (v: boolean) => set((s) => ({ saved: v ? [...s.saved.filter((x) => x !== id), id] : s.saved.filter((x) => x !== id) }));
+        apply(on);
+        if (apiMode && stRef.current.user) {
+          api(`/me/saved/${id}`, { method: on ? 'PUT' : 'DELETE' }).catch(() => apply(!on));
+        }
       },
+      /** Útil: sem sessão fica no browser (junta-se à conta ao entrar); com sessão conta no servidor */
       toggleUseful: (id: string) => {
-        track('mark_helpful', { helpful: !stRef.current.useful[id] });
-        set((s) => ({ useful: { ...s.useful, [id]: !s.useful[id] } }));
+        const on = !stRef.current.useful[id];
+        track('mark_helpful', { helpful: on });
+        const apply = (v: boolean) => {
+          set((s) => ({ useful: { ...s.useful, [id]: v } }));
+          if (apiMode && stRef.current.user) setRemote((x) => ({ ...x, details: bumpHelpful(x.details, id, v ? 1 : -1) }));
+        };
+        apply(on);
+        if (apiMode && stRef.current.user) {
+          api(`/reviews/${id}/helpful`, { method: on ? 'PUT' : 'DELETE' }).catch(() => apply(!on));
+        }
       },
       /** Confirmou que trabalha na organização: as suas avaliações dela passam a verificadas (o servidor faz o mesmo) */
       markVerified: (orgId: string) => set((s) => ({ myReviews: s.myReviews.map((r) => (r.orgId === orgId ? { ...r, verified: true } : r)) })),

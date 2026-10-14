@@ -75,7 +75,8 @@ export class ReviewsService {
   async listPublic(orgId: string) {
     if (!isUuid(orgId)) throw new NotFoundException();
     const { rows } = await this.pool.query(
-      `SELECT r.id, r.scores, r.avg, r.recommend, r.tags, r.text, r.flagged, r.verified, r.created_at
+      `SELECT r.id, r.scores, r.avg, r.recommend, r.tags, r.text, r.flagged, r.verified, r.created_at,
+              (SELECT count(*)::int FROM review_helpful h WHERE h.review_id = r.id) AS helpful
          FROM reviews r JOIN organizations o ON o.id = r.org_id
         WHERE r.org_id = $1 AND r.status = 'published' AND o.status = 'active'
         ORDER BY r.created_at DESC LIMIT 50`,
@@ -96,6 +97,7 @@ function toPublic(r: Record<string, unknown>) {
     text: r.text,
     flagged: r.flagged,
     verified: r.verified ?? false,
+    helpful: (r.helpful as number | undefined) ?? 0,
     createdAt: r.created_at,
   };
 }

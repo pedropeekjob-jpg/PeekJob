@@ -28,6 +28,8 @@ export interface ApiReview {
   text: string;
   flagged: boolean;
   verified: boolean;
+  /** quantas pessoas acharam útil (sem dizer quem) */
+  helpful?: number;
   createdAt: string;
 }
 
@@ -54,7 +56,7 @@ function mapLocations(locs: ApiOrg['locations'], city: string): OrgLocation[] {
 }
 
 export function toReview(r: ApiReview): Review {
-  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: 0, verified: r.verified, tags: r.tags };
+  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags };
 }
 
 /** Converte uma organização da API para o modelo usado pelos ecrãs (campos sem dados ficam vazios) */
