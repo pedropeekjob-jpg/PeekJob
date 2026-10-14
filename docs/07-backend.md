@@ -13,6 +13,8 @@
 | 7 | **Login por link mágico** e sessão em cookie httpOnly | Sem palavras-passe para gerir. A conta guarda só um hash do email; tokens e sessões também só em hash | Palavra-passe ou login social: mais atrito e mais dados pessoais |
 | 8 | **Verificação anónima** por código no email de trabalho ou NIF lido de um PDF (recibo/contrato) | Dá peso às avaliações sem guardar o email de trabalho nem o documento: guarda-se só o "sim" | Upload guardado para revisão humana: risco de RGPD desnecessário |
 | 9 | **A API serve a web em produção** (mesma origem) | O cookie de sessão é do próprio site: funciona no Safari/iPhone, que bloqueia cookies entre domínios. Sem CORS em produção | Web e API em domínios diferentes, com cookies `SameSite=None` (falham no Safari) ou tokens no browser (menos seguros) |
+| 10 | **Contas das organizações com pseudónimo próprio** (`member_ref`, outro espaço do HMAC) e **aprovação humana** de cada pedido | Pedidos, acessos e respostas não se cruzam com as avaliações da mesma pessoa; um recibo de quem lá trabalha também tem o NIF, por isso nem o email do domínio nem o documento dão acesso sozinhos. Guarda-se o domínio, nunca o email | Acesso automático pelo domínio: qualquer pessoa com email da empresa geria a página |
+| 11 | **Pro ligado pela moderação** até haver pagamentos; o plano nunca sai na API pública nem mexe no ranking | O preço ainda não está decidido (tarefa 8); assim já se testa com clientes | Integrar já um fornecedor de pagamentos |
 
 ## Distrito de cada organização
 
@@ -95,6 +97,15 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | GET | `/moderation/summary` | moderador | Nº de denúncias em aberto e de organizações pendentes |
 | GET | `/moderation/orgs` | moderador | Organizações novas pendentes, com nº de pessoas que avaliaram e possíveis duplicados |
 | POST | `/orgs/:id/reject` | moderador | Rejeitar uma organização pendente, com justificação |
+| POST | `/orgs/:id/claim/email` | sessão | Reivindicar a página: código para o email de trabalho (não serve email pessoal; com domínios conhecidos, só esses) → 202 |
+| POST | `/orgs/:id/claim/email/confirm` | sessão | Confirma o código (com nome e cargo) → pedido pendente; guarda só o domínio |
+| POST | `/orgs/:id/claim/document` | sessão | Reivindicar com um documento (PDF/fotografia, lido em memória) que tenha o NIF da organização → pedido pendente |
+| GET | `/me/orgs` | sessão | Páginas que giro (com o plano) e os meus pedidos (estado e motivo) |
+| GET | `/orgs/:id/dashboard` | quem gere | Painel: semana (novas, respondidas, por responder, variação da nota), posição na cidade, etiquetas do mês, avaliações por responder; Pro: tendência por critério e média do setor |
+| PUT, DELETE | `/reviews/:id/reply` | quem gere | Resposta pública da organização (2–600 caracteres, sem nomes nem insultos); aparece em `GET /orgs/:id/reviews` como `reply` |
+| GET | `/moderation/claims` | moderador | Pedidos para gerir páginas (método, domínio e se é conhecido, nome e cargo) |
+| POST | `/moderation/claims/:id/decision` | moderador | `approve` ou `reject`, com justificação |
+| PUT | `/moderation/orgs/:id/plan` | moderador | Plano `free` ou `pro` (até haver pagamentos); nunca mexe no ranking |
 | GET | `/me/export` | sessão | Os meus dados (JSON) |
 | DELETE | `/me` | sessão | Apagar a conta (`keepReviews` mantém as avaliações, desligadas da pessoa) |
 | GET | `/me/messages` | sessão | Mensagens privadas de apoio com os contactos; nos avisos de moderação, `appeal` (disponível até quando, expirado, ou o estado do pedido) |
@@ -206,8 +217,8 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - O GitHub desliga os workflows agendados ao fim de 60 dias sem atividade no repositório. Para produção, juntar o UptimeRobot ou o Better Stack (gratuitos) a avisar por SMS.
 
 ## RGPD
-- **Acesso:** `GET /me/export` (inclui as guardadas, os "úteis", as entrevistas e os salários) e o ecrã *Perfil → Privacidade e dados → Descarregar*.
-- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
+- **Acesso:** `GET /me/export` (inclui as guardadas, os "úteis", as entrevistas, os salários e, à parte, as páginas de organizações que gere, os pedidos e as respostas) e o ecrã *Perfil → Privacidade e dados → Descarregar*.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, pedidos e acessos a páginas de organizações (as respostas ficam, da organização, sem ligação à pessoa), verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
 
 ## Correr localmente
 

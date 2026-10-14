@@ -76,13 +76,19 @@ export class ReviewsService {
     if (!isUuid(orgId)) throw new NotFoundException();
     const { rows } = await this.pool.query(
       `SELECT r.id, r.scores, r.avg, r.recommend, r.tags, r.text, r.flagged, r.verified, r.created_at,
-              (SELECT count(*)::int FROM review_helpful h WHERE h.review_id = r.id) AS helpful
+              (SELECT count(*)::int FROM review_helpful h WHERE h.review_id = r.id) AS helpful,
+              p.text AS reply_text, p.created_at AS reply_created_at, p.updated_at AS reply_updated_at
          FROM reviews r JOIN organizations o ON o.id = r.org_id
+         LEFT JOIN review_replies p ON p.review_id = r.id
         WHERE r.org_id = $1 AND r.status = 'published' AND o.status = 'active'
         ORDER BY r.created_at DESC LIMIT 50`,
       [orgId],
     );
-    return rows.map(toPublic);
+    return rows.map((r) => ({
+      ...toPublic(r),
+      // resposta pública da organização (de quem gere a página)
+      reply: r.reply_text ? { text: r.reply_text, createdAt: r.reply_created_at, updatedAt: r.reply_updated_at } : null,
+    }));
   }
 }
 

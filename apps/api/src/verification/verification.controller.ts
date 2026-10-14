@@ -1,20 +1,18 @@
-import { Body, Controller, Get, HttpCode, type OnApplicationShutdown, Post, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, type OnApplicationShutdown, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, type AuthUser } from '../auth/auth.guard';
 import { privacySecret, userRef } from '../common/privacy';
 import { parse } from '../common/zod';
-import { fileKind, imageText, stopOcr } from './image-text';
-import { fixOcrDigits } from './nif-extract';
-import { pdfText } from './pdf-text';
+import { documentText, MAX_DOCUMENT_BYTES } from './document-text';
+import { stopOcr } from './image-text';
 import { VerificationService } from './verification.service';
 import { Lang } from '../common/lang';
 
 const EmailBody = z.object({ orgId: z.string(), email: z.string().trim().toLowerCase().email(), lang: Lang });
 const ConfirmBody = z.object({ orgId: z.string(), code: z.string().regex(/^\d{6}$/) });
 const DocBody = z.object({ orgId: z.string() });
-const MAX_BYTES = 5 * 1024 * 1024;
 
 @Controller()
 @UseGuards(AuthGuard)
@@ -48,14 +46,10 @@ export class VerificationController implements OnApplicationShutdown {
   /** O ficheiro fica só em memória durante o pedido (memoryStorage) e é descartado no fim. */
   @Post('verifications/document')
   @HttpCode(200)
-  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: MAX_BYTES, files: 1 } }))
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: MAX_DOCUMENT_BYTES, files: 1 } }))
   async document(@UploadedFile() file: Express.Multer.File | undefined, @Body() body: unknown, @CurrentUser() user: AuthUser) {
     const b = parse(DocBody, body);
-    // o tipo vê-se pelo conteúdo (assinatura do ficheiro), não pelo que o browser diz
-    const kind = file ? fileKind(file.buffer) : null;
-    if (!file || !kind) throw new UnsupportedMediaTypeException('Envia o recibo ou contrato em PDF ou numa fotografia (JPG, PNG ou WebP).');
-    const text = kind === 'pdf' ? await pdfText(file.buffer) : fixOcrDigits(await imageText(file.buffer));
-    file.buffer.fill(0);
+    const text = await documentText(file, 'Envia o recibo ou contrato em PDF ou numa fotografia (JPG, PNG ou WebP).');
     return this.v.verifyDocument(this.ref(user), b.orgId, text);
   }
 

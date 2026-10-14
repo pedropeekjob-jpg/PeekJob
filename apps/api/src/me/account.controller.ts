@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, type AuthUser } from '../auth/auth.guard';
 import { clearSessionCookie } from '../auth/session';
-import { privacySecret, userRef } from '../common/privacy';
+import { memberRef, privacySecret, userRef } from '../common/privacy';
 import { parse } from '../common/zod';
 import { PG_POOL, tx } from '../db/db.module';
 
@@ -53,6 +53,19 @@ export class AccountController {
       [ref],
     );
 
+    // páginas de organizações: outro pseudónimo (não se cruza com as avaliações)
+    const mref = memberRef(privacySecret(), user.id);
+    const manages = await q(`SELECT o.name AS org_name, m.created_at FROM org_members m JOIN organizations o ON o.id = m.org_id WHERE m.member_ref = $1`, [mref]);
+    const claims = await q(
+      `SELECT o.name AS org_name, c.method, c.email_domain, c.name, c.role, c.status, c.decision_note, c.created_at
+         FROM org_claims c JOIN organizations o ON o.id = c.org_id WHERE c.member_ref = $1 ORDER BY c.created_at`,
+      [mref],
+    );
+    const replies = await q(
+      `SELECT o.name AS org_name, p.text, p.created_at, p.updated_at FROM review_replies p JOIN organizations o ON o.id = p.org_id WHERE p.member_ref = $1 ORDER BY p.created_at`,
+      [mref],
+    );
+
     const date = new Date().toISOString().slice(0, 10);
     res.setHeader('content-disposition', `attachment; filename="peekjob-os-meus-dados-${date}.json"`);
     return {
@@ -94,6 +107,20 @@ export class AccountController {
         createdAt: i.created_at,
       })),
       salaries: salaries.map((s) => ({ orgName: s.org_name, role: s.role, monthlyGross: s.monthly_gross, paidOnTime: s.paid_on_time, updatedAt: s.updated_at })),
+      organizationAccounts: {
+        manages: manages.map((m) => ({ orgName: m.org_name, since: m.created_at })),
+        claims: claims.map((c) => ({
+          orgName: c.org_name,
+          method: c.method,
+          emailDomain: c.email_domain,
+          name: c.name,
+          role: c.role,
+          status: c.status,
+          decision: c.decision_note,
+          createdAt: c.created_at,
+        })),
+        replies: replies.map((p) => ({ orgName: p.org_name, text: p.text, createdAt: p.created_at, updatedAt: p.updated_at })),
+      },
     };
   }
 
@@ -111,6 +138,12 @@ export class AccountController {
       if (keepReviews) await c.query(`UPDATE reviews SET author_ref = 'apagado:' || gen_random_uuid() WHERE author_ref = $1`, [ref]);
       else await c.query(`DELETE FROM reviews WHERE author_ref = $1`, [ref]);
       await c.query(`DELETE FROM interviews WHERE author_ref = $1`, [ref]);
+      // páginas de organizações: deixa de gerir; as respostas ficam (são da organização), sem ligação à pessoa
+      const mref = memberRef(privacySecret(), user.id);
+      await c.query(`DELETE FROM org_members WHERE member_ref = $1`, [mref]);
+      await c.query(`DELETE FROM org_claims WHERE member_ref = $1`, [mref]);
+      await c.query(`DELETE FROM org_claim_codes WHERE member_ref = $1`, [mref]);
+      await c.query(`UPDATE review_replies SET member_ref = NULL WHERE member_ref = $1`, [mref]);
       await c.query(`DELETE FROM salaries WHERE author_ref = $1`, [ref]);
       await c.query(`DELETE FROM support_messages WHERE user_ref = $1`, [ref]);
       await c.query(`DELETE FROM appeals WHERE appellant_ref = $1`, [ref]);

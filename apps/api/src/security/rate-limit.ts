@@ -15,6 +15,8 @@ const RULES: { method: string; path: RegExp; rule: RateRule }[] = [
   // adivinhar tokens
   { method: 'POST', path: /^\/auth\/verify$/, rule: { name: 'verify', max: 30, windowMs: 15 * MIN } },
   { method: 'POST', path: /^\/verifications\/email(\/confirm)?$/, rule: { name: 'work-email', max: 20, windowMs: 60 * MIN } },
+  // reivindicar uma página: códigos por email (e adivinhá-los)
+  { method: 'POST', path: /^\/orgs\/[^/]+\/claim\/email(\/confirm)?$/, rule: { name: 'claim-email', max: 20, windowMs: 60 * MIN } },
   { method: 'GET', path: /^\/orgs\/nif\//, rule: { name: 'nif-lookup', max: 30, windowMs: 10 * MIN } },
   { method: 'POST', path: /^\/client-errors$/, rule: { name: 'client-errors', max: 20, windowMs: 10 * MIN } },
   // recolha automática do catálogo

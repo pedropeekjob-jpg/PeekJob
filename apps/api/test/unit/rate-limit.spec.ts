@@ -14,6 +14,8 @@ describe('RateLimiter (janela deslizante, em memória)', () => {
   it('regras por rota; health e ficheiros estáticos ficam de fora', () => {
     expect(ruleFor('POST', '/auth/magic-link')?.name).toBe('magic-link');
     expect(ruleFor('POST', '/verifications/email/confirm')?.name).toBe('work-email');
+    expect(ruleFor('POST', '/orgs/abc/claim/email')?.name).toBe('claim-email');
+    expect(ruleFor('POST', '/orgs/abc/claim/email/confirm')?.name).toBe('claim-email');
     expect(ruleFor('GET', '/orgs/nif/500697256')?.name).toBe('nif-lookup');
     expect(ruleFor('GET', '/orgs/search')?.name).toBe('search');
     expect(ruleFor('GET', '/orgs')?.name).toBe('global');

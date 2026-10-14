@@ -39,7 +39,8 @@ const CRITERIA_SQL = `jsonb_build_object(${CRITERION_KEYS.map((k) => `'${k}', ro
 const AGG_SELECT = `
   SELECT o.id, o.name, o.type, o.city, o.district, o.sector, o.status, o.nif_verified,
          count(r.id)::int AS reviews_count, round(avg(r.avg), 1) AS score, ${CRITERIA_SQL} AS criteria,
-         count(r.id) FILTER (WHERE r.flag_kinds && ARRAY['assédio sexual', 'assédio moral'])::int AS harassment_reports
+         count(r.id) FILTER (WHERE r.flag_kinds && ARRAY['assédio sexual', 'assédio moral'])::int AS harassment_reports,
+         EXISTS (SELECT 1 FROM org_members m WHERE m.org_id = o.id) AS claimed
     FROM organizations o
     LEFT JOIN reviews r ON r.org_id = o.id AND r.status = 'published'`;
 
@@ -60,6 +61,8 @@ function toPublicOrg(row: Record<string, any>) {
     harassmentReports: row.harassment_reports,
     score: num(row.score),
     criteria,
+    /** a página é gerida pela organização (pedido aprovado pela moderação) */
+    claimed: !!row.claimed,
   };
 }
 
@@ -256,6 +259,10 @@ export class OrganizationsService {
       );
       await c.query(`UPDATE salaries SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
       await c.query(`UPDATE org_locations SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
+      // quem gere a página do duplicado passa a gerir a que fica; as respostas acompanham as avaliações
+      await c.query(`INSERT INTO org_members (org_id, member_ref, created_at) SELECT $2, member_ref, created_at FROM org_members WHERE org_id = $1 ON CONFLICT DO NOTHING`, [sourceId, targetId]);
+      await c.query(`UPDATE review_replies SET org_id = $2 WHERE org_id = $1`, [sourceId, targetId]);
+      await c.query(`UPDATE org_claims SET org_id = $2 WHERE org_id = $1 AND status <> 'pending'`, [sourceId, targetId]);
       await c.query(`UPDATE org_aliases SET org_id = $2 WHERE org_id = $1 AND alias NOT IN (SELECT alias FROM org_aliases WHERE org_id = $2)`, [sourceId, targetId]);
       await c.query(`INSERT INTO org_aliases (org_id, alias) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [targetId, src.name]);
       await c.query(`UPDATE organizations SET status = 'merged', merged_into = $2, nif = NULL WHERE id = $1`, [sourceId, targetId]);
