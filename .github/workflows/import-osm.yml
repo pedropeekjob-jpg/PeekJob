@@ -1,8 +1,9 @@
 name: Importar organizações (OpenStreetMap)
 
 # Manual: Actions → "Importar organizações (OpenStreetMap)" → Run workflow.
-# Corre num servidor do GitHub (com acesso ao Overpass). Para gravar precisa do segredo da base de dados do ambiente:
-#   UAT_DATABASE_URL / PROD_DATABASE_URL (Render → base de dados → External Database URL)
+# Corre num servidor do GitHub (com acesso ao Overpass). Para gravar vai buscar a ligação ao Neon
+# (ramo `uat` ou `production`) com o segredo NEON_API_KEY, que já existe; nunca a imprime.
+# Alternativa: os segredos UAT_DATABASE_URL / PROD_DATABASE_URL, se estiverem definidos.
 on:
   workflow_dispatch:
     inputs:
@@ -31,6 +32,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build -w @peekjob/shared && npm run build -w @peekjob/api
+      - name: Ligação ao Neon (ramo do destino)
+        if: github.event.inputs.target != 'simular'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          TARGET: ${{ github.event.inputs.target }}
+        run: |
+          if [ -z "$NEON_API_KEY" ]; then echo "Sem NEON_API_KEY: uso os segredos *_DATABASE_URL"; exit 0; fi
+          npm i -g neon@latest
+          set -o pipefail
+          neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch "$TARGET" --services postgres > init.log 2>&1 \
+            || { echo "::error title=neon init::$(tail -n 5 init.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g' | tr '\n' ' ')"; exit 1; }
+          neon deploy > deploy.log 2>&1 \
+            || { echo "::error title=neon deploy::$(tail -n 5 deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g' | tr '\n' ' ')"; exit 1; }
+          # Ligação direta (sem pooler) para as migrações e a importação; mascarada nos logs.
+          URL=$(grep -E '^DATABASE_URL_UNPOOLED=' .env.local | cut -d= -f2- | sed -E 's/^"(.*)"$/\1/')
+          [ -n "$URL" ] || URL=$(grep -E '^DATABASE_URL=' .env.local | cut -d= -f2- | sed -E 's/^"(.*)"$/\1/')
+          [ -n "$URL" ] || { echo "::error::O neon deploy não devolveu a ligação"; exit 1; }
+          echo "::add-mask::$URL"
+          echo "NEON_DB=$URL" >> "$GITHUB_ENV"
+          rm -f .env.local
+          echo "::notice title=Neon::ligação ao ramo $TARGET obtida"
       - name: Importar
         env:
           AREA: ${{ github.event.inputs.area }}
@@ -46,8 +68,8 @@ jobs:
           esac
           case "$TARGET" in
             simular) ARGS+=(--dry-run) ;;
-            uat) export DATABASE_URL="$UAT_DB" ;;
-            production) export DATABASE_URL="$PROD_DB" ;;
+            uat) export DATABASE_URL="${NEON_DB:-$UAT_DB}" ;;
+            production) export DATABASE_URL="${NEON_DB:-$PROD_DB}" ;;
           esac
           if [ "$TARGET" != simular ] && [ -z "$DATABASE_URL" ]; then echo "Falta o segredo da base de dados para $TARGET"; exit 1; fi
           if [ "$TARGET" != simular ]; then node dist/db/migrate-cli.js; fi

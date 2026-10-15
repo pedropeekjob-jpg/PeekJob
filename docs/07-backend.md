@@ -33,7 +33,7 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
    - corre por concelho: `npm run import:osm -w @peekjob/api -- --city Porto`, `--district Braga` (também `Açores` e `Madeira`) ou `--all` (os 308 concelhos, distrito a distrito);
    - cada organização fica com o distrito (ou região autónoma) da consulta. "Lagoa" e "Calheta" existem em duas regiões: com `--city` é preciso indicar `--district`;
    - `--dry-run` só conta e não grava;
-   - no GitHub há um workflow manual, "Importar organizações (OpenStreetMap)", com as opções simular, UAT e produção. Precisa dos segredos `UAT_DATABASE_URL` / `PROD_DATABASE_URL`;
+   - no GitHub há um workflow manual, "Importar organizações (OpenStreetMap)", com as opções simular, UAT e produção. Vai buscar a ligação ao ramo do Neon com o segredo `NEON_API_KEY` (alternativa: segredos `UAT_DATABASE_URL` / `PROD_DATABASE_URL`);
    - inclui comércio, ofícios, restauração, turismo, saúde privada, escolas privadas, associações, ONG e IPSS;
    - deixa de fora entidades públicas, grandes marcas (`brand:wikidata`) e lugares sem nome;
    - não duplica: guarda o identificador do OpenStreetMap em `org_sources.external_id`, e junta a uma organização existente quando o NIF é o mesmo ou o nome é muito parecido (≥ 0,6) na mesma cidade;
@@ -211,7 +211,7 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 
 **Disponibilidade:**
 - `/health` responde 200 com `{ ok, db: "up", release, uptimeSec }`, ou 503 com `db: "down"` se a base de dados não responder em 3 s.
-- O workflow "Disponibilidade" corre de 10 em 10 minutos e verifica `UAT_URL` e `PROD_URL`, que são variáveis do repositório.
+- O workflow "Disponibilidade" corre de 10 em 10 minutos e verifica `UAT_URL` e `PROD_URL`, que são variáveis do repositório (a UAT tem por omissão `https://peekjob-uat.onrender.com`).
 - Se um ambiente for abaixo, abre um issue "🔴 … em baixo" com a etiqueta `incident`. O GitHub avisa por email quem acompanha o repositório.
 - Quando o ambiente volta, comenta e fecha o issue.
 - O plano gratuito do Render adormece ao fim de 15 minutos: a verificação espera até 70 s e tenta 3 vezes.

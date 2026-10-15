@@ -1,6 +1,7 @@
 name: Disponibilidade
 
-# De 10 em 10 minutos verifica o /health da UAT e da produção (variáveis do repositório UAT_URL e PROD_URL).
+# De 10 em 10 minutos verifica o /health da UAT e da produção (variáveis do repositório UAT_URL e PROD_URL;
+# a UAT tem como valor por omissão https://peekjob-uat.onrender.com).
 # Em baixo: abre um issue "🔴 … em baixo" (o GitHub avisa por email quem acompanha o repositório) e o run falha.
 # De volta: comenta e fecha o issue. Manual: Actions → Disponibilidade → Run workflow (opcional: um URL completo).
 on:
@@ -31,7 +32,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           INPUT_URL: ${{ github.event.inputs.url }}
-          UAT_URL: ${{ vars.UAT_URL }}
+          UAT_URL: ${{ vars.UAT_URL || 'https://peekjob-uat.onrender.com' }}
           PROD_URL: ${{ vars.PROD_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |

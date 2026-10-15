@@ -76,7 +76,7 @@ Para não pagar já o plano da produção: no Render, *New → Blueprint*, repos
 
 ## Monitorização (depois de publicar)
 
-1. No GitHub, em Settings → Secrets and variables → Actions → **Variables**, criar `UAT_URL` (ex.: `https://peekjob-uat.onrender.com`) e, mais tarde, `PROD_URL`.
+1. A UAT já é verificada sem configurar nada (`https://peekjob-uat.onrender.com` por omissão). Para a produção: no GitHub, em Settings → Secrets and variables → Actions → **Variables**, criar `PROD_URL`.
 2. No GitHub, carregar em "Watch" no repositório (Custom → Issues) em quem deve receber os alertas por email.
 3. Opcional: criar um projeto no Sentry (região UE), copiar o DSN para `SENTRY_DSN` no Render e configurar o alerta por email para "novo problema".
 
@@ -123,6 +123,6 @@ Email de contacto provisório do site: **pedropeekjob@gmail.com** (tarefa 7). Ta
 ### Falta
 
 - Domínio próprio (tarefa 4): emails para qualquer pessoa e endereço do site.
-- Alertas (tarefa 62): criar a variável `UAT_URL=https://peekjob-uat.onrender.com` em *Settings → Secrets and variables → Actions → Variables*.
+- Alertas (tarefa 62): a UAT passou a ser verificada de 10 em 10 minutos sem configuração; falta carregar em *Watch* no repositório para receber os emails.
 - Carregar a lista real de organizações (tarefa 22): já há base de dados.
 - Produção: quando houver decisão, `peekjob-prod` pelo `render.yaml` (plano pago) com o ramo `production` do Neon.
