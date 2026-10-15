@@ -80,6 +80,16 @@ Para não pagar já o plano da produção: no Render, *New → Blueprint*, repos
 2. No GitHub, carregar em "Watch" no repositório (Custom → Issues) em quem deve receber os alertas por email.
 3. Opcional: criar um projeto no Sentry (região UE), copiar o DSN para `SENTRY_DSN` no Render e configurar o alerta por email para "novo problema".
 
+## Domínio peekjob.com (tarefa 4)
+
+O domínio é **peekjob.com**. Falta acesso ao DNS (onde o domínio foi comprado). O código não precisa de mudanças: o endereço e o remetente vêm das variáveis do Render.
+
+1. **Resend** → *Domains* → *Add domain* → `peekjob.com` (região UE). O Resend mostra 3 registos (MX e TXT/SPF em `send`, TXT/DKIM em `resend._domainkey`); copiá-los tal e qual para o DNS e carregar em *Verify*. Pode demorar até umas horas.
+2. **Render** → `peekjob-uat` → *Settings* → *Custom Domains* → `uat.peekjob.com`. No DNS: `CNAME uat → peekjob-uat.onrender.com`. O Render emite o certificado sozinho.
+3. **Render** → `peekjob-uat` → *Environment*: `MAIL_FROM=PeekJob <nao-responder@peekjob.com>` (depois de o Resend dizer *Verified*) e `WEB_ORIGIN=https://uat.peekjob.com`. Guardar faz uma publicação nova.
+4. Produção (mais tarde): `peekjob.com` e `www.peekjob.com` no serviço `peekjob-prod`, com os registos que o Render indicar (A no domínio raiz, CNAME no `www`).
+5. Emails do site (tarefa 7): quando existirem `ola@` e `privacidade@`, mudar `VITE_CONTACT_EMAIL` e `GEOCODER_USER_AGENT`. Receber emails no domínio é outro serviço (ex.: Google Workspace, Zoho); o Resend só envia.
+
 ## Verificado antes de publicar
 
 Com a mesma estrutura da imagem, numa base de dados vazia: migrações e seed, web servida pela API, email do link mágico no formato do Resend (para um servidor falso), cookie `Secure` + `httpOnly`, login e publicação de uma avaliação no browser em mobile.
@@ -122,7 +132,7 @@ Email de contacto provisório do site: **pedropeekjob@gmail.com** (tarefa 7). Ta
 
 ### Falta
 
-- Domínio próprio (tarefa 4): emails para qualquer pessoa e endereço do site.
+- Domínio próprio (tarefa 4): `peekjob.com`, falta acesso ao DNS; passos em *Domínio peekjob.com* acima.
 - Alertas (tarefa 62): a UAT passou a ser verificada de 10 em 10 minutos sem configuração; falta carregar em *Watch* no repositório para receber os emails.
 - Carregar a lista real de organizações (tarefa 22): já há base de dados.
 - Produção: quando houver decisão, `peekjob-prod` pelo `render.yaml` (plano pago) com o ramo `production` do Neon.
