@@ -29,6 +29,15 @@
 .lockLine {
   gap: 6px;
 }
+.mineEdit {
+  gap: 8px;
+}
+.mineButtons {
+  gap: 16px;
+}
+.mineAction {
+  gap: 4px;
+}
 
 .review {
   gap: 8px;

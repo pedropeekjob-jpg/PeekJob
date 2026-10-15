@@ -1,3 +1,9 @@
+// Fontes servidas pelo próprio site (antes Google Fonts: cada visita enviava o IP ao Google)
+import '@fontsource/geist/400.css';
+import '@fontsource/geist/500.css';
+import '@fontsource/geist/600.css';
+import '@fontsource/geist/700.css';
+import '@fontsource/geist-mono/500.css';
 // Estilos base primeiro: os CSS Modules dos componentes vêm depois e ganham nos empates
 import './styles/global.css';
 import { StrictMode } from 'react';

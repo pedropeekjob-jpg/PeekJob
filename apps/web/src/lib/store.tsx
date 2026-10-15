@@ -5,7 +5,7 @@ import { bumpHelpful, loadEngagement, syncOnLogin } from './engagement';
 import { DEFAULT_PREFS, type CriterionKey } from '../data/criteria';
 import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
-import { detectRedFlags } from './moderation';
+import { detectRedFlags, findPersonalAttacks, softenText } from './moderation';
 import { getLang, tr } from '../i18n';
 import { stepsLabel, type CreateInterviewInput, type CreateSalaryInput } from '@peekjob/shared';
 import { emptyShared, type SharedLocal } from '../features/share/share';
@@ -30,6 +30,8 @@ export interface MyReview {
   flagged: boolean;
   /** quem escreveu confirmou que trabalha lá (antes ou depois de publicar) */
   verified?: boolean;
+  /** quem escreveu mudou o texto depois de publicar */
+  edited?: boolean;
 }
 
 export interface SupportMessage {
@@ -515,6 +517,50 @@ function useAppState() {
           await api('/me', { method: 'DELETE', body: { keepReviews } });
           set({ user: null, myReviews: [], messages: [], lastPublished: null });
           void loadOrgs().catch(() => undefined);
+          return { ok: true };
+        } catch (e) {
+          return fail(e);
+        }
+      },
+
+      /**
+       * Corrigir o texto da minha avaliação (RGPD, retificação); notas e etiquetas ficam.
+       * As regras são as de publicar: nomes e insultos bloqueiam (422 com sugestão).
+       */
+      editMyReview: async (id: string, text: string): Promise<Result> => {
+        const r = stRef.current.myReviews.find((x) => x.id === id);
+        if (!r) return { ok: false, status: 404, message: tr('Esta avaliação já não existe.', 'This review no longer exists.'), body: null };
+        if (!apiMode) {
+          if (findPersonalAttacks(text).blocked) return { ok: false, status: 422, message: '', body: { suggestion: softenText(text) } };
+          const rf = detectRedFlags(text, r.tags);
+          set((s) => ({ myReviews: s.myReviews.map((x) => (x.id === id ? { ...x, text, flagged: rf.flagged, edited: true } : x)) }));
+          return { ok: true };
+        }
+        try {
+          const res = await api<{ review: ApiReview }>(`/me/reviews/${id}`, { method: 'PATCH', body: { scores: r.scores, recommend: r.recommend, tags: r.tags, text } });
+          set((s) => ({ myReviews: s.myReviews.map((x) => (x.id === id ? toMyReview({ ...res.review, orgId: r.orgId }) : x)) }));
+          track('review_edit', { result: 'ok' });
+          void loadMine().catch(() => undefined); // a mensagem de apoio, se o texto novo a gerar
+          void loadOrg(r.orgId, true);
+          return { ok: true };
+        } catch (e) {
+          const f = fail(e);
+          track('review_edit', { result: failKind(f) });
+          return f;
+        }
+      },
+
+      /** Apagar a minha avaliação sem apagar a conta (RGPD, apagamento) */
+      deleteMyReview: async (id: string): Promise<Result> => {
+        const r = stRef.current.myReviews.find((x) => x.id === id);
+        try {
+          if (apiMode) await api(`/me/reviews/${id}`, { method: 'DELETE' });
+          set((s) => ({ myReviews: s.myReviews.filter((x) => x.id !== id), lastPublished: s.lastPublished === id ? null : s.lastPublished }));
+          track('review_delete', { result: 'ok' });
+          if (apiMode && r) {
+            void loadOrg(r.orgId, true);
+            void loadOrgs().catch(() => undefined);
+          }
           return { ok: true };
         } catch (e) {
           return fail(e);

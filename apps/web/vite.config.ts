@@ -18,6 +18,8 @@ export default defineConfig({
   base: browser ? '/' : './',
   build: {
     sourcemap: coverage,
+    // fontes sempre em ficheiro (nunca data:), para a CSP `font-src 'self'`
+    assetsInlineLimit: (file) => (/\.woff2?$/.test(file) ? false : undefined),
     rollupOptions: {
       output: {
         // React e o router mudam pouco: ficheiro próprio, que fica em cache entre publicações

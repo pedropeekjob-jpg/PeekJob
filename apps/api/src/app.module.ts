@@ -7,7 +7,6 @@ import { HelpfulController } from './engagement/helpful.controller';
 import { SavedController } from './engagement/saved.controller';
 import { MessagesController } from './me/messages.controller';
 import { AccountController } from './me/account.controller';
-import { MyReviewsController } from './me/reviews.controller';
 import { ModerationController } from './moderation/moderation.controller';
 import { ReportsModule } from './reports/reports.module';
 import { OrganizationsModule } from './organizations/organizations.module';
@@ -19,9 +18,10 @@ import { VerificationModule } from './verification/verification.module';
 import { SeoController } from './web/seo.controller';
 import { SecurityModule } from './security/security.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
+import { HousekeepingModule } from './housekeeping/housekeeping.module';
 
 @Module({
-  imports: [SecurityModule, MonitoringModule, DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, AppealsModule, RewriteModule, ContributionsModule, AccountsModule],
-  controllers: [HealthController, MessagesController, MyReviewsController, AccountController, SavedController, HelpfulController, ModerationController, SeoController],
+  imports: [SecurityModule, MonitoringModule, DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, AppealsModule, RewriteModule, ContributionsModule, AccountsModule, HousekeepingModule],
+  controllers: [HealthController, MessagesController, AccountController, SavedController, HelpfulController, ModerationController, SeoController],
 })
 export class AppModule {}

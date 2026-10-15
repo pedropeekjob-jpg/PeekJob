@@ -39,6 +39,10 @@ export const CreateReviewInput = z.object({
 });
 export type CreateReviewInput = z.infer<typeof CreateReviewInput>;
 
+/** Editar a própria avaliação: as mesmas regras, sem mudar o local */
+export const UpdateReviewInput = CreateReviewInput.omit({ locationId: true });
+export type UpdateReviewInput = z.infer<typeof UpdateReviewInput>;
+
 export const SearchOrganizationsQuery = z.object({
   q: z.string().trim().max(120).default(''),
   type: z.enum(ORG_TYPES).optional(),

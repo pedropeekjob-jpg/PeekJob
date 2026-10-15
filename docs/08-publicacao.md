@@ -71,6 +71,7 @@ Para não pagar já o plano da produção: no Render, *New → Blueprint*, repos
 | `GEOCODER_USER_AGENT` | não | Identificação nos pedidos ao Nominatim (regra de uso): pôr um contacto real, ex. `PeekJob/0.1 (pedropeekjob@gmail.com)` |
 | `GEOCODER_URL` | não | Outro serviço compatível com o Nominatim; `off` desliga a geocodificação |
 | `GEOCODE_INTERVAL_MIN` | não | Minutos entre rondas de geocodificação (por omissão 15; 0 desliga as rondas) |
+| `CLEANUP_INTERVAL_MIN` | não | Minutos entre rondas de limpeza de links de entrada, sessões e códigos expirados (por omissão 60; 0 desliga) |
 | `GSC_VERIFICATION` | não | Código da etiqueta HTML do Search Console |
 | `COOKIE_SAMESITE` | não | Só se a web ficar noutro domínio (`none`); não é o caso desta configuração |
 

@@ -86,6 +86,8 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | POST | `/verifications/document` | sessão | PDF ou fotografia (JPG, PNG, WebP; tipo confirmado pelo conteúdo) em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
 | GET | `/me/verifications` | sessão | As minhas verificações |
 | GET | `/me/reviews` | sessão | As minhas avaliações |
+| PATCH | `/me/reviews/:id` | sessão | Editar a minha avaliação (notas, etiquetas, texto; as regras de publicar: nomes e insultos → 422 com sugestão; nova possível ilegalidade → mensagem de apoio, uma só vez). Retirada pela moderação → 409. Fica `editedAt` |
+| DELETE | `/me/reviews/:id` | sessão | Apagar a minha avaliação (e as mensagens, denúncias, "úteis" e resposta ligadas), sem apagar a conta |
 | POST | `/reviews/rewrite` | todos | Reescrever com IA: proposta publicável (sem nomes nem insultos, com os mesmos factos); não guarda o texto; 20 pedidos/10 min por pessoa |
 | POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
 | POST | `/interviews/:id/reports` | todos | Denunciar uma entrevista (como as avaliações) |
@@ -166,7 +168,7 @@ Quem escreve com raiva recebe uma proposta publicável e decide se a usa. Pode s
 - HSTS de um ano só em produção (o domínio da UAT pode mudar).
 
 **CSP:**
-- **Web:** scripts só do próprio site e do Google Analytics, sem `unsafe-inline` nos scripts. Por isso a configuração (`window.__PJ__`) vem de `/pj-config.js` e não de um script inline. Estilos inline são permitidos, por causa dos atributos `style` do React. Fontes vêm do Google Fonts. Ninguém pode pôr o site num iframe (`frame-ancestors 'none'`).
+- **Web:** scripts só do próprio site e do Google Analytics, sem `unsafe-inline` nos scripts. Por isso a configuração (`window.__PJ__`) vem de `/pj-config.js` e não de um script inline. Estilos inline são permitidos, por causa dos atributos `style` do React. As fontes (Geist e Geist Mono, pacotes `@fontsource`) são servidas pelo próprio site: nada vai para o Google Fonts (`font-src 'self'`). Ninguém pode pôr o site num iframe (`frame-ancestors 'none'`).
 - **API:** as respostas JSON levam `default-src 'none'`.
 
 **Pedidos de outros sites:** um POST, PUT, PATCH ou DELETE com `Origin` de outro domínio recebe 403. É uma defesa extra além do cookie `SameSite=Lax`. Os GET continuam abertos.
@@ -219,8 +221,9 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - O GitHub desliga os workflows agendados ao fim de 60 dias sem atividade no repositório. Para produção, juntar o UptimeRobot ou o Better Stack (gratuitos) a avisar por SMS.
 
 ## RGPD
+- **Retificação:** `PATCH /me/reviews/:id` e, na página da organização, "Corrigir o texto" na própria avaliação (as notas ficam; aparece "editada").
 - **Acesso:** `GET /me/export` (inclui as guardadas, os "úteis", as entrevistas, os salários e, à parte, as páginas de organizações que gere, os pedidos e as respostas) e o ecrã *Perfil → Privacidade e dados → Descarregar*.
-- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, pedidos e acessos a páginas de organizações (as respostas ficam, da organização, sem ligação à pessoa), verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, pedidos e acessos a páginas de organizações (as respostas ficam, da organização, sem ligação à pessoa), verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação. Uma só avaliação: `DELETE /me/reviews/:id` ("Apagar" na própria avaliação).
 
 ## Correr localmente
 
@@ -306,6 +309,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 ## Geocodificação dos locais adicionados à mão (14/10)
 - **Nominatim** (OpenStreetMap), em segundo plano: logo que se adiciona uma organização com morada e numa ronda a cada 15 min (`GEOCODE_INTERVAL_MIN`; 0 desliga). Regras do Nominatim: 1 pedido por segundo e identificação da app (`GEOCODER_USER_AGENT`, por omissão `PeekJob (https://peekjob.com)`; em produção convém pôr um contacto real). Outro serviço compatível: `GEOCODER_URL`; `off` desliga.
+- **Limpeza**, em segundo plano: ao arrancar e a cada hora (`CLEANUP_INTERVAL_MIN`; 0 desliga) apaga sessões e códigos de verificação e de reivindicação expirados, e links de entrada expirados há mais de um dia (o limite de pedidos conta os dos últimos 15 minutos).
 - Só se envia a morada da organização (pública), nunca dados de quem avalia. Resultados fora de Portugal (continente, Açores, Madeira) são ignorados.
 - Morada não encontrada: tenta no dia seguinte, no máximo 3 vezes. Serviço em baixo: tenta dentro de 1 hora, sem contar como tentativa.
 - **Correção (14/10):** os locais de uma organização passam a ativos quando ela fica ativa (aprovada, NIF confirmado ou pessoas suficientes a avaliar), por um trigger na base de dados. Antes ficavam pendentes e nunca apareciam na página; a migração 010 corrige os que já existiam.

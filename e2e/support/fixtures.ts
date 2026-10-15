@@ -68,8 +68,8 @@ export const test = base.extend<{ guard: void }>({
       page.on('pageerror', (e) => problems.push(`erro JS: ${e.message}`));
       page.on('console', (m) => {
         const t = m.text();
-        if (m.type() === 'error' && !/Failed to load resource|fonts\.(googleapis|gstatic)/.test(t)) problems.push(`consola: ${t}`);
-        if (/Content Security Policy|Refused to (load|execute|connect|apply)/.test(t) && !/fonts\.(googleapis|gstatic)/.test(t)) problems.push(`CSP: ${t}`);
+        if (m.type() === 'error' && !/Failed to load resource/.test(t)) problems.push(`consola: ${t}`);
+        if (/Content Security Policy|Refused to (load|execute|connect|apply)/.test(t)) problems.push(`CSP: ${t}`);
       });
       await use();
       // Cobertura da web nos testes no browser (build com VITE_COVERAGE=true): junta-se à dos testes unitários no SonarQube

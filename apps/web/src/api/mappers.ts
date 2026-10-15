@@ -34,6 +34,8 @@ export interface ApiReview {
   /** quantas pessoas acharam útil (sem dizer quem) */
   helpful?: number;
   createdAt: string;
+  /** quando quem escreveu a editou (null se nunca) */
+  editedAt?: string | null;
   /** resposta pública da organização */
   reply?: { text: string; createdAt: string; updatedAt: string } | null;
 }
@@ -130,7 +132,7 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = [], extras: OrgExtras = 
 }
 
 export function toMyReview(r: ApiReview & { orgId: string }): MyReview {
-  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, when: when(r.createdAt), flagged: r.flagged, verified: r.verified };
+  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, when: when(r.createdAt), flagged: r.flagged, verified: r.verified, edited: !!r.editedAt };
 }
 
 export function toMessage(m: {
