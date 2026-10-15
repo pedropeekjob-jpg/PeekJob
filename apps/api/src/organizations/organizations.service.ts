@@ -87,7 +87,11 @@ export class OrganizationsService {
     };
   }
 
-  /** Pesquisa tolerante a acentos, maiúsculas e erros (pg_trgm), incluindo nomes antigos (aliases). */
+  /**
+   * Pesquisa tolerante a acentos, maiúsculas e erros (pg_trgm), incluindo nomes antigos (aliases).
+   * Pesquisar o nome de uma cidade ou distrito (ex.: «Lisboa») lista também as organizações de lá;
+   * as que coincidem pelo nome ficam à frente.
+   */
   async search(q: SearchOrganizationsQuery): Promise<OrgSummary[]> {
     const { rows } = await this.pool.query(
       `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
@@ -105,7 +109,9 @@ export class OrganizationsService {
                OR o.search_name % input.q
                OR input.q <% o.search_name
                OR a.search_alias % input.q
-               OR o.search_name LIKE '%' || input.q || '%')
+               OR o.search_name LIKE '%' || input.q || '%'
+               OR o.search_city = input.q
+               OR lower(f_unaccent(o.district)) = input.q)
         GROUP BY o.id, input.q
         ORDER BY score DESC, o.name
         LIMIT $4`,
