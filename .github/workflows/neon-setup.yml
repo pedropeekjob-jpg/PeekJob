@@ -1,0 +1,69 @@
+name: Neon · ligar e provar
+
+# Corre à mão (Actions → "Neon · ligar e provar" → Run workflow). Precisa do segredo NEON_API_KEY.
+# Liga o repositório ao projeto Neon, faz o deploy dos serviços (só Postgres), aplica as migrações
+# no ramo indicado e prova a ligação: a API arranca e /health responde com a base de dados ligada.
+# Nunca imprime as connection strings: ficam no .env.local, que não sai do runner.
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Ramo do Neon
+        default: production
+
+jobs:
+  neon:
+    runs-on: ubuntu-latest
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: CLI do Neon
+        run: |
+          npm i -g neon@latest
+          neon --version
+          test -n "$NEON_API_KEY" || { echo "::error::Falta o segredo NEON_API_KEY"; exit 1; }
+      - name: neon init (projeto existente)
+        run: neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch "${{ inputs.branch }}" --services postgres
+      - name: neon deploy (escreve DATABASE_URL e DATABASE_URL_UNPOOLED no .env.local)
+        run: |
+          neon deploy
+          for v in DATABASE_URL DATABASE_URL_UNPOOLED; do
+            grep -q "^$v=" .env.local && echo "$v: definido" || echo "::warning::$v não veio no .env.local"
+          done
+      - name: Build
+        run: npm run build
+      - name: Migrações (ligação direta)
+        run: npm run migrate -w @peekjob/api
+      - name: Prova: a API arranca e fala com a base de dados
+        run: |
+          PORT=3333 node apps/api/dist/main.js > api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf localhost:3333/health > health.json && break; sleep 1; done
+          cat health.json; echo
+          node -e "const h=require('./health.json'); if(h.db!=='up'){console.error('base de dados em baixo'); process.exit(1)}"
+          echo "Organizações ativas (GET /orgs):"
+          curl -sf localhost:3333/orgs | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>console.log(JSON.parse(d).items.length))"
+          echo "Tabelas criadas:"
+          node -e "
+            const fs=require('fs');for(const l of fs.readFileSync('.env.local','utf8').split('\n')){const m=/^([A-Z_]+)=(.*)$/.exec(l);if(m)process.env[m[1]]=m[2].replace(/^\"(.*)\"$/,'\$1')}
+            const {Client}=require('pg');const c=new Client({connectionString:process.env.DATABASE_URL});
+            c.connect().then(()=>c.query(\"select count(*)::int n from information_schema.tables where table_schema='public'\")).then(r=>{console.log(r.rows[0].n);return c.query('select name from schema_migrations order by name')}).then(r=>{console.log(r.rows.map(x=>x.name).join(', '));return c.end()})
+          "
+      - name: Guardar o neon.ts gerado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-config
+          path: |
+            neon.ts
+            .neon
+          if-no-files-found: warn
+      - name: Log da API (sem segredos)
+        if: failure()
+        run: cat api.log || true
