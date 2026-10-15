@@ -17,8 +17,10 @@
   --job-fg: var(--ink);
   --job-glow: rgba(255, 255, 255, 0.24);
   --rule: var(--teal);
-  --label: var(--teal-dark);
+  --label: var(--ink);
   --job-label: var(--ink);
+  --door-sub: rgba(1, 11, 19, 0.56);
+  --job-sub: rgba(1, 11, 19, 0.8);
   --hint-peek-bg: var(--ink);
   --hint-peek-fg: #fff;
   --hint-job-bg: var(--ink);
@@ -144,7 +146,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 10px;
   border: 0;
   background: transparent;
@@ -153,41 +155,66 @@
   -webkit-tap-highlight-color: transparent;
 }
 .peek .door {
-  padding: 32px 20px calc(var(--mark-above) + 20px);
+  padding: 32px 24px calc(var(--mark-above) + 28px);
 }
 .job .door {
-  padding: calc(var(--mark-below) + 20px) 20px 32px;
+  justify-content: flex-start;
+  padding: calc(var(--mark-below) + 28px) 24px 32px;
 }
 .door:focus-visible {
   outline: 3px solid currentColor;
   outline-offset: -12px;
 }
 .label {
-  font-family: var(--font-display);
-  /* verde-água escuro em vez de preto (14/10): legível (7,6:1), mais suave, liga-se ao logo */
-  font-weight: 400;
+  /* estilo iOS (15/10): letra do sistema (SF Pro no iPhone e no Mac; Geist nos outros), negrito e apertada.
+     Antes: Jost fina e centrada, que parecia uma etiqueta solta */
+  font-family: var(--font-system);
+  font-weight: 700;
   color: var(--label);
-  /* mais pequena (14/10): presença sem peso; 36 px no telemóvel, 64 px no computador */
-  font-size: clamp(36px, 9vw, 64px);
-  line-height: 1;
-  letter-spacing: -0.025em;
-  animation: up 0.8s var(--ease) both;
+  font-size: clamp(40px, 6vw, 84px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  gap: 0.18em;
+  align-items: center;
 }
 .job .label {
   color: var(--job-label);
-  animation-delay: 0.3s;
 }
-/* ecrãs táteis: o que acontece ao tocar fica escrito (com rato, a dica segue o cursor) */
-.tap {
-  font-size: 15px;
-  font-weight: 500;
+.chevron {
+  flex: none;
+  width: 0.42em;
+  height: 0.42em;
+  opacity: 0.4;
+  transition:
+    transform 0.25s var(--ease),
+    opacity 0.25s;
+}
+.door:hover .chevron,
+.door:focus-visible .chevron {
   opacity: 0.85;
-  animation: up 0.8s var(--ease) 0.1s both;
+  transform: translateX(4px);
 }
-@media (hover: hover) and (pointer: fine) {
-  .tap {
-    display: none;
-  }
+/* título e linha alinhados à esquerda na largura do conteúdo: Espreitar junto à linha, O teu trabalho logo abaixo */
+.doorText {
+  width: min(1080px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  animation: up 0.8s var(--ease) both;
+}
+.job .doorText {
+  animation-delay: 0.2s;
+}
+.doorSub {
+  font-family: var(--font-system);
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--door-sub);
+}
+.job .doorSub {
+  color: var(--job-sub);
 }
 
 /* Dica que acompanha o rato */
@@ -323,11 +350,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* alinhado à esquerda, como os títulos das zonas (estilo iOS, 15/10) */
+  align-items: flex-start;
   justify-content: center;
-  text-align: center;
+  text-align: left;
   gap: 12px;
-  padding: 64px 20px 40px;
+  padding: 64px max(24px, calc((100% - 1080px) / 2)) 40px;
 }
 /* o conteúdo aparece depois de a linha deslizar */
 .panel > * {
@@ -351,20 +379,19 @@
   right: 16px;
 }
 .eyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0.75;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.6;
 }
 .title {
   margin: 0;
   max-width: 860px;
-  font-family: var(--font-display);
-  font-weight: var(--display-weight);
-  font-size: clamp(30px, 8vw, 56px);
-  line-height: 1.02;
-  letter-spacing: -0.01em;
+  font-family: var(--font-system);
+  font-weight: 700;
+  font-size: clamp(32px, 7vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 .sub {
@@ -483,8 +510,8 @@
 @media (prefers-reduced-motion: reduce) {
   .half,
   .glow::before,
-  .label,
-  .tap,
+  .doorText,
+  .chevron,
   .hint,
   .rule,
   .mark,

@@ -6,17 +6,17 @@ import { tr } from '../../i18n';
 import { reviewHref, searchHref, type Zone } from './home';
 import styles from './Home.module.css';
 
-/** Textos de cada zona: rótulo, dica que segue o rato e texto fixo nos ecrãs táteis */
+/** Textos de cada zona: título, uma linha a explicar e a dica que segue o rato */
 export const ZONE_TEXT = {
   peek: {
     label: () => tr('Espreitar', 'Peek inside'),
+    sub: () => tr('Vê como é trabalhar lá dentro.', 'See what it’s like to work there.'),
     hint: () => tr('Espreitar organizações', 'Peek at organisations'),
-    tap: () => tr('Toca para procurar uma organização', 'Tap to find an organisation'),
   },
   job: {
     label: () => tr('O teu trabalho', 'Your job'),
+    sub: () => tr('Avalia onde trabalhas, sem dar a cara.', 'Review where you work, anonymously.'),
     hint: () => tr('Avaliar onde trabalho', 'Review where I work'),
-    tap: () => tr('Toca para avaliar onde trabalhas', 'Tap to review where you work'),
   },
 } as const;
 
@@ -45,9 +45,13 @@ export function Door({ zone, onOpen, focusOnMount }: DoorProps) {
       data-ev-cta={zone === 'peek' ? 'abrir_espreitar' : 'abrir_avaliar'}
       data-ev-area="home"
     >
-      <span className={styles.label}>{t.label()}</span>
-      <span className={styles.tap} aria-hidden="true">
-        {t.tap()}
+      {/* título grande à esquerda, com o chevron de "abre" (estilo iOS, 15/10) e uma linha em cinzento */}
+      <span className={styles.doorText}>
+        <span className={`row ${styles.label}`}>
+          {t.label()}
+          <Icon name="next" size={28} stroke={2.6} className={styles.chevron} />
+        </span>
+        <span className={styles.doorSub}>{t.sub()}</span>
       </span>
       <span className="sr-only">: {t.hint()}</span>
     </button>

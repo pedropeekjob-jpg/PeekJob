@@ -30,6 +30,8 @@
 
   --font-display: 'Jost', 'Futura', 'Century Gothic', sans-serif;
   --font-body: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  /* letra do sistema (SF Pro em Apple), com a Geist como alternativa: títulos "estilo iOS" */
+  --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Geist', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --r-sm: 14px;
