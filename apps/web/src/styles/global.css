@@ -963,6 +963,8 @@ main h1:focus,
   --title: var(--zone-fg);
   --teal-text: var(--zone-fg);
   --teal-dark: var(--zone-fg);
+  /* o verde-água da marca desapareceria sobre o próprio fundo (ex.: os anéis da promessa no Explorar) */
+  --teal: var(--zone-fg);
   --line: var(--zone-line);
 }
 .zone .btn-primary {
