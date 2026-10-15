@@ -30,10 +30,16 @@ jobs:
           neon --version
           test -n "$NEON_API_KEY" || { echo "::error::Falta o segredo NEON_API_KEY"; exit 1; }
       - name: neon init (projeto existente)
-        run: neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch "${{ inputs.branch }}" --services postgres
+        run: |
+          set -o pipefail
+          neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch "${{ inputs.branch }}" --services postgres 2>&1 | tee init.log \
+            || { echo "::error title=neon init::$(tail -n 5 init.log | tr '\n' ' ')"; exit 1; }
+          echo "::notice title=neon init::$(tail -n 2 init.log | tr '\n' ' ')"
       - name: neon deploy (escreve DATABASE_URL e DATABASE_URL_UNPOOLED no .env.local)
         run: |
-          neon deploy 2>&1 | tee deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g'
+          set -o pipefail
+          neon deploy 2>&1 | tee deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g' \
+            || { echo "::error title=neon deploy::$(tail -n 5 deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g' | tr '\n' ' ')"; exit 1; }
           echo "::notice title=neon deploy::$(tail -n 3 deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g' | tr '\n' ' ')"
           for v in DATABASE_URL DATABASE_URL_UNPOOLED; do
             grep -q "^$v=" .env.local && echo "$v: definido" || echo "::warning::$v não veio no .env.local"
@@ -42,7 +48,8 @@ jobs:
         run: npm run build
       - name: Migrações (ligação direta)
         run: |
-          npm run migrate -w @peekjob/api 2>&1 | tee migrate.log
+          set -o pipefail
+          npm run migrate -w @peekjob/api 2>&1 | tee migrate.log || { echo "::error title=migrate::$(tail -n 5 migrate.log | tr '\n' ' ')"; exit 1; }
           echo "::notice title=npm run migrate::$(tail -n 1 migrate.log)"
       - name: "Prova — a API arranca e fala com a base de dados"
         run: |
