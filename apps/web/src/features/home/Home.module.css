@@ -21,10 +21,6 @@
   --job-label: var(--ink);
   --door-sub: rgba(1, 11, 19, 0.56);
   --job-sub: rgba(1, 11, 19, 0.8);
-  --hint-peek-bg: var(--ink);
-  --hint-peek-fg: #fff;
-  --hint-job-bg: var(--ink);
-  --hint-job-fg: #fff;
   --search-bg: var(--surface);
   --search-border: var(--line);
   --go-bg: var(--ink);
@@ -215,48 +211,6 @@
 }
 .job .doorSub {
   color: var(--job-sub);
-}
-
-/* Dica que acompanha o rato */
-.hint {
-  display: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .hint {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 4;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate(calc(var(--gx) + 18px), calc(var(--gy) + 18px));
-    transition:
-      opacity 0.2s,
-      transform 0.08s linear;
-  }
-  .peek .hint {
-    background: var(--hint-peek-bg);
-    color: var(--hint-peek-fg);
-  }
-  .job .hint {
-    background: var(--hint-job-bg);
-    color: var(--hint-job-fg);
-  }
-  .split[data-zone='none'] .half:hover .hint {
-    opacity: 1;
-  }
-  /* por cima do logo (fica entre as duas zonas) a frase confundia: esconde-se (pedido do cliente, 14/10) */
-  .split[data-zone='none']:has(.mark:hover) .hint {
-    opacity: 0;
-  }
 }
 
 /* A linha do esboço: desenha-se da esquerda para a direita e desliza com a zona */
@@ -512,7 +466,6 @@
   .glow::before,
   .doorText,
   .chevron,
-  .hint,
   .rule,
   .mark,
   .panel > *,

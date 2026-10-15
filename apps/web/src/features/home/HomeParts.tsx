@@ -6,7 +6,7 @@ import { tr } from '../../i18n';
 import { reviewHref, searchHref, type Zone } from './home';
 import styles from './Home.module.css';
 
-/** Textos de cada zona: título, uma linha a explicar e a dica que segue o rato */
+/** Textos de cada zona: título, uma linha a explicar e o nome do destino (para leitores de ecrã) */
 export const ZONE_TEXT = {
   peek: {
     label: () => tr('Espreitar', 'Peek inside'),
@@ -55,16 +55,6 @@ export function Door({ zone, onOpen, focusOnMount }: DoorProps) {
       </span>
       <span className="sr-only">: {t.hint()}</span>
     </button>
-  );
-}
-
-/** Dica que acompanha o rato (só com rato; nos ecrãs táteis o texto está fixo na zona) */
-export function CursorHint({ zone }: { zone: Zone }) {
-  return (
-    <span className={styles.hint} aria-hidden="true">
-      {ZONE_TEXT[zone].hint()}
-      <Icon name="arrow" size={16} />
-    </span>
   );
 }
 

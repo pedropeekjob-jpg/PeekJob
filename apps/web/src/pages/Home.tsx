@@ -1,7 +1,7 @@
 import { useCallback, useState, type PointerEvent, type ReactNode } from 'react';
 import { DesktopHeader, MobileHomeHeader, SiteFooter } from '../components/Layout';
 import type { Zone } from '../features/home/home';
-import { CursorHint, Door, HomeMark, JobPanel, PeekPanel } from '../features/home/HomeParts';
+import { Door, HomeMark, JobPanel, PeekPanel } from '../features/home/HomeParts';
 import styles from '../features/home/Home.module.css';
 import { useHomeZone } from '../features/home/useHomeZone';
 import { tr } from '../i18n';
@@ -14,7 +14,7 @@ const NEXT = { peek: ['Pesquisa', 'Inicio'], job: ['AvaliarEscolher'] } as const
 /**
  * Página inicial (pedido do cliente): duas zonas de cor e o logo na fronteira.
  * O primeiro clique escolhe: a zona clicada estende-se até ocupar a página (a linha desliza para o fundo ou para o topo)
- * enquanto a outra se retrai, e só então mostra o que fazer (pesquisar ou avaliar). Com rato, uma dica segue o cursor.
+ * enquanto a outra se retrai, e só então mostra o que fazer (pesquisar ou avaliar). Com rato, uma mancha de luz segue o cursor.
  */
 export default function Home() {
   const desktop = useIsDesktop();
@@ -24,7 +24,7 @@ export default function Home() {
   const intent = useCallback((z: Zone) => preload(...NEXT[z]), []);
   const [hover, setHover] = useState<Zone | null>(null);
 
-  // a mancha de luz e a dica seguem o cursor (variáveis CSS, sem re-render)
+  // a mancha de luz segue o cursor (variáveis CSS, sem re-render)
   const follow = useCallback((e: PointerEvent<HTMLElement>) => {
     if (e.pointerType !== 'mouse') return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -59,14 +59,12 @@ export default function Home() {
         <div {...half('peek')}>
           <span className={styles.glow} aria-hidden="true" />
           {content('peek', <PeekPanel typed={typed} autoFocus={finePointer || typed !== ''} onClose={close} />)}
-          {zone === null && <CursorHint zone="peek" />}
         </div>
         <div {...half('job')}>
           <span className={styles.glow} aria-hidden="true" />
           <span className={styles.rule} aria-hidden="true" />
           <HomeMark />
           {content('job', <JobPanel autoFocus={finePointer} onClose={close} />)}
-          {zone === null && <CursorHint zone="job" />}
         </div>
       </main>
       <SiteFooter />
