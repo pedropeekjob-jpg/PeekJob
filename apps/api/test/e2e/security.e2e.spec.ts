@@ -47,7 +47,9 @@ describe('Segurança', () => {
       expect(dir('default-src')).toBe("default-src 'self'");
       expect(dir('script-src')).toBe("script-src 'self' https://www.googletagmanager.com");
       expect(dir('connect-src')).toContain('https://*.google-analytics.com');
-      expect(dir('font-src')).toContain('https://fonts.gstatic.com');
+      // as fontes vêm do próprio site: o IP de quem visita não vai para o Google Fonts
+      expect(dir('font-src')).toBe("font-src 'self'");
+      expect(dir('style-src')).toBe("style-src 'self' 'unsafe-inline'");
       expect(dir('frame-ancestors')).toBe("frame-ancestors 'none'");
       expect(dir('object-src')).toBe("object-src 'none'");
       expect(dir('base-uri')).toBe("base-uri 'self'");

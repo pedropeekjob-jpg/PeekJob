@@ -27,8 +27,9 @@ export function htmlCsp(env: AppEnv, vars: Record<string, string | undefined> = 
   const d = [
     "default-src 'self'",
     "script-src 'self' https://www.googletagmanager.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    "style-src 'self' 'unsafe-inline'",
+    // fontes servidas pelo próprio site (sem Google Fonts: o IP de quem visita não sai)
+    "font-src 'self'",
     // mosaicos do mapa: só os do fornecedor configurado (só carregam quando a pessoa abre o mapa)
     `img-src 'self' data: blob: ${GA.join(' ')} ${mapTiles(vars).origin}`,
     `connect-src 'self' ${GA.join(' ')}`,

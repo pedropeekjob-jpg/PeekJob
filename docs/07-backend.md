@@ -168,7 +168,7 @@ Quem escreve com raiva recebe uma proposta publicável e decide se a usa. Pode s
 - HSTS de um ano só em produção (o domínio da UAT pode mudar).
 
 **CSP:**
-- **Web:** scripts só do próprio site e do Google Analytics, sem `unsafe-inline` nos scripts. Por isso a configuração (`window.__PJ__`) vem de `/pj-config.js` e não de um script inline. Estilos inline são permitidos, por causa dos atributos `style` do React. Fontes vêm do Google Fonts. Ninguém pode pôr o site num iframe (`frame-ancestors 'none'`).
+- **Web:** scripts só do próprio site e do Google Analytics, sem `unsafe-inline` nos scripts. Por isso a configuração (`window.__PJ__`) vem de `/pj-config.js` e não de um script inline. Estilos inline são permitidos, por causa dos atributos `style` do React. As fontes (Geist e Geist Mono, pacotes `@fontsource`) são servidas pelo próprio site: nada vai para o Google Fonts (`font-src 'self'`). Ninguém pode pôr o site num iframe (`frame-ancestors 'none'`).
 - **API:** as respostas JSON levam `default-src 'none'`.
 
 **Pedidos de outros sites:** um POST, PUT, PATCH ou DELETE com `Origin` de outro domínio recebe 403. É uma defesa extra além do cookie `SameSite=Lax`. Os GET continuam abertos.
