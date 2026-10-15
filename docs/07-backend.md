@@ -37,7 +37,7 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
    - inclui comércio, ofícios, restauração, turismo, saúde privada, escolas privadas, associações, ONG e IPSS;
    - deixa de fora entidades públicas, grandes marcas (`brand:wikidata`) e lugares sem nome;
    - não duplica: guarda o identificador do OpenStreetMap em `org_sources.external_id`, e junta a uma organização existente quando o NIF é o mesmo ou o nome é muito parecido (≥ 0,6) na mesma cidade;
-   - grava em lotes de 500 (função `import_orgs_batch`, migração 014): uma ida à base de dados por lote, em vez de ~8 por organização. O servidor do GitHub fica nos EUA e o Neon na UE, por isso o Porto (≈5 200 organizações) passou de mais de meia hora para segundos;
+   - grava em lotes de 500 (função `import_orgs_batch`, migração 014): uma ida à base de dados por lote, em vez de ~8 por organização. O servidor do GitHub fica nos EUA e o Neon na UE, por isso o Porto (≈5 200 organizações) demorava mais de meia hora. A procura de nome parecido usa o índice de trigramas (migração 015): 5 000 organizações na mesma cidade gravam em ~13 s numa base de dados local;
    - as organizações importadas ficam disponíveis no fluxo de avaliar e passam a públicas com a primeira avaliação. Não entram na fila de moderação.
    - Atribuição obrigatória: "© contribuidores do OpenStreetMap (ODbL)", no rodapé e na privacidade. A ODbL pede que uma base derivada partilhada seja aberta nos mesmos termos, por isso convém validação jurídica antes da produção.
 2. **VIES** (Comissão Europeia, gratuito): confirma o NIF e devolve o nome e a morada oficiais.
