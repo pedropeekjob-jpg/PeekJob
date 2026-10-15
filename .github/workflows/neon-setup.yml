@@ -33,27 +33,31 @@ jobs:
         run: neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch "${{ inputs.branch }}" --services postgres
       - name: neon deploy (escreve DATABASE_URL e DATABASE_URL_UNPOOLED no .env.local)
         run: |
-          neon deploy
+          neon deploy 2>&1 | tee deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g'
+          echo "::notice title=neon deploy::$(tail -n 3 deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgres://***#g' | tr '\n' ' ')"
           for v in DATABASE_URL DATABASE_URL_UNPOOLED; do
             grep -q "^$v=" .env.local && echo "$v: definido" || echo "::warning::$v não veio no .env.local"
           done
       - name: Build
         run: npm run build
       - name: Migrações (ligação direta)
-        run: npm run migrate -w @peekjob/api
+        run: |
+          npm run migrate -w @peekjob/api 2>&1 | tee migrate.log
+          echo "::notice title=npm run migrate::$(tail -n 1 migrate.log)"
       - name: "Prova — a API arranca e fala com a base de dados"
         run: |
           PORT=3333 node apps/api/dist/main.js > api.log 2>&1 &
           for i in $(seq 1 30); do curl -sf localhost:3333/health > health.json && break; sleep 1; done
           cat health.json; echo
+          echo "::notice title=health::$(cat health.json)"
           node -e "const h=require('./health.json'); if(h.db!=='up'){console.error('base de dados em baixo'); process.exit(1)}"
           echo "Organizações ativas (GET /orgs):"
-          curl -sf localhost:3333/orgs | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>console.log(JSON.parse(d).items.length))"
+          curl -sf localhost:3333/orgs | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>console.log('::notice title=GET /orgs::'+JSON.parse(d).items.length+' organizações'))"
           echo "Tabelas criadas:"
           node -e "
             const fs=require('fs');for(const l of fs.readFileSync('.env.local','utf8').split('\n')){const m=/^([A-Z_]+)=(.*)$/.exec(l);if(m)process.env[m[1]]=m[2].replace(/^\"(.*)\"$/,'\$1')}
             const {Client}=require('pg');const c=new Client({connectionString:process.env.DATABASE_URL});
-            c.connect().then(()=>c.query(\"select count(*)::int n from information_schema.tables where table_schema='public'\")).then(r=>{console.log(r.rows[0].n);return c.query('select name from schema_migrations order by name')}).then(r=>{console.log(r.rows.map(x=>x.name).join(', '));return c.end()})
+            c.connect().then(()=>c.query(\"select count(*)::int n from information_schema.tables where table_schema='public'\")).then(r=>{console.log('::notice title=Tabelas::'+r.rows[0].n+' tabelas no esquema public');return c.query('select name from schema_migrations order by name')}).then(r=>{console.log('::notice title=Migrações::'+r.rows.map(x=>x.name).join(', '));return c.end()})
           "
       - name: Guardar o neon.ts gerado
         if: always()
