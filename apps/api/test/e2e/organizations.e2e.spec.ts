@@ -38,6 +38,31 @@ describe('Organizações', () => {
       expect(flow.body.items[0]).toMatchObject({ name: 'Padaria Escondida', status: 'pending' });
     });
 
+    it('pesquisar por uma cidade lista as organizações dessa cidade (sem acentos, maiúsculas indiferentes)', async () => {
+      await insertOrg(t.pool, { name: 'Café Central', city: 'Lisboa' });
+      await insertOrg(t.pool, { name: 'Associação Ajuda', type: 'Associação', city: 'Lisboa' });
+      for (const q of ['Lisboa', 'lisboa', 'LISBOA']) {
+        const res = await t.http().get('/orgs/search').query({ q }).expect(200);
+        expect(res.body.items.map((o: { name: string }) => o.name).sort()).toEqual(['Associação Ajuda', 'Café Central']);
+      }
+      const braga = await t.http().get('/orgs/search').query({ q: 'braga' }).expect(200);
+      expect(braga.body.items.map((o: { name: string }) => o.name)).toEqual(['Associação Mãos Dadas']);
+    });
+
+    it('pesquisar por distrito também lista as organizações desse distrito', async () => {
+      const id = await insertOrg(t.pool, { name: 'Loja Sintrense', city: 'Sintra' });
+      await t.pool.query(`UPDATE organizations SET district = 'Lisboa' WHERE id = $1`, [id]);
+      const res = await t.http().get('/orgs/search').query({ q: 'lisboa' }).expect(200);
+      expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Loja Sintrense']);
+    });
+
+    it('com cidade e nome iguais, o nome continua à frente', async () => {
+      await insertOrg(t.pool, { name: 'Padaria Lisboa', city: 'Porto' });
+      await insertOrg(t.pool, { name: 'Oficina Alfama', city: 'Lisboa' });
+      const res = await t.http().get('/orgs/search').query({ q: 'lisboa' }).expect(200);
+      expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Padaria Lisboa', 'Oficina Alfama']);
+    });
+
     it('filtra por tipo', async () => {
       const res = await t.http().get('/orgs/search').query({ q: '', type: 'Associação' }).expect(200);
       expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Associação Mãos Dadas']);
