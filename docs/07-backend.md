@@ -306,6 +306,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/peekjob_test npm t
 
 ## Geocodificação dos locais adicionados à mão (14/10)
 - **Nominatim** (OpenStreetMap), em segundo plano: logo que se adiciona uma organização com morada e numa ronda a cada 15 min (`GEOCODE_INTERVAL_MIN`; 0 desliga). Regras do Nominatim: 1 pedido por segundo e identificação da app (`GEOCODER_USER_AGENT`, por omissão `PeekJob (https://peekjob.com)`; em produção convém pôr um contacto real). Outro serviço compatível: `GEOCODER_URL`; `off` desliga.
+- **Limpeza**, em segundo plano: ao arrancar e a cada hora (`CLEANUP_INTERVAL_MIN`; 0 desliga) apaga sessões e códigos de verificação e de reivindicação expirados, e links de entrada expirados há mais de um dia (o limite de pedidos conta os dos últimos 15 minutos).
 - Só se envia a morada da organização (pública), nunca dados de quem avalia. Resultados fora de Portugal (continente, Açores, Madeira) são ignorados.
 - Morada não encontrada: tenta no dia seguinte, no máximo 3 vezes. Serviço em baixo: tenta dentro de 1 hora, sem contar como tentativa.
 - **Correção (14/10):** os locais de uma organização passam a ativos quando ela fica ativa (aprovada, NIF confirmado ou pessoas suficientes a avaliar), por um trigger na base de dados. Antes ficavam pendentes e nunca apareciam na página; a migração 010 corrige os que já existiam.

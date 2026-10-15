@@ -19,9 +19,10 @@ import { VerificationModule } from './verification/verification.module';
 import { SeoController } from './web/seo.controller';
 import { SecurityModule } from './security/security.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
+import { HousekeepingModule } from './housekeeping/housekeeping.module';
 
 @Module({
-  imports: [SecurityModule, MonitoringModule, DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, AppealsModule, RewriteModule, ContributionsModule, AccountsModule],
+  imports: [SecurityModule, MonitoringModule, DbModule, AuthModule, OrganizationsModule, ReviewsModule, VerificationModule, ReportsModule, AppealsModule, RewriteModule, ContributionsModule, AccountsModule, HousekeepingModule],
   controllers: [HealthController, MessagesController, MyReviewsController, AccountController, SavedController, HelpfulController, ModerationController, SeoController],
 })
 export class AppModule {}
