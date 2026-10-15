@@ -66,6 +66,9 @@ jobs:
             const {Client}=require('pg');const c=new Client({connectionString:process.env.DATABASE_URL});
             c.connect().then(()=>c.query(\"select count(*)::int n from information_schema.tables where table_schema='public'\")).then(r=>{console.log('::notice title=Tabelas::'+r.rows[0].n+' tabelas no esquema public');return c.query('select name from schema_migrations order by name')}).then(r=>{console.log('::notice title=Migrações::'+r.rows.map(x=>x.name).join(', '));return c.end()})
           "
+      - name: Mostrar o neon.ts (não tem segredos)
+        if: always()
+        run: test -f neon.ts && echo "::notice title=neon.ts::$(base64 -w0 neon.ts)" || true
       - name: Guardar o neon.ts gerado
         if: always()
         uses: actions/upload-artifact@v4
