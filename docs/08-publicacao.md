@@ -84,5 +84,6 @@ Com a mesma estrutura da imagem, numa base de dados vazia: migrações e seed, w
 
 - **Neon:** projeto `quiet-hall-12294765` (org `org-curly-hall-39678854`), ramo `production`. Na raiz: `neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch production --services postgres` e depois `neon deploy`, que escreve `DATABASE_URL` (pooler) e `DATABASE_URL_UNPOOLED` (direta) no `.env.local` (fica fora do git).
 - A API carrega o `.env.local` sozinha fora de produção (`src/common/local-env.ts`). A app usa o `pg` com a ligação do pooler; as migrações e o seed usam a direta (`DATABASE_URL_UNPOOLED`), porque o pooler não guarda o estado da sessão.
-- Provar: `npm run migrate -w @peekjob/api`, `npm run seed -w @peekjob/api`, `npm run start -w @peekjob/api` e `curl localhost:3000/health`.
+- **Ligado e provado a 15/10** pelo workflow *Neon · ligar e provar* (Actions, segredo `NEON_API_KEY`): 13 migrações aplicadas no ramo `production`, 24 tabelas, `/health` com `"db":"up"`. O `neon.ts` gerado está na raiz (só Postgres).
+- Provar à mão: `npm run migrate -w @peekjob/api`, `npm run seed -w @peekjob/api`, `npm run start -w @peekjob/api` e `curl localhost:3000/health`.
 - **Resend:** `RESEND_API_KEY=re_… npm run email:test -w @peekjob/api` envia o "Hello World" (SDK do Resend) para pedropeekjob@gmail.com. A chave fica no `.env.local` ou no Render, nunca no código.

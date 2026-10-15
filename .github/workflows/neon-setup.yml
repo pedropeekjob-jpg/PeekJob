@@ -16,7 +16,7 @@ jobs:
   neon:
     runs-on: ubuntu-latest
     env:
-      NEON_API_KEY: ${{ secrets.NEON_API_KEY || secrets.NEO_API_KEY }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
