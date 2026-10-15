@@ -89,7 +89,7 @@ describe('textos', () => {
   });
 
   it('dimensões, resumos, prioridades e contagem', () => {
-    expect([sizeLabel('1–9'), sizeLabel('10–49'), sizeLabel('50–249')]).toEqual(['Até 9 pessoas', '10 a 49 pessoas', '50 a 249 pessoas']);
+    expect([sizeLabel('1–9'), sizeLabel('10–49'), sizeLabel('50–249'), sizeLabel('250+')]).toEqual(['Até 9 pessoas', '10 a 49 pessoas', '50 a 249 pessoas', '250 ou mais pessoas']);
     expect(summarize([], 'Todos')).toBe('Todos');
     expect(summarize(['a', 'b', 'c'], 'Todos', (v) => v.toUpperCase())).toBe('A +2');
     expect(prefsText([])).toBe('');

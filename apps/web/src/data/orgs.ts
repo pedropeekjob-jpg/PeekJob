@@ -1,9 +1,9 @@
 import { byPt } from '../lib/format';
 import type { CriterionKey } from './criteria';
 
-export type OrgType = 'PME' | 'Associação' | 'Voluntariado' | 'Nome individual';
-export const ORG_TYPES: OrgType[] = ['PME', 'Associação', 'Voluntariado', 'Nome individual'];
-export type SizeBand = '1–9' | '10–49' | '50–249';
+export type OrgType = 'PME' | 'Associação' | 'Voluntariado' | 'Nome individual' | 'Grande empresa';
+export const ORG_TYPES: OrgType[] = ['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa'];
+export type SizeBand = '1–9' | '10–49' | '50–249' | '250+';
 
 export type Scores = Record<CriterionKey, number | null>;
 
@@ -174,7 +174,7 @@ const SEEDS: Seed[] = [
   ['lavandaria-sol', 'Lavandaria Sol', 'PME', 'Limpeza', 'Matosinhos', 'Porto', 8, 2.9, 11, -4, -0.4, s(2.4, 2.6, 2.7, 3.2, 2.8, 3.1, 2.7, 2.9), 'Relatos de horas extra não pagas e pouca comunicação.', 41.1844, -8.6963, 'Rua Brito Capelo, 90, Matosinhos'],
 ];
 
-const size = (n: number): SizeBand => (n < 10 ? '1–9' : n < 50 ? '10–49' : '50–249');
+const size = (n: number): SizeBand => (n < 10 ? '1–9' : n < 50 ? '10–49' : n < 250 ? '50–249' : '250+');
 
 export const ORGS: Org[] = [
   RIBEIRA,

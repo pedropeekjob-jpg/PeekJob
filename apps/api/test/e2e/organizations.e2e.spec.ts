@@ -87,6 +87,11 @@ describe('Organizações', () => {
       expect(res.body.issues[0].path).toEqual(['nif']);
     });
 
+    it('aceita grandes empresas (o foco são as pequenas, mas qualquer empresa pode ser avaliada)', async () => {
+      const res = await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, name: 'Sonae', type: 'Grande empresa' }).expect(201);
+      expect(res.body).toMatchObject({ name: 'Sonae', status: 'pending' });
+    });
+
     it('exige NIF a empresas em nome individual', async () => {
       expect((await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, type: 'Nome individual' })).status).toBe(400);
     });

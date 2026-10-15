@@ -14,7 +14,7 @@ describe('setores: agregados e ligações', () => {
   });
 
   it('tipos pela ordem fixa; setores por nota, respeito ou n.º (desempate pela nota)', () => {
-    expect(typeCards(ORGS).map((c) => c.t)).toEqual(['PME', 'Associação', 'Voluntariado', 'Nome individual']);
+    expect(typeCards(ORGS).map((c) => c.t)).toEqual(['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa']);
     const byN = sectorRows(ORGS, null, 'n');
     expect(byN[0].n).toBeGreaterThanOrEqual(byN[1].n);
     const resp = sectorRows(ORGS, null, 'resp').map((s) => s.resp);

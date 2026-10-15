@@ -9,6 +9,7 @@ const ORG_TYPE_EN: Record<string, string> = {
   Associação: 'Association',
   Voluntariado: 'Volunteering',
   'Nome individual': 'Sole trader',
+  'Grande empresa': 'Large company',
   Todas: 'All',
   Todos: 'All',
 };
@@ -54,7 +55,7 @@ const TAG_EN: Record<string, string> = {
 };
 export const tagLabel = (t: string) => tr(t, TAG_EN[t] ?? t);
 
-const SIZE_EN: Record<string, string> = { '1–9': '1–9', '10–49': '10–49', '50–249': '50–249' };
+const SIZE_EN: Record<string, string> = { '1–9': '1–9', '10–49': '10–49', '50–249': '50–249', '250+': '250+' };
 export const sizeLabel = (s: string) => tr(`${s} pessoas`, `${SIZE_EN[s] ?? s} people`);
 
 /** Red flags (vêm do domínio partilhado em português) */
