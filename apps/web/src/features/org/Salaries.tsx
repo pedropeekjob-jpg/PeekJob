@@ -5,7 +5,7 @@ import { tr } from '../../i18n';
 import { euros, plural } from '../../lib/format';
 import { useToggle } from '../../lib/useToggle';
 import { BigRing } from '../../components/Score';
-import { hiddenExtra, hiddenNote, MIN_SALARIES, paidOnTimeCount, salaryAria, salaryScale, salaryTotal } from './org';
+import { hiddenExtra, hiddenNote, MIN_SALARIES, paidOnTimeCount, salaryAria, salaryEmptyBody, salaryScale, salaryTotal } from './org';
 import styles from './Salaries.module.css';
 
 type Band = Org['salaries'][number];
@@ -74,7 +74,7 @@ function SalaryBands({ org, desktop }: { org: Org; desktop: boolean }) {
         body={
           volunteer
             ? tr('Não há salários para mostrar. Vê as avaliações para saber como é o dia a dia.', 'There are no salaries to show. Read the reviews to see what day-to-day work is like.')
-            : tr(`Mostramos uma função quando houver pelo menos ${MIN_SALARIES} salários partilhados.`, `We show a role once at least ${MIN_SALARIES} salaries have been shared.`)
+            : salaryEmptyBody(org)
         }
       />
     );

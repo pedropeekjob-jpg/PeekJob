@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ORG_BY_ID, type Org } from '../../src/data/orgs';
-import { dotFill, harassmentLine, hiddenExtra, hiddenNote, interviewNumbers, interviewRings, locationsSuffix, osmLink, paidOnTimeCount, reviewLists, salaryScale, scoreAria, shareCta, splitCriteria } from '../../src/features/org/org';
+import { dotFill, harassmentLine, hiddenExtra, hiddenNote, salaryEmptyBody, interviewNumbers, interviewRings, locationsSuffix, osmLink, paidOnTimeCount, reviewLists, salaryScale, scoreAria, shareCta, splitCriteria } from '../../src/features/org/org';
 
 const padaria = ORG_BY_ID['padaria-ribeira'];
 const withSalaries = (salaries: Org['salaries']) => ({ ...padaria, salaries });
@@ -21,6 +21,14 @@ describe('página da organização: regras puras', () => {
     expect(hiddenExtra(withSalaries([{ role: 'Sala', min: 1, max: 2, median: 1, count: 1 }]))).toBe('Sala tem 1 — faltam 2');
     expect(hiddenNote(withSalaries([]))).not.toMatch(/tem/);
     expect(salaryScale(withSalaries([])).pos(0)).toBe(0);
+  });
+
+  it('salários: sem funções visíveis, diz quantos já há em cada uma', () => {
+    // quem acabou de partilhar o 1.º salário tem de ver que contou
+    expect(salaryEmptyBody(withSalaries([{ role: 'Sala', min: 0, max: 0, median: 0, count: 1 }]))).toBe(
+      'Mostramos uma função quando houver pelo menos 3 salários partilhados. Para já: Sala tem 1 — faltam 2.',
+    );
+    expect(salaryEmptyBody(withSalaries([]))).toBe('Mostramos uma função quando houver pelo menos 3 salários partilhados.');
   });
 
   it('entrevistas: estatísticas próprias ou calculadas', () => {
