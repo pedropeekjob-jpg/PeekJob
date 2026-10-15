@@ -111,6 +111,13 @@ export function hiddenNote(org: Pick<Org, 'salaries'>) {
   return extra ? `${base} ${extra}.` : base;
 }
 
+/** Estado vazio dos salários: a regra e, se já houver alguns, quantos faltam em cada função */
+export function salaryEmptyBody(org: Pick<Org, 'salaries'>) {
+  const extra = hiddenExtra(org);
+  const base = tr(`Mostramos uma função quando houver pelo menos ${MIN_SALARIES} salários partilhados.`, `We show a role once at least ${MIN_SALARIES} salaries have been shared.`);
+  return extra ? `${base} ${tr('Para já', 'So far')}: ${extra}.` : base;
+}
+
 export function salaryAria(s: { role: string; min: number; max: number; median: number; count: number }) {
   return tr(
     `${s.role}: de ${euros(s.min)} a ${euros(s.max)}, valor do meio ${euros(s.median)}, ${s.count} salários`,
