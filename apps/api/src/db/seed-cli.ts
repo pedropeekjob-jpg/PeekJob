@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { Client } from 'pg';
+import { loadLocalEnv, migrationUrl } from '../common/local-env';
 
 /**
  * Carrega organizações de demonstração (dados fictícios, os mesmos do POC).
@@ -16,9 +17,11 @@ interface SeedOrg {
   locations?: { label?: string; address: string; lat?: number; lng?: number }[];
 }
 
+loadLocalEnv();
+
 (async () => {
   const data: SeedOrg[] = JSON.parse(readFileSync(join(__dirname, '..', '..', 'seed', 'organizations.json'), 'utf8'));
-  const db = new Client({ connectionString: process.env.DATABASE_URL });
+  const db = new Client({ connectionString: migrationUrl() });
   await db.connect();
   let n = 0;
   for (const o of data) {

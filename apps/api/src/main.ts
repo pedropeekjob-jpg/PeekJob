@@ -11,6 +11,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { appEnv, corsOrigins } from './common/config';
+import { loadLocalEnv } from './common/local-env';
 import { htmlCsp } from './security/headers';
 import { applySecurity } from './security/security';
 import { protectEnvironment } from './web/environment';
@@ -75,6 +76,8 @@ function serveWeb(app: INestApplication, dir: string | undefined) {
 }
 
 async function bootstrap() {
+  // desenvolvimento: DATABASE_URL e companhia vêm do .env.local escrito pelo `neon deploy`
+  loadLocalEnv();
   const app = await NestFactory.create(AppModule);
   configureApp(app);
   const port = Number(process.env.PORT ?? 3000);

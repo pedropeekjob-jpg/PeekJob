@@ -14,7 +14,8 @@
     "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand test/e2e",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "import:osm": "node dist/import/osm-cli.js",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --coverage"
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --coverage",
+    "email:test": "node dist/mail/send-test-cli.js"
   },
   "dependencies": {
     "@napi-rs/canvas": "1.0.11",
@@ -27,6 +28,7 @@
     "pdfjs-dist": "6.4.299",
     "pg": "8.13.1",
     "reflect-metadata": "0.2.2",
+    "resend": "6.33.0",
     "rxjs": "7.8.1",
     "tesseract.js": "7.0.0",
     "zod": "3.23.8"

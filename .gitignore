@@ -14,3 +14,7 @@ coverage
 e2e/.nyc_output
 visual-report
 react-profile.json
+
+# variáveis escritas pelo neon deploy (segredos)
+.env.local
+.env.*.local
