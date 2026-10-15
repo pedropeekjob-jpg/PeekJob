@@ -86,6 +86,8 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | POST | `/verifications/document` | sessão | PDF ou fotografia (JPG, PNG, WebP; tipo confirmado pelo conteúdo) em memória; confirma se tem o NIF da organização. O ficheiro nunca é guardado |
 | GET | `/me/verifications` | sessão | As minhas verificações |
 | GET | `/me/reviews` | sessão | As minhas avaliações |
+| PATCH | `/me/reviews/:id` | sessão | Editar a minha avaliação (notas, etiquetas, texto; as regras de publicar: nomes e insultos → 422 com sugestão; nova possível ilegalidade → mensagem de apoio, uma só vez). Retirada pela moderação → 409. Fica `editedAt` |
+| DELETE | `/me/reviews/:id` | sessão | Apagar a minha avaliação (e as mensagens, denúncias, "úteis" e resposta ligadas), sem apagar a conta |
 | POST | `/reviews/rewrite` | todos | Reescrever com IA: proposta publicável (sem nomes nem insultos, com os mesmos factos); não guarda o texto; 20 pedidos/10 min por pessoa |
 | POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
 | POST | `/interviews/:id/reports` | todos | Denunciar uma entrevista (como as avaliações) |
@@ -219,8 +221,9 @@ Os limites ficam em memória, guardando só o IP e as horas dos pedidos, nunca e
 - O GitHub desliga os workflows agendados ao fim de 60 dias sem atividade no repositório. Para produção, juntar o UptimeRobot ou o Better Stack (gratuitos) a avisar por SMS.
 
 ## RGPD
+- **Retificação:** `PATCH /me/reviews/:id` e, na página da organização, "Corrigir o texto" na própria avaliação (as notas ficam; aparece "editada").
 - **Acesso:** `GET /me/export` (inclui as guardadas, os "úteis", as entrevistas, os salários e, à parte, as páginas de organizações que gere, os pedidos e as respostas) e o ecrã *Perfil → Privacidade e dados → Descarregar*.
-- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, pedidos e acessos a páginas de organizações (as respostas ficam, da organização, sem ligação à pessoa), verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação.
+- **Apagamento:** `DELETE /me` apaga conta, avaliações, entrevistas, salários, pedidos e acessos a páginas de organizações (as respostas ficam, da organização, sem ligação à pessoa), verificações, mensagens, pedidos de revisão, guardadas, "úteis" e sessões. Opcionalmente mantém as avaliações, com um pseudónimo aleatório, já sem ligação à pessoa. As organizações que criou ficam, sem ligação. Uma só avaliação: `DELETE /me/reviews/:id` ("Apagar" na própria avaliação).
 
 ## Correr localmente
 

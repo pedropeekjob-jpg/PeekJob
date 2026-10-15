@@ -9,7 +9,10 @@ import { fmt } from '../../lib/format';
 import { useStore, type MyReview } from '../../lib/store';
 import { useToggle } from '../../lib/useToggle';
 import { reviewLists } from './org';
+import { PublishErrorBox } from '../review/PublishErrorBox';
+import { REVIEW_TEXT_MAX } from '../review/useReviewDraft';
 import { OrgReply } from './OrgCommon';
+import { useMyReview } from './useMyReview';
 import { useOrgActions, useUseful } from './useOrgPage';
 import styles from './Reviews.module.css';
 
@@ -19,6 +22,57 @@ export function ReportLink({ org, itemId }: { org: Org; itemId: string }) {
     <Link to={`/org/${org.id}/denunciar/${itemId}`} className={`row ${styles.report}`}>
       <Icon name="flag" size={14} /> {tr('Denunciar', 'Report')}
     </Link>
+  );
+}
+
+/** Corrigir o texto ou apagar a minha avaliação (RGPD: retificação e apagamento sem apagar a conta) */
+function MyReviewActions({ r }: { r: MyReview }) {
+  const m = useMyReview(r);
+  const id = `mine-text-${r.id}`;
+  if (m.mode === 'edit') {
+    return (
+      <div className={`stack fade-up ${styles.mineEdit}`}>
+        <label htmlFor={id} className="small muted">
+          {tr('O teu texto (as notas ficam iguais)', 'Your text (your scores stay the same)')}
+        </label>
+        <textarea id={id} className="textarea" rows={4} maxLength={REVIEW_TEXT_MAX} value={m.draft} onChange={(e) => m.setDraft(e.target.value)} />
+        <PublishErrorBox error={m.error} onUseSuggestion={m.useSuggestion} />
+        <div className={`row wrap ${styles.mineButtons}`}>
+          <button type="button" className="btn btn-dark" disabled={m.busy || !m.changed} onClick={() => void m.save()}>
+            {m.busy ? tr('A guardar…', 'Saving…') : tr('Guardar', 'Save')}
+          </button>
+          <button type="button" className="btn" disabled={m.busy} onClick={m.cancel}>
+            {tr('Cancelar', 'Cancel')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (m.mode === 'delete') {
+    return (
+      <div className={`stack fade-up ${styles.mineEdit}`}>
+        <span className="body">{tr('Apagar esta avaliação? Não dá para desfazer.', 'Delete this review? This can’t be undone.')}</span>
+        <PublishErrorBox error={m.error} onUseSuggestion={m.useSuggestion} />
+        <div className={`row wrap ${styles.mineButtons}`}>
+          <button type="button" className="btn btn-dark" disabled={m.busy} onClick={() => void m.remove()}>
+            {m.busy ? tr('A apagar…', 'Deleting…') : tr('Apagar de vez', 'Delete for good')}
+          </button>
+          <button type="button" className="btn" disabled={m.busy} onClick={m.cancel}>
+            {tr('Cancelar', 'Cancel')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className={`row ${styles.mineButtons}`}>
+      <button type="button" className={`link small row ${styles.mineAction}`} onClick={m.edit}>
+        <Icon name="edit" size={14} /> {tr('Corrigir o texto', 'Edit text')}
+      </button>
+      <button type="button" className={`link small ${styles.mineAction}`} onClick={m.askDelete}>
+        {tr('Apagar', 'Delete')}
+      </button>
+    </div>
   );
 }
 
@@ -34,6 +88,7 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
           <span className="small muted">
             {loc ? `${loc.label} · ` : ''}
             {whenLabel(r.when)}
+            {r.edited ? tr(' · editada', ' · edited') : ''}
           </span>
         </span>
         {!desktop && (
@@ -55,6 +110,7 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
       <span className={`small muted row ${styles.lockLine}`}>
         <Icon name="lock" size={14} /> {tr('Publicada sem o teu nome. Só tu vês esta etiqueta.', 'Published without your name. Only you see this label.')}
       </span>
+      <MyReviewActions r={r} />
     </article>
   );
 }

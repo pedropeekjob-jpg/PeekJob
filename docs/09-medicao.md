@@ -29,6 +29,7 @@ Verificado no browser num fluxo completo (entrar, pesquisar, avaliar, publicar):
 | `review_org_created` | Nova organização | `org_type`, `result` (created, existing…) | Qualidade do catálogo, duplicados |
 | `verification` | Verificação | `method` (email, document, none), `step` (code_sent, confirmed, nif_not_found, skipped…) | Que verificação as pessoas preferem; onde falha |
 | `review_submit` | Publicar | `result` (published, moderation_blocked, duplicate, auth…), `verified`, `criteria_count`, `tags_count`, `text_length` (escalões), `org_type` | Conversão final, impacto da moderação |
+| `review_edit` / `review_delete` | Corrigir o texto ou apagar a própria avaliação | `result` (ok, moderation_blocked…) | Quantas pessoas corrigem ou retiram o que escreveram |
 | `review_rewrite` | Reescrever com IA | `step` (requested, accepted, dismissed, failed), `trigger` (blocked, tone, manual), `source` (ai, rules) | Quantas pessoas escrevem com raiva, e se a proposta da IA é aceite ou recusada |
 | `save_org`, `mark_helpful` | Guardar, "útil" | `saved` / `helpful` | Interesse e confiança no conteúdo |
 | `moderation_appeal` | Pedido de revisão de uma decisão enviado | `result` | Quantas decisões são contestadas (qualidade da moderação) |
