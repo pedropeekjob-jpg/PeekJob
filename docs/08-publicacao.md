@@ -68,7 +68,7 @@ Para não pagar já o plano da produção: no Render, *New → Blueprint*, repos
 | `GA_MEASUREMENT_ID` | não | Google Analytics 4 (`G-…`), ver [09 · Medição](09-medicao.md) |
 | `MAP_TILES_URL` | não | Mosaicos do mapa (https, com `{z}/{x}/{y}`). Por omissão o OpenStreetMap, que aceita pouco tráfego: em produção, um fornecedor com conta (ex.: MapTiler, Stadia). Entra na CSP |
 | `MAP_TILES_ATTRIBUTION` | não | Atribuição obrigatória do fornecedor (por omissão `© OpenStreetMap`) |
-| `GEOCODER_USER_AGENT` | não | Identificação nos pedidos ao Nominatim (regra de uso): pôr um contacto real, ex. `PeekJob (ola@peekjob.pt)` |
+| `GEOCODER_USER_AGENT` | não | Identificação nos pedidos ao Nominatim (regra de uso): pôr um contacto real, ex. `PeekJob/0.1 (pedropeekjob@gmail.com)` |
 | `GEOCODER_URL` | não | Outro serviço compatível com o Nominatim; `off` desliga a geocodificação |
 | `GEOCODE_INTERVAL_MIN` | não | Minutos entre rondas de geocodificação (por omissão 15; 0 desliga as rondas) |
 | `GSC_VERIFICATION` | não | Código da etiqueta HTML do Search Console |
@@ -84,10 +84,45 @@ Para não pagar já o plano da produção: no Render, *New → Blueprint*, repos
 
 Com a mesma estrutura da imagem, numa base de dados vazia: migrações e seed, web servida pela API, email do link mágico no formato do Resend (para um servidor falso), cookie `Secure` + `httpOnly`, login e publicação de uma avaliação no browser em mobile.
 
-## Neon (base de dados) e Resend em desenvolvimento (15/10)
+## UAT publicada (15/10): o que foi feito
 
-- **Neon:** projeto `quiet-hall-12294765` (org `org-curly-hall-39678854`), ramo `production`. Na raiz: `neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch production --services postgres` e depois `neon deploy`, que escreve `DATABASE_URL` (pooler) e `DATABASE_URL_UNPOOLED` (direta) no `.env.local` (fica fora do git).
-- A API carrega o `.env.local` sozinha fora de produção (`src/common/local-env.ts`). A app usa o `pg` com a ligação do pooler; as migrações e o seed usam a direta (`DATABASE_URL_UNPOOLED`), porque o pooler não guarda o estado da sessão.
-- **Ligado e provado a 15/10** pelo workflow *Neon · ligar e provar* (Actions, segredo `NEON_API_KEY`): 13 migrações aplicadas no ramo `production`, 24 tabelas, `/health` com `"db":"up"`. O `neon.ts` gerado está na raiz (só Postgres).
-- Provar à mão: `npm run migrate -w @peekjob/api`, `npm run seed -w @peekjob/api`, `npm run start -w @peekjob/api` e `curl localhost:3000/health`.
-- **Resend:** `RESEND_API_KEY=re_… npm run email:test -w @peekjob/api` envia o "Hello World" (SDK do Resend) para pedropeekjob@gmail.com. A chave fica no `.env.local` ou no Render, nunca no código.
+Endereço: **https://peekjob-uat.onrender.com** (pede utilizador e palavra-passe: `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`, definidos no Render). Verificado: `/health` → `{"ok":true,"db":"up","release":"97adc08"}`.
+
+### Contas e quem as gere
+
+| Serviço | Conta | Para quê |
+|---|---|---|
+| Neon | org `org-curly-hall-39678854`, projeto `quiet-hall-12294765` | PostgreSQL. Ramo `production` (produção) e ramo `uat` (testes, criado a partir do `production`, sem expiração) |
+| Render | conta ligada ao GitHub `pedropeekjob-jpg` | Serviço `peekjob-uat` (Docker, Frankfurt, plano gratuito), criado pelo blueprint `render.uat.yaml` |
+| Resend | conta de pedropeekjob@gmail.com | Emails de login e códigos. Chave `peekjob-uat` (só envio) |
+| GitHub | segredo de Actions `NEON_API_KEY` | Workflow *Neon · ligar e provar* |
+
+Email de contacto provisório do site: **pedropeekjob@gmail.com** (tarefa 7). Também identifica a PeekJob nos pedidos ao OpenStreetMap (`GEOCODER_USER_AGENT`).
+
+### Neon
+
+1. Skills do Neon instaladas no projeto (`npx neon skills -y`, em `.claude/skills`).
+2. O ambiente do Claude e a pasta local não chegam à rede do Neon; por isso a ligação faz-se no GitHub Actions: workflow **Neon · ligar e provar** (*Actions → Run workflow*, ramo do Neon como parâmetro), com o segredo `NEON_API_KEY` (chave criada no Neon em *Account settings → API keys*).
+3. O workflow corre `neon init -y --org-id org-curly-hall-39678854 --project-id quiet-hall-12294765 --branch production --services postgres`, `neon deploy` (escreve `DATABASE_URL`, `DATABASE_URL_UNPOOLED` e `NEON_BRANCH` no `.env.local` do runner, nunca nos logs), o build, as migrações e a prova (`/health`, `GET /orgs`, tabelas e migrações) e mostra os resultados como anotações do run.
+4. Resultado no ramo `production`: 13 migrações (001 a 013), 24 tabelas, `/health` com `"db":"up"`, 0 organizações (a produção não leva dados de demonstração). O `neon.ts` gerado está na raiz (só Postgres; ramos novos expiram em 7 dias, exceto o principal).
+5. Na API: driver `pg` (servidor sempre a correr) com a ligação do **pooler** (`DATABASE_URL`); migrações e seed pela ligação **direta** (`DATABASE_URL_UNPOOLED`, se existir), porque o pooler não guarda o estado da sessão. Fora de produção, a API lê o `.env.local` sozinha (`src/common/local-env.ts`); o ficheiro está no `.gitignore`.
+6. Ramo `uat`: criado na consola do Neon (*Branches → Create branch*, pai `production`, sem expiração). A ligação com pooler foi para o `DATABASE_URL` do Render. As migrações e as organizações de demonstração aplicam-se sozinhas no arranque da imagem (`SEED_DEMO=true`).
+
+### Render (só UAT, gratuito)
+
+1. *New → Blueprint*, repositório `PeekJob`, **Blueprint Path** `render.uat.yaml` (só o `peekjob-uat`; o `render.yaml` completo também cria a produção, paga).
+2. Valores pedidos: `DATABASE_URL` (ramo `uat`, pooler), `RESEND_API_KEY`, `MAIL_FROM=PeekJob <onboarding@resend.dev>`, `BASIC_AUTH_USER` e `BASIC_AUTH_PASSWORD`. Em branco: `ANTHROPIC_API_KEY` (a reescrita usa só as regras), `SENTRY_DSN`, `GA_MEASUREMENT_ID`. O `PRIVACY_SECRET` é gerado pelo Render: **nunca o mudar**.
+3. Cada push para `main` publica uma versão nova (o `/health` mostra o commit em `release`). No plano gratuito adormece ao fim de 15 min; o primeiro pedido demora ~1 min.
+
+### Resend
+
+- A app envia pela API HTTP do Resend (`src/auth/resend-mailer.ts`); a chave vem só de `RESEND_API_KEY`.
+- Exemplo do SDK pedido (15/10): `npm run email:test -w @peekjob/api` envia o "Hello World" para pedropeekjob@gmail.com com o SDK `resend` (a chave nunca no código).
+- **Limite atual:** com o remetente `onboarding@resend.dev`, o Resend só entrega ao email da conta (pedropeekjob@gmail.com). Para o cliente e outras pessoas entrarem com o seu email é preciso verificar um domínio no Resend (*Domains*, registos DNS; tarefa 4) e mudar `MAIL_FROM` para um endereço desse domínio.
+
+### Falta
+
+- Domínio próprio (tarefa 4): emails para qualquer pessoa e endereço do site.
+- Alertas (tarefa 62): criar a variável `UAT_URL=https://peekjob-uat.onrender.com` em *Settings → Secrets and variables → Actions → Variables*.
+- Carregar a lista real de organizações (tarefa 22): já há base de dados.
+- Produção: quando houver decisão, `peekjob-prod` pelo `render.yaml` (plano pago) com o ramo `production` do Neon.
