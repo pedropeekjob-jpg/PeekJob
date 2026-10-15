@@ -41,7 +41,7 @@ jobs:
         run: npm run build
       - name: Migrações (ligação direta)
         run: npm run migrate -w @peekjob/api
-      - name: Prova: a API arranca e fala com a base de dados
+      - name: "Prova — a API arranca e fala com a base de dados"
         run: |
           PORT=3333 node apps/api/dist/main.js > api.log 2>&1 &
           for i in $(seq 1 30); do curl -sf localhost:3333/health > health.json && break; sleep 1; done
