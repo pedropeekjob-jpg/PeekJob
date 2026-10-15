@@ -58,6 +58,25 @@ describe('Importação do OpenStreetMap', () => {
     expect(majestic.rows.map((x) => x.city)).toEqual(['Lisboa', 'Porto']);
   });
 
+  it('grava em lotes: uma ida à base de dados por lote, não várias por organização', async () => {
+    let calls = 0;
+    const counted = { query: (...a: Parameters<typeof t.pool.query>) => (calls++, t.pool.query(...a)) } as unknown as typeof t.pool;
+    expect(await importOrgs(counted, orgs)).toEqual({ created: 7, linked: 0, skipped: 0 });
+    expect(calls).toBe(1);
+    const names = ['Talho Central', 'Florista Jasmim', 'Livraria Aurora', 'Barbearia Norte', 'Ginásio Atlas'];
+    const many = names.map((name, i) => ({ ...orgs[0], externalId: `node/9${i}`, name, nif: null }));
+    calls = 0;
+    expect(await importOrgs(counted, many, 'osm', OSM_LICENSE, 2)).toEqual({ created: 5, linked: 0, skipped: 0 });
+    expect(calls).toBe(3);
+  });
+
+  it('no mesmo lote, uma organização com nome parecido na mesma cidade junta-se à anterior', async () => {
+    const twin = { ...orgs[0], externalId: 'node/999', name: `${orgs[0].name} `, nif: null };
+    expect(await importOrgs(t.pool, [orgs[0], twin])).toEqual({ created: 1, linked: 1, skipped: 0 });
+    const { rows } = await t.pool.query(`SELECT count(*)::int AS n FROM org_locations l JOIN organizations o ON o.id = l.org_id WHERE o.name = $1`, [orgs[0].name]);
+    expect(rows[0].n).toBe(2);
+  });
+
   it('aparecem na pesquisa de avaliar (não na pública) e a primeira avaliação torna-as públicas', async () => {
     await importOrgs(t.pool, orgs);
     const pub = await t.http().get('/orgs/search').query({ q: 'padaria ribeira' }).expect(200);

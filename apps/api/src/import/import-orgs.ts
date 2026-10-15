@@ -1,4 +1,4 @@
-import type { Pool, PoolClient } from 'pg';
+import type { Pool } from 'pg';
 import type { ImportedOrg } from './osm';
 
 export const OSM_LICENSE = 'ODbL 1.0 · © contribuidores do OpenStreetMap';
@@ -11,79 +11,35 @@ export interface ImportResult {
   skipped: number;
 }
 
+/** Organizações por lote: um pedido à base de dados por lote (cabe folgado no limite de parâmetros) */
+export const IMPORT_BATCH_SIZE = 500;
+
 /**
- * Grava organizações importadas. Idempotente (identificador externo em org_sources).
+ * Grava organizações importadas, em lotes (função import_orgs_batch, migração 014). Idempotente
+ * (identificador externo em org_sources). Cada lote é uma transação.
  * - já importada → ignora
  * - mesmo NIF ou nome muito parecido na mesma cidade → junta (acrescenta o local e a proveniência)
  * - senão cria, por avaliar (status pending, source import): aparece em público com a primeira avaliação
  */
-export async function importOrgs(pool: Pool, orgs: ImportedOrg[], source = 'osm', license = OSM_LICENSE): Promise<ImportResult> {
-  const r: ImportResult = { created: 0, linked: 0, skipped: 0 };
-  for (const o of orgs) {
-    const c = await pool.connect();
-    try {
-      await c.query('BEGIN');
-      const outcome = await importOne(c, o, source, license);
-      await c.query('COMMIT');
-      r[outcome]++;
-    } catch (e) {
-      await c.query('ROLLBACK');
-      throw e;
-    } finally {
-      c.release();
-    }
-  }
-  return r;
-}
-
-async function importOne(c: PoolClient, o: ImportedOrg, source: string, license: string): Promise<keyof ImportResult> {
-  const known = await c.query('SELECT 1 FROM org_sources WHERE source = $1 AND external_id = $2', [source, o.externalId]);
-  if (known.rowCount) return 'skipped';
-
-  let target: string | null = null;
-  if (o.nif) {
-    const byNif = await c.query(`SELECT id FROM organizations WHERE nif = $1 AND status IN ('active', 'pending')`, [o.nif]);
-    target = byNif.rows[0]?.id ?? null;
-  }
-  if (!target) {
-    const byName = await c.query(
-      `SELECT id FROM organizations
-        WHERE status IN ('active', 'pending') AND search_city = lower(f_unaccent($2))
-          AND similarity(search_name, lower(f_unaccent($1))) >= $3
-        ORDER BY similarity(search_name, lower(f_unaccent($1))) DESC LIMIT 1`,
-      [o.name, o.city, SAME_ORG_SIMILARITY],
-    );
-    target = byName.rows[0]?.id ?? null;
-  }
-
-  let outcome: keyof ImportResult = 'linked';
-  if (!target) {
-    const nifFree = o.nif ? !(await c.query('SELECT 1 FROM organizations WHERE nif = $1', [o.nif])).rowCount : false;
-    const ins = await c.query(
-      `INSERT INTO organizations (name, type, city, district, sector, nif, status, source)
-       VALUES ($1, $2, $3, $4, $5, $6, 'pending', 'import') RETURNING id`,
-      [o.name, o.type, o.city, o.district, o.sector, nifFree ? o.nif : null],
-    );
-    target = ins.rows[0].id as string;
-    outcome = 'created';
-  } else if (o.district) {
-    // a organização já existia (criada por alguém, sem distrito conhecido): completa-o
-    await c.query('UPDATE organizations SET district = $2 WHERE id = $1 AND district IS NULL', [target, o.district]);
-  }
-  if (o.address || o.lat != null) {
-    await c.query(`INSERT INTO org_locations (org_id, address, city, lat, lng, status) VALUES ($1, $2, $3, $4, $5, 'active')`, [
-      target,
-      o.address ?? o.city,
-      o.city,
-      o.lat,
-      o.lng,
+export async function importOrgs(
+  db: Pick<Pool, 'query'>,
+  orgs: ImportedOrg[],
+  source = 'osm',
+  license = OSM_LICENSE,
+  batchSize = IMPORT_BATCH_SIZE,
+): Promise<ImportResult> {
+  const total: ImportResult = { created: 0, linked: 0, skipped: 0 };
+  for (let i = 0; i < orgs.length; i += batchSize) {
+    const batch = orgs.slice(i, i + batchSize);
+    const { rows } = await db.query<{ r: ImportResult }>('SELECT import_orgs_batch($1::jsonb, $2, $3, $4) AS r', [
+      JSON.stringify(batch),
+      source,
+      license,
+      SAME_ORG_SIMILARITY,
     ]);
+    total.created += rows[0].r.created;
+    total.linked += rows[0].r.linked;
+    total.skipped += rows[0].r.skipped;
   }
-  await c.query(`INSERT INTO org_sources (org_id, field, source, license, external_id) VALUES ($1, 'name,type,sector,location', $2, $3, $4)`, [
-    target,
-    source,
-    license,
-    o.externalId,
-  ]);
-  return outcome;
+  return total;
 }
