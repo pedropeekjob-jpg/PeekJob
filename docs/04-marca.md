@@ -17,7 +17,7 @@ Ficheiros na pasta [`marca/`](marca/).
 | Subida / descida | `#1F7A4D` / `#B4540A` | Tendências |
 
 ## Tipografia
-- **Jost** (títulos e números) · **Geist** (texto) · **Geist Mono** (valores pequenos). Todas Google Fonts, gratuitas.
+- **Letra do sistema** (títulos e números; SF Pro no iPhone e no Mac, Geist nos outros, a negrito e apertada, estilo iOS — desde 15/10, antes Jost) · **Geist** (texto) · **Geist Mono** (valores pequenos). Geist e Geist Mono são Google Fonts, gratuitas; a SF Pro vem com o sistema e não se descarrega.
 
 ## Leitura de dados
 - **Anel** à volta da nota (0–5). **5 bolinhas** por critério (meia bolinha para valores intermédios). Respeito sempre a roxo.

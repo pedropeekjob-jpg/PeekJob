@@ -8,7 +8,9 @@
   /* Visual leve (14/10): fundo branco, menta para zonas suaves, títulos menos carregados */
   --mint: #eef8f8;
   --title: #10242a;
-  --display-weight: 500;
+  /* títulos estilo iOS (15/10): letra do sistema a negrito, mais apertada */
+  --display-weight: 700;
+  --display-tracking: -0.025em;
   --purple: #652d90;
   --purple-text: #4e2270;
   --purple-tint: #f3ecf8;
@@ -28,10 +30,11 @@
   --warn-text: #8a3f06;
   --overlay: rgba(1, 11, 19, 0.55);
 
-  --font-display: 'Jost', 'Futura', 'Century Gothic', sans-serif;
+  /* letra do sistema (SF Pro no iPhone e no Mac), com a Geist nos outros; antes Jost */
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Geist', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Geist', 'Helvetica Neue', Arial, sans-serif;
   /* letra do sistema (SF Pro em Apple), com a Geist como alternativa: títulos "estilo iOS" */
-  --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  --font-system: var(--font-display);
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --r-sm: 14px;
@@ -94,7 +97,7 @@ button {
 .display {
   font-family: var(--font-display);
   font-weight: var(--display-weight);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--display-tracking);
   line-height: 1.02;
   margin: 0;
 }
@@ -104,7 +107,7 @@ button {
   color: var(--title);
   font-size: 34px;
   line-height: 1.05;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--display-tracking);
   margin: 0;
 }
 .h2 {
@@ -113,6 +116,7 @@ button {
   color: var(--title);
   font-size: 22px;
   line-height: 1.15;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 .h3 {
