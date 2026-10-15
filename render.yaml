@@ -1,7 +1,7 @@
 # Render Blueprint: dois ambientes a partir da mesma imagem (API + web na mesma origem), na UE (Frankfurt).
 # - peekjob-uat: testes com o cliente. Publica a cada push para "main". Fechado com palavra-passe e fora do Google.
 # - peekjob-prod: produção. Publica só quando o ramo "production" avança (workflow "Promover para produção").
-# Bases de dados externas (Neon): um projeto com dois ramos, "uat" e "main" (produção). Colar cada DATABASE_URL no painel.
+# Bases de dados externas (Neon, projeto quiet-hall-12294765): ramo "uat" para a UAT e "production" para produção. Colar cada DATABASE_URL no painel.
 services:
   - type: web
     name: peekjob-uat
@@ -33,6 +33,8 @@ services:
       # Opcional: propriedade GA só para a UAT (não misturar com produção)
       - key: GA_MEASUREMENT_ID
         sync: false
+      - key: GEOCODER_USER_AGENT
+        value: "PeekJob/0.1 (pedropeekjob@gmail.com)"
       - key: SEED_DEMO
         value: "true"
 
@@ -66,5 +68,7 @@ services:
         sync: false
       - key: GSC_VERIFICATION
         sync: false
+      - key: GEOCODER_USER_AGENT
+        value: "PeekJob/0.1 (pedropeekjob@gmail.com)"
       - key: SEED_DEMO
         value: "false"

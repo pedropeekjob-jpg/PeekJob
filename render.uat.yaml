@@ -1,0 +1,37 @@
+# Render Blueprint só da UAT (plano gratuito), para começar sem custos.
+# No Render: New → Blueprint → repositório PeekJob → "Blueprint Path": render.uat.yaml
+# Base de dados: ramo "uat" do projeto Neon (nunca o "production": a UAT carrega organizações de demonstração).
+services:
+  - type: web
+    name: peekjob-uat
+    runtime: docker
+    region: frankfurt
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: uat
+      - key: DATABASE_URL
+        sync: false
+      - key: PRIVACY_SECRET
+        generateValue: true
+      - key: BASIC_AUTH_USER
+        sync: false
+      - key: BASIC_AUTH_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: GA_MEASUREMENT_ID
+        sync: false
+      - key: GEOCODER_USER_AGENT
+        value: "PeekJob/0.1 (pedropeekjob@gmail.com)"
+      - key: SEED_DEMO
+        value: "true"

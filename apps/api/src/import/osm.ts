@@ -169,7 +169,7 @@ export class OverpassClient {
     for (let i = 0; i < this.attempts; i++) {
       const res = await this.fetchFn(this.url, {
         method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'PeekJob/0.1 (importador de organizacoes; ola@peekjob.pt)' },
+        headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'PeekJob/0.1 (importador de organizacoes; pedropeekjob@gmail.com)' },
         body: 'data=' + encodeURIComponent(query),
       });
       if (res.ok) return (await res.json()) as { elements: OverpassElement[] };

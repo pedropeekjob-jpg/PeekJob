@@ -10,7 +10,7 @@ A demo no GitHub Pages continua em **modo demonstração** (dados de exemplo no 
 |---|---|---|
 | Serviço no Render | `peekjob-uat` (plano gratuito) | `peekjob-prod` (plano pago, não adormece) |
 | Publica quando | há um push para `main` (depois do CI) | o ramo `production` avança (workflow **Promover para produção**) |
-| Base de dados | ramo `uat` do projeto Neon | ramo `main` do projeto Neon (com cópias de segurança) |
+| Base de dados | ramo `uat` do projeto Neon | ramo `production` do projeto Neon (com cópias de segurança) |
 | Acesso | palavra-passe (`BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`); sem ela não arranca | público |
 | Google | fora (`noindex`, robots fechado, sem sitemap) | indexado, Search Console |
 | Emails | assunto com `[UAT]` | normais |
@@ -43,6 +43,10 @@ Para o cliente testar à vontade convém um domínio (ex.: `peekjob.pt`): serve 
 5. Abrir o endereço `https://peekjob.onrender.com` (ou o domínio próprio). Os links dos emails usam esse endereço automaticamente. Com domínio próprio, definir `WEB_ORIGIN=https://peekjob.pt`.
 
 Cada push para `main` publica uma nova versão (o CI corre os testes e constrói a imagem).
+
+### Começar só com a UAT (15/10)
+
+Para não pagar já o plano da produção: no Render, *New → Blueprint*, repositório `PeekJob`, e em **Blueprint Path** escrever `render.uat.yaml` (só cria o `peekjob-uat`, gratuito). Base de dados: ramo `uat` no Neon (criado a partir do `production`, sem expiração). Enquanto não houver domínio verificado no Resend, `MAIL_FROM="PeekJob <onboarding@resend.dev>"` e os emails só chegam ao email da conta Resend (pedropeekjob@gmail.com). Email de contacto do site: pedropeekjob@gmail.com (`VITE_CONTACT_EMAIL` muda-o no build).
 
 ## Variáveis de ambiente
 
