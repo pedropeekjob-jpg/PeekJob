@@ -74,7 +74,7 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
   it('filtrar por tipo (sem esperar)', async () => {
     const { user } = show(viewport);
     const group = screen.getByRole('group', { name: 'Tipo de organização' });
-    expect(within(group).getAllByRole('button').map((b) => b.textContent)).toEqual(['Todas', 'PME', 'Associação', 'Voluntariado', 'Nome individual']);
+    expect(within(group).getAllByRole('button').map((b) => b.textContent)).toEqual(['Todas', 'PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa']);
     expect(within(group).getByRole('button', { name: 'Todas' })).toHaveAttribute('aria-pressed', 'true');
     await user.click(within(group).getByRole('button', { name: 'Voluntariado' }));
     expect(within(group).getByRole('button', { name: 'Voluntariado' })).toHaveAttribute('aria-pressed', 'true');

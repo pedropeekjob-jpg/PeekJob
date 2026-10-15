@@ -12,7 +12,7 @@ import { match } from '../../lib/match';
 export const MIN_REVIEWS = 5;
 /** Aproximação no POC: "só verificadas" = pelo menos 80% das avaliações verificadas */
 export const VERIFIED_MIN = 80;
-export const SIZES: SizeBand[] = ['1–9', '10–49', '50–249'];
+export const SIZES: SizeBand[] = ['1–9', '10–49', '50–249', '250+'];
 /** No computador mostramos 8 de cada vez */
 export const DESKTOP_LIMIT = 8;
 /** Opções visíveis por grupo antes de "+n" */
@@ -116,7 +116,8 @@ export function trendInfo(t: number | 'novo'): { text: string; aria: string; kin
 export function sizeLabel(s: string) {
   if (s === '1–9') return tr('Até 9 pessoas', 'Up to 9 people');
   if (s === '10–49') return tr('10 a 49 pessoas', '10 to 49 people');
-  return tr('50 a 249 pessoas', '50 to 249 people');
+  if (s === '50–249') return tr('50 a 249 pessoas', '50 to 249 people');
+  return tr('250 ou mais pessoas', '250 or more people');
 }
 
 /** "Todos", um valor, ou "primeiro +n" */

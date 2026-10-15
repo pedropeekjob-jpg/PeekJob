@@ -34,7 +34,8 @@ export const CRITERIA: Criterion[] = [
 export const PREF_WEIGHTS = [3, 2, 1];
 export const DEFAULT_PREFS: CriterionKey[] = ['respeito', 'salario', 'equilibrio'];
 
-export const ORG_TYPES = ['PME', 'Associação', 'Voluntariado', 'Nome individual'] as const;
+/** O foco são as pequenas (PME, associações, voluntariado, nome individual), mas qualquer empresa pode ser avaliada */
+export const ORG_TYPES = ['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa'] as const;
 export type OrgType = (typeof ORG_TYPES)[number];
 
 export const GOOD_TAGS = ['Ambiente seguro', 'Horários cumpridos', 'Igualdade salarial', 'Horários para quem cuida'] as const;

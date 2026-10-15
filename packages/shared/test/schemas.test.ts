@@ -19,6 +19,10 @@ describe('CreateOrganizationInput', () => {
     expect(() => CreateOrganizationInput.parse({ ...base, type: 'Nome individual' })).toThrow(/NIF/);
   });
 
+  it('aceita grandes empresas (qualquer empresa pode ser avaliada)', () => {
+    expect(CreateOrganizationInput.parse({ ...base, name: 'Continente', type: 'Grande empresa' }).type).toBe('Grande empresa');
+  });
+
   it('recusa tipos desconhecidos e nomes curtos', () => {
     expect(() => CreateOrganizationInput.parse({ ...base, type: 'Multinacional' })).toThrow();
     expect(() => CreateOrganizationInput.parse({ ...base, name: 'A' })).toThrow();

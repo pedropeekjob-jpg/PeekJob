@@ -44,8 +44,8 @@ export const FAQ = () => [
   {
     q: tr('Somos uma associação de voluntariado. Faz sentido?', 'We’re a volunteering association. Does this make sense for us?'),
     a: tr(
-      'Sim. A PeekJob foi pensada para casas pequenas: associações, voluntariado, PME e quem trabalha em nome individual.',
-      'Yes. PeekJob was designed for small places: associations, volunteering, SMEs and sole traders.',
+      'Sim. A PeekJob foi pensada para casas pequenas: associações, voluntariado, PME e quem trabalha em nome individual. Grandes empresas também podem ser avaliadas.',
+      'Yes. PeekJob was designed for small places: associations, volunteering, SMEs and sole traders. Large companies can be reviewed too.',
     ),
   },
 ];

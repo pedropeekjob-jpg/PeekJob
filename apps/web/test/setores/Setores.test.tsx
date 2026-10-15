@@ -15,7 +15,7 @@ describe.each(['mobile', 'desktop'] as const)('Setores (%s)', (viewport) => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Encontra o teu tipo de lugar.' })).toBeInTheDocument();
     const group = screen.getByRole('group', { name: 'Tipo de organização' });
     const buttons = within(group).getAllByRole('button');
-    expect(buttons.map((b) => b.querySelector('.num')!.textContent)).toEqual(['PME', 'Associação', 'Voluntariado', 'Nome individual']);
+    expect(buttons.map((b) => b.querySelector('.num')!.textContent)).toEqual(['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa']);
     expect(within(buttons[0]).getByText(/^\d+ organizaç/)).toBeInTheDocument();
     expect(within(buttons[0]).getByRole('img', { name: /^Nota média \d,\d de 5$/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Ver ranking · todos os tipos/ })).toHaveAttribute('href', '/ranking');
