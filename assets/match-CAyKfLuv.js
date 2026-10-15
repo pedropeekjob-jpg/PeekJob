@@ -1,0 +1,1 @@
+import{a7 as u}from"./index-CcX7fm_9.js";function i(a,o){let t=0,s=0;return o.forEach((c,e)=>{const n=a[c];if(n==null)return;const r=u[e]??1;t+=n*r,s+=r}),s?Math.round(t/(5*s)*100):0}const m=5,E=3.8,l=(a,o,t=m,s=E)=>(t*s+o*a)/(t+o);export{m as B,E as G,l as a,i as m};
