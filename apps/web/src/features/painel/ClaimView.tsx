@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import type { Claim } from '../../api/accounts';
 import { useOrg, useSearch } from '../../api/orgs';
@@ -36,14 +36,10 @@ function ClaimList({ claims }: { claims: Claim[] }) {
 }
 
 /** Procurar e escolher a organização (ou a que veio no endereço) */
-function OrgChoice({ form, suggested }: { form: ClaimForm; suggested: string | null }) {
+function OrgChoice({ form }: { form: ClaimForm }) {
   const [q, setQ] = useState('');
   const { items } = useSearch(q);
-  const pre = useOrg(suggested);
   const { org, pick } = form;
-  useEffect(() => {
-    if (pre && !org) pick(pre);
-  }, [pre, org, pick]);
   return (
     <div className="field">
       <label htmlFor="claim-q">{tr('Organização', 'Organisation')}</label>
@@ -111,7 +107,7 @@ function submitLabel(form: ClaimForm) {
 
 /** Pedir para gerir a página da organização (a moderação confirma) */
 export function ClaimView({ claims, suggested, onSent }: { claims: Claim[]; suggested: string | null; onSent: () => void }) {
-  const form = useClaim(onSent);
+  const form = useClaim(onSent, useOrg(suggested));
   const submit = (e: FormEvent) => {
     e.preventDefault();
     void (form.step === 'code' ? form.confirm() : form.send());
@@ -134,7 +130,7 @@ export function ClaimView({ claims, suggested, onSent }: { claims: Claim[]; sugg
         <form className={styles.form} onSubmit={submit} noValidate>
           {form.step === 'form' ? (
             <>
-              <OrgChoice form={form} suggested={suggested} />
+              <OrgChoice form={form} />
               <ClaimFields form={form} />
             </>
           ) : (

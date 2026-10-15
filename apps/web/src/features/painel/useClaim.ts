@@ -7,9 +7,10 @@ import { isEmailLike } from '../../lib/validation';
 export type ClaimMethod = 'email' | 'document';
 export type ClaimStep = 'form' | 'code' | 'sent';
 
-/** Pedir para gerir a página: escolher a organização, provar (email com código ou documento) e enviar */
-export function useClaim(onSent: () => void) {
-  const [org, setOrg] = useState<Org | null>(null);
+/** Pedir para gerir a página: escolher a organização (por omissão, a sugerida), provar (email com código ou documento) e enviar */
+export function useClaim(onSent: () => void, suggested?: Org | null) {
+  const [picked, setOrg] = useState<Org | null>(null);
+  const org = picked ?? suggested ?? null;
   const [method, setMethod] = useState<ClaimMethod>('email');
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
