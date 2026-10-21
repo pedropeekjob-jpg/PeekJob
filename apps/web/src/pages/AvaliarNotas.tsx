@@ -1,4 +1,3 @@
-import { useCallback, useState } from 'react';
 import { Navigate } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
@@ -7,7 +6,6 @@ import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
 import { ResponsibilityNote } from '../components/UI';
 import { RewriteHelper } from '../components/RewriteHelper';
-import type { CriterionKey } from '../data/criteria';
 import type { Org } from '../data/orgs';
 import { PublishErrorBox } from '../features/review/PublishErrorBox';
 import { SupportAlert } from '../features/review/SupportAlert';
@@ -50,8 +48,6 @@ const recommendLabel = (v: boolean | null) =>
 
 function MobileNotas({ org, locationLabel, review }: ViewProps) {
   const { go, leave, change } = useFlowNav();
-  const [help, setHelp] = useState<CriterionKey | null>(null);
-  const toggleHelp = useCallback((k: CriterionKey) => setHelp((h) => (h === k ? null : k)), []);
   const { done, insult } = review;
   // "publicado" substitui as notas: voltar atrás nunca cai num rascunho já publicado
   const publish = async () => {
@@ -74,7 +70,7 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
 
         <div className="stack">
           {MOBILE_ORDER.map((k) => (
-            <ScoreRow key={k} k={k} value={scoreOf(review.scores, k)} onPick={review.setScore} helpOpen={help === k} onHelp={toggleHelp} />
+            <ScoreRow key={k} k={k} value={scoreOf(review.scores, k)} onPick={review.setScore} />
           ))}
         </div>
 

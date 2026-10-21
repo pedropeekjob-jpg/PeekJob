@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { expect, login, pickOrg, test, uniqueEmail } from '../support/fixtures';
+import { expect, login, pickOrg, test, uniqueEmail, setScore } from '../support/fixtures';
 
 /**
  * WCAG 2.1 AA (axe-core): todas as páginas, em telemóvel e computador, também os passos de avaliar e o perfil.
@@ -66,7 +66,7 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   await audit(page, '/avaliar', found);
   await pickOrg(page, 'oficina sete', 'Oficina Sete');
   await audit(page, '/avaliar/notas', found);
-  await page.getByRole('radio', { name: 'Ambiente, 3 de 5' }).first().click();
+  await setScore(page, 'Ambiente', 3);
   if (isMobile) await page.getByRole('button', { name: /Contar como é/ }).click();
   await page.locator('textarea').fill('O Ricardo é um idiota e o salário chega sempre atrasado.');
   await audit(page, 'avaliar: texto bloqueado', found);

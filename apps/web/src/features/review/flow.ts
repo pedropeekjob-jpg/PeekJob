@@ -27,14 +27,9 @@ export const toggleIn = (list: string[], item: string) => (list.includes(item) ?
 
 export const countDone = (scores: Partial<Scores>) => DESKTOP_ORDER.filter((k) => scoreOf(scores, k) > 0).length;
 
-/** Nota de destino de uma tecla num grupo 1–5 (setas, Home, End); null para outras teclas */
-export function scoreForKey(key: string, current: number): number | null {
-  const next = ({ ArrowRight: current + 1, ArrowUp: current + 1, ArrowLeft: current - 1, ArrowDown: current - 1, Home: 1, End: 5 } as Record<string, number>)[key];
-  return next == null ? null : Math.min(5, Math.max(1, next));
-}
-
-/** Só um botão por critério entra no Tab: a nota escolhida, ou a primeira */
-export const isTabStop = (n: number, value: number) => (value ? n === value : n === 1);
+/** O que cada nota quer dizer (a etiqueta que acompanha o slider, 21/10) */
+export const scoreWord = (n: number) =>
+  [tr('Sem nota', 'No score'), tr('Péssimo', 'Terrible'), tr('Mau', 'Poor'), tr('Aceitável', 'OK'), tr('Bom', 'Good'), tr('Excelente', 'Excellent')][Math.max(0, Math.min(5, Math.round(n)))];
 
 /**
  * Três passos (21/10: "avalia em 3 passos"): escolher a organização, avaliar e publicar.

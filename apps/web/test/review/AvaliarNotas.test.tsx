@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import AvaliarNotas from '../../src/pages/AvaliarNotas';
 import { renderScreen, WithDraft } from '../utils/render';
+import { setScore } from '../utils/score';
 
 const show = (viewport: 'mobile' | 'desktop', patch = {}) =>
   renderScreen(
@@ -18,10 +19,10 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     const { user } = show('mobile');
     expect(await screen.findByRole('heading', { level: 1, name: /Dá uma nota de 1 a 5/ })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Passo 2 de 3' })).toBeInTheDocument();
-    expect(screen.getAllByRole('radiogroup')).toHaveLength(8);
+    expect(screen.getAllByRole('slider')).toHaveLength(8);
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
-    await user.click(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' }));
-    expect(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' })).toHaveAttribute('aria-checked', 'true');
+    setScore('Ambiente', 4);
+    expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
     const publish = screen.getByRole('button', { name: /Publicar avaliação/ });
     expect(publish).toHaveTextContent('1/8');
     await user.click(publish);
@@ -66,10 +67,11 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     expect(screen.getByText(/^A PeekJob não trata nem resolve irregularidades/)).toBeInTheDocument();
   });
 
-  it('clicar na nota escolhida tira-a', async () => {
-    const { user } = show('mobile', { scores: { ambiente: 4 } });
-    await user.click(await screen.findByRole('radio', { name: 'Ambiente, 4 de 5' }));
-    expect(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' })).toHaveAttribute('aria-checked', 'false');
+  it('o × tira a nota escolhida', async () => {
+    show('mobile', { scores: { ambiente: 4 } });
+    expect(await screen.findByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
+    setScore('Ambiente', 0);
+    expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', 'Sem nota');
   });
 
   it('ajuda por critério abre e fecha', async () => {
@@ -94,7 +96,7 @@ describe('Avaliar · notas e texto (computador, ecrã único)', () => {
     const { user } = show('desktop');
     expect(await screen.findByRole('heading', { level: 1, name: /Como é trabalhar lá/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
-    await user.click(screen.getByRole('radio', { name: 'Salário justo, 5 de 5' }));
+    setScore('Salário justo', 5);
     expect(screen.getByRole('img', { name: 'Nota média 5,0 de 5' })).toBeInTheDocument();
     expect(screen.getByText(/1 de 8 notas/)).toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: /A tua experiência/ }), 'Equipa unida.');

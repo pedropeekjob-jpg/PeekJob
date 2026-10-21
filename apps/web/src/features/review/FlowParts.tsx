@@ -1,4 +1,4 @@
-import { memo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { memo, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { CRITERION, type CriterionKey } from '../../data/criteria';
@@ -6,7 +6,7 @@ import type { Scores } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { fmt } from '../../lib/format';
-import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
+import { isBadTag, MOBILE_ORDER, scoreOf, scoreWord, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
 import styles from './Flow.module.css';
 
 /** Partes partilhadas pelos ecrãs do fluxo de avaliar */
@@ -76,11 +76,31 @@ export function DeskSteps({ current, right, onChange }: { current: 1 | 2 | 3; ri
   );
 }
 
-function HelpToggle({ label, open, toggle }: { label: string; open: boolean; toggle: () => void }) {
+/**
+ * Ícone de ajuda (?) com a explicação do critério (21/10): aparece ao passar o rato ou com o foco,
+ * e fica aberta ao tocar (ecrãs táteis). Escape fecha.
+ */
+export function HelpTip({ id, label, text }: { id: string; label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  const tipId = `${id}-ajuda`;
   return (
-    <button type="button" onClick={toggle} aria-expanded={open} aria-label={tr(`O que conta em ${label}`, `What counts in ${label}`)} className={styles.help}>
-      <span className={styles.helpMark}>?</span>
-    </button>
+    <span className={styles.tipWrap} data-open={open || undefined}>
+      <button
+        type="button"
+        className={styles.help}
+        aria-label={tr(`O que conta em ${label}`, `What counts in ${label}`)}
+        aria-expanded={open}
+        aria-describedby={tipId}
+        onClick={() => setOpen(!open)}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+        onBlur={() => setOpen(false)}
+      >
+        <Icon name="help" size={18} stroke={2} />
+      </button>
+      <span id={tipId} role="tooltip" className={styles.tip}>
+        {text}
+      </span>
+    </span>
   );
 }
 
@@ -90,52 +110,67 @@ interface ScoreRowProps {
   /** Recebe o critério: a mesma função serve as 8 linhas (estável, para o memo) */
   onPick: (k: CriterionKey, n: number) => void;
   desktop?: boolean;
-  /** Ajuda "o que conta": aberta ou não, e a função que a alterna (recebe o critério) */
-  helpOpen?: boolean;
-  onHelp?: (k: CriterionKey) => void;
 }
 
 /**
- * Um critério com os botões 1–5 (rádio: um só Tab; setas, Home e End mudam a nota).
+ * Um critério com um slider de 1 a 5 (21/10; antes cinco botões). A cor intensifica-se com a nota e a etiqueta
+ * diz o que ela quer dizer (Péssimo … Excelente). Sem nota, o slider fica cinzento: tocar ou usar as setas dá a nota;
+ * o × (ou Delete) tira-a.
  * memo: ao dar uma nota só a linha desse critério volta a correr (medido com scripts/react-profile.mjs).
  */
-export const ScoreRow = memo(function ScoreRow({ k, value, onPick, desktop = false, helpOpen = false, onHelp }: ScoreRowProps) {
+export const ScoreRow = memo(function ScoreRow({ k, value, onPick, desktop = false }: ScoreRowProps) {
   const c = CRITERION[k];
-  const onKey = (e: KeyboardEvent<HTMLButtonElement>, n: number) => {
-    const to = scoreForKey(e.key, n);
-    if (to == null) return;
-    e.preventDefault();
-    onPick(k, to);
-    (e.currentTarget.parentElement?.children[to - 1] as HTMLElement | undefined)?.focus();
+  const nameId = `nota-${k}`;
+  const word = scoreWord(value);
+  const level = value || undefined;
+  // sem nota o slider está no meio: tocar aí não muda o valor (não há onChange), por isso a nota dá-se ao largar
+  const pickCurrent = (e: { currentTarget: HTMLInputElement }) => {
+    if (!value) onPick(k, Number(e.currentTarget.value));
+  };
+  const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && value) {
+      e.preventDefault();
+      onPick(k, 0);
+    }
   };
   return (
-    <div className={desktop ? styles.scoreWide : styles.score} data-respect={k === 'respeito' || undefined}>
-      <div role="radiogroup" aria-label={c.label} className={styles.scoreGroup}>
+    <div className={desktop ? styles.scoreWide : styles.score} data-respect={k === 'respeito' || undefined} data-level={level}>
+      <div className={`row ${styles.scoreHead}`}>
         <span className={`row ${styles.scoreName}`}>
-          <span className={styles.scoreLabel}>{c.label}</span>
-          {onHelp && <HelpToggle label={c.label} open={helpOpen} toggle={() => onHelp(k)} />}
+          <span id={nameId} className={styles.scoreLabel}>
+            {c.label}
+          </span>
+          <HelpTip id={nameId} label={c.label} text={c.help} />
         </span>
-        <span className={`row ${styles.dots}`}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              role="radio"
-              className={styles.dotButton}
-              aria-checked={n === value}
-              aria-label={tr(`${c.label}, ${n} de 5`, `${c.label}, ${n} of 5`)}
-              tabIndex={isTabStop(n, value) ? 0 : -1}
-              onKeyDown={(e) => onKey(e, n)}
-              onClick={() => onPick(k, n === value ? 0 : n)}
-            >
-              <span className={styles.dot} data-on={n <= value || undefined}>
-                {n}
-              </span>
-            </button>
-          ))}
+        <span className={styles.levelPill} data-level={level} aria-hidden="true">
+          {value ? `${value} · ${word}` : word}
         </span>
       </div>
-      {helpOpen && <div className={`fade-up ${styles.hint}`}>{c.hint}.</div>}
+      <div className={`row ${styles.sliderRow}`}>
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          className={styles.slider}
+          value={value || 3}
+          data-empty={!value || undefined}
+          style={{ '--pct': `${((value || 1) - 1) * 25}%` } as CSSProperties}
+          aria-labelledby={nameId}
+          aria-valuetext={value ? tr(`${value} de 5, ${word}`, `${value} of 5, ${word}`) : tr('Sem nota', 'No score')}
+          onChange={(e) => onPick(k, Number(e.target.value))}
+          onPointerUp={pickCurrent}
+          onKeyDown={onKey}
+        />
+        <button type="button" className={styles.clear} aria-label={tr(`Tirar a nota de ${c.label}`, `Remove the ${c.label} score`)} onClick={() => onPick(k, 0)} hidden={!value}>
+          <Icon name="close" size={14} stroke={2.2} />
+        </button>
+      </div>
+      <span className={`row between mono ${styles.ticks}`} aria-hidden="true">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <span key={n}>{n}</span>
+        ))}
+      </span>
     </div>
   );
 });

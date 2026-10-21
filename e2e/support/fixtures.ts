@@ -107,3 +107,11 @@ export function randomNif(): string {
   const r = sum % 11;
   return base + (r < 2 ? 0 : 11 - r);
 }
+
+/** Dá uma nota de 1 a 5 no slider de um critério, com o teclado (Home vai ao 1, cada seta sobe um) */
+export async function setScore(page: Page, label: string, n: number) {
+  const slider = page.getByRole('slider', { name: label }).first();
+  await slider.focus();
+  await page.keyboard.press('Home');
+  for (let i = 1; i < n; i++) await page.keyboard.press('ArrowRight');
+}
