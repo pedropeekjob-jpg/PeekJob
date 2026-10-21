@@ -71,7 +71,7 @@ describe('Início no telemóvel', () => {
     seedStore({ onboarded: true });
     show('mobile');
     expect(await screen.findByRole('link', { name: /Procurar uma organização/ })).toHaveAttribute('href', '/pesquisa');
-    expect(screen.getByRole('link', { name: /Avaliar onde trabalho.*2 minutos/ })).toHaveAttribute('href', '/avaliar');
+    expect(screen.getByRole('link', { name: /Avaliar onde trabalho.*3 passos/ })).toHaveAttribute('href', '/avaliar');
     for (const a of screen.getAllByRole('link', { name: 'Perfil' })) expect(a).toHaveAttribute('href', '/perfil');
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { LogoAnimated } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
@@ -14,8 +14,9 @@ export const ZONE_TEXT = {
     hint: () => tr('Espreitar organizações', 'Peek at organisations'),
   },
   job: {
-    label: () => tr('O teu trabalho', 'Your job'),
-    sub: () => tr('Avalia onde trabalhas, sem dar a cara.', 'Review where you work, anonymously.'),
+    // "Avalia" (21/10): diz o que se faz e é o termo que se pesquisa (antes "O teu trabalho")
+    label: () => tr('Avalia', 'Review'),
+    sub: () => tr('Conta como é onde trabalhas, sem dar a cara.', 'Say what it’s like where you work, anonymously.'),
     hint: () => tr('Avaliar onde trabalho', 'Review where I work'),
   },
 } as const;
@@ -60,10 +61,30 @@ export function Door({ zone, onOpen, focusOnMount }: DoorProps) {
 
 function CloseButton({ onClose }: { onClose: () => void }) {
   return (
-    <button type="button" className={`icon-btn ${styles.close}`} aria-label={tr('Voltar ao início', 'Back to the start')} onClick={onClose}>
-      <Icon name="close" size={18} />
-    </button>
+    <div className={`row ${styles.closeRow}`}>
+      {/* o clique na zona (fora da pesquisa e das ligações) também fecha: a dica diz isso (texto para rato ou toque) */}
+      <span className={styles.closeHint} aria-hidden="true">
+        <span className={styles.hintMouse}>{tr('Clica fora da pesquisa para voltar', 'Click outside the search to go back')}</span>
+        <span className={styles.hintTouch}>{tr('Toca fora da pesquisa para voltar', 'Tap outside the search to go back')}</span>
+      </span>
+      <button type="button" className={`icon-btn ${styles.close}`} aria-label={tr('Voltar ao início', 'Back to the start')} onClick={onClose}>
+        <Icon name="close" size={18} />
+      </button>
+    </div>
   );
+}
+
+/** Elementos que tratam o próprio clique: dentro deles, o clique não fecha a zona */
+const INTERACTIVE = 'a, button, input, textarea, select, label, form';
+
+/** Clique na zona aberta, fora da pesquisa e das ligações: volta às duas zonas (pedido de 21/10) */
+export function closeOnBackground(onClose: () => void) {
+  return (e: MouseEvent<HTMLElement>) => {
+    if (e.target instanceof Element && e.target.closest(INTERACTIVE)) return;
+    // quem está a selecionar texto não quer fechar
+    if (window.getSelection()?.toString()) return;
+    onClose();
+  };
 }
 
 interface SearchFormProps {
@@ -103,7 +124,8 @@ function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFoc
         autoFocus={autoFocus}
       />
       <button type="submit" className={styles.go} aria-label={submitLabel}>
-        <Icon name="arrow" size={20} />
+        {/* seta mais grossa (21/10): antes o traço fino quase desaparecia */}
+        <Icon name="arrow" size={22} stroke={2.75} />
       </button>
     </form>
   );
@@ -112,7 +134,9 @@ function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFoc
 /** Espreitar aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
 export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFocus: boolean; onClose: () => void }) {
   return (
-    <section id="zona-peek" aria-labelledby="zona-peek-t" className={styles.panel}>
+    // o teclado fecha com Escape ou com o X; o clique no fundo é um atalho para rato e toque
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
+    <section id="zona-peek" aria-labelledby="zona-peek-t" className={styles.panel} onClick={closeOnBackground(onClose)}>
       <CloseButton onClose={onClose} />
       <span className={styles.eyebrow}>{ZONE_TEXT.peek.label()}</span>
       <h2 id="zona-peek-t" className={styles.title}>
@@ -122,7 +146,7 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
       <SearchForm
         id="home-q"
         label={tr('Pesquisar organização', 'Search organisations')}
-        placeholder={tr('Empresa, associação ou cidade', 'Company, association or city')}
+        placeholder={tr('Procura uma empresa, associação ou cidade', 'Search a company, association or city')}
         submitLabel={tr('Procurar', 'Search')}
         initial={typed}
         autoFocus={autoFocus}
@@ -141,17 +165,18 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
 /** O teu trabalho aberto: "onde trabalhas?" já aqui (poupa um ecrã); Enter leva à escolha com a pesquisa feita */
 export function JobPanel({ autoFocus, onClose }: { autoFocus: boolean; onClose: () => void }) {
   return (
-    <section id="zona-job" aria-labelledby="zona-job-t" className={styles.panel}>
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
+    <section id="zona-job" aria-labelledby="zona-job-t" className={styles.panel} onClick={closeOnBackground(onClose)}>
       <CloseButton onClose={onClose} />
       <span className={styles.eyebrow}>{ZONE_TEXT.job.label()}</span>
       <h2 id="zona-job-t" className={styles.title}>
         {tr('Conta como é. Sem dar a cara.', 'Tell it like it is. Stay anonymous.')}
       </h2>
-      <p className={styles.sub}>{tr('Avaliação anónima em 3 minutos. A organização nunca sabe quem escreveu.', 'An anonymous review in 3 minutes. The organisation never knows who wrote it.')}</p>
+      <p className={styles.sub}>{tr('Avalia em 3 passos, de forma anónima. A organização nunca sabe quem escreveu.', 'Review in 3 steps, anonymously. The organisation never knows who wrote it.')}</p>
       <SearchForm
         id="home-job"
         label={tr('Onde trabalhas?', 'Where do you work?')}
-        placeholder={tr('Onde trabalhas?', 'Where do you work?')}
+        placeholder={tr('Procura onde trabalhas', 'Search where you work')}
         submitLabel={tr('Avaliar onde trabalho', 'Review where I work')}
         autoFocus={autoFocus}
         href={reviewHref}

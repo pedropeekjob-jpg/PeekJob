@@ -45,7 +45,7 @@ test.describe('Avaliar onde trabalho', () => {
 
   test('da página inicial: escrever onde trabalho, escolher e dar notas (3 cliques)', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /^O teu trabalho/ }).click();
+    await page.getByRole('button', { name: /^Avalia(?!r)/ }).click();
     await page.getByRole('searchbox', { name: 'Onde trabalhas?' }).fill('oficina sete');
     await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.keyboard.press('Enter')]);
     await expect(page).toHaveURL(/\/avaliar\?q=oficina/);

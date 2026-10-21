@@ -81,7 +81,7 @@ describe('partes do fluxo de avaliar', () => {
   it('passos no computador: feitos são botões (voltar a esse passo), o atual marcado', async () => {
     const onChange = vi.fn();
     inRouter(<DeskSteps current={2} onChange={onChange} right={<span>direita</span>} />);
-    const steps = screen.getByRole('list', { name: 'Passo 2 de 2' });
+    const steps = screen.getByRole('list', { name: 'Passo 2 de 3' });
     await userEvent.click(within(steps).getByRole('button', { name: 'Passo 1, Organização, feito' }));
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(within(steps).getAllByRole('button')).toHaveLength(1);
@@ -92,7 +92,13 @@ describe('partes do fluxo de avaliar', () => {
   it('passos no computador: no primeiro, nenhum é botão', () => {
     inRouter(<DeskSteps current={1} />);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Avaliação']);
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Avaliação', '3Publicação']);
+  });
+
+  it('passos no computador: depois de publicar, os feitos já não são botões', () => {
+    inRouter(<DeskSteps current={3} />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Feito:Organização', 'Feito:Avaliação', '3Publicação']);
   });
 
   it('passos no telemóvel, cabeçalho, cadeado e grelha das notas', async () => {
@@ -108,8 +114,8 @@ describe('partes do fluxo de avaliar', () => {
         <NotesGrid scores={{}} desktop />
       </>,
     );
-    expect(screen.getByRole('img', { name: 'Passo 2 de 2, concluído' })).toHaveTextContent('2/2');
-    expect(screen.getByRole('img', { name: 'Passo 1 de 2' })).toHaveTextContent('1/2');
+    expect(screen.getByRole('img', { name: 'Passo 2 de 3, concluído' })).toHaveTextContent('2/3');
+    expect(screen.getByRole('img', { name: 'Passo 1 de 3' })).toHaveTextContent('1/3');
     await user.click(screen.getByRole('button', { name: 'Fechar' }));
     expect(onClick).toHaveBeenCalled();
     expect(screen.getByText('Publicação anónima')).toBeInTheDocument();

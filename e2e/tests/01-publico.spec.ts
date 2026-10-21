@@ -54,7 +54,7 @@ test.describe('Visita pública', () => {
     await expect(page.getByRole('searchbox', { name: 'Pesquisar organização' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page).toHaveURL(/\/$/);
-    await page.getByRole('button', { name: /^O teu trabalho/ }).click();
+    await page.getByRole('button', { name: /^Avalia(?!r)/ }).click();
     await page.getByRole('link', { name: 'Escolher da lista' }).click();
     await page.waitForURL(/\/avaliar$/);
     await expectNoHorizontalScroll(page);

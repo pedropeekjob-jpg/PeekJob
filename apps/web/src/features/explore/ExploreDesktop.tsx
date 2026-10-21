@@ -30,7 +30,7 @@ function HeroSearch() {
       <label htmlFor="hero-q" className="sr-only">
         {tr('Pesquisar organização', 'Search organisations')}
       </label>
-      <input id="hero-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('Nome, setor ou cidade', 'Name, sector or city')} autoComplete="off" />
+      <input id="hero-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('Procura por nome, setor ou cidade', 'Search by name, sector or city')} autoComplete="off" />
       <button type="submit" className={`btn btn-dark ${styles.searchButton}`}>
         {tr('Procurar', 'Search')}
       </button>

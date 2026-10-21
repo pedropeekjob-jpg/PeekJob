@@ -11,7 +11,7 @@ function Where() {
 const show = (viewport: 'mobile' | 'desktop', route = '/') => renderScreen(<Home />, { route, path: '/', viewport, outside: <Where /> });
 const where = () => screen.getByTestId('where').textContent;
 const peekDoor = () => screen.getByRole('button', { name: /^Espreitar/ });
-const jobDoor = () => screen.getByRole('button', { name: /^O teu trabalho/ });
+const jobDoor = () => screen.getByRole('button', { name: /^Avalia(?!r)/ });
 
 describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport) => {
   beforeEach(() => localStorage.clear());
@@ -67,12 +67,26 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
 
   it('a zona aberta ocupa a página: a outra retrai-se e não tem nada clicável', async () => {
     const { user } = show(viewport, '/?lado=espreitar');
-    expect(screen.queryByRole('button', { name: /^O teu trabalho/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Avalia(?!r)/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Espreitar/ })).not.toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'peek');
     await user.click(screen.getByRole('button', { name: 'Voltar ao início' }));
     expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'none');
     expect(jobDoor()).toBeInTheDocument();
+  });
+
+  it('clicar no fundo da zona aberta volta às duas zonas; na pesquisa e nas ligações não', async () => {
+    const { user } = show(viewport, '/?lado=espreitar');
+    const panel = screen.getByRole('region', { name: 'Como é trabalhar lá dentro?' });
+    // as duas dicas estão no HTML; o CSS mostra a do rato ou a do toque
+    expect(within(panel).getByText('Clica fora da pesquisa para voltar')).toBeInTheDocument();
+    expect(within(panel).getByText('Toca fora da pesquisa para voltar')).toBeInTheDocument();
+    await user.click(within(panel).getByRole('searchbox', { name: 'Pesquisar organização' }));
+    await user.click(within(panel).getByRole('search'));
+    expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'peek');
+    await user.click(within(panel).getByRole('heading', { level: 2 }));
+    expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'none');
+    expect(peekDoor()).toBeInTheDocument();
   });
 
   it('voltar (botão ou Escape) regressa às duas zonas', async () => {

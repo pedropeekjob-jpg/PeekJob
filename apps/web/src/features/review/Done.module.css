@@ -238,6 +238,10 @@ a.messages {
   align-self: flex-start;
   margin-top: 4px;
 }
+.shareMore {
+  gap: 8px;
+  margin-top: 4px;
+}
 .verified {
   gap: 6px;
   margin: 0;

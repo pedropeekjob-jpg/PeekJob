@@ -23,7 +23,7 @@ export function FlowHead({ icon, label, onClick, right }: { icon: 'close' | 'bac
   );
 }
 
-/** Indicador de passos do telemóvel (uma barra por passo + 1/2) */
+/** Indicador de passos do telemóvel (uma barra por passo + 1/3) */
 export const MiniSteps = memo(function MiniSteps({ current, done = false }: { current: number; done?: boolean }) {
   return (
     <div role="img" aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}${done ? ', concluído' : ''}`, `Step ${current} of ${STEPS_TOTAL}${done ? ', done' : ''}`)} className={`row ${styles.mini}`}>
@@ -41,10 +41,10 @@ export const MiniSteps = memo(function MiniSteps({ current, done = false }: { cu
 
 /**
  * Indicador de passos do computador: passos feitos são botões (voltar a esse passo), o atual a verde-água,
- * os seguintes a cinzento. O passo feito só pode ser a escolha da organização: `onChange` decide como lá voltar
- * (recuar no histórico em vez de abrir uma entrada nova).
+ * os seguintes a cinzento. Só a escolha da organização se pode refazer (com `onChange`, que decide como lá voltar:
+ * recuar no histórico em vez de abrir uma entrada nova); depois de publicar, os passos feitos já não são botões.
  */
-export function DeskSteps({ current, right, onChange }: { current: 1 | 2; right?: ReactNode; onChange?: () => void }) {
+export function DeskSteps({ current, right, onChange }: { current: 1 | 2 | 3; right?: ReactNode; onChange?: () => void }) {
   return (
     <div className={`row wrap between ${styles.desk}`}>
       <ol aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}`, `Step ${current} of ${STEPS_TOTAL}`)} className={`row wrap ${styles.steps}`}>
@@ -54,10 +54,15 @@ export function DeskSteps({ current, right, onChange }: { current: 1 | 2; right?
           return (
             <li key={label} aria-current={state === 'current' ? 'step' : undefined} className={`row ${styles.step}`} data-state={state}>
               {i > 0 && <span aria-hidden="true" className={styles.link} data-on={n <= current || undefined} />}
-              {state === 'done' ? (
+              {state === 'done' && n === 1 && onChange ? (
                 <button type="button" onClick={onChange} aria-label={tr(`Passo ${n}, ${label}, feito`, `Step ${n}, ${label}, done`)} className={`${styles.circle} ${styles.circleDone}`}>
                   <Icon name="check" size={16} stroke={2.4} />
                 </button>
+              ) : state === 'done' ? (
+                <span className={`${styles.circle} ${styles.circleDone}`}>
+                  <Icon name="check" size={16} stroke={2.4} />
+                  <span className="sr-only">{tr('Feito:', 'Done:')}</span>
+                </span>
               ) : (
                 <span className={styles.circle}>{n}</span>
               )}

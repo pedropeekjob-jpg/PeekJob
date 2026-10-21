@@ -45,6 +45,17 @@ describe.each(['mobile', 'desktop'] as const)('Avaliação publicada (%s)', (vie
     expect(screen.queryByRole('link', { name: 'Confirmar agora' })).not.toBeInTheDocument();
   });
 
+  it('depois de publicar: passo 3 de 3 e convite para avaliar a entrevista e partilhar o salário', async () => {
+    seedStore({ lastPublished: 'novo-1', myReviews: [mine(false)] });
+    show(viewport);
+    const more = await screen.findByRole('region', { name: 'Já agora, ajuda mais um bocadinho' });
+    expect(more).toHaveTextContent(/Também é anónimo/);
+    expect(screen.getByRole('link', { name: 'Avaliar a entrevista' })).toHaveAttribute('href', '/partilhar/entrevista?org=padaria-ribeira');
+    expect(screen.getByRole('link', { name: 'Partilhar o salário' })).toHaveAttribute('href', '/partilhar/salario?org=padaria-ribeira');
+    if (desktop) expect(screen.getByRole('list', { name: 'Passo 3 de 3' })).toBeInTheDocument();
+    else expect(screen.getByRole('img', { name: 'Passo 3 de 3, concluído' })).toBeInTheDocument();
+  });
+
   it('ver e esconder as 8 notas', async () => {
     seedStore({ lastPublished: 'novo-1', myReviews: [mine(false)] });
     const { user } = show(viewport);

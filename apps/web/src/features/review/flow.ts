@@ -36,9 +36,12 @@ export function scoreForKey(key: string, current: number): number | null {
 /** Só um botão por critério entra no Tab: a nota escolhida, ou a primeira */
 export const isTabStop = (n: number, value: number) => (value ? n === value : n === 1);
 
-/** Dois passos: escolher a organização e avaliar (a verificação passou para depois de publicar) */
-export const STEP_LABELS = () => [tr('Organização', 'Organisation'), tr('Avaliação', 'Review')];
-export const STEP_ROUTES = ['/avaliar', '/avaliar/notas'];
+/**
+ * Três passos (21/10: "avalia em 3 passos"): escolher a organização, avaliar e publicar.
+ * O terceiro é o ecrã "publicado", com a verificação e o convite para partilhar entrevista e salário.
+ */
+export const STEP_LABELS = () => [tr('Organização', 'Organisation'), tr('Avaliação', 'Review'), tr('Publicação', 'Published')];
+export const STEP_ROUTES = ['/avaliar', '/avaliar/notas', '/avaliar/feito'];
 export const STEPS_TOTAL = STEP_ROUTES.length;
 export type StepState = 'done' | 'current' | 'todo';
 export const stepState = (n: number, current: number): StepState => (n < current ? 'done' : n === current ? 'current' : 'todo');

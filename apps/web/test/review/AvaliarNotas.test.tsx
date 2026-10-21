@@ -11,13 +11,13 @@ const show = (viewport: 'mobile' | 'desktop', patch = {}) =>
     { route: '/avaliar/notas', path: '/avaliar/notas', viewport },
   );
 
-describe('Avaliar · notas e publicar (telemóvel, passo 2 de 2)', () => {
+describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
   beforeEach(() => localStorage.clear());
 
   it('8 critérios; publicar só com pelo menos uma nota; contador; publica dali, sem passo extra', async () => {
     const { user } = show('mobile');
     expect(await screen.findByRole('heading', { level: 1, name: /Dá uma nota de 1 a 5/ })).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Passo 2 de 2' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Passo 2 de 3' })).toBeInTheDocument();
     expect(screen.getAllByRole('radiogroup')).toHaveLength(8);
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
     await user.click(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' }));
@@ -56,12 +56,13 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 2)', () => {
     expect(screen.getByRole('button', { name: /Publicar avaliação/ })).toBeEnabled();
   });
 
-  it('possível ilegalidade: cartão de apoio com ligação para pedir ajuda', async () => {
+  it('possível ilegalidade: cartão de apoio sem botão que tire a pessoa do fluxo', async () => {
     const { user } = show('mobile', { scores: { ambiente: 3 } });
     await user.click(await screen.findByRole('button', { name: /Contar como é/ }));
     await user.type(screen.getByRole('textbox', { name: /A tua experiência/ }), 'O salário chega sempre atrasado.');
     expect(screen.getByText('Isto pode ser uma ilegalidade')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Pedir ajuda' })).toHaveAttribute('href', '/apoio');
+    expect(screen.queryByRole('link', { name: 'Pedir ajuda' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Depois de publicares, mostramos-te onde pedir ajuda/)).toBeInTheDocument();
   });
 
   it('clicar na nota escolhida tira-a', async () => {
@@ -106,7 +107,7 @@ describe('Avaliar · notas e texto (computador, ecrã único)', () => {
     await user.type(await screen.findByRole('textbox', { name: /A tua experiência/ }), 'O salário chega sempre atrasado.');
     const alert = screen.getByRole('status', { name: 'Apoio' });
     expect(alert).toHaveTextContent(/Salário em atraso: pode ser incumprimento salarial/);
-    expect(within(alert).getByRole('link', { name: 'Pedir ajuda' })).toHaveAttribute('href', '/apoio');
+    expect(within(alert).queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('insulto bloqueia o botão', async () => {

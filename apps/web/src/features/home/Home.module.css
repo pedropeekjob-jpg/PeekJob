@@ -13,18 +13,20 @@
   --peek-bg: var(--surface);
   --peek-fg: var(--ink);
   --peek-glow: rgba(0, 169, 175, 0.14);
-  --job-bg: var(--teal);
-  --job-fg: var(--ink);
-  --job-glow: rgba(255, 255, 255, 0.24);
+  /* 21/10: o cliente pediu texto branco ou cinza claro sobre o azul. Com branco, o verde-água da marca não tem contraste
+     (2,9:1); o verde-água escuro (--action) tem 5,6:1 e é a mesma cor dos botões de ação */
+  --job-bg: var(--action);
+  --job-fg: #ffffff;
+  --job-glow: rgba(255, 255, 255, 0.16);
   --rule: var(--teal);
   --label: var(--ink);
-  --job-label: var(--ink);
+  --job-label: #ffffff;
   --door-sub: rgba(1, 11, 19, 0.56);
-  --job-sub: rgba(1, 11, 19, 0.8);
+  --job-sub: #e6eef0;
   --search-bg: var(--surface);
   --search-border: var(--line);
-  --go-bg: var(--ink);
-  --go-fg: #fff;
+  --go-bg: var(--action);
+  --go-fg: var(--action-fg);
   --cta-bg: var(--ink);
   --cta-fg: #fff;
   --cta-hover: #1b252d;
@@ -35,8 +37,8 @@
   --mk-top-road: rgba(1, 11, 19, 0.18);
   --mk-bot-ink: #010b13;
   --mk-bot-accent: #ffffff;
-  --mk-bot-bg: #00a9af;
-  --mk-bot-road: rgba(1, 11, 19, 0.25);
+  --mk-bot-bg: #00747a;
+  --mk-bot-road: rgba(255, 255, 255, 0.25);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -167,7 +169,8 @@
   font-family: var(--font-system);
   font-weight: 700;
   color: var(--label);
-  font-size: clamp(40px, 6vw, 84px);
+  /* 48 px em todos os ecrãs (21/10; antes até 84 px) */
+  font-size: 48px;
   line-height: 1.02;
   letter-spacing: -0.03em;
   gap: 0.18em;
@@ -326,11 +329,40 @@
 .panel > :nth-child(6) {
   animation-delay: 0.56s;
 }
-.close {
-  background: var(--close-bg);
+/* Zona aberta: clicar no fundo volta ao início (21/10); o cursor e a dica junto ao X dizem isso */
+.panel {
+  cursor: pointer;
+}
+.panel :is(a, button, input, form, label) {
+  cursor: auto;
+}
+.panel :is(a, button) {
+  cursor: pointer;
+}
+.closeRow {
   position: absolute;
   top: 16px;
   right: 16px;
+  gap: 12px;
+}
+.closeHint {
+  font-family: var(--font-system);
+  font-size: 14px;
+  opacity: 0.72;
+}
+.hintTouch {
+  display: none;
+}
+@media (hover: none) {
+  .hintMouse {
+    display: none;
+  }
+  .hintTouch {
+    display: inline;
+  }
+}
+.close {
+  background: var(--close-bg);
 }
 .eyebrow {
   font-family: var(--font-system);
@@ -371,7 +403,7 @@
   box-shadow: 0 8px 24px rgba(1, 11, 19, 0.06);
 }
 .search:focus-within {
-  border-color: var(--teal);
+  border-color: var(--action);
   box-shadow:
     0 8px 24px rgba(1, 11, 19, 0.06),
     0 0 0 4px var(--teal-tint);
@@ -407,10 +439,17 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
 }
-/* .link global é verde-água: no fundo verde-água fica escuro e sublinhado */
+.go:hover {
+  background: var(--action-hover);
+  box-shadow: var(--active-ring);
+}
+/* .link global é verde-água: no fundo verde-água escuro fica branco e sublinhado */
 .all {
-  color: var(--ink);
+  color: #fff;
   text-decoration: underline;
   text-underline-offset: 3px;
   font-size: 15px;

@@ -95,3 +95,29 @@ export function VerifyInvite({ orgId, verified, state }: { orgId: string; verifi
     </section>
   );
 }
+
+/**
+ * Depois de publicar: partilhar a entrevista e o salário na mesma organização (21/10: o cliente não encontrava onde).
+ * `state`: o estado do fluxo, para que sair da partilha volte aqui.
+ */
+export function ShareMore({ orgId, state }: { orgId: string; state?: unknown }) {
+  const org = encodeURIComponent(orgId);
+  return (
+    <section aria-labelledby="partilhar-mais" className={styles.verify}>
+      <h2 id="partilhar-mais" className={styles.verifyTitle}>
+        {tr('Já agora, ajuda mais um bocadinho', 'While you’re here, help a bit more')}
+      </h2>
+      <p className={`small body ${styles.verifyText}`}>
+        {tr('Conta como foi a tua entrevista ou partilha o teu salário. Também é anónimo.', 'Tell us how your interview went or share your salary. It’s anonymous too.')}
+      </p>
+      <div className={`row wrap ${styles.shareMore}`}>
+        <Link to={`/partilhar/entrevista?org=${org}`} state={state} className="btn btn-ghost btn-sm" data-ev="cta_click" data-ev-cta="partilhar_entrevista" data-ev-area="publicado">
+          {tr('Avaliar a entrevista', 'Review the interview')}
+        </Link>
+        <Link to={`/partilhar/salario?org=${org}`} state={state} className="btn btn-ghost btn-sm" data-ev="cta_click" data-ev-cta="partilhar_salario" data-ev-area="publicado">
+          {tr('Partilhar o salário', 'Share your salary')}
+        </Link>
+      </div>
+    </section>
+  );
+}

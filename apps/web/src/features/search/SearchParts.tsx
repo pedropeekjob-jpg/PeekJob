@@ -35,7 +35,7 @@ export function SearchBox({ id, text, onText, clear, large = false }: SearchBoxP
         type="search"
         value={text}
         onChange={(e) => onText(e.target.value)}
-        placeholder={tr('Nome, setor ou cidade', 'Name, sector or city')}
+        placeholder={tr('Procura por nome, setor ou cidade', 'Search by name, sector or city')}
         autoComplete="off"
         enterKeyHint="search"
       />

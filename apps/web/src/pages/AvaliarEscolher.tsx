@@ -8,7 +8,7 @@ import { useFlowNav } from '../features/review/useFlowNav';
 import { useOrgPicker } from '../features/review/useOrgPicker';
 import { tr } from '../i18n';
 import { useIsDesktop } from '../lib/useMedia';
-import { DeskSteps, FlowHead, LockLine } from '../features/review/FlowParts';
+import { DeskSteps, FlowHead, LockLine, MiniSteps } from '../features/review/FlowParts';
 
 /** Avaliar · passo 1: escolher a organização (e o local) ou adicionar uma que falta */
 export default function AvaliarEscolher() {
@@ -104,7 +104,7 @@ export default function AvaliarEscolher() {
   return (
     <Shell>
       <div className={`page ${styles.mobilePage}`}>
-        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => leave('/')} right={<span className="small muted">{tr('Antes de começar', 'Before you start')}</span>} />
+        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => leave('/')} right={<MiniSteps current={1} />} />
         {step === 'pick' && (
           <div className={`fade-up ${styles.mobilePick}`}>
             <h1 className={styles.title}>{tr('Onde trabalhas ou trabalhaste?', 'Where do you or did you work?')}</h1>

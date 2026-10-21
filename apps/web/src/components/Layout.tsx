@@ -45,11 +45,16 @@ function ProfileButton({ area }: { area: string }) {
   );
 }
 
+/** Ecrãs do fluxo de avaliar (e partilhar entrevista ou salário): o botão "Avaliar" do cabeçalho não aparece aqui */
+export const inReviewFlow = (pathname: string) => /^\/(avaliar|partilhar)(\/|$)/.test(pathname);
+
 /**
  * memo: o cabeçalho não volta a correr quando só a página muda (ex.: dar uma nota).
  * As ligações continuam a reagir ao endereço (ativa/não ativa) e as mensagens por ler à loja.
  */
 export const DesktopHeader = memo(function DesktopHeader({ home = false }: { home?: boolean }) {
+  // a meio de uma avaliação o botão levava de volta ao início do fluxo (21/10)
+  const flow = inReviewFlow(useLocation().pathname);
   return (
     <header className={'site-header' + (home ? ' is-home' : '')}>
       <div className={`container row ${styles.header}`}>
@@ -73,7 +78,7 @@ export const DesktopHeader = memo(function DesktopHeader({ home = false }: { hom
           )}
           <ProfileButton area="header" />
         </span>
-        {!home && (
+        {!home && !flow && (
           <Link to="/avaliar" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="header" className={`btn btn-primary ${styles.cta}`}>
             {tr('Avaliar onde trabalho', 'Review where I work')}
           </Link>
