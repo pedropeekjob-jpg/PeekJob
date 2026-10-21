@@ -13,7 +13,7 @@ test('organização com coordenadas: "Ver no mapa" abre o mapa real dentro da CS
   });
 
   await page.goto('/pesquisa');
-  await page.getByRole('searchbox').first().fill('padaria ribeira');
+  await page.getByRole('combobox').first().fill('padaria ribeira');
   await page.getByText('Padaria Ribeira', { exact: true }).first().click();
   await page.waitForURL(/\/org\//);
   await page.getByRole('button', { name: /Ver mapa/ }).click(); // o mapa abre a pedido (telemóvel e computador)

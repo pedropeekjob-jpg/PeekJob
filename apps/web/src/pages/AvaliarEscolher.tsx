@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Icon } from '../components/Icon';
+import { ResponsibilityNote } from '../components/UI';
 import { Shell } from '../components/Layout';
 import styles from '../features/review/OrgPicker.module.css';
 import { AddOrgForm, LocationPicker, OrgResults, OrgSearchBox, PickIllustration } from '../features/review/OrgPickerParts';
@@ -8,7 +9,7 @@ import { useFlowNav } from '../features/review/useFlowNav';
 import { useOrgPicker } from '../features/review/useOrgPicker';
 import { tr } from '../i18n';
 import { useIsDesktop } from '../lib/useMedia';
-import { DeskSteps, FlowHead, LockLine } from '../features/review/FlowParts';
+import { DeskSteps, FlowHead, LockLine, MiniSteps } from '../features/review/FlowParts';
 
 /** Avaliar · passo 1: escolher a organização (e o local) ou adicionar uma que falta */
 export default function AvaliarEscolher() {
@@ -62,7 +63,8 @@ export default function AvaliarEscolher() {
             <section aria-label={tr('Pesquisar organização', 'Search organisations')} className={styles.searchColumn}>
               <div className={styles.intro}>
                 <h1 className={styles.desktopTitle}>{tr('Onde trabalhas?', 'Where do you work?')}</h1>
-                <p className={`lead ${styles.lead}`}>{tr('Ninguém fica a saber que foste tu.', 'No one will know it was you.')}</p>
+                <p className={`lead ${styles.lead}`}>{tr('Fica entre nós: ninguém sabe que foste tu.', 'It stays between us: no one will know it was you.')}</p>
+                <ResponsibilityNote />
               </div>
               {search}
               {results}
@@ -104,15 +106,16 @@ export default function AvaliarEscolher() {
   return (
     <Shell>
       <div className={`page ${styles.mobilePage}`}>
-        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => leave('/')} right={<span className="small muted">{tr('Antes de começar', 'Before you start')}</span>} />
+        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={() => leave('/')} right={<MiniSteps current={1} />} />
         {step === 'pick' && (
           <div className={`fade-up ${styles.mobilePick}`}>
-            <h1 className={styles.title}>{tr('Onde trabalhas ou trabalhaste?', 'Where do you or did you work?')}</h1>
+            <h1 className={styles.title}>{tr('Onde trabalhas?', 'Where do you work?')}</h1>
             {search}
             {results}
             <button type="button" className={`link ${styles.addLink}`} onClick={startAdd}>
               {tr('Não encontras? Adicionar organização', 'Can’t find it? Add organisation')}
             </button>
+            <ResponsibilityNote />
           </div>
         )}
         {detail}

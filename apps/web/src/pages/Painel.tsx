@@ -5,7 +5,7 @@ import { PageLoading } from '../components/PageLoading';
 import { ClaimView } from '../features/painel/ClaimView';
 import { pulseStats } from '../features/painel/painel';
 import type { PainelData } from '../features/painel/painelData';
-import { HeadInfo, PendingSection, PublicLink, Pulse, RespeitoCard, ScoreRing, WeekCriteria } from '../features/painel/PainelParts';
+import { HeadInfo, PendingSection, PublicLink, Pulse, ReportLinks, RespeitoCard, ScoreRing, WeekCriteria } from '../features/painel/PainelParts';
 import { usePainel, type PainelState } from '../features/painel/usePainel';
 import styles from '../features/painel/Painel.module.css';
 import { tr } from '../i18n';
@@ -72,6 +72,7 @@ function Dashboard({ data, orgs, onSelect, desktop }: { data: PainelData; orgs: 
   const pendingSection = <PendingSection reviews={data.pending} orgId={org.id} unanswered={data.unanswered} desktop={desktop} />;
   const criteria = <WeekCriteria org={org} delta={data.criteriaDelta} peers={data.peers} />;
   const switcher = <Switcher orgs={orgs} current={org.id} onSelect={onSelect} />;
+  const reports = <ReportLinks orgId={org.id} pro={data.plan === 'pro'} />;
 
   if (desktop) {
     return (
@@ -88,6 +89,7 @@ function Dashboard({ data, orgs, onSelect, desktop }: { data: PainelData; orgs: 
             {pendingSection}
             <div className={styles.side}>
               {criteria}
+              {reports}
               <RespeitoCard org={org} />
             </div>
           </div>
@@ -110,6 +112,7 @@ function Dashboard({ data, orgs, onSelect, desktop }: { data: PainelData; orgs: 
         </section>
         {pendingSection}
         {criteria}
+        {reports}
         <RespeitoCard org={org} />
       </div>
     </Shell>

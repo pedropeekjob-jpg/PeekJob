@@ -48,7 +48,7 @@ export function ExploreMobile() {
 
       <div className={styles.actions}>
         <BigAction to="/pesquisa" icon="search" title={tr('Procurar uma organização', 'Find an organisation')} sub={tr('PME, associações, voluntariado', 'SMEs, associations, volunteering')} />
-        <BigAction to="/avaliar" icon="plus" title={tr('Avaliar onde trabalho', 'Review where I work')} sub={tr('2 minutos · anónimo', '2 minutes · anonymous')} primary />
+        <BigAction to="/avaliar" icon="plus" title={tr('Avaliar onde trabalho', 'Review where I work')} sub={tr('3 passos · anónimo', '3 steps · anonymous')} primary />
       </div>
 
       <section className={styles.forYouMobile} aria-labelledby="para-ti-m">

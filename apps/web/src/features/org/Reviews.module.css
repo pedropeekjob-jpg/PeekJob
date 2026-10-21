@@ -150,3 +150,33 @@
     height: 48px;
   }
 }
+
+/* Comentários por critério e parâmetros do tipo de trabalho */
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--teal-tint);
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.detailName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.detailAnswer {
+  font-weight: 600;
+  color: var(--body);
+}
+.detailText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--body);
+}

@@ -4,7 +4,7 @@ import { expect, login, test, uniqueEmail } from '../support/fixtures';
 test.describe('Guardadas e útil na conta', () => {
   async function openOrg(page: import('@playwright/test').Page, name: string) {
     await page.goto('/pesquisa');
-    await page.getByRole('searchbox').first().fill(name.toLowerCase());
+    await page.getByRole('combobox').first().fill(name.toLowerCase());
     await page.getByText(name, { exact: true }).first().click();
     await page.waitForURL(/\/org\//);
   }

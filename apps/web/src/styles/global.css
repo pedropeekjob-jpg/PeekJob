@@ -23,8 +23,16 @@
   --line: #e2e5e6;
   --field: #d5d9db;
   --soft: #eceFef;
-  --up: #1f7a4d;
+  /* sobe/desce em azul e laranja (21/10): verde e laranja confundem-se com daltonismo (deuteranopia e protanopia) */
+  --up: #1565c0;
   --down: #b4540a;
+  /* botões de ação (submeter, pesquisar, avançar): verde-água escuro com texto branco (21/10).
+     Antes havia botões verde-água com texto escuro e botões pretos; o preto passava por desativado */
+  --action: var(--teal-text);
+  --action-hover: var(--teal-dark);
+  --action-fg: #ffffff;
+  /* o mesmo realce do campo de pesquisa ativo serve o hover dos botões */
+  --active-ring: 0 0 0 4px var(--teal-tint);
   --warn-bg: #fff4ea;
   --warn-line: #f2d3b1;
   --warn-text: #8a3f06;
@@ -312,25 +320,24 @@ a.plain {
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
-  transition: transform 0.15s, background 0.15s, opacity 0.15s;
+  transition: transform 0.15s, background 0.15s, opacity 0.15s, box-shadow 0.15s;
 }
 .btn:active {
   transform: scale(0.98);
 }
-.btn-primary {
-  /* verde-água da marca com texto em tinta (14/10: mais vida, como a zona "O teu trabalho") */
-  background: var(--teal);
-  color: var(--ink);
+.btn:hover:not([disabled]):not([aria-disabled='true']) {
+  /* hover dos botões = campo de pesquisa ativo (pedido de 21/10) */
+  box-shadow: var(--active-ring);
 }
-.btn-primary:hover {
-  background: #14b6bc;
-}
+/* Botão principal e botões de submeter/pesquisar (antes pretos): a mesma cor de ação em todo o lado */
+.btn-primary,
 .btn-dark {
-  background: var(--ink);
-  color: #fff;
+  background: var(--action);
+  color: var(--action-fg);
 }
+.btn-primary:hover,
 .btn-dark:hover {
-  background: #1b252d;
+  background: var(--action-hover);
 }
 .btn-ghost {
   background: var(--surface);
@@ -338,7 +345,7 @@ a.plain {
   border-color: var(--field);
 }
 .btn-ghost:hover {
-  border-color: var(--ink);
+  border-color: var(--action);
 }
 .btn-purple {
   background: var(--purple);
@@ -379,6 +386,9 @@ a.plain {
   padding: 0;
   text-decoration: none;
   position: relative;
+}
+.icon-btn:hover {
+  box-shadow: var(--active-ring);
 }
 .icon-btn.bare {
   border-color: transparent;
@@ -550,6 +560,7 @@ a.plain {
   border-color: var(--ink);
 }
 .search {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -905,9 +916,11 @@ main h1:focus,
   box-shadow: none;
 }
 .search:focus-within {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px #fff;
+  /* campo ativo: borda verde-água escura e halo claro (o mesmo realce do hover dos botões) */
+  outline: none;
+  z-index: 20; /* a lista de sugestões fica por cima do que vem a seguir */
+  border-color: var(--action);
+  box-shadow: var(--active-ring);
 }
 .skip-link {
   position: fixed;

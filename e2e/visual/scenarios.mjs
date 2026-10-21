@@ -84,7 +84,7 @@ export const SCENARIOS = [
     path: '/pesquisa',
     full: true,
     run: async (p) => {
-      await p.getByRole('searchbox').first().fill('porto'); // foco, botão de limpar e resultados depois da espera
+      await p.getByRole('combobox').first().fill('porto'); // foco, botão de limpar e resultados depois da espera
       await p.waitForTimeout(1300);
     },
   },
@@ -285,7 +285,9 @@ export const SCENARIOS = [
       await tap(p, 'button', /^O que conta em Ambiente/);
       await tap(p, 'button', /^Contar como é/); // telemóvel: o comentário abre-se no mesmo ecrã
       await tap(p, 'button', /^Ver mais \d+ etiquetas/);
-      await tap(p, 'radio', /^Respeito e inclusão, 4 de 5/);
+      await p.getByRole('slider', { name: 'Respeito e inclusão' }).first().focus();
+      await p.keyboard.press('End');
+      await p.keyboard.press('ArrowLeft');
       await tap(p, 'button', /^Não$/);
     },
   },

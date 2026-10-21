@@ -1,3 +1,4 @@
+import userEvent from '@testing-library/user-event';
 import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useStore } from '../../src/lib/store';
@@ -28,8 +29,15 @@ describe.each(['mobile', 'desktop'] as const)('Apoio (%s)', (viewport) => {
     expect(screen.getAllByRole('link').some((a) => a.getAttribute('href')?.startsWith('mailto:'))).toBe(true);
     const emergency = screen.getAllByRole('link').find((a) => a.getAttribute('href') === 'tel:112')!;
     expect(emergency).toHaveTextContent('112');
-    expect(screen.getByText(/A PeekJob não apresenta queixas por ti/)).toBeInTheDocument();
+    expect(screen.getByText(/A PeekJob não trata nem resolve irregularidades: não apresenta queixas por ti/)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Avisos da moderação' })).not.toBeInTheDocument();
+  });
+
+  it('sem sessão, com os temas no endereço: conselhos para o que foi relatado', async () => {
+    renderScreen(<Apoio />, { route: '/apoio?temas=trabalho%20n%C3%A3o%20declarado', path: '/apoio', viewport });
+    expect(await screen.findByText(/^O que descreveste pode configurar trabalho não declarado/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /O que pode ajudar/ }));
+    expect(await screen.findByText('A ACT pode intervir mesmo sem contrato escrito.')).toBeInTheDocument();
   });
 
   it('com mensagem de apoio: o que pode configurar, o que se encontrou, e fica lida', async () => {

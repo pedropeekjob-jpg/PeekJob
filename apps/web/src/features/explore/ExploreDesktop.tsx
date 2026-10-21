@@ -2,6 +2,8 @@ import { useState, type CSSProperties, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
+import { useSuggest } from '../../components/Suggest';
+import { useSuggestions } from '../search/suggest';
 import { CRITERIA } from '../../data/criteria';
 import { WEEK_TAGS } from '../../data/content';
 import { ORG_BY_ID } from '../../data/orgs';
@@ -19,6 +21,13 @@ import styles from './Explore.module.css';
 function HeroSearch() {
   const navigate = useNavigate();
   const [q, setQ] = useState('');
+  const items = useSuggestions(q);
+  const suggest = useSuggest({
+    id: 'hero-q',
+    query: q,
+    items,
+    onPick: (s) => navigate(s.kind === 'org' ? `/org/${s.id}` : `/pesquisa?q=${encodeURIComponent(s.label)}`),
+  });
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
     const t = q.trim();
@@ -30,7 +39,16 @@ function HeroSearch() {
       <label htmlFor="hero-q" className="sr-only">
         {tr('Pesquisar organização', 'Search organisations')}
       </label>
-      <input id="hero-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('Nome, setor ou cidade', 'Name, sector or city')} autoComplete="off" />
+      <input
+        id="hero-q"
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder={tr('Procura por nome, profissão, setor ou cidade', 'Search by name, job, sector or city')}
+        autoComplete="off"
+        {...suggest.inputProps}
+      />
+      {suggest.list}
       <button type="submit" className={`btn btn-dark ${styles.searchButton}`}>
         {tr('Procurar', 'Search')}
       </button>
@@ -221,8 +239,8 @@ export function ExploreDesktop() {
     <div className={`container ${styles.container}`}>
       <section className={`row wrap ${styles.hero}`}>
         <div className={styles.heroText}>
-          <h1 className={`display ${styles.heroTitle}`}>{tr('Como é trabalhar lá dentro, contado por quem lá trabalha.', 'What it’s like to work there, told by the people who do.')}</h1>
-          <p className={`body ${styles.heroLead}`}>{tr('Avaliações anónimas de PME, associações e voluntariado.', 'Anonymous reviews of SMEs, associations and volunteering.')}</p>
+          <h1 className={`display ${styles.heroTitle}`}>{tr('Como é trabalhar lá dentro?', 'What’s it like to work there?')}</h1>
+          <p className={`body ${styles.heroLead}`}>{tr('Contado por quem lá trabalha, sem dar a cara. Empresas, associações e voluntariado.', 'Told by the people who work there, anonymously. Companies, associations and volunteering.')}</p>
           <HeroSearch />
         </div>
         <Stars />

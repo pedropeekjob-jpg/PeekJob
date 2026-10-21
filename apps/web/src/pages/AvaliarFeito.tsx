@@ -5,14 +5,15 @@ import { useOrg } from '../api/orgs';
 import { Shell } from '../components/Layout';
 import { Empty } from '../components/UI';
 import { publishedReview, reviewsCountText, totalAfterPublishing, unreadAfterPublishing } from '../features/review/done';
-import { DoneRing, NotesToggle, SupportCard, VerifyInvite } from '../features/review/DoneParts';
+import { DoneRing, NotesToggle, ShareMore, SupportCard, VerifyInvite } from '../features/review/DoneParts';
 import styles from '../features/review/Done.module.css';
 import { tr } from '../i18n';
+import { detectRedFlags } from '../lib/moderation';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { useToggle } from '../lib/useToggle';
 import { useFlowNav } from '../features/review/useFlowNav';
-import { FlowHead, MiniSteps, NotesGrid } from '../features/review/FlowParts';
+import { DeskSteps, FlowHead, MiniSteps, NotesGrid } from '../features/review/FlowParts';
 
 /** Avaliação publicada: agradecer, mostrar a nota e, se houve relato grave, o apoio */
 export default function AvaliarFeito() {
@@ -41,7 +42,7 @@ export default function AvaliarFeito() {
           {!desktop && <FlowHead icon="close" label={tr('Fechar e voltar ao início', 'Close and go back home')} onClick={goHome} />}
           <Empty
             title={tr('Ainda não publicaste nenhuma avaliação', 'You haven’t published a review yet')}
-            body={tr('Leva uns 2 minutos e ninguém fica a saber que foste tu.', 'It takes about 2 minutes and no one will know it was you.')}
+            body={tr('São 3 passos e ninguém fica a saber que foste tu.', 'It’s 3 steps and no one will know it was you.')}
             action={
               <Link to="/avaliar" className={`btn btn-primary ${styles.emptyAction}`}>
                 {tr('Avaliar onde trabalho', 'Review where I work')}
@@ -56,21 +57,23 @@ export default function AvaliarFeito() {
   const name = org?.name ?? tr('A organização', 'The organisation');
   const reviewsN = reviewsCountText(totalAfterPublishing(org, apiMode));
   const orgLink = org ? `/org/${org.id}` : '/';
-  const support = review.flagged && <SupportCard signedIn={!!user} unread={unreadAfterPublishing(messages)} />;
+  const support = review.flagged && <SupportCard signedIn={!!user} unread={unreadAfterPublishing(messages)} kinds={detectRedFlags(review.text, review.tags).kinds} />;
   const toggle = <NotesToggle open={open} onToggle={toggleOpen} desktop={desktop} />;
   const verify = <VerifyInvite orgId={review.orgId} verified={!!review.verified} state={linkState} />;
+  const more = <ShareMore orgId={review.orgId} state={linkState} />;
   const seeOnPage = tr('Ver na página da organização', 'See it on the organisation’s page');
 
   if (desktop) {
     return (
       <Shell chrome="header">
         <div className={`container fade-up ${styles.container}`}>
+          <DeskSteps current={3} />
           <div className={`row wrap ${styles.columns}`}>
             <div className={styles.main}>
               <div className={`row wrap ${styles.heroDesktop}`}>
                 <DoneRing avg={review.avg} desktop />
                 <div className={styles.heroDesktopText}>
-                  <h1 className={styles.titleDesktop}>{tr('Publicado. Obrigado.', 'Published. Thank you.')}</h1>
+                  <h1 className={styles.titleDesktop}>{tr('Já está. Obrigado por partilhares!', 'Done. Thanks for sharing!')}</h1>
                   <p className={`lead ${styles.lead}`}>{tr(<>Ninguém sabe que foste tu. {name} passa a ter {reviewsN}.</>, <>No one knows it was you. {name} now has {reviewsN}.</>)}</p>
                 </div>
               </div>
@@ -80,6 +83,7 @@ export default function AvaliarFeito() {
             <aside className={styles.aside}>
               {support}
               {verify}
+              {more}
               <Link to={orgLink} onClick={exitTo(orgLink)} className={`btn btn-dark lift ${styles.ctaMain}`}>
                 {seeOnPage}
               </Link>
@@ -96,15 +100,16 @@ export default function AvaliarFeito() {
   return (
     <Shell>
       <div className={`page ${styles.mobilePage}`}>
-        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={close} right={<MiniSteps current={2} done />} />
+        <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={close} right={<MiniSteps current={3} done />} />
         <div className={styles.hero}>
           <DoneRing avg={review.avg} desktop={false} />
-          <h1 className={styles.heroTitle}>{tr('Publicado. Obrigado.', 'Published. Thank you.')}</h1>
+          <h1 className={styles.heroTitle}>{tr('Já está. Obrigado por partilhares!', 'Done. Thanks for sharing!')}</h1>
           <div className={styles.heroText}>{tr(<>{name} passa a ter {reviewsN}.</>, <>{name} now has {reviewsN}.</>)}</div>
         </div>
 
         {support}
         {verify}
+        {more}
 
         <section aria-label={tr('As tuas notas', 'Your scores')} className={`stack ${styles.notes}`}>
           {toggle}

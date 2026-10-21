@@ -1,12 +1,14 @@
-import { memo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { memo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
-import { CRITERION, type CriterionKey } from '../../data/criteria';
+import { PARAM_COMMENT_MAX } from '@peekjob/shared';
+import { CRITERION } from '../../data/criteria';
+import { EXTRA, paramMeta, type ExtraKey, type ParamKey } from '../../data/params';
 import type { Scores } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { fmt } from '../../lib/format';
-import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
+import { isBadTag, MOBILE_ORDER, scoreOf, scoreWord, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
 import styles from './Flow.module.css';
 
 /** Partes partilhadas pelos ecrãs do fluxo de avaliar */
@@ -23,7 +25,7 @@ export function FlowHead({ icon, label, onClick, right }: { icon: 'close' | 'bac
   );
 }
 
-/** Indicador de passos do telemóvel (uma barra por passo + 1/2) */
+/** Indicador de passos do telemóvel (uma barra por passo + 1/3) */
 export const MiniSteps = memo(function MiniSteps({ current, done = false }: { current: number; done?: boolean }) {
   return (
     <div role="img" aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}${done ? ', concluído' : ''}`, `Step ${current} of ${STEPS_TOTAL}${done ? ', done' : ''}`)} className={`row ${styles.mini}`}>
@@ -41,10 +43,10 @@ export const MiniSteps = memo(function MiniSteps({ current, done = false }: { cu
 
 /**
  * Indicador de passos do computador: passos feitos são botões (voltar a esse passo), o atual a verde-água,
- * os seguintes a cinzento. O passo feito só pode ser a escolha da organização: `onChange` decide como lá voltar
- * (recuar no histórico em vez de abrir uma entrada nova).
+ * os seguintes a cinzento. Só a escolha da organização se pode refazer (com `onChange`, que decide como lá voltar:
+ * recuar no histórico em vez de abrir uma entrada nova); depois de publicar, os passos feitos já não são botões.
  */
-export function DeskSteps({ current, right, onChange }: { current: 1 | 2; right?: ReactNode; onChange?: () => void }) {
+export function DeskSteps({ current, right, onChange }: { current: 1 | 2 | 3; right?: ReactNode; onChange?: () => void }) {
   return (
     <div className={`row wrap between ${styles.desk}`}>
       <ol aria-label={tr(`Passo ${current} de ${STEPS_TOTAL}`, `Step ${current} of ${STEPS_TOTAL}`)} className={`row wrap ${styles.steps}`}>
@@ -54,10 +56,15 @@ export function DeskSteps({ current, right, onChange }: { current: 1 | 2; right?
           return (
             <li key={label} aria-current={state === 'current' ? 'step' : undefined} className={`row ${styles.step}`} data-state={state}>
               {i > 0 && <span aria-hidden="true" className={styles.link} data-on={n <= current || undefined} />}
-              {state === 'done' ? (
+              {state === 'done' && n === 1 && onChange ? (
                 <button type="button" onClick={onChange} aria-label={tr(`Passo ${n}, ${label}, feito`, `Step ${n}, ${label}, done`)} className={`${styles.circle} ${styles.circleDone}`}>
                   <Icon name="check" size={16} stroke={2.4} />
                 </button>
+              ) : state === 'done' ? (
+                <span className={`${styles.circle} ${styles.circleDone}`}>
+                  <Icon name="check" size={16} stroke={2.4} />
+                  <span className="sr-only">{tr('Feito:', 'Done:')}</span>
+                </span>
               ) : (
                 <span className={styles.circle}>{n}</span>
               )}
@@ -71,69 +78,250 @@ export function DeskSteps({ current, right, onChange }: { current: 1 | 2; right?
   );
 }
 
-function HelpToggle({ label, open, toggle }: { label: string; open: boolean; toggle: () => void }) {
+/**
+ * Ícone de ajuda (?) com a explicação do critério (21/10): aparece ao passar o rato ou com o foco,
+ * e fica aberta ao tocar (ecrãs táteis). Escape fecha.
+ */
+export function HelpTip({ id, label, text }: { id: string; label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  const tipId = `${id}-ajuda`;
   return (
-    <button type="button" onClick={toggle} aria-expanded={open} aria-label={tr(`O que conta em ${label}`, `What counts in ${label}`)} className={styles.help}>
-      <span className={styles.helpMark}>?</span>
+    <span className={styles.tipWrap} data-open={open || undefined}>
+      <button
+        type="button"
+        className={styles.help}
+        aria-label={tr(`O que conta em ${label}`, `What counts in ${label}`)}
+        aria-expanded={open}
+        aria-describedby={tipId}
+        onClick={() => setOpen(!open)}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+        onBlur={() => setOpen(false)}
+      >
+        <Icon name="help" size={18} stroke={2} />
+      </button>
+      <span id={tipId} role="tooltip" className={styles.tip}>
+        {text}
+      </span>
+    </span>
+  );
+}
+
+/** Comentário curto num critério ou parâmetro (21/10: um por parâmetro em vez de um só no fim) */
+interface CommentProps<K extends ParamKey> {
+  comment?: string;
+  onComment?: (k: K, t: string) => void;
+  /** o comentário tem nomes ou insultos */
+  invalid?: boolean;
+}
+
+/** "Comentar": abre uma caixa curta por baixo; fica aberta se já houver texto */
+function ParamComment<K extends ParamKey>({ k, label, comment = '', onComment, invalid = false }: CommentProps<K> & { k: K; label: string }) {
+  const [open, setOpen] = useState(!!comment);
+  // ao carregar em "Comentar" o foco passa para a caixa (só nesse momento, não ao abrir o ecrã)
+  const focusBox = useRef(false);
+  if (!onComment) return null;
+  const boxId = `comentario-${k}`;
+  return (
+    <div className={styles.paramComment}>
+      {!open ? (
+        <button type="button" className={`link ${styles.commentToggle}`} aria-label={tr(`Comentar sobre ${label}`, `Comment on ${label}`)} onClick={() => {
+            focusBox.current = true;
+            setOpen(true);
+          }}
+        >
+          <Icon name="plus" size={14} stroke={2.2} />
+          {tr('Comentar', 'Comment')}
+        </button>
+      ) : (
+        <div id={boxId} className={styles.commentBox}>
+          <label htmlFor={`${boxId}-t`} className="sr-only">
+            {tr(`Comentário sobre ${label}`, `Comment on ${label}`)}
+          </label>
+          <textarea
+            id={`${boxId}-t`}
+            className={`textarea ${invalid ? styles.textBlocked : ''}`}
+            rows={2}
+            maxLength={PARAM_COMMENT_MAX}
+            value={comment}
+            placeholder={tr('O que acontece, sem nomes', 'What happens, no names')}
+            aria-invalid={invalid}
+            aria-describedby={invalid ? `${boxId}-erro` : undefined}
+            ref={(el) => {
+              if (el && focusBox.current) {
+                focusBox.current = false;
+                el.focus();
+              }
+            }}
+            onChange={(e) => onComment(k, e.target.value)}
+          />
+          <div className={`row between small muted ${styles.commentFoot}`}>
+            <span id={`${boxId}-erro`} className={invalid ? styles.commentError : ''}>
+              {invalid ? tr('Sem nomes nem insultos', 'No names or insults') : ''}
+            </span>
+            <span className="mono">
+              {comment.length}/{PARAM_COMMENT_MAX}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ScoreRowProps<K extends ParamKey> extends CommentProps<K> {
+  k: K;
+  value: number;
+  /** Recebe a chave: a mesma função serve todas as linhas (estável, para o memo) */
+  onPick: (k: K, n: number) => void;
+  /** parâmetro acrescentado pela pessoa: pode tirá-lo */
+  onRemove?: (k: K) => void;
+  desktop?: boolean;
+}
+
+/** Botão para tirar um parâmetro acrescentado */
+function RemoveParam<K extends ParamKey>({ k, label, onRemove }: { k: K; label: string; onRemove?: (k: K) => void }) {
+  if (!onRemove) return null;
+  return (
+    <button type="button" className={`link ${styles.removeParam}`} aria-label={tr(`Tirar ${label}`, `Remove ${label}`)} onClick={() => onRemove(k)}>
+      {tr('Tirar', 'Remove')}
     </button>
   );
 }
 
-interface ScoreRowProps {
-  k: CriterionKey;
-  value: number;
-  /** Recebe o critério: a mesma função serve as 8 linhas (estável, para o memo) */
-  onPick: (k: CriterionKey, n: number) => void;
-  desktop?: boolean;
-  /** Ajuda "o que conta": aberta ou não, e a função que a alterna (recebe o critério) */
-  helpOpen?: boolean;
-  onHelp?: (k: CriterionKey) => void;
-}
-
 /**
- * Um critério com os botões 1–5 (rádio: um só Tab; setas, Home e End mudam a nota).
+ * Um critério (ou parâmetro com escala) com um slider de 1 a 5 (21/10; antes cinco botões). A cor intensifica-se com a nota
+ * e a etiqueta diz o que ela quer dizer (Péssimo … Excelente). Sem nota, o slider fica cinzento: tocar ou usar as setas dá a nota;
+ * o × (ou Delete) tira-a.
  * memo: ao dar uma nota só a linha desse critério volta a correr (medido com scripts/react-profile.mjs).
  */
-export const ScoreRow = memo(function ScoreRow({ k, value, onPick, desktop = false, helpOpen = false, onHelp }: ScoreRowProps) {
-  const c = CRITERION[k];
-  const onKey = (e: KeyboardEvent<HTMLButtonElement>, n: number) => {
-    const to = scoreForKey(e.key, n);
-    if (to == null) return;
-    e.preventDefault();
-    onPick(k, to);
-    (e.currentTarget.parentElement?.children[to - 1] as HTMLElement | undefined)?.focus();
+function ScoreRowImpl<K extends ParamKey>({ k, value, onPick, desktop = false, comment, onComment, invalid, onRemove }: ScoreRowProps<K>) {
+  const c = paramMeta(k);
+  const nameId = `nota-${k}`;
+  const word = scoreWord(value);
+  const level = value || undefined;
+  // sem nota o slider está no meio: tocar aí não muda o valor (não há onChange), por isso a nota dá-se ao largar
+  const pickCurrent = (e: { currentTarget: HTMLInputElement }) => {
+    if (!value) onPick(k, Number(e.currentTarget.value));
+  };
+  const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && value) {
+      e.preventDefault();
+      onPick(k, 0);
+    }
   };
   return (
-    <div className={desktop ? styles.scoreWide : styles.score} data-respect={k === 'respeito' || undefined}>
-      <div role="radiogroup" aria-label={c.label} className={styles.scoreGroup}>
+    <div className={desktop ? styles.scoreWide : styles.score} data-respect={k === 'respeito' || undefined} data-level={level}>
+      <div className={`row ${styles.scoreHead}`}>
         <span className={`row ${styles.scoreName}`}>
-          <span className={styles.scoreLabel}>{c.label}</span>
-          {onHelp && <HelpToggle label={c.label} open={helpOpen} toggle={() => onHelp(k)} />}
+          <span id={nameId} className={styles.scoreLabel}>
+            {c.label}
+          </span>
+          <HelpTip id={nameId} label={c.label} text={c.help} />
         </span>
-        <span className={`row ${styles.dots}`}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              role="radio"
-              className={styles.dotButton}
-              aria-checked={n === value}
-              aria-label={tr(`${c.label}, ${n} de 5`, `${c.label}, ${n} of 5`)}
-              tabIndex={isTabStop(n, value) ? 0 : -1}
-              onKeyDown={(e) => onKey(e, n)}
-              onClick={() => onPick(k, n === value ? 0 : n)}
-            >
-              <span className={styles.dot} data-on={n <= value || undefined}>
-                {n}
-              </span>
-            </button>
-          ))}
+        <span className={styles.levelPill} data-level={level} aria-hidden="true">
+          {value ? `${value} · ${word}` : word}
         </span>
       </div>
-      {helpOpen && <div className={`fade-up ${styles.hint}`}>{c.hint}.</div>}
+      <div className={`row ${styles.sliderRow}`}>
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          className={styles.slider}
+          value={value || 3}
+          data-empty={!value || undefined}
+          style={{ '--pct': `${((value || 1) - 1) * 25}%` } as CSSProperties}
+          aria-labelledby={nameId}
+          aria-valuetext={value ? tr(`${value} de 5, ${word}`, `${value} of 5, ${word}`) : tr('Sem nota', 'No score')}
+          onChange={(e) => onPick(k, Number(e.target.value))}
+          onPointerUp={pickCurrent}
+          onKeyDown={onKey}
+        />
+        <button type="button" className={styles.clear} aria-label={tr(`Tirar a nota de ${c.label}`, `Remove the ${c.label} score`)} onClick={() => onPick(k, 0)} hidden={!value}>
+          <Icon name="close" size={14} stroke={2.2} />
+        </button>
+      </div>
+      <span className={`row between mono ${styles.ticks}`} aria-hidden="true">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <span key={n}>{n}</span>
+        ))}
+      </span>
+      <div className={`row between ${styles.paramFoot}`}>
+        <ParamComment k={k} label={c.label} comment={comment} onComment={onComment} invalid={invalid} />
+        <RemoveParam k={k} label={c.label} onRemove={onRemove} />
+      </div>
+    </div>
+  );
+}
+export const ScoreRow = memo(ScoreRowImpl) as typeof ScoreRowImpl;
+
+interface YesNoRowProps extends CommentProps<ExtraKey> {
+  k: ExtraKey;
+  value: boolean | undefined;
+  onPick: (k: ExtraKey, v: boolean | null) => void;
+  onRemove?: (k: ExtraKey) => void;
+  desktop?: boolean;
+}
+
+/** Parâmetro qualitativo: Sim ou Não (tocar de novo tira a resposta) */
+export const YesNoRow = memo(function YesNoRow({ k, value, onPick, desktop = false, comment, onComment, invalid, onRemove }: YesNoRowProps) {
+  const p = EXTRA[k];
+  const nameId = `nota-${k}`;
+  const options = [
+    { l: tr('Sim', 'Yes'), v: true },
+    { l: tr('Não', 'No'), v: false },
+  ];
+  return (
+    <div className={desktop ? styles.scoreWide : styles.score}>
+      <div className={`row ${styles.scoreHead}`}>
+        <span className={`row ${styles.scoreName}`}>
+          <span id={nameId} className={styles.scoreLabel}>
+            {p.label}
+          </span>
+          <HelpTip id={nameId} label={p.label} text={p.help} />
+        </span>
+        <div role="group" aria-labelledby={nameId} className={`row ${styles.recommend}`}>
+          {options.map((o) => {
+            const on = value === o.v;
+            return (
+              <button key={o.l} type="button" aria-pressed={on} onClick={() => onPick(k, on ? null : o.v)} className={styles.yesNo}>
+                {o.l}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className={`row between ${styles.paramFoot}`}>
+        <ParamComment k={k} label={p.label} comment={comment} onComment={onComment} invalid={invalid} />
+        <RemoveParam k={k} label={p.label} onRemove={onRemove} />
+      </div>
     </div>
   );
 });
+
+/** "Acrescentar parâmetro": os que faltam, da lista do tipo de trabalho */
+export function AddParams({ available, onAdd }: { available: ExtraKey[]; onAdd: (k: ExtraKey) => void }) {
+  const [open, setOpen] = useState(false);
+  if (!available.length) return null;
+  return (
+    <div className={styles.addParams}>
+      <button type="button" className={`btn btn-ghost ${styles.addToggle}`} aria-expanded={open} aria-controls="mais-parametros" onClick={() => setOpen(!open)}>
+        <Icon name="plus" size={16} stroke={2.2} />
+        {tr('Acrescentar parâmetro', 'Add a parameter')}
+      </button>
+      {open && (
+        <div id="mais-parametros" role="group" aria-label={tr('Parâmetros que podes acrescentar', 'Parameters you can add')} className={`row wrap ${styles.tags}`}>
+          {available.map((k) => (
+            <button key={k} type="button" className={`chip ${styles.tag}`} onClick={() => onAdd(k)}>
+              + {EXTRA[k].label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** Sim / Não de "Recomendavas a um amigo?" (tocar de novo tira; memo: onChange é estável) */
 export const RecommendButtons = memo(function RecommendButtons({ value, onChange, desktop = false }: { value: boolean | null; onChange: (v: boolean | null) => void; desktop?: boolean }) {

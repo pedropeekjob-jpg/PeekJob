@@ -1,4 +1,5 @@
 export * from './criteria';
+export * from './params';
 export * from './nif';
 export * from './match';
 export * from './moderation';
@@ -8,3 +9,4 @@ export * from './routes';
 export * from './scrub';
 export * from './districts';
 export * from './contributions';
+export * from './report';

@@ -51,6 +51,40 @@ describe('Avaliações', () => {
     expect(count.rows[0].n).toBe(0);
   });
 
+  it('parâmetros do tipo de trabalho e comentários por parâmetro: guardam-se e aparecem na lista pública', async () => {
+    const body = { ...goodReview, extras: { gorjetas: true, folgas_escala: 2 }, comments: { ambiente: 'Equipa sempre pronta a ajudar.', gorjetas: 'Divididas por todos.' } };
+    const res = await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(body).expect(201);
+    expect(res.body.review).toMatchObject({ extras: body.extras, comments: body.comments });
+    const list = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
+    expect(list.body[0] ?? list.body.items?.[0]).toMatchObject({ extras: body.extras, comments: body.comments });
+  });
+
+  it('parâmetro sim/não com nota, ou parâmetro inventado: 400', async () => {
+    const login = await t.login('u1');
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(login).send({ ...goodReview, extras: { gorjetas: 4 } })).status).toBe(400);
+    expect((await t.http().post(`/orgs/${orgId}/reviews`).set(login).send({ ...goodReview, extras: { inventado: true } })).status).toBe(400);
+  });
+
+  it('insulto num comentário de parâmetro: 422 a dizer qual', async () => {
+    const res = await t.http()
+      .post(`/orgs/${orgId}/reviews`)
+      .set(await t.login('u1'))
+      .send({ ...goodReview, comments: { lideranca: 'O Ricardo é incompetente.' } })
+      .expect(422);
+    expect(res.body).toMatchObject({ code: 'PERSONAL_ATTACK', field: 'comments.lideranca' });
+    expect(res.body.suggestion).not.toMatch(/Ricardo|incompetente/);
+  });
+
+  it('possível ilegalidade num comentário de parâmetro também gera a mensagem de apoio', async () => {
+    const res = await t.http()
+      .post(`/orgs/${orgId}/reviews`)
+      .set(await t.login('u1'))
+      .send({ ...goodReview, comments: { salario: 'O salário chega sempre com atraso.' } })
+      .expect(201);
+    expect(res.body.review.flagged).toBe(true);
+    expect(res.body.supportMessage).not.toBeNull();
+  });
+
   describe('red flags: possível ilegalidade', () => {
     const flaggedReview = { ...goodReview, tags: ['Salário em atraso'], text: 'O salário chega com atraso e há comentários sobre o corpo.' };
 

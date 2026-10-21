@@ -1,8 +1,9 @@
-/* Cartão roxo "Isto pode ser uma ilegalidade": a organização não é avisada */
+/* "Isto pode ser uma ilegalidade": as cores das etiquetas escolhidas em "Conta como é" (21/10; antes roxo a cheio) */
 .alert {
   display: flex;
-  background: var(--purple);
-  color: #fff;
+  background: var(--teal-tint);
+  border: 1px solid var(--teal);
+  color: var(--ink);
 }
 .compact {
   composes: alert;
@@ -42,22 +43,9 @@
 .text {
   font-size: 13px;
   line-height: 1.4;
-  color: #f0e6f7;
+  color: var(--body);
 }
 .card .text {
   font-size: 15px;
   line-height: 1.5;
-}
-.help {
-  flex: none;
-  height: 44px;
-  padding: 0 14px;
-  border-radius: 14px;
-  background: #fff;
-  color: var(--purple-text);
-  font-size: 15px;
-}
-.card .help {
-  align-self: flex-start;
-  padding: 0 22px;
 }

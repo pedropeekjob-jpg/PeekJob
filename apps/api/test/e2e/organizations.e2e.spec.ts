@@ -118,6 +118,34 @@ describe('Organizações', () => {
     });
   });
 
+  describe('pesquisa por profissão e setor, e sugestões (21/10)', () => {
+    let padaria: string;
+    beforeEach(async () => {
+      padaria = await insertOrg(t.pool, { name: 'Padaria Ribeira', city: 'Viseu' });
+      await insertOrg(t.pool, { name: 'Oficina Sete', city: 'Vila Real' });
+      await t.pool.query(`UPDATE organizations SET sector = 'Restauração' WHERE id = $1`, [padaria]);
+      await t.pool.query(`INSERT INTO salaries (org_id, author_ref, role, monthly_gross) VALUES ($1, 'a1', 'Pasteleiro/a', 900), ($1, 'a2', 'Pasteleiro/a', 950)`, [padaria]);
+    });
+
+    it('encontra a organização pela profissão (sem acentos) e diz qual coincidiu', async () => {
+      const res = await t.http().get('/orgs/search?q=pasteleiro').expect(200);
+      expect(res.body.items).toEqual([expect.objectContaining({ id: padaria, matchedRole: 'Pasteleiro/a' })]);
+    });
+
+    it('encontra pelo setor', async () => {
+      const res = await t.http().get('/orgs/search?q=restauracao').expect(200);
+      expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Padaria Ribeira']);
+    });
+
+    it('sugestões: organizações, profissões, setores e sítios', async () => {
+      expect((await t.http().get('/orgs/suggest?q=pa').expect(200)).body).toMatchObject({ orgs: [{ id: padaria, name: 'Padaria Ribeira' }] });
+      expect((await t.http().get('/orgs/suggest?q=paste').expect(200)).body.roles).toEqual([{ label: 'Pasteleiro/a', orgs: 1 }]);
+      expect((await t.http().get('/orgs/suggest?q=restau').expect(200)).body.sectors).toEqual(['Restauração']);
+      expect((await t.http().get('/orgs/suggest?q=vi').expect(200)).body.places).toEqual(['Vila Real', 'Viseu']);
+      expect((await t.http().get('/orgs/suggest?q=p').expect(400)).status).toBe(400);
+    });
+  });
+
   describe('GET /orgs/:id', () => {
     it('devolve a organização com nota e nº de avaliações', async () => {
       const id = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
@@ -126,6 +154,18 @@ describe('Organizações', () => {
       expect(res.body).toMatchObject({ id, name: 'Padaria Ribeira', status: 'active', reviewsCount: 1 });
       expect(res.body.score).toBeCloseTo(4.3, 1);
       expect(res.body.criteria.respeito).toBe(5);
+    });
+
+    it('resumo dos parâmetros do tipo de trabalho só a partir de 3 respostas', async () => {
+      const id = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
+      const post = async (u: string, extras: Record<string, unknown>) =>
+        expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login(u)).send({ ...goodReview, extras })).status).toBe(201);
+      await post('u1', { gorjetas: true, folgas_escala: 2 });
+      await post('u2', { gorjetas: false, folgas_escala: 4 });
+      expect((await t.http().get(`/orgs/${id}`).expect(200)).body.extras).toEqual([]);
+      await post('u3', { gorjetas: true });
+      const res = await t.http().get(`/orgs/${id}`).expect(200);
+      expect(res.body.extras).toEqual([{ key: 'gorjetas', n: 3, yesPct: 67 }]);
     });
 
     it('404 para pendentes e inexistentes', async () => {

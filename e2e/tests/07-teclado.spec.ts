@@ -1,4 +1,4 @@
-import { expect, login, pickOrg, test, uniqueEmail } from '../support/fixtures';
+import { expect, login, pickOrg, test, uniqueEmail, setScore } from '../support/fixtures';
 
 /** Usar só com o teclado (e leitores de ecrã): saltar para o conteúdo, foco ao mudar de ecrã, notas e separadores com setas */
 test.describe('Teclado', () => {
@@ -32,22 +32,29 @@ test.describe('Teclado', () => {
     expect(ring.shadow).toContain('rgb(255, 255, 255)');
   });
 
-  test('notas: um Tab por critério e setas para escolher a nota', async ({ page, isMobile }) => {
+  test('notas: slider por critério, setas para escolher a nota e Tab para o seguinte', async ({ page, isMobile }) => {
     test.skip(isMobile, 'teclado físico: computador');
     await login(page, uniqueEmail('teclado'));
     await page.goto('/avaliar');
     await pickOrg(page, 'oficina sete', 'Oficina Sete');
-    const group = page.getByRole('radiogroup', { name: 'Salário justo' });
-    await expect(group).toBeVisible();
-    await expect(group.locator('[tabindex="0"]')).toHaveCount(1);
-    await group.getByRole('radio').first().focus();
+    const slider = page.getByRole('slider', { name: 'Salário justo' });
+    await expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
+    await slider.focus();
+    await page.keyboard.press('Home');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
-    await expect(group.getByRole('radio', { name: 'Salário justo, 3 de 5' })).toBeFocused();
-    await expect(group.getByRole('radio', { name: 'Salário justo, 3 de 5' })).toHaveAttribute('aria-checked', 'true');
-    // Tab sai do grupo para o critério seguinte
+    await expect(slider).toBeFocused();
+    await expect(slider).toHaveAttribute('aria-valuetext', '3 de 5, Aceitável');
+    // Delete tira a nota
+    await page.keyboard.press('Delete');
+    await expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
+    // Tab passa pelo × (escondido sem nota), por "Comentar" e pela ajuda do critério seguinte, até ao slider dele
     await page.keyboard.press('Tab');
-    await expect(page.getByRole('radiogroup', { name: 'Equilíbrio' }).getByRole('radio').first()).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Comentar sobre Salário justo' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'O que conta em Equilíbrio' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('slider', { name: 'Equilíbrio' })).toBeFocused();
   });
 
   test('verificação: separadores com setas', async ({ page }) => {

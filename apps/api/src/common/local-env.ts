@@ -24,7 +24,7 @@ export function findEnvFile(from = process.cwd()): string | null {
 function parse(text: string): Env {
   const out: Env = {};
   for (const line of text.split(/\r?\n/)) {
-    const m = /^\s*(?:export\s+)?([A-Za-z_]\w*)\s*=\s*(.*)\s*$/.exec(line);
+    const m = /^\s*(?:export\s+)?([A-Za-z_]\w*)\s*=\s*(.*)$/.exec(line);
     if (!m) continue;
     out[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
   }

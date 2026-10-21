@@ -38,6 +38,13 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(screen.getByTestId('draft').textContent).toMatch(/^padaria-ribeira\|.+/);
   });
 
+  it('no início: passo 1 de 3 e o aviso de que a PeekJob não trata irregularidades', () => {
+    show(viewport);
+    if (viewport === 'desktop') expect(screen.getByRole('list', { name: 'Passo 1 de 3' })).toBeInTheDocument();
+    else expect(screen.getByRole('img', { name: 'Passo 1 de 3' })).toBeInTheDocument();
+    expect(screen.getByText(/^A PeekJob não trata nem resolve irregularidades/)).toBeInTheDocument();
+  });
+
   it('sem resultados: explica e deixa adicionar', async () => {
     const { user } = show(viewport);
     await user.type(screen.getByRole('searchbox', { name: /Nome da organização/ }), 'zzzz nada');

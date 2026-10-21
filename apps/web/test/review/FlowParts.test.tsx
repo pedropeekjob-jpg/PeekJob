@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { MemoryRouter } from 'react-router';
@@ -14,28 +14,38 @@ function Score({ desktop = false }: { desktop?: boolean }) {
 }
 
 describe('partes do fluxo de avaliar', () => {
-  it.each([false, true])('nota: um só Tab por critério e setas/Home/End mudam a nota (computador: %s)', async (desktop) => {
+  it.each([false, true])('nota: slider de 1 a 5 com etiqueta que muda; largar sem mexer dá a nota; × e Delete tiram (computador: %s)', async (desktop) => {
     const user = userEvent.setup();
     render(<Score desktop={desktop} />);
-    const radios = screen.getAllByRole('radio');
-    expect(radios.map((r) => r.tabIndex)).toEqual([0, -1, -1, -1, -1]);
-    await user.click(radios[2]);
-    expect(radios[2]).toHaveAttribute('aria-checked', 'true');
-    expect(radios.map((r) => r.tabIndex)).toEqual([-1, -1, 0, -1, -1]);
-    await user.keyboard('{ArrowRight}');
-    expect(radios[3]).toHaveAttribute('aria-checked', 'true');
-    expect(radios[3]).toHaveFocus();
-    await user.keyboard('{End}{ArrowUp}');
-    expect(radios[4]).toHaveAttribute('aria-checked', 'true');
-    await user.keyboard('{Home}{ArrowDown}{ArrowLeft}');
-    expect(radios[0]).toHaveAttribute('aria-checked', 'true');
-    expect(radios[0]).toHaveFocus();
-    await user.keyboard('a'); // outras teclas não mudam nada
-    expect(radios[0]).toHaveAttribute('aria-checked', 'true');
-    await user.click(radios[0]); // tocar na escolhida tira-a
-    expect(screen.queryByRole('radio', { checked: true })).not.toBeInTheDocument();
-    expect(screen.getByRole('radiogroup', { name: 'Salário justo' })).toBeInTheDocument();
-    expect(radios[1]).toHaveAccessibleName('Salário justo, 2 de 5');
+    const slider = screen.getByRole('slider', { name: 'Salário justo' });
+    expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
+    expect(slider).toHaveAttribute('data-empty');
+    expect(screen.getByText('Sem nota')).toBeInTheDocument();
+    fireEvent.pointerUp(slider);
+    expect(slider).toHaveAttribute('aria-valuetext', '3 de 5, Aceitável');
+    fireEvent.change(slider, { target: { value: '5' } });
+    expect(slider).toHaveAttribute('aria-valuetext', '5 de 5, Excelente');
+    expect(screen.getByText('5 · Excelente')).toBeInTheDocument();
+    expect(slider.closest('[data-level]')).toHaveAttribute('data-level', '5');
+    fireEvent.change(slider, { target: { value: '1' } });
+    expect(screen.getByText('1 · Péssimo')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Tirar a nota de Salário justo' }));
+    expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
+    fireEvent.change(slider, { target: { value: '2' } });
+    slider.focus();
+    await user.keyboard('{Delete}');
+    expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
+  });
+
+  it('ajuda (?): a explicação do critério, que abre ao tocar e fecha com Escape', async () => {
+    const user = userEvent.setup();
+    render(<Score />);
+    const help = screen.getByRole('button', { name: 'O que conta em Salário justo' });
+    expect(help).toHaveAccessibleDescription(/chega a horas, com recibo/);
+    await user.click(help);
+    expect(help).toHaveAttribute('aria-expanded', 'true');
+    await user.keyboard('{Escape}');
+    expect(help).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('recomendar: sim/não e tocar de novo tira', async () => {
@@ -81,7 +91,7 @@ describe('partes do fluxo de avaliar', () => {
   it('passos no computador: feitos são botões (voltar a esse passo), o atual marcado', async () => {
     const onChange = vi.fn();
     inRouter(<DeskSteps current={2} onChange={onChange} right={<span>direita</span>} />);
-    const steps = screen.getByRole('list', { name: 'Passo 2 de 2' });
+    const steps = screen.getByRole('list', { name: 'Passo 2 de 3' });
     await userEvent.click(within(steps).getByRole('button', { name: 'Passo 1, Organização, feito' }));
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(within(steps).getAllByRole('button')).toHaveLength(1);
@@ -92,7 +102,13 @@ describe('partes do fluxo de avaliar', () => {
   it('passos no computador: no primeiro, nenhum é botão', () => {
     inRouter(<DeskSteps current={1} />);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Avaliação']);
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Organização', '2Avaliação', '3Publicação']);
+  });
+
+  it('passos no computador: depois de publicar, os feitos já não são botões', () => {
+    inRouter(<DeskSteps current={3} />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Feito:Organização', 'Feito:Avaliação', '3Publicação']);
   });
 
   it('passos no telemóvel, cabeçalho, cadeado e grelha das notas', async () => {
@@ -108,8 +124,8 @@ describe('partes do fluxo de avaliar', () => {
         <NotesGrid scores={{}} desktop />
       </>,
     );
-    expect(screen.getByRole('img', { name: 'Passo 2 de 2, concluído' })).toHaveTextContent('2/2');
-    expect(screen.getByRole('img', { name: 'Passo 1 de 2' })).toHaveTextContent('1/2');
+    expect(screen.getByRole('img', { name: 'Passo 2 de 3, concluído' })).toHaveTextContent('2/3');
+    expect(screen.getByRole('img', { name: 'Passo 1 de 3' })).toHaveTextContent('1/3');
     await user.click(screen.getByRole('button', { name: 'Fechar' }));
     expect(onClick).toHaveBeenCalled();
     expect(screen.getByText('Publicação anónima')).toBeInTheDocument();

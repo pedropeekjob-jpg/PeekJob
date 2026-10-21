@@ -25,8 +25,8 @@ export function Found({ text }: { text: string | null }) {
   return text ? <p className={styles.found}>{text}</p> : null;
 }
 
-/** O que pode ajudar (acordeão) */
-export function Tips({ desktop }: { desktop: boolean }) {
+/** O que pode ajudar (acordeão): conselhos para o que foi relatado, primeiro */
+export function Tips({ desktop, kinds }: { desktop: boolean; kinds: readonly string[] }) {
   return (
     <Accordion
       items={[
@@ -34,7 +34,7 @@ export function Tips({ desktop }: { desktop: boolean }) {
           title: <span className={styles.tipsTitle}>{tr('O que pode ajudar', 'What can help')}</span>,
           body: (
             <ul className={styles.tips}>
-              {tips(desktop).map((t) => (
+              {tips(desktop, kinds).map((t) => (
                 <li key={t} className={`row ${styles.tip}`}>
                   <span aria-hidden="true" className={styles.tipDot} />
                   {t}

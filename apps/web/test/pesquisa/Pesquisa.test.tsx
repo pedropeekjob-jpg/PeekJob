@@ -48,7 +48,7 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
 
   it('termo no endereço: mostra "a procurar" e depois os resultados', async () => {
     show(viewport, '/pesquisa?q=gaia');
-    expect(screen.getByRole('searchbox', { name: 'Pesquisar organização' })).toHaveValue('gaia');
+    expect(screen.getByRole('combobox', { name: 'Pesquisar organização' })).toHaveValue('gaia');
     expect(screen.getByText('A espreitar 12 organizações…').closest('[role=status]')).toHaveTextContent('Ordenadas pelo que valorizas');
     expect(await screen.findByText(desktop ? '1 resultado, por compatibilidade' : '1 resultado, ordenado para ti', undefined, SLOW)).toBeInTheDocument();
     expect(names()).toEqual(['Café Vinha']);
@@ -56,7 +56,7 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
 
   it('o endereço acompanha os resultados (muda quando a pesquisa é aplicada); limpar esvazia o campo e devolve o foco', async () => {
     const { user } = show(viewport);
-    const box = screen.getByRole('searchbox', { name: 'Pesquisar organização' });
+    const box = screen.getByRole('combobox', { name: 'Pesquisar organização' });
     await user.type(box, 'maia');
     expect(search()).toBe(''); // ainda a procurar: o endereço não muda a cada tecla
     expect(await screen.findByText(desktop ? '1 resultado, por compatibilidade' : '1 resultado, ordenado para ti', undefined, SLOW)).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
       expect(screen.getByText('Experimenta outro nome ou tipo de organização.')).toBeInTheDocument();
       expect(add).toHaveLength(2);
       await user.click(screen.getByRole('button', { name: 'Limpar filtros' }));
-      expect(screen.getByRole('searchbox')).toHaveValue('');
+      expect(screen.getByRole('combobox')).toHaveValue('');
       expect(await screen.findByText(count(12), undefined, SLOW)).toBeInTheDocument();
       await waitFor(() => expect(search()).toBe(''));
     } else {
@@ -107,7 +107,7 @@ describe.each(['mobile', 'desktop'] as const)('Pesquisa (%s)', (viewport) => {
     await user.click(screen.getByRole('button', { name: 'Associação' }));
     expect(screen.getByText('Nada encontrado para “gaia”')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Todas' }));
-    await user.clear(screen.getByRole('searchbox'));
+    await user.clear(screen.getByRole('combobox'));
     await user.click(screen.getByRole('button', { name: 'Associação' }));
     expect(await screen.findByText(count(2), undefined, SLOW)).toBeInTheDocument();
   });
@@ -129,7 +129,7 @@ describe('Pesquisa: o endereço muda por fora (voltar atrás, ligação do iníc
     expect(await screen.findByText('1 resultado, ordenado para ti', undefined, SLOW)).toBeInTheDocument();
     expect(names()).toEqual(['Café Vinha']);
     await user.click(screen.getByRole('button', { name: 'ir' }));
-    expect(screen.getByRole('searchbox')).toHaveValue('maia');
+    expect(screen.getByRole('combobox')).toHaveValue('maia');
     await screen.findByText('A espreitar 12 organizações…');
     expect(await screen.findByText('1 resultado, ordenado para ti', undefined, SLOW)).toBeInTheDocument();
     expect(names()).toEqual(['Norte Logística']);
@@ -150,7 +150,7 @@ describe('Pesquisa: só no computador', () => {
   it('lateral: as prioridades por ordem, ou "pela nota" sem prioridades', () => {
     seedStore({ prefs: ['salario', 'lideranca'] });
     const { unmount } = show('desktop');
-    expect(screen.getByRole('heading', { level: 1, name: 'Procurar uma organização' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Pesquisar empresas' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Ordenado pelo que valorizas' })).toBeInTheDocument();
     const aside = screen.getByRole('complementary');
     expect(aside.textContent).toContain(`1${CRITERION.salario.label}2${CRITERION.lideranca.label}`);

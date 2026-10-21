@@ -191,6 +191,32 @@ describe('Contas das organizações', () => {
       expect((await t.http().get('/orgs')).body.items).toEqual(before);
       expect((await t.http().get(`/orgs/${orgId}`)).body.plan).toBeUndefined();
     });
+
+    it('relatório semanal e mensal: só Pro e só quem gere; resultados, comparação com o setor, fortes e a melhorar', async () => {
+      await t.pool.query(`UPDATE organizations SET sector = 'Restauração' WHERE id = $1`, [orgId]);
+      const peer = await insertOrg(t.pool, { name: 'Café Vinha', city: 'Porto' });
+      await t.pool.query(`UPDATE organizations SET sector = 'Restauração' WHERE id = $1`, [peer]);
+      await t.http().post(`/orgs/${peer}/reviews`).set(await t.login('eva')).send({ ...goodReview, scores: { lideranca: 2, salario: 4 } }).expect(201);
+      for (const [who, lid, sal] of [['ana', 5, 2], ['bia', 4, 2], ['cris', 5, 3]] as const) {
+        await review(who, { ...goodReview, scores: { lideranca: lid, salario: sal } });
+      }
+      const rosa = await member();
+      expect((await t.http().get(`/orgs/${orgId}/report`).set(await t.login('rui'))).status).toBe(403);
+      const free = await t.http().get(`/orgs/${orgId}/report`).set(rosa);
+      expect(free.status).toBe(403);
+      expect(free.body.code).toBe('PRO_REQUIRED');
+
+      await t.http().put(`/moderation/orgs/${orgId}/plan`).set(mod).send({ plan: 'pro' }).expect(200);
+      const week = (await t.http().get(`/orgs/${orgId}/report`).set(rosa).expect(200)).body;
+      expect(week).toMatchObject({ period: 'week', org: { name: 'Padaria Ribeira', sector: 'Restauração' }, peers: { basis: 'sector', label: 'Restauração', orgs: 1 } });
+      expect(week.results).toMatchObject({ total: 3, inPeriod: 3, recommendPct: 100 });
+      expect(week.strengths[0]).toBe('lideranca');
+      expect(week.improve[0]).toBe('salario');
+      expect((await t.http().get(`/orgs/${orgId}/report?periodo=mes`).set(rosa).expect(200)).body.period).toBe('month');
+      expect((await t.http().get(`/orgs/${orgId}/report?periodo=ano`).set(rosa)).status).toBe(400);
+      // nunca diz quem escreveu
+      expect(JSON.stringify(week)).not.toMatch(/ana|bia|cris|author/);
+    });
   });
 
   describe('os meus dados', () => {

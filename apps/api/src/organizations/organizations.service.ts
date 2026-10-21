@@ -1,6 +1,6 @@
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { ConflictException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CRITERION_KEYS, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery } from '@peekjob/shared';
+import { CRITERION_KEYS, EXTRA_MIN_ANSWERS, extraKind, isExtraKey, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery, type SuggestQuery } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { isUuid } from '../common/zod';
 import { PG_POOL, tx } from '../db/db.module';
@@ -25,6 +25,8 @@ export interface OrgSummary {
   city: string;
   district: string | null;
   status: string;
+  /** a profissão que coincidiu com a pesquisa (salário ou entrevista partilhados) */
+  matchedRole?: string;
 }
 
 export class MergedOrgRedirect {
@@ -93,14 +95,24 @@ export class OrganizationsService {
    * as que coincidem pelo nome ficam à frente.
    */
   async search(q: SearchOrganizationsQuery): Promise<OrgSummary[]> {
+    // também por setor e por profissão (21/10): o cargo de quem partilhou o salário ou a entrevista
     const { rows } = await this.pool.query(
-      `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
-       SELECT o.id, o.name, o.type, o.city, o.district, o.status,
+      `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q),
+       roles AS (
+         SELECT DISTINCT ON (r.org_id) r.org_id, r.role
+           FROM (SELECT org_id, role FROM salaries
+                 UNION ALL SELECT org_id, role FROM interviews WHERE status = 'published') r, input
+          WHERE length(input.q) >= 3 AND lower(f_unaccent(r.role)) LIKE '%' || input.q || '%'
+          ORDER BY r.org_id, length(r.role)
+       )
+       SELECT o.id, o.name, o.type, o.city, o.district, o.status, ro.role AS matched_role,
               greatest(similarity(o.search_name, input.q),
                        word_similarity(input.q, o.search_name),
-                       coalesce(max(similarity(a.search_alias, input.q)), 0)) AS score
+                       coalesce(max(similarity(a.search_alias, input.q)), 0),
+                       CASE WHEN ro.role IS NOT NULL THEN 0.5 ELSE 0 END) AS score
          FROM organizations o
          LEFT JOIN org_aliases a ON a.org_id = o.id
+         LEFT JOIN roles ro ON ro.org_id = o.id
          CROSS JOIN input
         WHERE o.status IN ('active', 'pending')
           AND ($2::boolean OR o.status = 'active')
@@ -111,13 +123,69 @@ export class OrganizationsService {
                OR a.search_alias % input.q
                OR o.search_name LIKE '%' || input.q || '%'
                OR o.search_city = input.q
-               OR lower(f_unaccent(o.district)) = input.q)
-        GROUP BY o.id, input.q
+               OR lower(f_unaccent(o.district)) = input.q
+               OR (length(input.q) >= 3 AND lower(f_unaccent(coalesce(o.sector, ''))) LIKE '%' || input.q || '%')
+               OR ro.role IS NOT NULL)
+        GROUP BY o.id, input.q, ro.role
         ORDER BY score DESC, o.name
         LIMIT $4`,
       [q.q, q.includePending, q.type ?? null, q.limit],
     );
-    return rows.map(({ score: _s, ...o }) => o);
+    return rows.map(({ score: _s, matched_role, ...o }) => (matched_role ? { ...o, matchedRole: matched_role } : o));
+  }
+
+  /**
+   * Sugestões enquanto se escreve: organizações ativas, profissões (dos salários e entrevistas partilhados),
+   * setores e sítios (cidades e distritos). Sem acentos e sem distinguir maiúsculas.
+   */
+  async suggest(q: SuggestQuery) {
+    const nq = q.q;
+    const [orgs, roles, sectors, places] = await Promise.all([
+      this.pool.query(
+        `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
+         SELECT o.id, o.name, o.city, o.type
+           FROM organizations o, input
+          WHERE o.status = 'active' AND (o.search_name LIKE '%' || input.q || '%' OR input.q <% o.search_name)
+          ORDER BY (o.search_name LIKE input.q || '%') DESC, word_similarity(input.q, o.search_name) DESC, o.name
+          LIMIT 5`,
+        [nq],
+      ),
+      this.pool.query(
+        `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
+         SELECT min(r.role) AS label, count(DISTINCT r.org_id)::int AS orgs
+           FROM (SELECT org_id, role FROM salaries UNION ALL SELECT org_id, role FROM interviews WHERE status = 'published') r
+           JOIN organizations o ON o.id = r.org_id AND o.status = 'active', input
+          WHERE lower(f_unaccent(r.role)) LIKE '%' || input.q || '%'
+          GROUP BY lower(f_unaccent(r.role))
+          ORDER BY count(DISTINCT r.org_id) DESC, min(r.role)
+          LIMIT 4`,
+        [nq],
+      ),
+      this.pool.query(
+        `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
+         SELECT min(o.sector) AS label FROM organizations o, input
+          WHERE o.status = 'active' AND o.sector IS NOT NULL AND lower(f_unaccent(o.sector)) LIKE '%' || input.q || '%'
+          GROUP BY lower(f_unaccent(o.sector)) ORDER BY count(*) DESC LIMIT 3`,
+        [nq],
+      ),
+      this.pool.query(
+        `WITH input AS (SELECT lower(f_unaccent($1::text)) AS q)
+         SELECT label FROM (
+           SELECT min(o.city) AS label, count(*) AS n FROM organizations o, input
+            WHERE o.status = 'active' AND o.search_city LIKE input.q || '%' GROUP BY o.search_city
+           UNION
+           SELECT min(o.district), count(*) FROM organizations o, input
+            WHERE o.status = 'active' AND lower(f_unaccent(coalesce(o.district, ''))) LIKE input.q || '%' GROUP BY lower(f_unaccent(o.district))
+         ) p ORDER BY n DESC, label LIMIT 3`,
+        [nq],
+      ),
+    ]);
+    return {
+      orgs: orgs.rows,
+      roles: roles.rows.map((r) => ({ label: r.label, orgs: r.orgs })),
+      sectors: sectors.rows.map((r) => r.label as string),
+      places: [...new Set(places.rows.map((r) => r.label as string))],
+    };
   }
 
   async create(input: CreateOrganizationInput, creatorRef: string) {
@@ -202,7 +270,19 @@ export class OrganizationsService {
       `SELECT id, label, address, lat, lng FROM org_locations WHERE org_id = $1 AND status = 'active' ORDER BY created_at`,
       [id],
     );
-    return { ...toPublicOrg(agg.rows[0]), locations: locs.rows };
+    // parâmetros do tipo de trabalho: só os que têm respostas suficientes para não identificar ninguém
+    const ex = await this.pool.query(
+      `SELECT e.key, count(*)::int AS n, count(*) FILTER (WHERE e.value = 'true'::jsonb)::int AS yes,
+              round(avg((e.value #>> '{}')::numeric) FILTER (WHERE jsonb_typeof(e.value) = 'number'), 1) AS avg
+         FROM reviews r, jsonb_each(r.extras) e
+        WHERE r.org_id = $1 AND r.status = 'published'
+        GROUP BY e.key HAVING count(*) >= $2 ORDER BY count(*) DESC, e.key`,
+      [id, EXTRA_MIN_ANSWERS],
+    );
+    const extras = ex.rows
+      .filter((r) => isExtraKey(r.key))
+      .map((r) => (extraKind(r.key) === 'yesno' ? { key: r.key, n: r.n, yesPct: Math.round((r.yes / r.n) * 100) } : { key: r.key, n: r.n, avg: num(r.avg) }));
+    return { ...toPublicOrg(agg.rows[0]), locations: locs.rows, extras };
   }
 
   /** Organizações ativas com agregados (para o início e o ranking da web). */

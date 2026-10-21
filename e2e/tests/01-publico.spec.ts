@@ -29,6 +29,23 @@ test.describe('Visita pública', () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test('sugestões ao escrever: na página inicial e na pesquisa, com o rato e com o teclado', async ({ page }) => {
+    await page.goto('/?lado=espreitar');
+    const home = page.getByRole('combobox', { name: 'Pesquisar organização' });
+    await home.fill('oficina');
+    await page.getByRole('option', { name: /Oficina Sete/ }).click();
+    await page.waitForURL(/\/org\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Oficina Sete' })).toBeVisible();
+
+    await page.goto('/pesquisa');
+    const box = page.getByRole('combobox').first();
+    await box.fill('padaria');
+    await expect(page.getByRole('option', { name: /Padaria Ribeira/ })).toBeVisible();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await page.waitForURL(/\/org\/[0-9a-f-]{36}$/);
+  });
+
   test('Explorar está no menu de qualquer ecrã', async ({ page }) => {
     await page.goto('/sobre');
     await page.getByRole('navigation', { name: 'Principal', exact: true }).getByRole('link', { name: 'Explorar' }).click();
@@ -38,7 +55,7 @@ test.describe('Visita pública', () => {
 
   test('a avaliação publicada aparece na página da organização', async ({ page }) => {
     await page.goto('/pesquisa');
-    await page.getByRole('searchbox').first().fill('padaria ribeira');
+    await page.getByRole('combobox').first().fill('padaria ribeira');
     await page.getByText('Padaria Ribeira').first().click();
     await page.waitForURL(/\/org\//);
     await expect(page.getByText('Turnos mal planeados e chefia desorganizada.')).toBeVisible();
@@ -47,14 +64,14 @@ test.describe('Visita pública', () => {
   test('página inicial: pesquisar a partir da zona de cima, voltar e escolher avaliar', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /^Espreitar/ }).click();
-    await page.getByRole('searchbox', { name: 'Pesquisar organização' }).fill('padaria');
+    await page.getByRole('combobox', { name: 'Pesquisar organização' }).fill('padaria');
     await page.keyboard.press('Enter');
     await page.waitForURL(/\/pesquisa\?q=padaria$/);
     await page.goBack();
-    await expect(page.getByRole('searchbox', { name: 'Pesquisar organização' })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Pesquisar organização' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page).toHaveURL(/\/$/);
-    await page.getByRole('button', { name: /^O teu trabalho/ }).click();
+    await page.getByRole('button', { name: /^Avalia(?!r)/ }).click();
     await page.getByRole('link', { name: 'Escolher da lista' }).click();
     await page.waitForURL(/\/avaliar$/);
     await expectNoHorizontalScroll(page);

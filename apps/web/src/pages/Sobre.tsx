@@ -81,7 +81,7 @@ export default function Sobre() {
             <Icon name="arrow" size={20} />
           </Link>
           <Link to="/avaliar" className="info-door info-door-job zone" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="sobre">
-            <span className="info-eyebrow">{tr('O teu trabalho', 'Your job')}</span>
+            <span className="info-eyebrow">{tr('Avalia', 'Review')}</span>
             <strong>{tr('Avaliar onde trabalho', 'Review where I work')}</strong>
             <Icon name="arrow" size={20} />
           </Link>

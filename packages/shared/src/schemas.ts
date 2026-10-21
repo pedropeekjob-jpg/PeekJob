@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CRITERION_KEYS, ORG_TYPES, REVIEW_TAGS, REVIEW_TEXT_MAX } from './criteria';
 import { DISTRICTS } from './districts';
+import { EXTRA_KEYS, extraKind, isExtraKey, PARAM_COMMENT_MAX } from './params';
 import { isValidNif, normalizeNif } from './nif';
 
 const nifField = z
@@ -36,6 +37,22 @@ export const CreateReviewInput = z.object({
   recommend: z.boolean().nullable().default(null),
   tags: z.array(z.enum(REVIEW_TAGS)).max(REVIEW_TAGS.length).default([]),
   text: z.string().trim().max(REVIEW_TEXT_MAX).default(''),
+  /** parâmetros do tipo de trabalho: nota de 1 a 5 ou sim/não, conforme o parâmetro */
+  extras: z
+    .record(z.enum(EXTRA_KEYS), z.union([score, z.boolean()]))
+    .default({})
+    .superRefine((e, ctx) => {
+      for (const [k, v] of Object.entries(e)) {
+        if (isExtraKey(k) && (extraKind(k) === 'yesno') !== (typeof v === 'boolean')) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [k], message: extraKind(k) === 'yesno' ? 'Responde sim ou não' : 'Dá uma nota de 1 a 5' });
+        }
+      }
+    }),
+  /** um comentário curto por critério ou parâmetro (os vazios não se guardam) */
+  comments: z
+    .record(z.enum([...CRITERION_KEYS, ...EXTRA_KEYS]), z.string().trim().max(PARAM_COMMENT_MAX))
+    .default({})
+    .transform((c) => Object.fromEntries(Object.entries(c).filter(([, v]) => v)) as typeof c),
 });
 export type CreateReviewInput = z.infer<typeof CreateReviewInput>;
 
@@ -50,3 +67,9 @@ export const SearchOrganizationsQuery = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 export type SearchOrganizationsQuery = z.infer<typeof SearchOrganizationsQuery>;
+
+/** Sugestões enquanto se escreve (organizações, profissões, setores e sítios) */
+export const SuggestQuery = z.object({
+  q: z.string().trim().min(2).max(80),
+});
+export type SuggestQuery = z.infer<typeof SuggestQuery>;

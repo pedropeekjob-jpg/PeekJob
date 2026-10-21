@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import AvaliarNotas from '../../src/pages/AvaliarNotas';
 import { renderScreen, WithDraft } from '../utils/render';
+import { setScore } from '../utils/score';
 
 const show = (viewport: 'mobile' | 'desktop', patch = {}) =>
   renderScreen(
@@ -11,17 +12,18 @@ const show = (viewport: 'mobile' | 'desktop', patch = {}) =>
     { route: '/avaliar/notas', path: '/avaliar/notas', viewport },
   );
 
-describe('Avaliar · notas e publicar (telemóvel, passo 2 de 2)', () => {
+describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
   beforeEach(() => localStorage.clear());
 
   it('8 critérios; publicar só com pelo menos uma nota; contador; publica dali, sem passo extra', async () => {
     const { user } = show('mobile');
     expect(await screen.findByRole('heading', { level: 1, name: /Dá uma nota de 1 a 5/ })).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Passo 2 de 2' })).toBeInTheDocument();
-    expect(screen.getAllByRole('radiogroup')).toHaveLength(8);
+    expect(screen.getByRole('img', { name: 'Passo 2 de 3' })).toBeInTheDocument();
+    // 8 critérios + 1 parâmetro com escala sugerido para restauração (folgas e escalas)
+    expect(screen.getAllByRole('slider')).toHaveLength(9);
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
-    await user.click(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' }));
-    expect(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' })).toHaveAttribute('aria-checked', 'true');
+    setScore('Ambiente', 4);
+    expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
     const publish = screen.getByRole('button', { name: /Publicar avaliação/ });
     expect(publish).toHaveTextContent('1/8');
     await user.click(publish);
@@ -56,18 +58,21 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 2)', () => {
     expect(screen.getByRole('button', { name: /Publicar avaliação/ })).toBeEnabled();
   });
 
-  it('possível ilegalidade: cartão de apoio com ligação para pedir ajuda', async () => {
+  it('possível ilegalidade: cartão de apoio sem botão que tire a pessoa do fluxo', async () => {
     const { user } = show('mobile', { scores: { ambiente: 3 } });
     await user.click(await screen.findByRole('button', { name: /Contar como é/ }));
     await user.type(screen.getByRole('textbox', { name: /A tua experiência/ }), 'O salário chega sempre atrasado.');
     expect(screen.getByText('Isto pode ser uma ilegalidade')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Pedir ajuda' })).toHaveAttribute('href', '/apoio');
+    expect(screen.queryByRole('link', { name: 'Pedir ajuda' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Depois de publicares, mostramos-te onde pedir ajuda/)).toBeInTheDocument();
+    expect(screen.getByText(/^A PeekJob não trata nem resolve irregularidades/)).toBeInTheDocument();
   });
 
-  it('clicar na nota escolhida tira-a', async () => {
-    const { user } = show('mobile', { scores: { ambiente: 4 } });
-    await user.click(await screen.findByRole('radio', { name: 'Ambiente, 4 de 5' }));
-    expect(screen.getByRole('radio', { name: 'Ambiente, 4 de 5' })).toHaveAttribute('aria-checked', 'false');
+  it('o × tira a nota escolhida', async () => {
+    show('mobile', { scores: { ambiente: 4 } });
+    expect(await screen.findByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
+    setScore('Ambiente', 0);
+    expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', 'Sem nota');
   });
 
   it('ajuda por critério abre e fecha', async () => {
@@ -75,6 +80,45 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 2)', () => {
     const help = await screen.findByRole('button', { name: 'O que conta em Ambiente' });
     await user.click(help);
     expect(help).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('parâmetros do tipo de trabalho: sugeridos pelo setor, sim/não e escala, e acrescentar mais', async () => {
+    const { user } = show('mobile');
+    const section = (await screen.findByRole('heading', { name: 'No teu tipo de trabalho' })).closest('section')!;
+    expect(within(section).getByText('Sugestões para Restauração. Responde só ao que faz sentido.')).toBeInTheDocument();
+    const tips = within(section).getByRole('group', { name: 'Gorjetas para a equipa' });
+    await user.click(within(tips).getByRole('button', { name: 'Sim' }));
+    expect(within(tips).getByRole('button', { name: 'Sim' })).toHaveAttribute('aria-pressed', 'true');
+    setScore('Folgas e escalas', 2);
+    expect(screen.getByRole('slider', { name: 'Folgas e escalas' })).toHaveAttribute('aria-valuetext', '2 de 5, Mau');
+    // os parâmetros não contam para "pelo menos uma nota"
+    expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
+
+    await user.click(within(section).getByRole('button', { name: 'Acrescentar parâmetro' }));
+    await user.click(within(section).getByRole('button', { name: '+ Contrato escrito' }));
+    expect(within(section).getByRole('group', { name: 'Contrato escrito' })).toBeInTheDocument();
+    await user.click(within(section).getByRole('button', { name: 'Tirar Contrato escrito' }));
+    expect(within(section).queryByRole('group', { name: 'Contrato escrito' })).not.toBeInTheDocument();
+  });
+
+  it('comentário por critério: abre, conta caracteres e bloqueia insultos', async () => {
+    const { user } = show('mobile', { scores: { ambiente: 3 } });
+    await user.click(await screen.findByRole('button', { name: 'Comentar sobre Ambiente' }));
+    const box = screen.getByRole('textbox', { name: 'Comentário sobre Ambiente' });
+    await user.type(box, 'Entreajuda todos os dias.');
+    expect(screen.getByText('25/280')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Publicar avaliação/ })).toBeEnabled();
+    await user.clear(box);
+    await user.type(box, 'O Ricardo é um idiota.');
+    expect(box).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('button', { name: /Corrige a frase para publicar/ })).toBeDisabled();
+  });
+
+  it('possível ilegalidade num comentário de critério também mostra o apoio', async () => {
+    const { user } = show('mobile', { scores: { salario: 2 } });
+    await user.click(await screen.findByRole('button', { name: 'Comentar sobre Salário justo' }));
+    await user.type(screen.getByRole('textbox', { name: 'Comentário sobre Salário justo' }), 'O salário chega sempre atrasado.');
+    expect(screen.getByText('Isto pode ser uma ilegalidade')).toBeInTheDocument();
   });
 
   it('recomendar a um amigo', async () => {
@@ -92,7 +136,7 @@ describe('Avaliar · notas e texto (computador, ecrã único)', () => {
     const { user } = show('desktop');
     expect(await screen.findByRole('heading', { level: 1, name: /Como é trabalhar lá/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
-    await user.click(screen.getByRole('radio', { name: 'Salário justo, 5 de 5' }));
+    setScore('Salário justo', 5);
     expect(screen.getByRole('img', { name: 'Nota média 5,0 de 5' })).toBeInTheDocument();
     expect(screen.getByText(/1 de 8 notas/)).toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: /A tua experiência/ }), 'Equipa unida.');
@@ -106,7 +150,7 @@ describe('Avaliar · notas e texto (computador, ecrã único)', () => {
     await user.type(await screen.findByRole('textbox', { name: /A tua experiência/ }), 'O salário chega sempre atrasado.');
     const alert = screen.getByRole('status', { name: 'Apoio' });
     expect(alert).toHaveTextContent(/Salário em atraso: pode ser incumprimento salarial/);
-    expect(within(alert).getByRole('link', { name: 'Pedir ajuda' })).toHaveAttribute('href', '/apoio');
+    expect(within(alert).queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('insulto bloqueia o botão', async () => {

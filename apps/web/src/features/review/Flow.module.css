@@ -90,45 +90,70 @@
   color: var(--teal-dark);
 }
 
-/* Notas 1–5 */
+/* Notas 1–5: slider com a cor a intensificar com a nota e uma etiqueta que diz o que ela quer dizer (21/10) */
 .score,
 .scoreWide {
-  --col: var(--teal);
-  --on-text: var(--ink);
-  --off: #c9cdd0;
-  --off-text: var(--muted);
+  /* rampa de verde-água (1 claro … 5 escuro); Respeito tem a sua, em roxo. Uma só cor muda de luminosidade:
+     lê-se também com daltonismo */
+  --l1: #c4ebec;
+  --l2: #8fd8db;
+  --l3: #3fbcc1;
+  --l4: #00a9af;
+  --l5: #00747a;
+  --fill: var(--grey);
+  --pill-bg: var(--soft);
+  --pill-fg: var(--body);
   --name: 15px;
-  --dot: 30px;
-  --dot-font: 11px;
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  padding: 10px 0 6px;
 }
 .scoreWide {
-  --off: var(--grey);
-  --off-text: var(--body);
   --name: 16px;
-  --dot: 34px;
-  --dot-font: 13px;
+  padding: 12px 0 8px;
   border-bottom: 1px solid #eef0f1;
 }
 .score[data-respect],
 .scoreWide[data-respect] {
-  --col: var(--purple);
-  --on-text: #fff;
+  --l1: #eadcf4;
+  --l2: #cfb2e5;
+  --l3: #a578c9;
+  --l4: #84489f;
+  --l5: #652d90;
 }
-.scoreGroup {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px;
-  align-items: center;
-  min-height: 48px;
+[data-level='1'] {
+  --fill: var(--l1);
+  --pill-bg: var(--l1);
+  --pill-fg: var(--ink);
 }
-.scoreWide .scoreGroup {
-  display: flex;
-  flex-wrap: wrap;
+[data-level='2'] {
+  --fill: var(--l2);
+  --pill-bg: var(--l2);
+  --pill-fg: var(--ink);
+}
+[data-level='3'] {
+  --fill: var(--l3);
+  --pill-bg: var(--l3);
+  --pill-fg: var(--ink);
+}
+[data-level='4'] {
+  --fill: var(--l4);
+  --pill-bg: var(--l4);
+  --pill-fg: var(--ink);
+}
+[data-level='5'] {
+  --fill: var(--l5);
+  --pill-bg: var(--l5);
+  --pill-fg: #fff;
+}
+[data-respect][data-level='4'] {
+  --pill-fg: #fff;
+}
+.scoreHead {
   justify-content: space-between;
-  gap: 8px 16px;
-  min-height: 52px;
+  gap: 8px;
+  min-height: 40px;
 }
 .scoreName {
   gap: 2px;
@@ -143,79 +168,203 @@
 [data-respect] .scoreLabel {
   color: var(--purple-text);
 }
-.help {
+.levelPill {
   flex: none;
-  width: 32px;
-  height: 44px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.helpMark {
-  width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  border: 1.5px solid var(--muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+  min-width: 96px;
+  text-align: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--muted);
-  background: transparent;
-}
-.help[aria-expanded='true'] .helpMark {
-  border-color: var(--ink);
-  color: var(--ink);
-  background: var(--line);
-}
-.dots {
-  gap: 0;
-}
-.scoreWide .dots {
-  gap: 2px;
-}
-.dotButton {
-  width: 42px;
-  height: 44px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.scoreWide .dotButton {
-  width: 44px;
-}
-.dot {
-  width: var(--dot);
-  height: var(--dot);
-  border-radius: calc(var(--dot) / 2);
-  border: 3px solid var(--off);
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: var(--dot-font);
-  color: var(--off-text);
+  background: var(--pill-bg);
+  color: var(--pill-fg);
   transition:
     background 0.15s,
-    border-color 0.15s;
+    color 0.15s;
 }
-.dot[data-on] {
-  border-color: var(--col);
-  background: var(--col);
-  color: var(--on-text);
+
+/* Ajuda (?) com a explicação: aparece com o rato ou o foco, fica aberta ao tocar */
+.tipWrap {
+  position: relative;
+  display: inline-flex;
 }
-.hint {
+.help {
+  flex: none;
+  width: 36px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+.help:hover,
+.help[aria-expanded='true'] {
+  color: var(--ink);
+}
+.tip {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: calc(100% + 2px);
+  width: min(280px, 72vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
   font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  box-shadow: 0 10px 30px -12px rgba(1, 11, 19, 0.45);
+}
+.tipWrap:hover .tip,
+.tipWrap:focus-within .tip,
+.tipWrap[data-open] .tip {
+  display: block;
+}
+
+.sliderRow {
+  gap: 8px;
+}
+.slider {
+  --track: 8px;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.slider::-webkit-slider-runnable-track {
+  height: var(--track);
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--fill) var(--pct), var(--line) var(--pct));
+}
+.slider::-moz-range-track {
+  height: var(--track);
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--fill) var(--pct), var(--line) var(--pct));
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: calc((var(--track) - 26px) / 2);
+  border-radius: 50%;
+  background: var(--fill);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(1, 11, 19, 0.35);
+  transition: background 0.15s;
+}
+.slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--fill);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(1, 11, 19, 0.35);
+}
+/* sem nota: o botão fica branco com borda cinzenta, no meio da barra */
+.slider[data-empty]::-webkit-slider-thumb {
+  background: var(--surface);
+  border-color: var(--grey);
+}
+.slider[data-empty]::-moz-range-thumb {
+  background: var(--surface);
+  border-color: var(--grey);
+}
+.slider:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.clear {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  border: 1px solid var(--field);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.clear[hidden] {
+  display: flex;
+  visibility: hidden;
+}
+.ticks {
+  /* números da escala por baixo da barra, alinhados com as posições do botão */
+  padding: 0 calc(40px + 13px) 0 13px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.ticks > span {
+  width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Comentário por parâmetro (21/10) e tirar um parâmetro acrescentado */
+.paramFoot {
+  gap: 12px;
+  align-items: flex-start;
+}
+.paramComment {
+  flex: 1;
+  min-width: 0;
+}
+.commentToggle,
+.removeParam {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-text);
+}
+.removeParam {
   color: var(--body);
-  padding-bottom: 8px;
+}
+.commentBox {
+  margin-top: 4px;
+}
+.commentBox textarea {
+  width: 100%;
+  font-size: 15px;
+  line-height: 1.45;
+  min-height: 64px;
+}
+.textBlocked {
+  border-color: #e3a56b;
+}
+.commentFoot {
+  gap: 12px;
+  margin-top: 4px;
+}
+.commentError {
+  color: var(--down);
+  font-weight: 600;
+}
+
+/* Parâmetros do tipo de trabalho */
+.addParams {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.addToggle {
+  align-self: flex-start;
+  gap: 6px;
 }
 
 /* Recomendavas? */
@@ -301,4 +450,20 @@
 }
 .noteNumber {
   font-size: 13px;
+}
+
+.extras,
+.extrasWide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+}
+.extrasTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.extrasWide .extrasTitle {
+  font-size: 20px;
 }

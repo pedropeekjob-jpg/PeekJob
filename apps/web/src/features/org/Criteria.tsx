@@ -4,7 +4,8 @@ import { Icon } from '../../components/Icon';
 import { CRITERION } from '../../data/criteria';
 import type { Org } from '../../data/orgs';
 import { tr } from '../../i18n';
-import { fmt } from '../../lib/format';
+import { fmt, plural } from '../../lib/format';
+import { EXTRA } from '../../data/params';
 import { useToggle } from '../../lib/useToggle';
 import { CritLine, PrioMark } from '../../components/Score';
 import { MoreToggle } from '../../components/UI';
@@ -119,6 +120,33 @@ export function DesktopCriteria({ org }: { org: Org }) {
       <Link to="/preferencias" className={`small ${styles.prefsLink}`}>
         {tr('Mudar as minhas prioridades', 'Change my priorities')}
       </Link>
+    </section>
+  );
+}
+
+/**
+ * O dia a dia no tipo de trabalho (21/10): os parâmetros que quem avaliou respondeu,
+ * com a percentagem de "sim" ou a nota média. Só aparecem com 3 ou mais respostas.
+ */
+export function ExtrasSummary({ org, desktop = false }: { org: Org; desktop?: boolean }) {
+  const rows = org.extras ?? [];
+  if (!rows.length) return null;
+  return (
+    <section aria-labelledby="extras-h" className={desktop ? styles.desktop : styles.mobile}>
+      <h2 id="extras-h" className={`h2 ${desktop ? styles.desktopTitle : styles.mobileTitle}`}>
+        {tr('No dia a dia', 'Day to day')}
+      </h2>
+      <ul className={styles.extrasList}>
+        {rows.map((r) => (
+          <li key={r.key} className={`row between ${styles.extraRow}`}>
+            <span className={styles.extraName}>{EXTRA[r.key].label}</span>
+            <span className={styles.extraValue}>
+              {r.yesPct != null ? tr(`${r.yesPct}% dizem que sim`, `${r.yesPct}% say yes`) : r.avg != null ? tr(`${fmt(r.avg)} de 5`, `${fmt(r.avg)} out of 5`) : '—'}
+              <span className="small muted"> · {plural(r.n, tr('resposta', 'answer'), tr('respostas', 'answers'))}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

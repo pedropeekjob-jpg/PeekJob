@@ -1,7 +1,7 @@
-import { stepsLabel } from '@peekjob/shared';
-import type { Interview, Org, OrgLocation, OrgType, Review, SalaryBand, Scores } from '../data/orgs';
+import { stepsLabel, type Extras } from '@peekjob/shared';
+import type { ExtraSummary, Interview, Org, OrgLocation, OrgType, Review, SalaryBand, Scores } from '../data/orgs';
 import { ago } from '../lib/format';
-import type { MyReview, SupportMessage } from '../lib/store';
+import type { Comments, MyReview, SupportMessage } from '../lib/store';
 
 /** Formas devolvidas pela API */
 export interface ApiOrg {
@@ -21,6 +21,10 @@ export interface ApiOrg {
   harassmentReports?: number;
   /** a página é gerida pela organização */
   claimed?: boolean;
+  /** só na página da organização */
+  extras?: ExtraSummary[];
+  /** só na pesquisa: a profissão que coincidiu */
+  matchedRole?: string;
 }
 export interface ApiReview {
   id: string;
@@ -29,6 +33,9 @@ export interface ApiReview {
   recommend: boolean | null;
   tags: string[];
   text: string;
+  /** parâmetros do tipo de trabalho e comentários por critério ou parâmetro */
+  extras?: Extras;
+  comments?: Comments;
   flagged: boolean;
   verified: boolean;
   /** quantas pessoas acharam útil (sem dizer quem) */
@@ -90,7 +97,7 @@ function mapLocations(locs: ApiOrg['locations'], city: string): OrgLocation[] {
 }
 
 export function toReview(r: ApiReview): Review {
-  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags, reply: r.reply?.text };
+  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags, reply: r.reply?.text, extras: r.extras ?? {}, comments: r.comments ?? {}, scores: r.scores };
 }
 
 /** Converte uma organização da API para o modelo usado pelos ecrãs (campos sem dados ficam vazios) */
@@ -128,11 +135,13 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = [], extras: OrgExtras = 
     salaries: extras.salaries?.bands.map(toBand) ?? [],
     paidOnTimePct: extras.salaries?.paidOnTimePct ?? undefined,
     claimed: !!o.claimed,
+    extras: o.extras ?? [],
+    matchedRole: o.matchedRole,
   };
 }
 
 export function toMyReview(r: ApiReview & { orgId: string }): MyReview {
-  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, when: when(r.createdAt), flagged: r.flagged, verified: r.verified, edited: !!r.editedAt };
+  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, extras: r.extras ?? {}, comments: r.comments ?? {}, when: when(r.createdAt), flagged: r.flagged, verified: r.verified, edited: !!r.editedAt };
 }
 
 export function toMessage(m: {

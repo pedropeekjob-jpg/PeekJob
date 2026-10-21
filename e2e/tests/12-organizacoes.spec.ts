@@ -53,4 +53,15 @@ test('reivindicar a página, aprovação da moderação e resposta pública', as
   await page.goto(`/org/${org.id}`);
   await expect(page.getByText('Página gerida pela organização').first()).toBeVisible();
   await expect(page.getByText('Obrigado. Já fixámos as escalas com duas semanas de antecedência.').first()).toBeAttached();
+
+  // 5) relatórios: sem o Pro explicam o que trazem; com o Pro abrem com os dados reais
+  await page.goto('/painel');
+  await page.getByRole('link', { name: 'Relatório semanal' }).click();
+  await expect(page.getByRole('heading', { name: 'Os relatórios fazem parte do plano Pro' })).toBeVisible();
+  await sql(`UPDATE organizations SET plan = 'pro' WHERE id = $1`, [org.id]);
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: new RegExp(`Relatório semanal · ${name}`) })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Equilíbrio' })).toBeVisible();
+  await page.getByRole('link', { name: 'Mensal' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: /Relatório mensal/ })).toBeVisible();
 });

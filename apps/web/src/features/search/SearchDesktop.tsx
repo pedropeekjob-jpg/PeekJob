@@ -60,9 +60,9 @@ export function SearchDesktop({ s }: { s: SearchState }) {
   return (
     <div className={`container ${styles.desktop}`}>
       <section className={`zone zone-band ${styles.head}`}>
-        <h1 className={`display ${styles.title}`}>{tr('Procurar uma organização', 'Find an organisation')}</h1>
+        <h1 className={`display ${styles.title}`}>{tr('Pesquisar empresas', 'Search companies')}</h1>
         <div className="row">
-          <SearchBox id="dq" text={s.text} onText={s.onText} clear={s.clear} large />
+          <SearchBox id="dq" text={s.text} onText={s.onText} clear={s.clear} large settled={!s.loading && s.applied === s.text} />
         </div>
         <TypeChips type={s.type} pickType={s.pickType} />
       </section>

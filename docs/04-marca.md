@@ -9,12 +9,22 @@ Ficheiros na pasta [`marca/`](marca/).
 | Nome | Hex | Uso |
 |---|---|---|
 | Ink | `#010B13` | Texto, botões secundários, fundo do ícone |
-| Teal | `#00A9AF` | Marca, anéis, botão principal (texto ink por cima) |
-| Teal texto | `#00747A` | Ligações |
+| Teal | `#00A9AF` | Marca, anéis |
+| Teal texto / ação | `#00747A` | Ligações, todos os botões de ação (texto branco por cima, 5,6:1) e a zona "Avalia" da página inicial (desde 21/10) |
 | Roxo | `#652D90` | **Respeito e inclusão** e mensagens de apoio |
 | Cinza | `#A7A9AC` / `#6D6E71` | Secundário / texto discreto |
 | Fundo | `#F6F7F7` | Fundo das páginas |
-| Subida / descida | `#1F7A4D` / `#B4540A` | Tendências |
+| Subida / descida | `#1565C0` / `#B4540A` | Tendências: azul e laranja, que se distinguem com daltonismo (até 21/10 a subida era verde) |
+
+O hover dos botões é o mesmo halo do campo de pesquisa ativo (`--active-ring`).
+
+## Tom de voz
+Pedido de 21/10: informal e próximo, para criar confiança.
+- Tratar por **tu**, frases curtas e na segunda pessoa ("Procura onde trabalhas", "Fica entre nós").
+- Dizer o que acontece a seguir e tranquilizar ("Se não sabes, deixa em branco, não faz mal").
+- Nos temas graves (assédio, salários em atraso) o tom continua próximo, mas sem graças.
+- Páginas para organizações (planos, painel) mantêm um tom cordial mas profissional.
+- **Aviso de responsabilidade**: a PeekJob não trata irregularidades; perante uma possível ilegalidade só mostra quem pode ajudar. Aparece no rodapé, na zona "Avalia", no início e no fim da avaliação e no apoio (`RESPONSIBILITY` em `data/content.ts`).
 
 ## Tipografia
 - **Letra do sistema** (títulos e números; SF Pro no iPhone e no Mac, Geist nos outros, a negrito e apertada, estilo iOS — desde 15/10, antes Jost) · **Geist** (texto) · **Geist Mono** (valores pequenos). Geist e Geist Mono são gratuitas (licença OFL) e servidas pelo próprio site, a partir dos pacotes `@fontsource` (não do Google Fonts, para não enviar o IP de quem visita); a SF Pro vem com o sistema e não se descarrega.

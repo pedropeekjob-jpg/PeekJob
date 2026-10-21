@@ -17,7 +17,7 @@ export function SearchMobile({ s }: { s: SearchState }) {
         <button type="button" className={`icon-btn bare ${styles.back}`} aria-label={tr('Voltar', 'Back')} onClick={back}>
           <Icon name="back" />
         </button>
-        <SearchBox id="mq" text={s.text} onText={s.onText} clear={s.clear} />
+        <SearchBox id="mq" text={s.text} onText={s.onText} clear={s.clear} settled={!s.loading && s.applied === s.text} />
       </div>
 
       <TypeChips type={s.type} pickType={s.pickType} small />

@@ -20,7 +20,7 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       </MemoryRouter>,
     );
-    expect(screen.getByRole('alert')).toHaveTextContent('Algo correu mal neste ecrã');
+    expect(screen.getByRole('alert')).toHaveTextContent('Ups, algo correu mal neste ecrã');
     expect(screen.getByRole('button', { name: 'Tentar outra vez' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Voltar ao início' })).toHaveAttribute('href', '/');
     expect(reportError).toHaveBeenCalledWith(expect.any(Error), expect.any(String));

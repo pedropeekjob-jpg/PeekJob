@@ -1,0 +1,55 @@
+/* Lista de sugestões por baixo de um campo de pesquisa (o pai tem position: relative) */
+.list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--field);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(1, 11, 19, 0.16);
+  max-height: min(360px, 60vh);
+  overflow-y: auto;
+  text-align: left;
+}
+.list[hidden] {
+  display: none;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.option[aria-selected='true'] {
+  background: var(--teal-tint);
+  box-shadow: inset 0 0 0 2px var(--action);
+}
+.icon {
+  flex: none;
+  color: var(--teal-text);
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sub {
+  font-size: 13px;
+  color: var(--body);
+}

@@ -19,7 +19,7 @@ export class MyReviewsController {
   @Get()
   async list(@CurrentUser() user: AuthUser) {
     const { rows } = await this.pool.query(
-      `SELECT r.id, r.org_id, o.name AS org_name, r.scores, r.avg, r.recommend, r.tags, r.text, r.flagged, r.verified, r.created_at, r.edited_at
+      `SELECT r.id, r.org_id, o.name AS org_name, r.scores, r.avg, r.recommend, r.tags, r.text, r.extras, r.comments, r.flagged, r.verified, r.created_at, r.edited_at
          FROM reviews r JOIN organizations o ON o.id = r.org_id
         WHERE r.author_ref = $1 ORDER BY r.created_at DESC`,
       [userRef(privacySecret(), user.id)],
@@ -27,7 +27,7 @@ export class MyReviewsController {
     return {
       items: rows.map((r) => ({
         id: r.id, orgId: r.org_id, orgName: r.org_name, scores: r.scores, avg: Number(r.avg), recommend: r.recommend,
-        tags: r.tags, text: r.text, flagged: r.flagged, verified: r.verified, createdAt: r.created_at, editedAt: r.edited_at,
+        tags: r.tags, text: r.text, extras: r.extras, comments: r.comments, flagged: r.flagged, verified: r.verified, createdAt: r.created_at, editedAt: r.edited_at,
       })),
     };
   }

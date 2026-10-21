@@ -8,6 +8,7 @@ import { useIsDesktop } from '../lib/useMedia';
 import { Logo } from './Brand';
 import { openConsent } from './ConsentBanner';
 import { Icon } from './Icon';
+import { ResponsibilityNote } from './UI';
 import styles from './Layout.module.css';
 
 const nav = (area: string, item: string) => ({ 'data-ev': 'nav_click', 'data-ev-area': area, 'data-ev-item': item });
@@ -45,11 +46,16 @@ function ProfileButton({ area }: { area: string }) {
   );
 }
 
+/** Ecrãs do fluxo de avaliar (e partilhar entrevista ou salário): o botão "Avaliar" do cabeçalho não aparece aqui */
+export const inReviewFlow = (pathname: string) => /^\/(avaliar|partilhar)(\/|$)/.test(pathname);
+
 /**
  * memo: o cabeçalho não volta a correr quando só a página muda (ex.: dar uma nota).
  * As ligações continuam a reagir ao endereço (ativa/não ativa) e as mensagens por ler à loja.
  */
 export const DesktopHeader = memo(function DesktopHeader({ home = false }: { home?: boolean }) {
+  // a meio de uma avaliação o botão levava de volta ao início do fluxo (21/10)
+  const flow = inReviewFlow(useLocation().pathname);
   return (
     <header className={'site-header' + (home ? ' is-home' : '')}>
       <div className={`container row ${styles.header}`}>
@@ -73,7 +79,7 @@ export const DesktopHeader = memo(function DesktopHeader({ home = false }: { hom
           )}
           <ProfileButton area="header" />
         </span>
-        {!home && (
+        {!home && !flow && (
           <Link to="/avaliar" data-ev="cta_click" data-ev-cta="avaliar" data-ev-area="header" className={`btn btn-primary ${styles.cta}`}>
             {tr('Avaliar onde trabalho', 'Review where I work')}
           </Link>
@@ -143,6 +149,7 @@ export const SiteFooter = memo(function SiteFooter({ compact = false }: { compac
           <LangSwitch />
           <span className="small muted">{tr('Avaliações anónimas de quem trabalha em pequenas organizações.', 'Anonymous reviews from people who work at small organisations.')}</span>
         </div>
+        <ResponsibilityNote className={styles.footerNote} />
         <a className="small muted osm-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
           {tr('Dados de organizações: © contribuidores do OpenStreetMap (ODbL)', 'Organisation data: © OpenStreetMap contributors (ODbL)')}
         </a>

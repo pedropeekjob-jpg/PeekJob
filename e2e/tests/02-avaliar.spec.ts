@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect, expectNoHorizontalScroll, login, openMagicLink, pickOrg, test, uniqueEmail } from '../support/fixtures';
+import { expect, expectNoHorizontalScroll, login, openMagicLink, pickOrg, test, uniqueEmail, setScore } from '../support/fixtures';
 
 /** O fluxo principal: entrar, escolher a organização, dar notas e escrever no mesmo ecrã, reescrever, publicar e verificar depois */
 test.describe('Avaliar onde trabalho', () => {
@@ -7,7 +7,7 @@ test.describe('Avaliar onde trabalho', () => {
     await login(page, uniqueEmail('autora'));
     await page.goto('/avaliar');
     await pickOrg(page, 'oficina sete', 'Oficina Sete');
-    await page.getByRole('radio', { name: 'Respeito e inclusão, 2 de 5' }).first().click();
+    await setScore(page, 'Respeito e inclusão', 2);
     // telemóvel: o comentário é opcional e abre-se no mesmo ecrã
     if (isMobile) await page.getByRole('button', { name: /Contar como é/ }).click();
 
@@ -37,6 +37,27 @@ test.describe('Avaliar onde trabalho', () => {
     await expect(page.getByText(/incumprimento salarial/i).first()).toBeVisible();
   });
 
+  test('parâmetros do tipo de trabalho e comentário por critério: publicados e visíveis na página', async ({ page }) => {
+    await login(page, uniqueEmail('parametros'));
+    await page.goto('/avaliar');
+    await pickOrg(page, 'oficina sete', 'Oficina Sete');
+    await setScore(page, 'Ambiente', 4);
+    await page.getByRole('button', { name: 'Comentar sobre Ambiente' }).click();
+    await page.getByRole('textbox', { name: 'Comentário sobre Ambiente' }).fill('Há sempre alguém para ajudar.');
+    await page.getByRole('group', { name: 'Trabalho remoto' }).getByRole('button', { name: 'Sim' }).click();
+    await page.getByRole('button', { name: 'Acrescentar parâmetro' }).click();
+    await page.getByRole('button', { name: '+ Contrato escrito' }).click();
+    await page.getByRole('group', { name: 'Contrato escrito' }).getByRole('button', { name: 'Não' }).click();
+    await page.getByRole('button', { name: /Publicar avaliação/ }).click();
+    await page.waitForURL(/\/avaliar\/feito/);
+
+    await page.getByRole('link', { name: 'Ver na página da organização' }).first().click();
+    await page.waitForURL(/\/org\//);
+    await expect(page.getByText('Há sempre alguém para ajudar.').first()).toBeVisible();
+    await expect(page.getByText('Trabalho remoto · Sim').first()).toBeVisible();
+    await expect(page.getByText('Contrato escrito · Não').first()).toBeVisible();
+  });
+
   test('sem sessão também se começa: escolher a organização e seguir logo para as notas', async ({ page }) => {
     await page.goto('/avaliar');
     await pickOrg(page, 'oficina sete', 'Oficina Sete');
@@ -45,19 +66,19 @@ test.describe('Avaliar onde trabalho', () => {
 
   test('da página inicial: escrever onde trabalho, escolher e dar notas (3 cliques)', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /^O teu trabalho/ }).click();
-    await page.getByRole('searchbox', { name: 'Onde trabalhas?' }).fill('oficina sete');
+    await page.getByRole('button', { name: /^Avalia(?!r)/ }).click();
+    await page.getByRole('combobox', { name: 'Onde trabalhas?' }).fill('oficina sete');
     await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.keyboard.press('Enter')]);
     await expect(page).toHaveURL(/\/avaliar\?q=oficina/);
     await page.getByText('Oficina Sete', { exact: true }).first().click();
     await page.waitForURL(/\/avaliar\/notas/);
-    await expect(page.getByRole('radiogroup', { name: 'Salário justo' })).toBeVisible();
+    await expect(page.getByRole('slider', { name: 'Salário justo' })).toBeVisible();
   });
 
   test('lista → organização → avaliar → fechar → voltar: volta à lista (não à avaliação)', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'o "fechar" das notas é do telemóvel');
     await page.goto('/pesquisa');
-    await page.getByRole('searchbox').first().fill('oficina sete');
+    await page.getByRole('combobox').first().fill('oficina sete');
     await page.getByText('Oficina Sete', { exact: true }).first().click();
     await page.waitForURL(/\/org\//);
     const orgUrl = page.url();
@@ -100,7 +121,7 @@ test.describe('Avaliar onde trabalho', () => {
     await openOrgFromList(page);
     await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
     await page.waitForURL(/\/avaliar\/notas/);
-    await page.getByRole('radio', { name: 'Ambiente, 4 de 5' }).first().click();
+    await setScore(page, 'Ambiente', 4);
     await page.getByRole('button', { name: /Publicar avaliação/ }).click();
     await expect(page.getByRole('alert').filter({ hasText: 'Entra para publicar.' })).toBeVisible();
     await page.getByRole('link', { name: 'Entrar', exact: true }).click();
@@ -109,7 +130,7 @@ test.describe('Avaliar onde trabalho', () => {
     await expect(page.getByText('Vê o teu email.')).toBeVisible();
     await openMagicLink(page, email);
     await expect(page).toHaveURL(/\/avaliar\/notas/);
-    await expect(page.getByRole('radio', { name: 'Ambiente, 4 de 5' }).first()).toBeChecked();
+    await expect(page.getByRole('slider', { name: 'Ambiente' }).first()).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
     await page.getByRole('button', { name: /Publicar avaliação/ }).click();
     await page.waitForURL(/\/avaliar\/feito/);
   });
@@ -118,7 +139,7 @@ test.describe('Avaliar onde trabalho', () => {
 /** Lista → organização (como quem navega), devolve o endereço da organização */
 async function openOrgFromList(page: Page) {
   await page.goto('/pesquisa');
-  await page.getByRole('searchbox').first().fill('oficina sete');
+  await page.getByRole('combobox').first().fill('oficina sete');
   await page.getByText('Oficina Sete', { exact: true }).first().click();
   await page.waitForURL(/\/org\//);
   return page.url();
@@ -128,7 +149,7 @@ async function openOrgFromList(page: Page) {
 async function startAndPublish(page: Page) {
   await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
   await page.waitForURL(/\/avaliar\/notas/);
-  await page.getByRole('radio', { name: 'Ambiente, 4 de 5' }).first().click();
+  await setScore(page, 'Ambiente', 4);
   await page.getByRole('button', { name: /Publicar avaliação/ }).click();
   await page.waitForURL(/\/avaliar\/feito/);
 }

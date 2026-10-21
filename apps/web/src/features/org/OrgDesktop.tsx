@@ -8,7 +8,7 @@ import { tr } from '../../i18n';
 import { orgTypeLabel, sectorLabel } from '../../i18n/labels';
 import { fmt, plural } from '../../lib/format';
 import { BigRing } from '../../components/Score';
-import { DesktopCriteria, DesktopRespeito } from './Criteria';
+import { DesktopCriteria, DesktopRespeito, ExtrasSummary } from './Criteria';
 import { DesktopInterviews } from './Interviews';
 import { locationsSuffix, osmLink, scoreAria, shareCta, type OrgTab } from './org';
 import { LocationList, ManagedLine, OrgTabs, SaveButton } from './OrgCommon';
@@ -89,6 +89,7 @@ export function OrgDesktop({ org, tab }: { org: Org; tab: OrgTab }) {
         <aside className={styles.aside}>
           {has && <DesktopRespeito org={org} />}
           {has && <DesktopCriteria org={org} />}
+          <ExtrasSummary org={org} desktop />
           <WhereItIs org={org} />
         </aside>
       </div>

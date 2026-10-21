@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { Link } from 'react-router';
 import { tr } from '../../i18n';
 import { flagLabel } from '../../i18n/labels';
 import type { RedFlagResult } from '../../lib/moderation';
@@ -15,7 +14,8 @@ export function flagSentence(rf: Pick<RedFlagResult, 'found' | 'kinds'>): string
 }
 
 /**
- * Aviso de possível ilegalidade com ligação ao apoio. Não bloqueia a publicação.
+ * Aviso de possível ilegalidade. Não bloqueia a publicação. Sem botão "Pedir ajuda" (21/10): tirava a pessoa do fluxo
+ * antes de publicar; os contactos de apoio aparecem no ecrã "publicado".
  * `compact`: linha (telemóvel); `card`: cartão com a frase do que foi encontrado (computador).
  */
 type SupportAlertProps = { redFlags: Pick<RedFlagResult, 'found' | 'kinds'>; variant?: 'compact' | 'card' };
@@ -26,17 +26,14 @@ export const sameFlags = (a: SupportAlertProps, b: SupportAlertProps) => a.varia
 export const SupportAlert = memo(function SupportAlert({ redFlags, variant = 'compact' }: SupportAlertProps) {
   const text =
     variant === 'card'
-      ? `${flagSentence(redFlags)} ${tr('A organização não é avisada.', 'The organisation is not told.')}`
-      : tr(`Pode configurar ${redFlags.kinds.map(flagLabel).join(' e ')}. A organização não é avisada.`, `This may amount to ${redFlags.kinds.map(flagLabel).join(' and ')}. The organisation is not told.`);
+      ? `${flagSentence(redFlags)} ${tr('A organização não é avisada. Depois de publicares, mostramos-te onde pedir ajuda.', 'The organisation is not told. Once you publish, we’ll show you where to get help.')}`
+      : tr(`Pode configurar ${redFlags.kinds.map(flagLabel).join(' e ')}. A organização não é avisada. Depois de publicares, mostramos-te onde pedir ajuda.`, `This may amount to ${redFlags.kinds.map(flagLabel).join(' and ')}. The organisation is not told. Once you publish, we’ll show you where to get help.`);
   return (
     <section role="status" aria-label={tr('Apoio', 'Support')} className={`${styles[variant]} fade-up`}>
       <div className={styles.body}>
         <span className={styles.title}>{tr('Isto pode ser uma ilegalidade', 'This may be against the law')}</span>
         <span className={styles.text}>{text}</span>
       </div>
-      <Link to="/apoio" className={`btn lift ${styles.help}`}>
-        {tr('Pedir ajuda', 'Get help')}
-      </Link>
     </section>
   );
 }, sameFlags);

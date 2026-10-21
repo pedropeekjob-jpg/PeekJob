@@ -23,7 +23,7 @@ export function useOrgMeta(org: Org | undefined, tab: OrgTab) {
     const what = tab === 'salarios' ? tr('Salários', 'Salaries') : tab === 'entrevistas' ? tr('Entrevistas', 'Interviews') : tr('Avaliações', 'Reviews');
     const type = orgTypeLabel(org.type);
     applyPageMeta(pathname, {
-      title: tr(`${name} · ${what} de quem lá trabalha · PeekJob`, `${name} · ${what} from people who work there · PeekJob`),
+      title: tr(`${name} · ${what} · PeekJob`, `${name} · ${what} · PeekJob`),
       description: count
         ? tr(
             `${type} em ${org.city}. Nota ${fmt(score)} em ${plural(count, 'avaliação anónima', 'avaliações anónimas')} de quem lá trabalha.`,

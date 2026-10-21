@@ -18,7 +18,7 @@ export function OrgSearchBox({ value, onChange }: { value: string; onChange: (v:
       </label>
       <div className={`search ${styles.search}`}>
         <Icon name="search" size={18} className={styles.searchIcon} />
-        <input id="eq" type="search" autoComplete="off" value={value} onChange={(e) => onChange(e.target.value)} placeholder={tr('Empresa, associação, projeto…', 'Company, association, project…')} />
+        <input id="eq" type="search" autoComplete="off" value={value} onChange={(e) => onChange(e.target.value)} placeholder={tr('Procura a empresa, associação ou projeto', 'Search the company, association or project')} />
       </div>
     </>
   );

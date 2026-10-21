@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
-import { CreateOrganizationInput, isValidNif, normalizeNif, SearchOrganizationsQuery } from '@peekjob/shared';
+import { CreateOrganizationInput, isValidNif, normalizeNif, SearchOrganizationsQuery, SuggestQuery } from '@peekjob/shared';
 import type { Response } from 'express';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, Roles, type AuthUser } from '../auth/auth.guard';
@@ -22,6 +22,11 @@ export class OrganizationsController {
   @Get('search')
   async search(@Query() query: unknown) {
     return { items: await this.orgs.search(parse(SearchOrganizationsQuery, query)) };
+  }
+
+  @Get('suggest')
+  suggest(@Query() query: unknown) {
+    return this.orgs.suggest(parse(SuggestQuery, query));
   }
 
   @Post()

@@ -1,5 +1,7 @@
 import { memo, useRef, type CSSProperties } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useSuggest } from '../../components/Suggest';
+import { useSuggestions } from './suggest';
 import { LogoAnimated } from '../../components/Brand';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
@@ -14,11 +16,17 @@ interface SearchBoxProps {
   onText: (v: string) => void;
   clear: () => void;
   large?: boolean;
+  /** a pesquisa do texto atual já está aplicada (os resultados estão à vista): as sugestões fecham */
+  settled?: boolean;
 }
 
 /** Campo de pesquisa com botão de limpar (devolve o foco ao campo) */
-export function SearchBox({ id, text, onText, clear, large = false }: SearchBoxProps) {
+export function SearchBox({ id, text, onText, clear, large = false, settled = false }: SearchBoxProps) {
   const ref = useRef<HTMLInputElement>(null);
+  const nav = useNavigate();
+  // sugestões: uma organização abre a página dela; um termo (profissão, setor, sítio) passa a ser a pesquisa
+  const items = useSuggestions(text);
+  const suggest = useSuggest({ id, query: text, items, closeWhen: settled, onPick: (s) => (s.kind === 'org' ? nav(`/org/${s.id}`) : onText(s.label)) });
   const onClear = () => {
     clear();
     ref.current?.focus();
@@ -35,10 +43,12 @@ export function SearchBox({ id, text, onText, clear, large = false }: SearchBoxP
         type="search"
         value={text}
         onChange={(e) => onText(e.target.value)}
-        placeholder={tr('Nome, setor ou cidade', 'Name, sector or city')}
+        placeholder={tr('Procura por nome, profissão, setor ou cidade', 'Search by name, job, sector or city')}
         autoComplete="off"
         enterKeyHint="search"
+        {...suggest.inputProps}
       />
+      {suggest.list}
       {text && (
         <button type="button" aria-label={tr('Limpar pesquisa', 'Clear search')} onClick={onClear} className={styles.clear}>
           <span className={styles.clearDot}>
@@ -92,6 +102,7 @@ export const ResultRow = memo(function ResultRow({ r, desktop = false }: { r: Re
         <span className={`ellipsis ${styles.name}`}>{org.name}</span>
         <span className="small muted ellipsis">
           {orgTypeLabel(org.type)} · {org.city}
+          {org.matchedRole && <> · {tr(`Tem ${org.matchedRole}`, `Has ${org.matchedRole}`)}</>}
         </span>
       </span>
       <Compatibility value={r.match} desktop={desktop} />

@@ -123,3 +123,26 @@
   align-items: center;
   color: var(--muted);
 }
+
+/* No dia a dia: parâmetros do tipo de trabalho */
+.extrasList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.extraRow {
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef0f1;
+  font-size: 15px;
+}
+.extraName {
+  font-weight: 600;
+  color: var(--ink);
+}
+.extraValue {
+  text-align: right;
+  color: var(--body);
+}

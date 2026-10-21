@@ -1,0 +1,203 @@
+/* Relatório semanal e mensal (21/10): legível no ecrã e impresso */
+.page {
+  padding-top: 24px;
+  padding-bottom: 48px;
+  max-width: 980px;
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.back {
+  gap: 4px;
+  align-self: flex-start;
+  font-weight: 600;
+}
+.title {
+  margin: 0;
+}
+.titleOrg {
+  color: var(--body);
+}
+.tools {
+  gap: 12px;
+}
+.periods {
+  gap: 8px;
+}
+.period[aria-current='page'] {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--action-fg);
+}
+.print {
+  gap: 6px;
+}
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.h2 {
+  margin: 0;
+}
+.h3 {
+  margin: 8px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.tiles {
+  align-items: stretch;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+}
+.tile {
+  flex: 1 1 96px;
+  justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.tileLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+}
+.tileValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.table th,
+.table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+.table th:first-child {
+  text-align: left;
+}
+.table thead th {
+  font-size: 13px;
+  color: var(--body);
+}
+.table tbody th {
+  font-weight: 600;
+  color: var(--ink);
+}
+.diff[data-dir='up'] {
+  color: var(--up);
+}
+.diff[data-dir='down'] {
+  color: var(--down);
+}
+.twoCols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+}
+.points {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.how {
+  margin: 4px 0 0;
+  color: var(--body);
+}
+.levels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.level {
+  display: grid;
+  grid-template-columns: 120px 1fr 36px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.levelName {
+  color: var(--body);
+}
+.bar {
+  height: 12px;
+}
+.barFill {
+  display: block;
+  height: 100%;
+  width: var(--w);
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--teal-text);
+}
+.levelValue {
+  text-align: right;
+  font-weight: 600;
+  color: var(--ink);
+}
+.drivers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upsell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+.foot {
+  margin: 0;
+}
+
+@media (max-width: 599px) {
+  .tile {
+    padding: 10px 12px;
+  }
+  .tileValue {
+    font-size: 24px;
+  }
+}
+
+@media print {
+  .back,
+  .tools {
+    display: none;
+  }
+  .tile,
+  .section {
+    break-inside: avoid;
+  }
+  .barFill {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

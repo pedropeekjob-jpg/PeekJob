@@ -71,7 +71,7 @@ describe('Início no telemóvel', () => {
     seedStore({ onboarded: true });
     show('mobile');
     expect(await screen.findByRole('link', { name: /Procurar uma organização/ })).toHaveAttribute('href', '/pesquisa');
-    expect(screen.getByRole('link', { name: /Avaliar onde trabalho.*2 minutos/ })).toHaveAttribute('href', '/avaliar');
+    expect(screen.getByRole('link', { name: /Avaliar onde trabalho.*3 passos/ })).toHaveAttribute('href', '/avaliar');
     for (const a of screen.getAllByRole('link', { name: 'Perfil' })) expect(a).toHaveAttribute('href', '/perfil');
   });
 });
@@ -82,7 +82,7 @@ describe('Início no computador', () => {
   it('pesquisar leva à pesquisa com o texto', async () => {
     seedStore({ onboarded: true });
     const { user } = show('desktop');
-    await user.type(await screen.findByRole('searchbox', { name: 'Pesquisar organização' }), ' padaria ');
+    await user.type(await screen.findByRole('combobox', { name: 'Pesquisar organização' }), ' padaria ');
     await user.click(screen.getByRole('button', { name: 'Procurar' }));
     expect(screen.getByTestId('where')).toHaveTextContent('/pesquisa?q=padaria');
   });

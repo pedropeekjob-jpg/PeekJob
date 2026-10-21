@@ -6,7 +6,7 @@ test('adicionar uma organização com NIF', async ({ page }) => {
   const name = `Horta Comunitária ${Date.now() % 100000}`;
   const nif = randomNif();
   await page.goto('/avaliar');
-  await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.getByPlaceholder(/Empresa, associação/).fill(name)]);
+  await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.getByPlaceholder(/empresa, associação/i).fill(name)]);
   await page.getByRole('button', { name: /Adicionar organização que não está cá|Não encontras/ }).first().click();
   await page.locator('#nn').fill(name);
   await page.locator('#nt').selectOption('Associação');

@@ -1,14 +1,15 @@
-import { useCallback, useState } from 'react';
 import { Navigate } from 'react-router';
 import { apiMode } from '../api/http';
 import { useOrg } from '../api/orgs';
 import { Ring } from '../components/Data';
 import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
+import { ResponsibilityNote } from '../components/UI';
 import { RewriteHelper } from '../components/RewriteHelper';
 import type { CriterionKey } from '../data/criteria';
 import type { Org } from '../data/orgs';
 import { PublishErrorBox } from '../features/review/PublishErrorBox';
+import { ExtrasSection } from '../features/review/ExtrasSection';
 import { SupportAlert } from '../features/review/SupportAlert';
 import { ReviewTextMobile } from '../features/review/ReviewTextMobile';
 import { useFlowNav } from '../features/review/useFlowNav';
@@ -34,7 +35,7 @@ export default function AvaliarNotas() {
   const desktop = useIsDesktop();
   const { draft, remote } = useStore();
   const org = useOrg(draft.orgId);
-  const review = useReviewDraft();
+  const review = useReviewDraft(org);
 
   if (apiMode && draft.orgId && !org && !remote.ready) return null;
   // Ao publicar o rascunho é limpo antes de ir para "publicado": não voltar a /avaliar pelo meio
@@ -44,13 +45,14 @@ export default function AvaliarNotas() {
   return desktop ? <DesktopNotas {...props} /> : <MobileNotas {...props} />;
 }
 
+/** Comentário de um critério (a função é estável; o memo da linha mantém-se) */
+const commentProps = (review: Review, k: CriterionKey) => ({ comment: review.comments[k], onComment: review.setComment, invalid: review.badComments.includes(k) });
+
 const recommendLabel = (v: boolean | null) =>
   v === true ? tr('recomendas', 'you recommend it') : v === false ? tr('não recomendas', 'you don’t recommend it') : tr('sem resposta', 'no answer');
 
 function MobileNotas({ org, locationLabel, review }: ViewProps) {
   const { go, leave, change } = useFlowNav();
-  const [help, setHelp] = useState<CriterionKey | null>(null);
-  const toggleHelp = useCallback((k: CriterionKey) => setHelp((h) => (h === k ? null : k)), []);
   const { done, insult } = review;
   // "publicado" substitui as notas: voltar atrás nunca cai num rascunho já publicado
   const publish = async () => {
@@ -73,9 +75,11 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
 
         <div className="stack">
           {MOBILE_ORDER.map((k) => (
-            <ScoreRow key={k} k={k} value={scoreOf(review.scores, k)} onPick={review.setScore} helpOpen={help === k} onHelp={toggleHelp} />
+            <ScoreRow key={k} k={k} value={scoreOf(review.scores, k)} onPick={review.setScore} {...commentProps(review, k)} />
           ))}
         </div>
+
+        <ExtrasSection review={review} sector={org.sector} />
 
         <div className={`row between ${styles.recommend}`}>
           <span className={styles.recommendLabel}>{tr('Recomendavas a um amigo?', 'Would you recommend it to a friend?')}</span>
@@ -83,6 +87,7 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
         </div>
 
         <ReviewTextMobile review={review} />
+        <ResponsibilityNote />
 
         <div className={`sticky-cta stack ${styles.cta}`}>
           <PublishErrorBox error={review.error} onUseSuggestion={review.useText} />
@@ -122,18 +127,20 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
           <div className={styles.main}>
             <div className={styles.intro}>
               <h1 className={styles.desktopTitle}>{tr('Como é trabalhar lá?', 'What’s it like to work there?')}</h1>
-              <p className={`lead ${styles.lead}`}>{tr('De 1 a 5. Deixa em branco o que não sabes.', 'From 1 to 5. Leave blank what you don’t know.')}</p>
+              <p className={`lead ${styles.lead}`}>{tr('De 1 a 5. Se não sabes, deixa em branco, não faz mal.', 'From 1 to 5. Not sure? Leave it blank, that’s fine.')}</p>
             </div>
 
             <section aria-label={tr('Notas por critério', 'Scores by criterion')} className={styles.scores}>
               {DESKTOP_ORDER.map((k) => (
-                <ScoreRow key={k} k={k} desktop value={scoreOf(review.scores, k)} onPick={review.setScore} />
+                <ScoreRow key={k} k={k} desktop value={scoreOf(review.scores, k)} onPick={review.setScore} {...commentProps(review, k)} />
               ))}
               <div className={`row wrap between ${styles.scoresFoot}`}>
                 <span className={styles.scoresFootLabel}>{tr('Recomendavas a um amigo?', 'Would you recommend it to a friend?')}</span>
                 <RecommendButtons desktop value={review.recommend} onChange={review.setRecommend} />
               </div>
             </section>
+
+            <ExtrasSection review={review} sector={org.sector} desktop />
 
             <section aria-labelledby="exp-t" className={styles.experience}>
               <h2 id="exp-t" className={styles.h2}>
@@ -190,6 +197,7 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
               {insult ? tr('Corrige a frase para publicar', 'Fix the sentence to publish') : done ? tr('Publicar avaliação', 'Publish review') : tr('Dá pelo menos uma nota', 'Give at least one score')}
             </button>
             <LockLine>{tr('Publicada sem o teu nome.', 'Published without your name.')}</LockLine>
+            <ResponsibilityNote />
           </aside>
         </div>
       </div>

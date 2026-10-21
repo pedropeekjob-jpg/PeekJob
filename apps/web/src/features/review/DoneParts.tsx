@@ -3,6 +3,7 @@ import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { fmt } from '../../lib/format';
+import { supportHref } from '../support/support';
 import { privateMessagesText } from './done';
 import styles from './Done.module.css';
 
@@ -22,8 +23,8 @@ export function DoneRing({ avg, desktop }: { avg: number; desktop: boolean }) {
   );
 }
 
-/** Relato grave: com sessão, a mensagem privada de apoio; sem sessão, convite para entrar e ajuda já */
-export function SupportCard({ signedIn, unread }: { signedIn: boolean; unread: number }) {
+/** Relato grave: com sessão, a mensagem privada de apoio; sem sessão, convite para entrar e ajuda já (com os conselhos do que relatou) */
+export function SupportCard({ signedIn, unread, kinds = [] }: { signedIn: boolean; unread: number; kinds?: readonly string[] }) {
   if (signedIn) {
     return (
       <Link to="/apoio" className={`plain row lift ${styles.messages}`}>
@@ -50,7 +51,7 @@ export function SupportCard({ signedIn, unread }: { signedIn: boolean; unread: n
         <Link to="/entrar" className={`btn btn-purple btn-sm ${styles.signInButton}`}>
           {tr('Entrar', 'Sign in')}
         </Link>
-        <Link to="/apoio" className={`link ${styles.helpLink}`}>
+        <Link to={supportHref(kinds)} className={`link ${styles.helpLink}`}>
           {tr('Ver onde pedir ajuda agora', 'See where to get help now')} <Icon name="next" size={16} />
         </Link>
       </div>
@@ -92,6 +93,32 @@ export function VerifyInvite({ orgId, verified, state }: { orgId: string; verifi
       <Link to={`/avaliar/verificar?org=${encodeURIComponent(orgId)}`} state={state} className={`btn btn-ghost btn-sm ${styles.verifyButton}`} data-ev="cta_click" data-ev-cta="verificar_depois" data-ev-area="publicado">
         {tr('Confirmar agora', 'Confirm now')}
       </Link>
+    </section>
+  );
+}
+
+/**
+ * Depois de publicar: partilhar a entrevista e o salário na mesma organização (21/10: o cliente não encontrava onde).
+ * `state`: o estado do fluxo, para que sair da partilha volte aqui.
+ */
+export function ShareMore({ orgId, state }: { orgId: string; state?: unknown }) {
+  const org = encodeURIComponent(orgId);
+  return (
+    <section aria-labelledby="partilhar-mais" className={styles.verify}>
+      <h2 id="partilhar-mais" className={styles.verifyTitle}>
+        {tr('Já agora, ajuda mais um bocadinho', 'While you’re here, help a bit more')}
+      </h2>
+      <p className={`small body ${styles.verifyText}`}>
+        {tr('Conta como foi a tua entrevista ou partilha o teu salário. Também é anónimo.', 'Tell us how your interview went or share your salary. It’s anonymous too.')}
+      </p>
+      <div className={`row wrap ${styles.shareMore}`}>
+        <Link to={`/partilhar/entrevista?org=${org}`} state={state} className="btn btn-ghost btn-sm" data-ev="cta_click" data-ev-cta="partilhar_entrevista" data-ev-area="publicado">
+          {tr('Avaliar a entrevista', 'Review the interview')}
+        </Link>
+        <Link to={`/partilhar/salario?org=${org}`} state={state} className="btn btn-ghost btn-sm" data-ev="cta_click" data-ev-cta="partilhar_salario" data-ev-area="publicado">
+          {tr('Partilhar o salário', 'Share your salary')}
+        </Link>
+      </div>
     </section>
   );
 }

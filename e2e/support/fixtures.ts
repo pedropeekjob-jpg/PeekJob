@@ -93,7 +93,7 @@ export { expect };
  * Com um só local segue logo para as notas; com vários, confirma o local primeiro.
  */
 export async function pickOrg(page: Page, query: string, name: string) {
-  await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.getByPlaceholder(/Empresa, associação/).fill(query)]);
+  await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.getByPlaceholder(/empresa, associação/i).fill(query)]);
   await page.getByText(name, { exact: true }).first().click();
   const next = page.getByRole('button', { name: /^Continuar/ }).first();
   await Promise.race([page.waitForURL(/\/avaliar\/notas/), next.waitFor().then(() => next.click())]);
@@ -106,4 +106,12 @@ export function randomNif(): string {
   const sum = base.split('').reduce((a, d, i) => a + Number(d) * (9 - i), 0);
   const r = sum % 11;
   return base + (r < 2 ? 0 : 11 - r);
+}
+
+/** Dá uma nota de 1 a 5 no slider de um critério, com o teclado (Home vai ao 1, cada seta sobe um) */
+export async function setScore(page: Page, label: string, n: number) {
+  const slider = page.getByRole('slider', { name: label }).first();
+  await slider.focus();
+  await page.keyboard.press('Home');
+  for (let i = 1; i < n; i++) await page.keyboard.press('ArrowRight');
 }
