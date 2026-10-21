@@ -285,7 +285,7 @@ export const SCENARIOS = [
       await tap(p, 'button', /^O que conta em Ambiente/);
       await tap(p, 'button', /^Contar como é/); // telemóvel: o comentário abre-se no mesmo ecrã
       await tap(p, 'button', /^Ver mais \d+ etiquetas/);
-      await p.getByRole('slider', { name: 'Respeito e inclusão' }).first().focus();
+      await p.getByRole('radiogroup', { name: 'Respeito e inclusão' }).first().getByRole('radio').first().focus();
       await p.keyboard.press('End');
       await p.keyboard.press('ArrowLeft');
       await tap(p, 'button', /^Não$/);

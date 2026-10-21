@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BAD_TAGS, REVIEW_TAGS } from '../../src/data/content';
-import { countDone, DESKTOP_ORDER, isBadTag, toggleIn, withScore, MOBILE_ORDER, scoreOf, scoreWord, stepState, tagOrder, visibleTags } from '../../src/features/review/flow';
+import { countDone, DESKTOP_ORDER, isBadTag, toggleIn, withScore, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, scoreWord, stepState, tagOrder, visibleTags } from '../../src/features/review/flow';
 
 describe('fluxo de avaliar: regras', () => {
   it('as duas ordens têm os mesmos 8 critérios; respeito primeiro no telemóvel', () => {
@@ -15,7 +15,20 @@ describe('fluxo de avaliar: regras', () => {
     expect(countDone({ salario: 4, ambiente: 2, respeito: 0 })).toBe(2);
   });
 
-  it('o que cada nota quer dizer (etiqueta do slider)', () => {
+  it('teclas: setas andam um, Home/End vão aos extremos, sem sair de 1–5', () => {
+    expect(scoreForKey('ArrowRight', 3)).toBe(4);
+    expect(scoreForKey('ArrowUp', 5)).toBe(5);
+    expect(scoreForKey('ArrowLeft', 1)).toBe(1);
+    expect(scoreForKey('ArrowDown', 2)).toBe(1);
+    expect(scoreForKey('Home', 4)).toBe(1);
+    expect(scoreForKey('End', 2)).toBe(5);
+    expect(scoreForKey('Enter', 2)).toBeNull();
+    expect(isTabStop(1, 0)).toBe(true);
+    expect(isTabStop(3, 3)).toBe(true);
+    expect(isTabStop(1, 3)).toBe(false);
+  });
+
+  it('o que cada nota quer dizer (etiqueta das bolinhas)', () => {
     expect([0, 1, 2, 3, 4, 5].map(scoreWord)).toEqual(['Sem nota', 'Péssimo', 'Mau', 'Aceitável', 'Bom', 'Excelente']);
     expect(scoreWord(9)).toBe('Excelente');
   });

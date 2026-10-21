@@ -92,7 +92,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para
   it('lista → organização (um local) → notas → fechar volta à organização; voltar volta à lista', async () => {
     const user = show(viewport);
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
-    await screen.findAllByRole('slider');
+    await screen.findAllByRole('radiogroup');
     if (viewport === 'desktop') return; // no computador as notas não têm "fechar" (o cabeçalho leva a qualquer lado)
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
     await at(/^org/);
@@ -104,7 +104,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para
     const user = show(viewport);
     await user.click(screen.getByRole('link', { name: 'avaliar padaria' }));
     await user.click(await screen.findByRole('button', { name: /^Continuar/ }));
-    await screen.findAllByRole('slider');
+    await screen.findAllByRole('radiogroup');
     if (viewport === 'desktop') return;
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
     await at(/^org/);
@@ -125,7 +125,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para
   it('aberto diretamente (sem histórico): fechar vai para a organização', async () => {
     if (viewport === 'desktop') return;
     const user = show(viewport, ['/avaliar?org=oficina-sete']);
-    await screen.findAllByRole('slider');
+    await screen.findAllByRole('radiogroup');
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
     await at(/^org/);
   });
@@ -136,7 +136,7 @@ describe('avaliar: publicar', () => {
   it('"publicado" substitui as notas: fechar volta à organização e voltar à lista (nunca às notas vazias)', async () => {
     const user = show('mobile');
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
-    await screen.findAllByRole('slider', { name: 'Ambiente' });
+    await screen.findAllByRole('radiogroup', { name: 'Ambiente' });
     setScore('Ambiente', 4);
     await user.click(screen.getByRole('button', { name: /Publicar avaliação/ }));
     await screen.findByRole('heading', { level: 1, name: 'Já está. Obrigado por partilhares!' });
@@ -149,7 +149,7 @@ describe('avaliar: publicar', () => {
 
 /** Publica a partir das notas (uma nota chega) */
 async function publish(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findAllByRole('slider', { name: 'Ambiente' });
+  await screen.findAllByRole('radiogroup', { name: 'Ambiente' });
   setScore('Ambiente', 4);
   await user.click(screen.getByRole('button', { name: /Publicar avaliação/ }));
   await screen.findByRole('heading', { level: 1, name: 'Já está. Obrigado por partilhares!' });
@@ -162,7 +162,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: todos os caminhos de sa�
   it('mudar de organização nas notas não deixa ecrãs para trás: "Ver na página" abre a nova; voltar leva à anterior e depois à lista', async () => {
     const user = show(viewport);
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
-    await screen.findAllByRole('slider');
+    await screen.findAllByRole('radiogroup');
     // "Mudar" (telemóvel) ou o passo 1 "Organização" (computador)
     await user.click(viewport === 'mobile' ? screen.getByRole('button', { name: 'Mudar' }) : screen.getByRole('button', { name: /Passo 1, Organização/ }));
     await user.click(await screen.findByRole('button', { name: 'Escolher outra organização' }).catch(() => screen.getByRole('searchbox')));

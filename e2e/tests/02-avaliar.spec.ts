@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect, expectNoHorizontalScroll, login, openMagicLink, pickOrg, test, uniqueEmail, setScore } from '../support/fixtures';
+import { expect, expectNoHorizontalScroll, login, openMagicLink, pickOrg, test, uniqueEmail, scoreRadio, setScore } from '../support/fixtures';
 
 /** O fluxo principal: entrar, escolher a organização, dar notas e escrever no mesmo ecrã, reescrever, publicar e verificar depois */
 test.describe('Avaliar onde trabalho', () => {
@@ -72,7 +72,7 @@ test.describe('Avaliar onde trabalho', () => {
     await expect(page).toHaveURL(/\/avaliar\?q=oficina/);
     await page.getByText('Oficina Sete', { exact: true }).first().click();
     await page.waitForURL(/\/avaliar\/notas/);
-    await expect(page.getByRole('slider', { name: 'Salário justo' })).toBeVisible();
+    await expect(page.getByRole('radiogroup', { name: 'Salário justo' })).toBeVisible();
   });
 
   test('lista → organização → avaliar → fechar → voltar: volta à lista (não à avaliação)', async ({ page, isMobile }) => {
@@ -130,7 +130,7 @@ test.describe('Avaliar onde trabalho', () => {
     await expect(page.getByText('Vê o teu email.')).toBeVisible();
     await openMagicLink(page, email);
     await expect(page).toHaveURL(/\/avaliar\/notas/);
-    await expect(page.getByRole('slider', { name: 'Ambiente' }).first()).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
+    await expect(scoreRadio(page, 'Ambiente', 4)).toHaveAttribute('aria-checked', 'true');
     await page.getByRole('button', { name: /Publicar avaliação/ }).click();
     await page.waitForURL(/\/avaliar\/feito/);
   });
