@@ -12,9 +12,9 @@ import styles from './Home.module.css';
 /** Textos de cada zona: título, uma linha a explicar e o nome do destino (para leitores de ecrã) */
 export const ZONE_TEXT = {
   peek: {
-    label: () => tr('Espreitar', 'Peek inside'),
+    label: () => tr('Espreita', 'Peek inside'),
     sub: () => tr('Espreita como é trabalhar lá dentro, antes de dizeres que sim.', 'See what it’s like inside before you say yes.'),
-    hint: () => tr('Espreitar organizações', 'Peek at organisations'),
+    hint: () => tr('Espreita organizações', 'Peek at organisations'),
   },
   job: {
     // "Avalia" (21/10): diz o que se faz e é o termo que se pesquisa (antes "O teu trabalho")
@@ -141,13 +141,13 @@ function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFoc
   );
 }
 
-/** Espreitar: uma organização abre a página dela; um termo (profissão, setor, sítio) pesquisa-o */
+/** Espreita: uma organização abre a página dela; um termo (profissão, setor, sítio) pesquisa-o */
 const peekPick = (s: Suggestion) => (s.kind === 'org' ? `/org/${s.id}` : searchHref(s.label));
 /** Avaliar: só organizações e sítios (a profissão não diz onde se trabalha); a organização vai direta às notas */
 const JOB_KINDS: SuggestKind[] = ['org', 'place'];
 const jobPick = (s: Suggestion) => (s.kind === 'org' ? `/avaliar?org=${encodeURIComponent(s.id)}` : reviewHref(s.label));
 
-/** Espreitar aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
+/** Espreita aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
 export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFocus: boolean; onClose: () => void }) {
   return (
     // o teclado fecha com Escape ou com o X; o clique no fundo é um atalho para rato e toque

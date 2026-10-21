@@ -7,7 +7,7 @@
   --mark-below: calc(var(--mark-h) * 0.518);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* Paleta "uma zona com cor" (14/10): o cliente achou o verde-água a cheio + preto pesado e o branco e menta
-     sem força. Espreitar fica branco; O teu trabalho em verde-água da marca, com texto em tinta.
+     sem força. Espreita fica branco; O teu trabalho em verde-água da marca, com texto em tinta.
      A estrutura e a animação não dependem destas variáveis */
   --mint: #eef8f8;
   --peek-bg: var(--surface);
@@ -193,7 +193,7 @@
   opacity: 0.85;
   transform: translateX(4px);
 }
-/* título e linha alinhados à esquerda na largura do conteúdo: Espreitar junto à linha, O teu trabalho logo abaixo */
+/* título e linha alinhados à esquerda na largura do conteúdo: Espreita junto à linha, O teu trabalho logo abaixo */
 .doorText {
   width: min(1080px, 100%);
   display: flex;
@@ -462,7 +462,7 @@
   font-size: 15px;
 }
 
-/* Espreitar: "Ver todas as organizações" com a largura do campo, como segunda opção clara */
+/* Espreita: "Ver todas as organizações" com a largura do campo, como segunda opção clara */
 .browse {
   width: min(100%, 480px);
   height: 52px;

@@ -16,7 +16,7 @@ test.describe('Visita pública', () => {
   test('da página inicial a uma organização', async ({ page }) => {
     await page.goto('/');
     // primeiro clique: a zona de cima ocupa a página; depois ver todas as organizações
-    await page.getByRole('button', { name: /^Espreitar/ }).click();
+    await page.getByRole('button', { name: /^Espreita/ }).click();
     await expect(page).toHaveURL(/\/\?lado=espreitar$/);
     await page.getByRole('link', { name: 'Ver todas as organizações' }).click();
     // a primeira visita abre logo a lista (as prioridades são um convite, não um passo obrigatório)
@@ -63,7 +63,7 @@ test.describe('Visita pública', () => {
 
   test('página inicial: pesquisar a partir da zona de cima, voltar e escolher avaliar', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /^Espreitar/ }).click();
+    await page.getByRole('button', { name: /^Espreita/ }).click();
     await page.getByRole('combobox', { name: 'Pesquisar organização' }).fill('padaria');
     await page.keyboard.press('Enter');
     await page.waitForURL(/\/pesquisa\?q=padaria$/);
