@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ReplyInput } from '@peekjob/shared';
+import { REPORT_PERIODS, ReplyInput } from '@peekjob/shared';
 import { memoryStorage } from 'multer';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, Roles, type AuthUser } from '../auth/auth.guard';
@@ -10,6 +10,7 @@ import { parse } from '../common/zod';
 import { documentText, MAX_DOCUMENT_BYTES } from '../verification/document-text';
 import { ClaimsService } from './claims.service';
 import { DashboardService } from './dashboard.service';
+import { PeriodicReportService } from './periodic-report.service';
 import { RepliesService } from './replies.service';
 
 const Claimant = { name: z.string().trim().min(2).max(120), role: z.string().trim().min(2).max(80) };
@@ -17,6 +18,7 @@ const EmailBody = z.object({ email: z.string().trim().toLowerCase().email(), lan
 const ConfirmBody = z.object({ code: z.string().regex(/^\d{6}$/), ...Claimant });
 const DocBody = z.object(Claimant);
 const DecisionBody = z.object({ action: z.enum(['approve', 'reject']), note: z.string().trim().min(10).max(1000) });
+const ReportQuery = z.object({ periodo: z.enum(['semana', 'mes']).default('semana') });
 const PlanBody = z.object({ plan: z.enum(['free', 'pro']) });
 
 const ref = (user: AuthUser) => memberRef(privacySecret(), user.id);
@@ -29,6 +31,7 @@ export class AccountsController {
     private readonly claims: ClaimsService,
     private readonly replies: RepliesService,
     private readonly dashboard: DashboardService,
+    private readonly reports: PeriodicReportService,
   ) {}
 
   @Post('orgs/:id/claim/email')
@@ -64,6 +67,13 @@ export class AccountsController {
   @Get('orgs/:id/dashboard')
   dashboardFor(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     return this.dashboard.get(id, ref(user));
+  }
+
+  /** Relatório semanal (?periodo=semana) ou mensal (?periodo=mes) — plano Pro */
+  @Get('orgs/:id/report')
+  report(@Param('id') id: string, @Query() query: unknown, @CurrentUser() user: AuthUser) {
+    const { periodo } = parse(ReportQuery, query);
+    return this.reports.get(id, ref(user), periodo === 'mes' ? 'month' : 'week');
   }
 
   @Put('reviews/:id/reply')

@@ -40,6 +40,7 @@ const PAGES = (): Record<string, PageMeta> => ({
   '/moderacao': { title: tr(`Moderação · ${BRAND}`, `Moderation · ${BRAND}`), index: false },
   '/entrar': { title: tr(`Entrar · ${BRAND}`, `Sign in · ${BRAND}`), index: false },
   '/painel': { title: tr(`Painel · ${BRAND}`, `Dashboard · ${BRAND}`), index: false },
+  '/painel/relatorio': { title: tr(`Relatório · ${BRAND}`, `Report · ${BRAND}`), index: false },
   '/404': { title: tr(`Página não encontrada · ${BRAND}`, `Page not found · ${BRAND}`), index: false },
 });
 

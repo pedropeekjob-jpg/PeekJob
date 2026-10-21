@@ -9,3 +9,4 @@ export * from './routes';
 export * from './scrub';
 export * from './districts';
 export * from './contributions';
+export * from './report';

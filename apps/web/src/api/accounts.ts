@@ -67,3 +67,5 @@ export function claimByDocument(orgId: string, file: File, who: Claimant) {
   return api<{ claim: Claim }>(`/orgs/${encodeURIComponent(orgId)}/claim/document`, { form });
 }
 export const saveReply = (reviewId: string, text: string) => api(`/reviews/${encodeURIComponent(reviewId)}/reply`, { method: 'PUT', body: { text } });
+export const periodicReport = (orgId: string, periodo: 'semana' | 'mes') =>
+  api<import('../features/painel/report').ApiReport>(`/orgs/${encodeURIComponent(orgId)}/report?periodo=${periodo}`);

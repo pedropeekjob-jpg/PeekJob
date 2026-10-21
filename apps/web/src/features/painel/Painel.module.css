@@ -427,3 +427,13 @@
 .switcher {
   max-width: 320px;
 }
+
+/* Relatórios semanal e mensal */
+.reports {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.reportButtons {
+  gap: 8px;
+}

@@ -115,6 +115,7 @@ export default function App() {
           <Route path="/entrar" element={<Pages.Entrar />} />
           <Route path="/para-organizacoes" element={<Pages.ParaOrganizacoes />} />
           <Route path="/painel" element={<Pages.Painel />} />
+          <Route path="/painel/relatorio" element={<Pages.Relatorio />} />
           <Route path="*" element={<Pages.NotFound />} />
         </Routes>
         </Suspense>

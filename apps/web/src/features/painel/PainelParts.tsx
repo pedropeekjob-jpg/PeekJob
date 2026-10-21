@@ -228,3 +228,32 @@ export function RespeitoCard({ org }: { org: Org }) {
     </section>
   );
 }
+
+/** Relatórios semanal e mensal (21/10): no Pro abrem; sem o Pro explicam o que trazem */
+export function ReportLinks({ orgId, pro }: { orgId: string; pro: boolean }) {
+  const href = (periodo: 'semana' | 'mes') => `/painel/relatorio?${new URLSearchParams({ periodo, org: orgId })}`;
+  return (
+    <section aria-labelledby="rel" className={styles.reports}>
+      <div className={`row between ${styles.criteriaHead}`}>
+        <h2 id="rel" className={`h2 ${styles.sectionTitle}`}>
+          {tr('Relatórios', 'Reports')}
+        </h2>
+        {!pro && <span className="pill">Pro</span>}
+      </div>
+      <p className="small body">
+        {tr(
+          'Resultados, comparação com organizações parecidas, pontos fortes e o que melhorar, com passos concretos.',
+          'Results, comparison with similar organisations, strengths and what to improve, with concrete steps.',
+        )}
+      </p>
+      <div className={`row wrap ${styles.reportButtons}`}>
+        <Link to={href('semana')} className="btn btn-ghost">
+          {tr('Relatório semanal', 'Weekly report')}
+        </Link>
+        <Link to={href('mes')} className="btn btn-ghost">
+          {tr('Relatório mensal', 'Monthly report')}
+        </Link>
+      </div>
+    </section>
+  );
+}
