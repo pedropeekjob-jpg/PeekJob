@@ -8,6 +8,6 @@ describe('Sobre', () => {
   it('mostra o título e as duas portas (explorar e avaliar)', () => {
     renderScreen(<Sobre />, { route: '/sobre' });
     expect(screen.getByRole('heading', { level: 1, name: /Damos voz/ })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Espreitar/ })).toHaveAttribute('href', '/explorar');
+    expect(screen.getByRole('link', { name: /Espreita/ })).toHaveAttribute('href', '/explorar');
   });
 });

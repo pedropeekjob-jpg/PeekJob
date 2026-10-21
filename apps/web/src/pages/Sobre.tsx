@@ -76,7 +76,7 @@ export default function Sobre() {
         <section aria-labelledby="t-how" className="info-doors">
           <h2 id="t-how" className="sr-only">{tr('Começar', 'Get started')}</h2>
           <Link to="/explorar" className="info-door info-door-peek" data-ev="cta_click" data-ev-cta="explorar" data-ev-area="sobre">
-            <span className="info-eyebrow">{tr('Espreitar', 'Peek inside')}</span>
+            <span className="info-eyebrow">{tr('Espreita', 'Peek inside')}</span>
             <strong>{tr('Explorar organizações', 'Explore organisations')}</strong>
             <Icon name="arrow" size={20} />
           </Link>

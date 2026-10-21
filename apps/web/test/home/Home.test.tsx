@@ -10,7 +10,7 @@ function Where() {
 }
 const show = (viewport: 'mobile' | 'desktop', route = '/') => renderScreen(<Home />, { route, path: '/', viewport, outside: <Where /> });
 const where = () => screen.getByTestId('where').textContent;
-const peekDoor = () => screen.getByRole('button', { name: /^Espreitar/ });
+const peekDoor = () => screen.getByRole('button', { name: /^Espreita/ });
 const jobDoor = () => screen.getByRole('button', { name: /^Avalia(?!r)/ });
 
 describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport) => {
@@ -69,7 +69,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
   it('a zona aberta ocupa a página: a outra retrai-se e não tem nada clicável', async () => {
     const { user } = show(viewport, '/?lado=espreitar');
     expect(screen.queryByRole('button', { name: /^Avalia(?!r)/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^Espreitar/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Espreita/ })).not.toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'peek');
     await user.click(screen.getByRole('button', { name: 'Voltar ao início' }));
     expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'none');
@@ -106,7 +106,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     show(viewport, '/?lado=avaliar');
     expect(screen.getByRole('combobox', { name: 'Onde trabalhas?' })).toBeInTheDocument();
     show(viewport, '/?lado=outra-coisa');
-    expect(screen.getAllByRole('button', { name: /^Espreitar/ }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /^Espreita/ }).length).toBeGreaterThan(0);
   });
 });
 
