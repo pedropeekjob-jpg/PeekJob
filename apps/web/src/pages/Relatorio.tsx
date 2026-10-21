@@ -25,7 +25,7 @@ function useReport(period: ReportPeriod, orgParam: string | null): State {
     if (!apiMode || !remote.ready || !user) return;
     let alive = true;
     setState({ status: 'loading' });
-    (async () => {
+    void (async () => {
       try {
         const mine = await myOrgs();
         const id = mine.orgs.find((o) => o.id === orgParam)?.id ?? mine.orgs[0]?.id;

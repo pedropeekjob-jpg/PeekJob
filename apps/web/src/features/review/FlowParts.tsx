@@ -1,4 +1,4 @@
-import { memo, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
+import { memo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { PARAM_COMMENT_MAX } from '@peekjob/shared';
@@ -117,12 +117,18 @@ interface CommentProps<K extends ParamKey> {
 /** "Comentar": abre uma caixa curta por baixo; fica aberta se já houver texto */
 function ParamComment<K extends ParamKey>({ k, label, comment = '', onComment, invalid = false }: CommentProps<K> & { k: K; label: string }) {
   const [open, setOpen] = useState(!!comment);
+  // ao carregar em "Comentar" o foco passa para a caixa (só nesse momento, não ao abrir o ecrã)
+  const focusBox = useRef(false);
   if (!onComment) return null;
   const boxId = `comentario-${k}`;
   return (
     <div className={styles.paramComment}>
       {!open ? (
-        <button type="button" className={`link ${styles.commentToggle}`} aria-label={tr(`Comentar sobre ${label}`, `Comment on ${label}`)} onClick={() => setOpen(true)}>
+        <button type="button" className={`link ${styles.commentToggle}`} aria-label={tr(`Comentar sobre ${label}`, `Comment on ${label}`)} onClick={() => {
+            focusBox.current = true;
+            setOpen(true);
+          }}
+        >
           <Icon name="plus" size={14} stroke={2.2} />
           {tr('Comentar', 'Comment')}
         </button>
@@ -140,7 +146,12 @@ function ParamComment<K extends ParamKey>({ k, label, comment = '', onComment, i
             placeholder={tr('O que acontece, sem nomes', 'What happens, no names')}
             aria-invalid={invalid}
             aria-describedby={invalid ? `${boxId}-erro` : undefined}
-            autoFocus={!comment}
+            ref={(el) => {
+              if (el && focusBox.current) {
+                focusBox.current = false;
+                el.focus();
+              }
+            }}
             onChange={(e) => onComment(k, e.target.value)}
           />
           <div className={`row between small muted ${styles.commentFoot}`}>
