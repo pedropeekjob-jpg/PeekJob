@@ -22,7 +22,7 @@ export class AccountController {
     const q = (sql: string, params: unknown[]) => this.pool.query(sql, params).then((r) => r.rows);
     const [account] = await q(`SELECT role, created_at, last_login_at FROM users WHERE id = $1`, [user.id]);
     const reviews = await q(
-      `SELECT r.id, o.name AS org_name, r.scores, r.avg, r.recommend, r.tags, r.text, r.verified, r.flagged, r.status, r.created_at
+      `SELECT r.id, o.name AS org_name, r.scores, r.avg, r.recommend, r.tags, r.text, r.extras, r.comments, r.verified, r.flagged, r.status, r.created_at
          FROM reviews r JOIN organizations o ON o.id = r.org_id WHERE r.author_ref = $1 ORDER BY r.created_at`,
       [ref],
     );
@@ -82,6 +82,8 @@ export class AccountController {
         recommend: r.recommend,
         tags: r.tags,
         text: r.text,
+        extras: r.extras,
+        comments: r.comments,
         verified: r.verified,
         flagged: r.flagged,
         status: r.status,

@@ -7,7 +7,7 @@ import { fmt } from '../../lib/format';
 import { useToggle } from '../../lib/useToggle';
 import { BigRing } from '../../components/Score';
 import { BackButton } from '../../components/UI';
-import { MobileCriteria } from './Criteria';
+import { ExtrasSummary, MobileCriteria } from './Criteria';
 import { MobileInterviews } from './Interviews';
 import { locationsSuffix, orgMetaLine, scoreAria, shareCta, type OrgTab } from './org';
 import { LocationList, ManagedLine, OrgTabs, SaveButton } from './OrgCommon';
@@ -79,6 +79,7 @@ export function OrgMobile({ org, tab }: { org: Org; tab: OrgTab }) {
       </section>
 
       {has && <MobileCriteria org={org} />}
+      <ExtrasSummary org={org} />
 
       <MobileMap org={org} active={active} setActive={setActive} />
 

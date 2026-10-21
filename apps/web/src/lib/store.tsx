@@ -7,7 +7,8 @@ import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
 import { detectRedFlags, findPersonalAttacks, softenText } from './moderation';
 import { getLang, tr } from '../i18n';
-import { stepsLabel, type CreateInterviewInput, type CreateSalaryInput } from '@peekjob/shared';
+import { stepsLabel, type CreateInterviewInput, type CreateSalaryInput, type Extras } from '@peekjob/shared';
+import type { ExtraKey, ParamKey } from '../data/params';
 import { emptyShared, type SharedLocal } from '../features/share/share';
 
 /**
@@ -26,6 +27,9 @@ export interface MyReview {
   recommend: boolean | null;
   tags: string[];
   text: string;
+  /** parâmetros do tipo de trabalho e comentários por critério ou parâmetro */
+  extras?: Extras;
+  comments?: Comments;
   when: string;
   flagged: boolean;
   /** quem escreveu confirmou que trabalha lá (antes ou depois de publicar) */
@@ -56,6 +60,8 @@ export type AppealState =
   | { status: 'expired' }
   | { status: 'open' | 'reversed' | 'confirmed'; note?: string | null };
 
+export type Comments = Partial<Record<ParamKey, string>>;
+
 export interface Draft {
   orgId: string | null;
   locationId: string | null;
@@ -64,6 +70,12 @@ export interface Draft {
   recommend: boolean | null;
   tags: string[];
   text: string;
+  /** respostas aos parâmetros do tipo de trabalho (nota de 1 a 5 ou sim/não) */
+  extras: Extras;
+  /** parâmetros que a pessoa acrescentou, além dos sugeridos */
+  extraKeys: ExtraKey[];
+  /** comentário curto por critério ou parâmetro */
+  comments: Comments;
 }
 
 export interface AddedOrg {
@@ -108,7 +120,7 @@ const EXAMPLE_TEXT =
   'Gosto das colegas, mas há meses que o salário chega com duas semanas de atraso. O encarregado faz comentários sobre o meu corpo à frente dos clientes.';
 
 export const emptyDraft = (): Draft => ({
-  orgId: null, locationId: null, verified: null, scores: {}, recommend: null, tags: [], text: '',
+  orgId: null, locationId: null, verified: null, scores: {}, recommend: null, tags: [], text: '', extras: {}, extraKeys: [], comments: {},
 });
 
 /** Rascunho de exemplo (igual ao do design) para a demonstração do fluxo de avaliar */
@@ -120,6 +132,9 @@ export const exampleDraft = (): Draft => ({
   recommend: null,
   tags: ['Salário em atraso'],
   text: EXAMPLE_TEXT,
+  extras: {},
+  extraKeys: [],
+  comments: {},
 });
 
 const initial = (): State =>
@@ -159,13 +174,22 @@ function load(): State {
     if (raw) {
       const saved = JSON.parse(raw);
       VOLATILE.forEach((k) => delete saved[k]);
-      return { ...initial(), ...saved };
+      const base = initial();
+      // rascunhos guardados antes de haver parâmetros e comentários ficam com eles vazios
+      return { ...base, ...saved, draft: { ...base.draft, ...saved.draft } };
     }
   } catch {
     /* sem storage: começa do zero */
   }
   return initial();
 }
+
+/** Comentários por parâmetro sem os vazios (aparados) */
+export const cleanComments = (c: Comments = {}): Comments =>
+  Object.fromEntries(Object.entries(c).map(([k, v]) => [k, (v ?? '').trim()]).filter(([, v]) => v)) as Comments;
+
+/** Todo o texto escrito (geral e por parâmetro): o que a moderação e o apoio leem */
+export const reviewText = (d: { text: string; comments?: Comments }) => [d.text, ...Object.values(d.comments ?? {})].filter((t) => t && t.trim()).join('\n');
 
 const avgOf = (sc: Partial<Scores>) => {
   const v = Object.values(sc).filter((x): x is number => typeof x === 'number');
@@ -441,11 +465,11 @@ function useAppState() {
           set((s) => {
             const d = s.draft;
             if (!d.orgId) return {};
-            const rf = detectRedFlags(d.text, d.tags);
+            const rf = detectRedFlags(reviewText(d), d.tags);
             const id = 'mine-' + Date.now();
             const review: MyReview = {
               id, orgId: d.orgId, locationId: d.locationId ?? undefined, scores: d.scores, avg: avgOf(d.scores),
-              recommend: d.recommend, tags: d.tags, text: d.text, when: 'hoje', flagged: rf.flagged, verified: !!d.verified,
+              recommend: d.recommend, tags: d.tags, text: d.text, extras: d.extras, comments: cleanComments(d.comments), when: 'hoje', flagged: rf.flagged, verified: !!d.verified,
             };
             const msgs = rf.flagged && s.user
               ? [{ id: 'msg-' + Date.now(), orgId: d.orgId, kinds: rf.kinds, found: rf.found, when: 'hoje', read: false }, ...s.messages]
@@ -459,7 +483,7 @@ function useAppState() {
         try {
           const loc = d.locationId && /^[0-9a-f-]{36}$/i.test(d.locationId) ? d.locationId : undefined;
           const r = await api<{ review: ApiReview }>(`/orgs/${d.orgId}/reviews`, {
-            body: { scores: d.scores, recommend: d.recommend, tags: d.tags, text: d.text, locationId: loc },
+            body: { scores: d.scores, recommend: d.recommend, tags: d.tags, text: d.text, extras: d.extras, comments: cleanComments(d.comments), locationId: loc },
           });
           const mine = toMyReview({ ...r.review, orgId: d.orgId });
           set((s) => ({ myReviews: [mine, ...s.myReviews.filter((x) => x.id !== mine.id)], lastPublished: mine.id, draft: emptyDraft() }));
@@ -537,7 +561,7 @@ function useAppState() {
           return { ok: true };
         }
         try {
-          const res = await api<{ review: ApiReview }>(`/me/reviews/${id}`, { method: 'PATCH', body: { scores: r.scores, recommend: r.recommend, tags: r.tags, text } });
+          const res = await api<{ review: ApiReview }>(`/me/reviews/${id}`, { method: 'PATCH', body: { scores: r.scores, recommend: r.recommend, tags: r.tags, text, extras: r.extras ?? {}, comments: r.comments ?? {} } });
           set((s) => ({ myReviews: s.myReviews.map((x) => (x.id === id ? toMyReview({ ...res.review, orgId: r.orgId }) : x)) }));
           track('review_edit', { result: 'ok' });
           void loadMine().catch(() => undefined); // a mensagem de apoio, se o texto novo a gerar

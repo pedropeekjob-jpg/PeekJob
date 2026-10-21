@@ -19,7 +19,8 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     const { user } = show('mobile');
     expect(await screen.findByRole('heading', { level: 1, name: /Dá uma nota de 1 a 5/ })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Passo 2 de 3' })).toBeInTheDocument();
-    expect(screen.getAllByRole('slider')).toHaveLength(8);
+    // 8 critérios + 1 parâmetro com escala sugerido para restauração (folgas e escalas)
+    expect(screen.getAllByRole('slider')).toHaveLength(9);
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
     setScore('Ambiente', 4);
     expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
@@ -79,6 +80,45 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     const help = await screen.findByRole('button', { name: 'O que conta em Ambiente' });
     await user.click(help);
     expect(help).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('parâmetros do tipo de trabalho: sugeridos pelo setor, sim/não e escala, e acrescentar mais', async () => {
+    const { user } = show('mobile');
+    const section = (await screen.findByRole('heading', { name: 'No teu tipo de trabalho' })).closest('section')!;
+    expect(within(section).getByText('Sugestões para Restauração. Responde só ao que faz sentido.')).toBeInTheDocument();
+    const tips = within(section).getByRole('group', { name: 'Gorjetas para a equipa' });
+    await user.click(within(tips).getByRole('button', { name: 'Sim' }));
+    expect(within(tips).getByRole('button', { name: 'Sim' })).toHaveAttribute('aria-pressed', 'true');
+    setScore('Folgas e escalas', 2);
+    expect(screen.getByRole('slider', { name: 'Folgas e escalas' })).toHaveAttribute('aria-valuetext', '2 de 5, Mau');
+    // os parâmetros não contam para "pelo menos uma nota"
+    expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
+
+    await user.click(within(section).getByRole('button', { name: 'Acrescentar parâmetro' }));
+    await user.click(within(section).getByRole('button', { name: '+ Contrato escrito' }));
+    expect(within(section).getByRole('group', { name: 'Contrato escrito' })).toBeInTheDocument();
+    await user.click(within(section).getByRole('button', { name: 'Tirar Contrato escrito' }));
+    expect(within(section).queryByRole('group', { name: 'Contrato escrito' })).not.toBeInTheDocument();
+  });
+
+  it('comentário por critério: abre, conta caracteres e bloqueia insultos', async () => {
+    const { user } = show('mobile', { scores: { ambiente: 3 } });
+    await user.click(await screen.findByRole('button', { name: 'Comentar sobre Ambiente' }));
+    const box = screen.getByRole('textbox', { name: 'Comentário sobre Ambiente' });
+    await user.type(box, 'Entreajuda todos os dias.');
+    expect(screen.getByText('25/280')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Publicar avaliação/ })).toBeEnabled();
+    await user.clear(box);
+    await user.type(box, 'O Ricardo é um idiota.');
+    expect(box).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('button', { name: /Corrige a frase para publicar/ })).toBeDisabled();
+  });
+
+  it('possível ilegalidade num comentário de critério também mostra o apoio', async () => {
+    const { user } = show('mobile', { scores: { salario: 2 } });
+    await user.click(await screen.findByRole('button', { name: 'Comentar sobre Salário justo' }));
+    await user.type(screen.getByRole('textbox', { name: 'Comentário sobre Salário justo' }), 'O salário chega sempre atrasado.');
+    expect(screen.getByText('Isto pode ser uma ilegalidade')).toBeInTheDocument();
   });
 
   it('recomendar a um amigo', async () => {

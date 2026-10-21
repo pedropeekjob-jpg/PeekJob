@@ -48,7 +48,9 @@ test.describe('Teclado', () => {
     // Delete tira a nota
     await page.keyboard.press('Delete');
     await expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
-    // Tab passa pelo × (escondido sem nota) e pela ajuda do critério seguinte, até ao slider dele
+    // Tab passa pelo × (escondido sem nota), por "Comentar" e pela ajuda do critério seguinte, até ao slider dele
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Comentar sobre Salário justo' })).toBeFocused();
     await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: 'O que conta em Equilíbrio' })).toBeFocused();
     await page.keyboard.press('Tab');

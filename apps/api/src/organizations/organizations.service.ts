@@ -1,6 +1,6 @@
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { ConflictException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CRITERION_KEYS, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery } from '@peekjob/shared';
+import { CRITERION_KEYS, EXTRA_MIN_ANSWERS, extraKind, isExtraKey, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { isUuid } from '../common/zod';
 import { PG_POOL, tx } from '../db/db.module';
@@ -202,7 +202,19 @@ export class OrganizationsService {
       `SELECT id, label, address, lat, lng FROM org_locations WHERE org_id = $1 AND status = 'active' ORDER BY created_at`,
       [id],
     );
-    return { ...toPublicOrg(agg.rows[0]), locations: locs.rows };
+    // parâmetros do tipo de trabalho: só os que têm respostas suficientes para não identificar ninguém
+    const ex = await this.pool.query(
+      `SELECT e.key, count(*)::int AS n, count(*) FILTER (WHERE e.value = 'true'::jsonb)::int AS yes,
+              round(avg((e.value #>> '{}')::numeric) FILTER (WHERE jsonb_typeof(e.value) = 'number'), 1) AS avg
+         FROM reviews r, jsonb_each(r.extras) e
+        WHERE r.org_id = $1 AND r.status = 'published'
+        GROUP BY e.key HAVING count(*) >= $2 ORDER BY count(*) DESC, e.key`,
+      [id, EXTRA_MIN_ANSWERS],
+    );
+    const extras = ex.rows
+      .filter((r) => isExtraKey(r.key))
+      .map((r) => (extraKind(r.key) === 'yesno' ? { key: r.key, n: r.n, yesPct: Math.round((r.yes / r.n) * 100) } : { key: r.key, n: r.n, avg: num(r.avg) }));
+    return { ...toPublicOrg(agg.rows[0]), locations: locs.rows, extras };
   }
 
   /** Organizações ativas com agregados (para o início e o ranking da web). */

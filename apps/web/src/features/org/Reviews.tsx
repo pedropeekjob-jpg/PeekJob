@@ -9,6 +9,8 @@ import { fmt } from '../../lib/format';
 import { useStore, type MyReview } from '../../lib/store';
 import { useToggle } from '../../lib/useToggle';
 import { reviewLists } from './org';
+import { paramMeta, isExtraKey, type ExtraKey, type ParamKey } from '../../data/params';
+import { CRITERIA } from '../../data/criteria';
 import { PublishErrorBox } from '../review/PublishErrorBox';
 import { REVIEW_TEXT_MAX } from '../review/useReviewDraft';
 import { OrgReply } from './OrgCommon';
@@ -22,6 +24,43 @@ export function ReportLink({ org, itemId }: { org: Org; itemId: string }) {
     <Link to={`/org/${org.id}/denunciar/${itemId}`} className={`row ${styles.report}`}>
       <Icon name="flag" size={14} /> {tr('Denunciar', 'Report')}
     </Link>
+  );
+}
+
+/**
+ * O que a pessoa respondeu além das notas (21/10): comentários por critério e parâmetros do tipo de trabalho.
+ * Ordem: critérios pela ordem habitual, depois os parâmetros.
+ */
+export function ReviewDetails({ r }: { r: Pick<Review, 'extras' | 'comments' | 'scores'> }) {
+  const extras = r.extras ?? {};
+  const comments = r.comments ?? {};
+  const keys: ParamKey[] = [
+    ...CRITERIA.map((c) => c.key).filter((k) => comments[k]),
+    ...(Object.keys(extras) as ExtraKey[]).filter(isExtraKey),
+    ...(Object.keys(comments).filter((k) => isExtraKey(k) && extras[k] === undefined) as ExtraKey[]),
+  ];
+  if (!keys.length) return null;
+  const answer = (k: ParamKey) => {
+    const v = isExtraKey(k) ? extras[k] : r.scores?.[k];
+    if (typeof v === 'boolean') return v ? tr('Sim', 'Yes') : tr('Não', 'No');
+    if (typeof v === 'number') return tr(`${v} de 5`, `${v} of 5`);
+    return null;
+  };
+  return (
+    <dl className={styles.details}>
+      {keys.map((k) => {
+        const a = answer(k);
+        return (
+          <div key={k} className={styles.detail}>
+            <dt className={styles.detailName}>
+              {paramMeta(k).label}
+              {a && <span className={styles.detailAnswer}> · {a}</span>}
+            </dt>
+            {comments[k] && <dd className={styles.detailText}>{comments[k]}</dd>}
+          </div>
+        );
+      })}
+    </dl>
   );
 }
 
@@ -98,6 +137,7 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
         )}
       </div>
       {r.text && <p className={`body ${styles.mineText}`}>{r.text}</p>}
+      <ReviewDetails r={r} />
       {r.tags.length > 0 && (
         <div className={`chips ${styles.chips}`}>
           {r.tags.map((t) => (
@@ -160,6 +200,7 @@ function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean
           </span>
         </div>
         <p className={`body ${styles.reviewDesktopBody}`}>{r.body}</p>
+        <ReviewDetails r={r} />
         <OrgReply org={org} review={r} />
         {actions}
       </article>
@@ -176,6 +217,7 @@ function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean
       </div>
       <h3 className={`h3 ${styles.reviewTitle}`}>{r.title}</h3>
       <p className={`body ${styles.reviewBody}`}>{r.body}</p>
+      <ReviewDetails r={r} />
       <OrgReply org={org} review={r} />
       {actions}
     </article>

@@ -1,4 +1,5 @@
 export * from './criteria';
+export * from './params';
 export * from './nif';
 export * from './match';
 export * from './moderation';

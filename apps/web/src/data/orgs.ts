@@ -1,3 +1,4 @@
+import type { ExtraKey, Extras } from '@peekjob/shared';
 import { byPt } from '../lib/format';
 import type { CriterionKey } from './criteria';
 
@@ -18,6 +19,14 @@ export interface OrgLocation {
   mapY: number;
 }
 
+/** Um parâmetro do tipo de trabalho na página da organização: % de "sim" ou nota média */
+export interface ExtraSummary {
+  key: ExtraKey;
+  n: number;
+  yesPct?: number;
+  avg?: number | null;
+}
+
 export interface Review {
   id: string;
   role: string;
@@ -31,6 +40,11 @@ export interface Review {
   tags?: string[];
   /** resposta pública da organização (modo API) */
   reply?: string;
+  /** parâmetros do tipo de trabalho e comentários por critério ou parâmetro */
+  extras?: Extras;
+  comments?: Partial<Record<string, string>>;
+  /** notas por critério (para mostrar a nota ao lado do comentário) */
+  scores?: Partial<Scores>;
 }
 
 export interface Interview {
@@ -78,6 +92,8 @@ export interface Org {
   salaries: SalaryBand[];
   paidOnTimePct?: number;
   claimed: boolean;
+  /** resumo dos parâmetros do tipo de trabalho (só os com 3 ou mais respostas; modo API) */
+  extras?: ExtraSummary[];
 }
 
 const s = (

@@ -1,7 +1,9 @@
 import { memo, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
-import { CRITERION, type CriterionKey } from '../../data/criteria';
+import { PARAM_COMMENT_MAX } from '@peekjob/shared';
+import { CRITERION } from '../../data/criteria';
+import { EXTRA, paramMeta, type ExtraKey, type ParamKey } from '../../data/params';
 import type { Scores } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
@@ -104,22 +106,85 @@ export function HelpTip({ id, label, text }: { id: string; label: string; text: 
   );
 }
 
-interface ScoreRowProps {
-  k: CriterionKey;
+/** Comentário curto num critério ou parâmetro (21/10: um por parâmetro em vez de um só no fim) */
+interface CommentProps<K extends ParamKey> {
+  comment?: string;
+  onComment?: (k: K, t: string) => void;
+  /** o comentário tem nomes ou insultos */
+  invalid?: boolean;
+}
+
+/** "Comentar": abre uma caixa curta por baixo; fica aberta se já houver texto */
+function ParamComment<K extends ParamKey>({ k, label, comment = '', onComment, invalid = false }: CommentProps<K> & { k: K; label: string }) {
+  const [open, setOpen] = useState(!!comment);
+  if (!onComment) return null;
+  const boxId = `comentario-${k}`;
+  return (
+    <div className={styles.paramComment}>
+      {!open ? (
+        <button type="button" className={`link ${styles.commentToggle}`} aria-label={tr(`Comentar sobre ${label}`, `Comment on ${label}`)} onClick={() => setOpen(true)}>
+          <Icon name="plus" size={14} stroke={2.2} />
+          {tr('Comentar', 'Comment')}
+        </button>
+      ) : (
+        <div id={boxId} className={styles.commentBox}>
+          <label htmlFor={`${boxId}-t`} className="sr-only">
+            {tr(`Comentário sobre ${label}`, `Comment on ${label}`)}
+          </label>
+          <textarea
+            id={`${boxId}-t`}
+            className={`textarea ${invalid ? styles.textBlocked : ''}`}
+            rows={2}
+            maxLength={PARAM_COMMENT_MAX}
+            value={comment}
+            placeholder={tr('O que acontece, sem nomes', 'What happens, no names')}
+            aria-invalid={invalid}
+            aria-describedby={invalid ? `${boxId}-erro` : undefined}
+            autoFocus={!comment}
+            onChange={(e) => onComment(k, e.target.value)}
+          />
+          <div className={`row between small muted ${styles.commentFoot}`}>
+            <span id={`${boxId}-erro`} className={invalid ? styles.commentError : ''}>
+              {invalid ? tr('Sem nomes nem insultos', 'No names or insults') : ''}
+            </span>
+            <span className="mono">
+              {comment.length}/{PARAM_COMMENT_MAX}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ScoreRowProps<K extends ParamKey> extends CommentProps<K> {
+  k: K;
   value: number;
-  /** Recebe o critério: a mesma função serve as 8 linhas (estável, para o memo) */
-  onPick: (k: CriterionKey, n: number) => void;
+  /** Recebe a chave: a mesma função serve todas as linhas (estável, para o memo) */
+  onPick: (k: K, n: number) => void;
+  /** parâmetro acrescentado pela pessoa: pode tirá-lo */
+  onRemove?: (k: K) => void;
   desktop?: boolean;
 }
 
+/** Botão para tirar um parâmetro acrescentado */
+function RemoveParam<K extends ParamKey>({ k, label, onRemove }: { k: K; label: string; onRemove?: (k: K) => void }) {
+  if (!onRemove) return null;
+  return (
+    <button type="button" className={`link ${styles.removeParam}`} aria-label={tr(`Tirar ${label}`, `Remove ${label}`)} onClick={() => onRemove(k)}>
+      {tr('Tirar', 'Remove')}
+    </button>
+  );
+}
+
 /**
- * Um critério com um slider de 1 a 5 (21/10; antes cinco botões). A cor intensifica-se com a nota e a etiqueta
- * diz o que ela quer dizer (Péssimo … Excelente). Sem nota, o slider fica cinzento: tocar ou usar as setas dá a nota;
+ * Um critério (ou parâmetro com escala) com um slider de 1 a 5 (21/10; antes cinco botões). A cor intensifica-se com a nota
+ * e a etiqueta diz o que ela quer dizer (Péssimo … Excelente). Sem nota, o slider fica cinzento: tocar ou usar as setas dá a nota;
  * o × (ou Delete) tira-a.
  * memo: ao dar uma nota só a linha desse critério volta a correr (medido com scripts/react-profile.mjs).
  */
-export const ScoreRow = memo(function ScoreRow({ k, value, onPick, desktop = false }: ScoreRowProps) {
-  const c = CRITERION[k];
+function ScoreRowImpl<K extends ParamKey>({ k, value, onPick, desktop = false, comment, onComment, invalid, onRemove }: ScoreRowProps<K>) {
+  const c = paramMeta(k);
   const nameId = `nota-${k}`;
   const word = scoreWord(value);
   const level = value || undefined;
@@ -171,9 +236,81 @@ export const ScoreRow = memo(function ScoreRow({ k, value, onPick, desktop = fal
           <span key={n}>{n}</span>
         ))}
       </span>
+      <div className={`row between ${styles.paramFoot}`}>
+        <ParamComment k={k} label={c.label} comment={comment} onComment={onComment} invalid={invalid} />
+        <RemoveParam k={k} label={c.label} onRemove={onRemove} />
+      </div>
+    </div>
+  );
+}
+export const ScoreRow = memo(ScoreRowImpl) as typeof ScoreRowImpl;
+
+interface YesNoRowProps extends CommentProps<ExtraKey> {
+  k: ExtraKey;
+  value: boolean | undefined;
+  onPick: (k: ExtraKey, v: boolean | null) => void;
+  onRemove?: (k: ExtraKey) => void;
+  desktop?: boolean;
+}
+
+/** Parâmetro qualitativo: Sim ou Não (tocar de novo tira a resposta) */
+export const YesNoRow = memo(function YesNoRow({ k, value, onPick, desktop = false, comment, onComment, invalid, onRemove }: YesNoRowProps) {
+  const p = EXTRA[k];
+  const nameId = `nota-${k}`;
+  const options = [
+    { l: tr('Sim', 'Yes'), v: true },
+    { l: tr('Não', 'No'), v: false },
+  ];
+  return (
+    <div className={desktop ? styles.scoreWide : styles.score}>
+      <div className={`row ${styles.scoreHead}`}>
+        <span className={`row ${styles.scoreName}`}>
+          <span id={nameId} className={styles.scoreLabel}>
+            {p.label}
+          </span>
+          <HelpTip id={nameId} label={p.label} text={p.help} />
+        </span>
+        <div role="group" aria-labelledby={nameId} className={`row ${styles.recommend}`}>
+          {options.map((o) => {
+            const on = value === o.v;
+            return (
+              <button key={o.l} type="button" aria-pressed={on} onClick={() => onPick(k, on ? null : o.v)} className={styles.yesNo}>
+                {o.l}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className={`row between ${styles.paramFoot}`}>
+        <ParamComment k={k} label={p.label} comment={comment} onComment={onComment} invalid={invalid} />
+        <RemoveParam k={k} label={p.label} onRemove={onRemove} />
+      </div>
     </div>
   );
 });
+
+/** "Acrescentar parâmetro": os que faltam, da lista do tipo de trabalho */
+export function AddParams({ available, onAdd }: { available: ExtraKey[]; onAdd: (k: ExtraKey) => void }) {
+  const [open, setOpen] = useState(false);
+  if (!available.length) return null;
+  return (
+    <div className={styles.addParams}>
+      <button type="button" className={`btn btn-ghost ${styles.addToggle}`} aria-expanded={open} aria-controls="mais-parametros" onClick={() => setOpen(!open)}>
+        <Icon name="plus" size={16} stroke={2.2} />
+        {tr('Acrescentar parâmetro', 'Add a parameter')}
+      </button>
+      {open && (
+        <div id="mais-parametros" role="group" aria-label={tr('Parâmetros que podes acrescentar', 'Parameters you can add')} className={`row wrap ${styles.tags}`}>
+          {available.map((k) => (
+            <button key={k} type="button" className={`chip ${styles.tag}`} onClick={() => onAdd(k)}>
+              + {EXTRA[k].label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** Sim / Não de "Recomendavas a um amigo?" (tocar de novo tira; memo: onChange é estável) */
 export const RecommendButtons = memo(function RecommendButtons({ value, onChange, desktop = false }: { value: boolean | null; onChange: (v: boolean | null) => void; desktop?: boolean }) {

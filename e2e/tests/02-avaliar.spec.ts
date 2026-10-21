@@ -37,6 +37,27 @@ test.describe('Avaliar onde trabalho', () => {
     await expect(page.getByText(/incumprimento salarial/i).first()).toBeVisible();
   });
 
+  test('parâmetros do tipo de trabalho e comentário por critério: publicados e visíveis na página', async ({ page }) => {
+    await login(page, uniqueEmail('parametros'));
+    await page.goto('/avaliar');
+    await pickOrg(page, 'oficina sete', 'Oficina Sete');
+    await setScore(page, 'Ambiente', 4);
+    await page.getByRole('button', { name: 'Comentar sobre Ambiente' }).click();
+    await page.getByRole('textbox', { name: 'Comentário sobre Ambiente' }).fill('Há sempre alguém para ajudar.');
+    await page.getByRole('group', { name: 'Trabalho remoto' }).getByRole('button', { name: 'Sim' }).click();
+    await page.getByRole('button', { name: 'Acrescentar parâmetro' }).click();
+    await page.getByRole('button', { name: '+ Contrato escrito' }).click();
+    await page.getByRole('group', { name: 'Contrato escrito' }).getByRole('button', { name: 'Não' }).click();
+    await page.getByRole('button', { name: /Publicar avaliação/ }).click();
+    await page.waitForURL(/\/avaliar\/feito/);
+
+    await page.getByRole('link', { name: 'Ver na página da organização' }).first().click();
+    await page.waitForURL(/\/org\//);
+    await expect(page.getByText('Há sempre alguém para ajudar.').first()).toBeVisible();
+    await expect(page.getByText('Trabalho remoto · Sim').first()).toBeVisible();
+    await expect(page.getByText('Contrato escrito · Não').first()).toBeVisible();
+  });
+
   test('sem sessão também se começa: escolher a organização e seguir logo para as notas', async ({ page }) => {
     await page.goto('/avaliar');
     await pickOrg(page, 'oficina sete', 'Oficina Sete');

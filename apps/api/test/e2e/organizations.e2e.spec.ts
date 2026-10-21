@@ -128,6 +128,18 @@ describe('Organizações', () => {
       expect(res.body.criteria.respeito).toBe(5);
     });
 
+    it('resumo dos parâmetros do tipo de trabalho só a partir de 3 respostas', async () => {
+      const id = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
+      const post = async (u: string, extras: Record<string, unknown>) =>
+        expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login(u)).send({ ...goodReview, extras })).status).toBe(201);
+      await post('u1', { gorjetas: true, folgas_escala: 2 });
+      await post('u2', { gorjetas: false, folgas_escala: 4 });
+      expect((await t.http().get(`/orgs/${id}`).expect(200)).body.extras).toEqual([]);
+      await post('u3', { gorjetas: true });
+      const res = await t.http().get(`/orgs/${id}`).expect(200);
+      expect(res.body.extras).toEqual([{ key: 'gorjetas', n: 3, yesPct: 67 }]);
+    });
+
     it('404 para pendentes e inexistentes', async () => {
       const id = await insertOrg(t.pool, { name: 'Pendente', status: 'pending' });
       expect((await t.http().get(`/orgs/${id}`)).status).toBe(404);

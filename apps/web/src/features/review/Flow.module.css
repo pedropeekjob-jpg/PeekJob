@@ -312,6 +312,61 @@
   justify-content: center;
 }
 
+/* Comentário por parâmetro (21/10) e tirar um parâmetro acrescentado */
+.paramFoot {
+  gap: 12px;
+  align-items: flex-start;
+}
+.paramComment {
+  flex: 1;
+  min-width: 0;
+}
+.commentToggle,
+.removeParam {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-text);
+}
+.removeParam {
+  color: var(--body);
+}
+.commentBox {
+  margin-top: 4px;
+}
+.commentBox textarea {
+  width: 100%;
+  font-size: 15px;
+  line-height: 1.45;
+  min-height: 64px;
+}
+.textBlocked {
+  border-color: #e3a56b;
+}
+.commentFoot {
+  gap: 12px;
+  margin-top: 4px;
+}
+.commentError {
+  color: var(--down);
+  font-weight: 600;
+}
+
+/* Parâmetros do tipo de trabalho */
+.addParams {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.addToggle {
+  align-self: flex-start;
+  gap: 6px;
+}
+
 /* Recomendavas? */
 .recommend {
   gap: 6px;
@@ -395,4 +450,20 @@
 }
 .noteNumber {
   font-size: 13px;
+}
+
+.extras,
+.extrasWide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+}
+.extrasTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.extrasWide .extrasTitle {
+  font-size: 20px;
 }
