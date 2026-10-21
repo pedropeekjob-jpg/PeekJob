@@ -8,6 +8,7 @@ import { publishedReview, reviewsCountText, totalAfterPublishing, unreadAfterPub
 import { DoneRing, NotesToggle, ShareMore, SupportCard, VerifyInvite } from '../features/review/DoneParts';
 import styles from '../features/review/Done.module.css';
 import { tr } from '../i18n';
+import { detectRedFlags } from '../lib/moderation';
 import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { useToggle } from '../lib/useToggle';
@@ -56,7 +57,7 @@ export default function AvaliarFeito() {
   const name = org?.name ?? tr('A organização', 'The organisation');
   const reviewsN = reviewsCountText(totalAfterPublishing(org, apiMode));
   const orgLink = org ? `/org/${org.id}` : '/';
-  const support = review.flagged && <SupportCard signedIn={!!user} unread={unreadAfterPublishing(messages)} />;
+  const support = review.flagged && <SupportCard signedIn={!!user} unread={unreadAfterPublishing(messages)} kinds={detectRedFlags(review.text, review.tags).kinds} />;
   const toggle = <NotesToggle open={open} onToggle={toggleOpen} desktop={desktop} />;
   const verify = <VerifyInvite orgId={review.orgId} verified={!!review.verified} state={linkState} />;
   const more = <ShareMore orgId={review.orgId} state={linkState} />;
@@ -72,7 +73,7 @@ export default function AvaliarFeito() {
               <div className={`row wrap ${styles.heroDesktop}`}>
                 <DoneRing avg={review.avg} desktop />
                 <div className={styles.heroDesktopText}>
-                  <h1 className={styles.titleDesktop}>{tr('Publicado. Obrigado.', 'Published. Thank you.')}</h1>
+                  <h1 className={styles.titleDesktop}>{tr('Já está. Obrigado por partilhares!', 'Done. Thanks for sharing!')}</h1>
                   <p className={`lead ${styles.lead}`}>{tr(<>Ninguém sabe que foste tu. {name} passa a ter {reviewsN}.</>, <>No one knows it was you. {name} now has {reviewsN}.</>)}</p>
                 </div>
               </div>
@@ -102,7 +103,7 @@ export default function AvaliarFeito() {
         <FlowHead icon="close" label={tr('Fechar', 'Close')} onClick={close} right={<MiniSteps current={3} done />} />
         <div className={styles.hero}>
           <DoneRing avg={review.avg} desktop={false} />
-          <h1 className={styles.heroTitle}>{tr('Publicado. Obrigado.', 'Published. Thank you.')}</h1>
+          <h1 className={styles.heroTitle}>{tr('Já está. Obrigado por partilhares!', 'Done. Thanks for sharing!')}</h1>
           <div className={styles.heroText}>{tr(<>{name} passa a ter {reviewsN}.</>, <>{name} now has {reviewsN}.</>)}</div>
         </div>
 

@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Icon } from './Icon';
+import { RESPONSIBILITY } from '../data/content';
 import { tr } from '../i18n';
 import sheetStyles from './Sheet.module.css';
 import styles from './UI.module.css';
@@ -197,5 +198,15 @@ export function MoreToggle({ open, onToggle, label, openLabel, controls }: { ope
     <button type="button" className={`link ${styles.moreToggle}`} aria-expanded={open} aria-controls={controls} onClick={onToggle}>
       {open ? openLabel : label}
     </button>
+  );
+}
+
+/** Aviso de responsabilidade: a PeekJob não trata irregularidades, só mostra quem pode ajudar */
+export function ResponsibilityNote({ className = '' }: { className?: string }) {
+  return (
+    <p className={`row small ${styles.responsibility} ${className}`}>
+      <Icon name="help" size={16} className={styles.responsibilityIcon} />
+      <span>{RESPONSIBILITY()}</span>
+    </p>
   );
 }

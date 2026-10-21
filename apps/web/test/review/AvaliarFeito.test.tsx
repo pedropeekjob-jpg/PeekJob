@@ -22,7 +22,7 @@ describe.each(['mobile', 'desktop'] as const)('Avaliação publicada (%s)', (vie
   it('publicada: nota média, total da organização (mais esta) e ligações', async () => {
     seedStore({ lastPublished: 'novo-1', myReviews: [mine(false)] });
     show(viewport);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Publicado. Obrigado.' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Já está. Obrigado por partilhares!' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'A tua nota média: 3,5 de 5' })).toBeInTheDocument();
     expect(screen.getByText(/Padaria Ribeira passa a ter 24 avaliações\./)).toBeInTheDocument();
     if (desktop) expect(screen.getByText(/Ninguém sabe que foste tu\./)).toBeInTheDocument();

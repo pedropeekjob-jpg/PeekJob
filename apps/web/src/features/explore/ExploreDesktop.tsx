@@ -221,8 +221,8 @@ export function ExploreDesktop() {
     <div className={`container ${styles.container}`}>
       <section className={`row wrap ${styles.hero}`}>
         <div className={styles.heroText}>
-          <h1 className={`display ${styles.heroTitle}`}>{tr('Como é trabalhar lá dentro, contado por quem lá trabalha.', 'What it’s like to work there, told by the people who do.')}</h1>
-          <p className={`body ${styles.heroLead}`}>{tr('Avaliações anónimas de PME, associações e voluntariado.', 'Anonymous reviews of SMEs, associations and volunteering.')}</p>
+          <h1 className={`display ${styles.heroTitle}`}>{tr('Como é trabalhar lá dentro?', 'What’s it like to work there?')}</h1>
+          <p className={`body ${styles.heroLead}`}>{tr('Contado por quem lá trabalha, sem dar a cara. Empresas, associações e voluntariado.', 'Told by the people who work there, anonymously. Companies, associations and volunteering.')}</p>
           <HeroSearch />
         </div>
         <Stars />

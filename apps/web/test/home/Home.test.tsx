@@ -55,6 +55,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     if (desktop) expect(box).toHaveFocus();
     else expect(box).not.toHaveFocus();
     expect(within(panel).getByRole('link', { name: 'Escolher da lista' })).toHaveAttribute('href', '/avaliar');
+    expect(within(panel).getByText(/^A PeekJob não trata nem resolve irregularidades/)).toBeInTheDocument();
     await user.type(box, 'padaria{Enter}');
     expect(where()).toBe('/avaliar?q=padaria');
   });

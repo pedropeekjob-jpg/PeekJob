@@ -35,6 +35,11 @@ describe('cabeçalho e rodapé', () => {
     expect(links(screen.getByRole('navigation', { name: 'Principal' })).map(([t]) => t)).toEqual(['Explorar', 'Ranking', 'Sobre']);
   });
 
+  it('rodapé: aviso de que a PeekJob não trata irregularidades', () => {
+    renderScreen(<SiteFooter />, { viewport: 'desktop' });
+    expect(screen.getByText(/^A PeekJob não trata nem resolve irregularidades\. Se algo puder ser ilegal/)).toBeInTheDocument();
+  });
+
   it('o Contacto passa para o rodapé', () => {
     renderScreen(<SiteFooter />, { viewport: 'desktop' });
     expect(within(screen.getByRole('navigation', { name: 'Rodapé' })).getByRole('link', { name: 'Contacto' })).toHaveAttribute('href', '/contacto');

@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode; resetKey: st
       <main className={`page ${styles.page}`}>
         <section role="alert" className={`stack fade-up ${styles.box}`}>
           <p className="label">{tr('Erro', 'Error')}</p>
-          <h1 className="h1">{tr('Algo correu mal neste ecrã', 'Something went wrong on this screen')}</h1>
+          <h1 className="h1">{tr('Ups, algo correu mal neste ecrã', 'Oops, something went wrong on this screen')}</h1>
           <p className="lead">
             {tr('Já fomos avisados. Tenta outra vez; o que escreveste no rascunho continua guardado.', 'We’ve been notified. Please try again; your draft is still saved.')}
           </p>

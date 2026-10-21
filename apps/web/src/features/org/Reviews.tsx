@@ -192,10 +192,10 @@ export function ReviewsSection({ org, desktop }: { org: Org; desktop: boolean })
     return (
       <Empty
         title={tr('Ainda sem avaliações.', 'No reviews yet.')}
-        body={tr('Se trabalhas ou trabalhaste aqui, a tua avaliação ajuda quem procura. É anónima.', 'If you work or worked here, your review helps people who are looking. It’s anonymous.')}
+        body={tr('Trabalhas ou trabalhaste aqui? Conta como é: ajudas quem vem a seguir, e é anónimo.', 'If you work or worked here, your review helps people who are looking. It’s anonymous.')}
         action={
           <button type="button" className={`btn btn-primary ${styles.firstReview}`} onClick={startReview}>
-            {tr('Ser a primeira pessoa a avaliar', 'Be the first to review')}
+            {tr('Sê a primeira pessoa a avaliar', 'Be the first to review')}
           </button>
         }
       />

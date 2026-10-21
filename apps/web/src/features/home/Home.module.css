@@ -448,6 +448,10 @@
   box-shadow: var(--active-ring);
 }
 /* .link global é verde-água: no fundo verde-água escuro fica branco e sublinhado */
+.note {
+  max-width: 480px;
+  color: #e6eef0;
+}
 .all {
   color: #fff;
   text-decoration: underline;

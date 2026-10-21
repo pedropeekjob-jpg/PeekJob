@@ -5,6 +5,7 @@ import { useOrg } from '../api/orgs';
 import { Ring } from '../components/Data';
 import { Icon } from '../components/Icon';
 import { Shell } from '../components/Layout';
+import { ResponsibilityNote } from '../components/UI';
 import { RewriteHelper } from '../components/RewriteHelper';
 import type { CriterionKey } from '../data/criteria';
 import type { Org } from '../data/orgs';
@@ -83,6 +84,7 @@ function MobileNotas({ org, locationLabel, review }: ViewProps) {
         </div>
 
         <ReviewTextMobile review={review} />
+        <ResponsibilityNote />
 
         <div className={`sticky-cta stack ${styles.cta}`}>
           <PublishErrorBox error={review.error} onUseSuggestion={review.useText} />
@@ -122,7 +124,7 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
           <div className={styles.main}>
             <div className={styles.intro}>
               <h1 className={styles.desktopTitle}>{tr('Como é trabalhar lá?', 'What’s it like to work there?')}</h1>
-              <p className={`lead ${styles.lead}`}>{tr('De 1 a 5. Deixa em branco o que não sabes.', 'From 1 to 5. Leave blank what you don’t know.')}</p>
+              <p className={`lead ${styles.lead}`}>{tr('De 1 a 5. Se não sabes, deixa em branco, não faz mal.', 'From 1 to 5. Not sure? Leave it blank, that’s fine.')}</p>
             </div>
 
             <section aria-label={tr('Notas por critério', 'Scores by criterion')} className={styles.scores}>
@@ -190,6 +192,7 @@ function DesktopNotas({ org, locationLabel, verified, review }: ViewProps) {
               {insult ? tr('Corrige a frase para publicar', 'Fix the sentence to publish') : done ? tr('Publicar avaliação', 'Publish review') : tr('Dá pelo menos uma nota', 'Give at least one score')}
             </button>
             <LockLine>{tr('Publicada sem o teu nome.', 'Published without your name.')}</LockLine>
+            <ResponsibilityNote />
           </aside>
         </div>
       </div>

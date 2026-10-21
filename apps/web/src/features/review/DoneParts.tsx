@@ -3,6 +3,7 @@ import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { fmt } from '../../lib/format';
+import { supportHref } from '../support/support';
 import { privateMessagesText } from './done';
 import styles from './Done.module.css';
 
@@ -22,8 +23,8 @@ export function DoneRing({ avg, desktop }: { avg: number; desktop: boolean }) {
   );
 }
 
-/** Relato grave: com sessão, a mensagem privada de apoio; sem sessão, convite para entrar e ajuda já */
-export function SupportCard({ signedIn, unread }: { signedIn: boolean; unread: number }) {
+/** Relato grave: com sessão, a mensagem privada de apoio; sem sessão, convite para entrar e ajuda já (com os conselhos do que relatou) */
+export function SupportCard({ signedIn, unread, kinds = [] }: { signedIn: boolean; unread: number; kinds?: readonly string[] }) {
   if (signedIn) {
     return (
       <Link to="/apoio" className={`plain row lift ${styles.messages}`}>
@@ -50,7 +51,7 @@ export function SupportCard({ signedIn, unread }: { signedIn: boolean; unread: n
         <Link to="/entrar" className={`btn btn-purple btn-sm ${styles.signInButton}`}>
           {tr('Entrar', 'Sign in')}
         </Link>
-        <Link to="/apoio" className={`link ${styles.helpLink}`}>
+        <Link to={supportHref(kinds)} className={`link ${styles.helpLink}`}>
           {tr('Ver onde pedir ajuda agora', 'See where to get help now')} <Icon name="next" size={16} />
         </Link>
       </div>

@@ -150,7 +150,7 @@ describe('Pesquisa: só no computador', () => {
   it('lateral: as prioridades por ordem, ou "pela nota" sem prioridades', () => {
     seedStore({ prefs: ['salario', 'lideranca'] });
     const { unmount } = show('desktop');
-    expect(screen.getByRole('heading', { level: 1, name: 'Procurar uma organização' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Pesquisar empresas' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Ordenado pelo que valorizas' })).toBeInTheDocument();
     const aside = screen.getByRole('complementary');
     expect(aside.textContent).toContain(`1${CRITERION.salario.label}2${CRITERION.lideranca.label}`);

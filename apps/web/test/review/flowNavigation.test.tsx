@@ -137,7 +137,7 @@ describe('avaliar: publicar', () => {
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
     await user.click((await screen.findAllByRole('radio', { name: 'Ambiente, 4 de 5' }))[0]);
     await user.click(screen.getByRole('button', { name: /Publicar avaliação/ }));
-    await screen.findByRole('heading', { level: 1, name: 'Publicado. Obrigado.' });
+    await screen.findByRole('heading', { level: 1, name: 'Já está. Obrigado por partilhares!' });
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
     await at(/^org/);
     await user.click(screen.getByRole('button', { name: 'voltar do browser' }));
@@ -149,7 +149,7 @@ describe('avaliar: publicar', () => {
 async function publish(user: ReturnType<typeof userEvent.setup>) {
   await user.click((await screen.findAllByRole('radio', { name: 'Ambiente, 4 de 5' }))[0]);
   await user.click(screen.getByRole('button', { name: /Publicar avaliação/ }));
-  await screen.findByRole('heading', { level: 1, name: 'Publicado. Obrigado.' });
+  await screen.findByRole('heading', { level: 1, name: 'Já está. Obrigado por partilhares!' });
 }
 const back = (user: ReturnType<typeof userEvent.setup>) => user.click(screen.getByRole('button', { name: 'voltar do browser' }));
 
@@ -201,7 +201,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: todos os caminhos de sa�
     await publish(user);
     await user.click(screen.getByRole('link', { name: 'Confirmar agora' }));
     await user.click(await screen.findAllByRole('button', { name: 'Agora não' }).then((b) => b[0]));
-    await screen.findByRole('heading', { level: 1, name: 'Publicado. Obrigado.' });
+    await screen.findByRole('heading', { level: 1, name: 'Já está. Obrigado por partilhares!' });
     await user.click(screen.getAllByRole('link', { name: 'Ver na página da organização' })[0]);
     await at(/^org/);
     await back(user);

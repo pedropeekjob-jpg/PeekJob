@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DISCLAIMER, foundText, introText, noticeTitle, splitMessages, tips } from '../../src/features/support/support';
+import { DISCLAIMER, foundText, introText, noticeTitle, splitMessages, supportHref, supportKinds, tips } from '../../src/features/support/support';
 import type { SupportMessage } from '../../src/lib/store';
 
 const msg = (over: Partial<SupportMessage> = {}): SupportMessage => ({
@@ -53,6 +53,26 @@ describe('apoio: regras e textos', () => {
   it('conselhos: mais um no computador; aviso legal', () => {
     expect(tips(true)).toHaveLength(tips(false).length + 1);
     expect(tips(true).at(-1)).toMatch(/^Confirma horários/);
-    expect(DISCLAIMER()).toMatch(/não é uma entidade de denúncia\.$/);
+    expect(DISCLAIMER()).toMatch(/Só te mostramos quem pode ajudar\.$/);
+  });
+
+  it('conselhos para o que foi relatado primeiro, sem repetir, e o do sindicato no fim', () => {
+    const salary = tips(false, ['incumprimento salarial']);
+    expect(salary[0]).toMatch(/^Guarda os recibos e os extratos/);
+    expect(salary.at(-1)).toBe('Fala com o sindicato do teu setor, se existir.');
+    const two = tips(false, ['assédio moral', 'discriminação']);
+    expect(two).toHaveLength(7);
+    expect(new Set(two).size).toBe(two.length);
+    // tema desconhecido: os conselhos gerais
+    expect(tips(false, ['outra coisa'])).toEqual(tips(false));
+  });
+
+  it('temas: os da mensagem, ou os do endereço; ligação com os temas', () => {
+    expect(supportKinds(msg({ kinds: ['assédio sexual'] }), 'discriminação')).toEqual(['assédio sexual']);
+    expect(supportKinds(undefined, 'incumprimento salarial, assédio moral')).toEqual(['incumprimento salarial', 'assédio moral']);
+    expect(supportKinds(undefined, null)).toEqual([]);
+    expect(supportHref([])).toBe('/apoio');
+    expect(supportHref(['assédio moral'])).toBe('/apoio?temas=ass%C3%A9dio+moral');
+    expect(introText(undefined, false, ['assédio moral'])).toMatch(/^O que descreveste pode configurar assédio moral/);
   });
 });

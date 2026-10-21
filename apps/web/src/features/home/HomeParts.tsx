@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 're
 import { Link, useNavigate } from 'react-router';
 import { LogoAnimated } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
+import { ResponsibilityNote } from '../../components/UI';
 import { tr } from '../../i18n';
 import { reviewHref, searchHref, type Zone } from './home';
 import styles from './Home.module.css';
@@ -10,7 +11,7 @@ import styles from './Home.module.css';
 export const ZONE_TEXT = {
   peek: {
     label: () => tr('Espreitar', 'Peek inside'),
-    sub: () => tr('Vê como é trabalhar lá dentro.', 'See what it’s like to work there.'),
+    sub: () => tr('Espreita como é trabalhar lá dentro, antes de dizeres que sim.', 'See what it’s like inside before you say yes.'),
     hint: () => tr('Espreitar organizações', 'Peek at organisations'),
   },
   job: {
@@ -142,7 +143,7 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
       <h2 id="zona-peek-t" className={styles.title}>
         {tr('Como é trabalhar lá dentro?', 'What’s it really like to work there?')}
       </h2>
-      <p className={styles.sub}>{tr('Procura uma organização e vê o que dizem as pessoas que lá trabalham.', 'Find an organisation and see what the people who work there say.')}</p>
+      <p className={styles.sub}>{tr('Procura uma empresa e descobre o que dizem as pessoas que lá trabalham.', 'Find a company and hear from the people who work there.')}</p>
       <SearchForm
         id="home-q"
         label={tr('Pesquisar organização', 'Search organisations')}
@@ -185,6 +186,7 @@ export function JobPanel({ autoFocus, onClose }: { autoFocus: boolean; onClose: 
       <Link to="/avaliar" className={`link ${styles.all}`} data-ev="cta_click" data-ev-cta="avaliar_lista" data-ev-area="home">
         {tr('Escolher da lista', 'Choose from the list')}
       </Link>
+      <ResponsibilityNote className={styles.note} />
     </section>
   );
 }

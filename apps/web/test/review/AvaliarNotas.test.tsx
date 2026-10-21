@@ -63,6 +63,7 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     expect(screen.getByText('Isto pode ser uma ilegalidade')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Pedir ajuda' })).not.toBeInTheDocument();
     expect(screen.getByText(/Depois de publicares, mostramos-te onde pedir ajuda/)).toBeInTheDocument();
+    expect(screen.getByText(/^A PeekJob não trata nem resolve irregularidades/)).toBeInTheDocument();
   });
 
   it('clicar na nota escolhida tira-a', async () => {

@@ -38,7 +38,7 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     expect(await screen.findByRole('heading', { level: 1, name: 'Padaria Ribeira' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /^Nota 4,4 de 5, com 23 avaliações$/ })).toBeInTheDocument();
     expect(screen.getAllByText(/para ti/).length).toBeGreaterThan(0);
-    expect(document.title).toMatch(/^Padaria Ribeira · Avaliações de quem lá trabalha · PeekJob$/);
+    expect(document.title).toMatch(/^Padaria Ribeira · Avaliações · PeekJob$/);
   });
 
   it('guardar e avaliar', async () => {
@@ -155,7 +155,7 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     expect(screen.getByRole('img', { name: 'Ainda sem nota' })).toBeInTheDocument();
     expect(screen.getByText('Ainda sem avaliações.')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: /As tuas prioridades|O que mais te importa/ })).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Ser a primeira pessoa a avaliar' }));
+    await user.click(screen.getByRole('button', { name: 'Sê a primeira pessoa a avaliar' }));
     expect(screen.getByTestId('probe')).toHaveTextContent(/^nova-horta-da-se\|/);
   });
 

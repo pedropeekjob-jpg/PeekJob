@@ -93,3 +93,16 @@
   font-weight: 600;
   font-size: 17px;
 }
+
+/* Aviso de responsabilidade (ícone + uma frase) */
+.responsibility {
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--body);
+  line-height: 1.45;
+}
+.responsibilityIcon {
+  flex: none;
+  margin-top: 1px;
+}

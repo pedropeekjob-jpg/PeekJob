@@ -9,13 +9,15 @@ export interface SupportViewProps {
   intro: string;
   found: string | null;
   notices: SupportMessage[];
+  /** O que foi relatado: escolhe os conselhos */
+  kinds: string[];
   onBack: () => void;
 }
 
 const TITLE = () => tr('Não tens de passar por isto sozinho/a.', 'You don’t have to go through this alone.');
 
 /** Computador: cabeçalho roxo, cartões das entidades, 112, avisos e conselhos */
-export function SupportDesktop({ intro, found, notices, onBack }: SupportViewProps) {
+export function SupportDesktop({ intro, found, notices, kinds, onBack }: SupportViewProps) {
   return (
     <>
       <section aria-labelledby="apoio-titulo" className={styles.hero}>
@@ -56,7 +58,7 @@ export function SupportDesktop({ intro, found, notices, onBack }: SupportViewPro
           </a>
           <section className={styles.side}>
             <ModerationNotices notices={notices} />
-            <Tips desktop />
+            <Tips desktop kinds={kinds} />
           </section>
         </div>
 
@@ -70,7 +72,7 @@ export function SupportDesktop({ intro, found, notices, onBack }: SupportViewPro
 }
 
 /** Telemóvel: cabeçalho roxo e lista de entidades */
-export function SupportMobile({ intro, found, notices, onBack }: SupportViewProps) {
+export function SupportMobile({ intro, found, notices, kinds, onBack }: SupportViewProps) {
   return (
     <>
       <section aria-labelledby="apoio-titulo" className={styles.header}>
@@ -112,7 +114,7 @@ export function SupportMobile({ intro, found, notices, onBack }: SupportViewProp
 
         <ModerationNotices notices={notices} />
         <section className={styles.tipsSection}>
-          <Tips desktop={false} />
+          <Tips desktop={false} kinds={kinds} />
         </section>
 
         <Disclaimer className={styles.disclaimerMobile} />

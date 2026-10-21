@@ -50,6 +50,45 @@ export const supportTips = () =>
     ['Keep payslips, your contract and messages.', 'Note dates, times and who was there.', 'Talk to the union for your sector, if there is one.'],
   );
 
+/**
+ * Conselhos para cada tipo de problema assinalado (as categorias da moderação, em português: ver detectRedFlags).
+ * O ecrã de apoio mostra os do que a pessoa relatou, antes dos gerais (21/10).
+ */
+const KIND_TIPS: Record<string, () => string[]> = {
+  'incumprimento salarial': () =>
+    tr(
+      ['Guarda os recibos e os extratos que mostram quando o salário entrou.', 'Anota as horas extra que fizeste e as datas em que deviam ter sido pagas.', 'Pede o pagamento por escrito (email ou mensagem): fica registado.'],
+      ['Keep your payslips and the bank statements that show when your pay arrived.', 'Write down the overtime you did and when it should have been paid.', 'Ask for the money in writing (email or message): that leaves a record.'],
+    ),
+  'assédio sexual': () =>
+    tr(
+      ['Escreve o que aconteceu logo que possas: data, hora, sítio e as palavras usadas.', 'Guarda mensagens e fotos e lembra-te de quem viu ou ouviu.', 'Não tens de resolver isto sozinho/a: a CITE e a APAV ouvem-te sem custos.'],
+      ['Write down what happened as soon as you can: date, time, place and the words used.', 'Keep messages and photos and remember who saw or heard it.', 'You don’t have to sort this out alone: CITE and APAV will listen, free of charge.'],
+    ),
+  'assédio moral': () =>
+    tr(
+      ['Regista cada situação: o que foi dito, quando e quem estava.', 'Guarda emails e mensagens, mesmo que custe lê-los.', 'Se te está a afetar a saúde, vai ao médico: esse registo também conta.'],
+      ['Keep a note of each incident: what was said, when and who was there.', 'Keep emails and messages, even if they are hard to read.', 'If it is affecting your health, see a doctor: that record counts too.'],
+    ),
+  'trabalho não declarado': () =>
+    tr(
+      ['Guarda provas de que trabalhas lá: horários, mensagens, pagamentos.', 'Na Segurança Social Direta vês se estão a fazer os teus descontos.', 'A ACT pode intervir mesmo sem contrato escrito.'],
+      ['Keep proof that you work there: rotas, messages, payments.', 'Segurança Social Direta shows whether your contributions are being paid.', 'ACT can step in even without a written contract.'],
+    ),
+  discriminação: () =>
+    tr(
+      ['Anota o que aconteceu e como foram tratados colegas na mesma situação.', 'Guarda anúncios, emails ou mensagens que mostrem a diferença.', 'A CITE trata casos de discriminação no trabalho, sem custos.'],
+      ['Write down what happened and how colleagues in the same situation were treated.', 'Keep job ads, emails or messages that show the difference.', 'CITE handles discrimination at work, free of charge.'],
+    ),
+};
+
+/** Conselhos para o que foi assinalado (sem repetir), seguidos dos gerais que ainda não estejam lá */
+export function tipsFor(kinds: readonly string[]): string[] {
+  const out: string[] = [];
+  for (const k of kinds) for (const t of KIND_TIPS[k]?.() ?? []) if (!out.includes(t)) out.push(t);
+  return out.length ? [...out, supportTips()[2]] : supportTips();
+}
+
 export const REVIEW_TAGS = [
   'Ambiente seguro',
   'Horários cumpridos',
@@ -96,3 +135,13 @@ export const PLANS = [
     get points() { return tr(['Pulso semanal e tendências', 'Comparar com organizações parecidas', 'Página com fotos e ofertas de trabalho'], ['Weekly pulse and trends', 'Compare with similar organisations', 'Page with photos and job openings']); },
   },
 ];
+
+/**
+ * Aviso de responsabilidade (pedido de 21/10): a PeekJob não trata irregularidades; perante uma possível ilegalidade
+ * só indica quem pode ajudar. Aparece no rodapé, na página inicial, no início e durante a avaliação e no apoio.
+ */
+export const RESPONSIBILITY = () =>
+  tr(
+    'A PeekJob não trata nem resolve irregularidades. Se algo puder ser ilegal, só te mostramos os contactos de quem pode ajudar.',
+    'PeekJob doesn’t handle or resolve irregularities. If something may be illegal, we just show you who can help.',
+  );
