@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CreateReviewInput, EXTRA_PARAMS, extraKind, suggestedExtras } from '../src';
+import { CreateReviewInput, EXTRA_PARAMS, extraKind, extraOptions, suggestedExtras } from '../src';
 
 describe('parâmetros por tipo de trabalho', () => {
   it('sugere 3 conforme o setor, sem acentos nem maiúsculas a contar', () => {
@@ -8,6 +8,12 @@ describe('parâmetros por tipo de trabalho', () => {
     expect(suggestedExtras('LIMPEZA')).toEqual(['seguranca', 'pausas', 'esforco_fisico']);
     expect(suggestedExtras('Tecnologia')).toEqual(['remoto', 'equipamento', 'formacao_paga']);
     expect(suggestedExtras('Educação')).toEqual(['grupos_razoaveis', 'preparacao_paga', 'formacao_paga']);
+  });
+
+  it('quem vende à comissão (comerciais, imobiliárias, seguros): como se recebe, antes das lojas', () => {
+    expect(suggestedExtras('Mediação imobiliária')).toEqual(['comissoes', 'comissoes_claras', 'contrato_escrito']);
+    expect(suggestedExtras('Vendas e comercial')).toEqual(['comissoes', 'comissoes_claras', 'contrato_escrito']);
+    expect(suggestedExtras('Comércio')).toEqual(['seguranca', 'pausas', 'esforco_fisico']);
   });
 
   it('voluntariado e associações sem setor conhecido; e o geral', () => {
@@ -31,6 +37,16 @@ describe('avaliação com parâmetros e comentários', () => {
     expect(CreateReviewInput.safeParse({ ...base, extras: { gorjetas: 3 } }).success).toBe(false);
     expect(CreateReviewInput.safeParse({ ...base, extras: { folgas_escala: true } }).success).toBe(false);
     expect(CreateReviewInput.safeParse({ ...base, extras: { inventado: true } }).success).toBe(false);
+  });
+
+  it('comissões: uma das opções fixas', () => {
+    expect(extraKind('comissoes')).toBe('choice');
+    expect(extraOptions('comissoes')).toEqual(['so_ordenado', 'base_comissao', 'so_comissao']);
+    expect(extraOptions('gorjetas')).toEqual([]);
+    expect(CreateReviewInput.parse({ ...base, extras: { comissoes: 'so_comissao', comissoes_claras: 2 } }).extras).toEqual({ comissoes: 'so_comissao', comissoes_claras: 2 });
+    expect(CreateReviewInput.safeParse({ ...base, extras: { comissoes: 'metade' } }).success).toBe(false);
+    expect(CreateReviewInput.safeParse({ ...base, extras: { comissoes: true } }).success).toBe(false);
+    expect(CreateReviewInput.safeParse({ ...base, extras: { gorjetas: 'sim' } }).success).toBe(false);
   });
 
   it('comentários por critério ou parâmetro: curtos, e os vazios caem', () => {

@@ -30,6 +30,14 @@ describe('página da organização: parâmetros e comentários (21/10)', () => {
     expect(rows).toEqual(['Gorjetas para a equipa67% dizem que sim · 3 respostas', 'Folgas e escalas3,5 de 5 · 4 respostas']);
   });
 
+  it('comissões: a opção de cada avaliação e, no resumo, as escolhidas da mais à menos', () => {
+    render(<ReviewDetails r={{ scores: {}, extras: { comissoes: 'base_comissao' }, comments: {} }} />);
+    expect(screen.getByRole('term')).toHaveTextContent('Como te pagam · Base + comissão');
+    const org = { ...ORG_BY_ID['padaria-ribeira'], extras: [{ key: 'comissoes' as const, n: 3, choices: [{ value: 'so_ordenado', pct: 0 }, { value: 'base_comissao', pct: 33 }, { value: 'so_comissao', pct: 67 }] }] };
+    render(<ExtrasSummary org={org} />);
+    expect(screen.getByRole('listitem')).toHaveTextContent('Como te pagamSó comissão 67% · Base + comissão 33% · 3 respostas');
+  });
+
   it('sem respostas suficientes não há resumo', () => {
     const { container } = render(<ExtrasSummary org={{ ...ORG_BY_ID['padaria-ribeira'], extras: [] }} />);
     expect(container).toBeEmptyDOMElement();
