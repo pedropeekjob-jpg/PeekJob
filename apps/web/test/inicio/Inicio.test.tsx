@@ -82,7 +82,7 @@ describe('Início no computador', () => {
   it('pesquisar leva à pesquisa com o texto', async () => {
     seedStore({ onboarded: true });
     const { user } = show('desktop');
-    await user.type(await screen.findByRole('searchbox', { name: 'Pesquisar organização' }), ' padaria ');
+    await user.type(await screen.findByRole('combobox', { name: 'Pesquisar organização' }), ' padaria ');
     await user.click(screen.getByRole('button', { name: 'Procurar' }));
     expect(screen.getByTestId('where')).toHaveTextContent('/pesquisa?q=padaria');
   });

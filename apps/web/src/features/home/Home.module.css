@@ -391,6 +391,9 @@
 
 /* Pesquisa a sério */
 .search {
+  /* acima da ligação e do aviso que vêm a seguir: a lista de sugestões fica por cima deles */
+  position: relative;
+  z-index: 5;
   margin-top: 10px;
   width: min(100%, 480px);
   height: 60px;

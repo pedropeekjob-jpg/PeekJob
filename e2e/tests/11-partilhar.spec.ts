@@ -4,7 +4,7 @@ import { expect, login, test, uniqueEmail } from '../support/fixtures';
 /** Entrevistas e salários: partilhar a partir da página da organização e ver o resultado agregado */
 async function openOrg(page: Page) {
   await page.goto('/pesquisa');
-  await page.getByRole('searchbox').first().fill('oficina sete');
+  await page.getByRole('combobox').first().fill('oficina sete');
   await page.getByText('Oficina Sete', { exact: true }).first().click();
   await page.waitForURL(/\/org\//);
   return page.url();

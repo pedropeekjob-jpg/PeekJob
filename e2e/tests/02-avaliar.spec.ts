@@ -67,7 +67,7 @@ test.describe('Avaliar onde trabalho', () => {
   test('da página inicial: escrever onde trabalho, escolher e dar notas (3 cliques)', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /^Avalia(?!r)/ }).click();
-    await page.getByRole('searchbox', { name: 'Onde trabalhas?' }).fill('oficina sete');
+    await page.getByRole('combobox', { name: 'Onde trabalhas?' }).fill('oficina sete');
     await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.keyboard.press('Enter')]);
     await expect(page).toHaveURL(/\/avaliar\?q=oficina/);
     await page.getByText('Oficina Sete', { exact: true }).first().click();
@@ -78,7 +78,7 @@ test.describe('Avaliar onde trabalho', () => {
   test('lista → organização → avaliar → fechar → voltar: volta à lista (não à avaliação)', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'o "fechar" das notas é do telemóvel');
     await page.goto('/pesquisa');
-    await page.getByRole('searchbox').first().fill('oficina sete');
+    await page.getByRole('combobox').first().fill('oficina sete');
     await page.getByText('Oficina Sete', { exact: true }).first().click();
     await page.waitForURL(/\/org\//);
     const orgUrl = page.url();
@@ -139,7 +139,7 @@ test.describe('Avaliar onde trabalho', () => {
 /** Lista → organização (como quem navega), devolve o endereço da organização */
 async function openOrgFromList(page: Page) {
   await page.goto('/pesquisa');
-  await page.getByRole('searchbox').first().fill('oficina sete');
+  await page.getByRole('combobox').first().fill('oficina sete');
   await page.getByText('Oficina Sete', { exact: true }).first().click();
   await page.waitForURL(/\/org\//);
   return page.url();

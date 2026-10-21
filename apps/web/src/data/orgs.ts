@@ -92,6 +92,8 @@ export interface Org {
   salaries: SalaryBand[];
   paidOnTimePct?: number;
   claimed: boolean;
+  /** a profissão que coincidiu com a pesquisa (pesquisa por profissão) */
+  matchedRole?: string;
   /** resumo dos parâmetros do tipo de trabalho (só os com 3 ou mais respostas; modo API) */
   extras?: ExtraSummary[];
 }

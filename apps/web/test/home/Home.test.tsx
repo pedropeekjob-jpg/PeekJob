@@ -22,7 +22,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('PeekJob');
     expect(peekDoor()).toHaveAttribute('aria-expanded', 'false');
     expect(jobDoor()).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Avaliar onde trabalho' })).not.toBeInTheDocument();
   });
 
@@ -31,7 +31,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     await user.click(peekDoor());
     expect(where()).toBe('/?lado=espreitar');
     const panel = screen.getByRole('region', { name: 'Como é trabalhar lá dentro?' });
-    const box = within(panel).getByRole('searchbox', { name: 'Pesquisar organização' });
+    const box = within(panel).getByRole('combobox', { name: 'Pesquisar organização' });
     // no computador o campo fica pronto a escrever; no telemóvel não abre o teclado sozinho
     if (desktop) expect(box).toHaveFocus();
     else expect(box).not.toHaveFocus();
@@ -51,7 +51,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     await user.click(jobDoor());
     expect(where()).toBe('/?lado=avaliar');
     const panel = screen.getByRole('region', { name: 'Conta como é. Sem dar a cara.' });
-    const box = within(panel).getByRole('searchbox', { name: 'Onde trabalhas?' });
+    const box = within(panel).getByRole('combobox', { name: 'Onde trabalhas?' });
     if (desktop) expect(box).toHaveFocus();
     else expect(box).not.toHaveFocus();
     expect(within(panel).getByRole('link', { name: 'Escolher da lista' })).toHaveAttribute('href', '/avaliar');
@@ -82,7 +82,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
     // as duas dicas estão no HTML; o CSS mostra a do rato ou a do toque
     expect(within(panel).getByText('Clica fora da pesquisa para voltar')).toBeInTheDocument();
     expect(within(panel).getByText('Toca fora da pesquisa para voltar')).toBeInTheDocument();
-    await user.click(within(panel).getByRole('searchbox', { name: 'Pesquisar organização' }));
+    await user.click(within(panel).getByRole('combobox', { name: 'Pesquisar organização' }));
     await user.click(within(panel).getByRole('search'));
     expect(screen.getByRole('main')).toHaveAttribute('data-zone', 'peek');
     await user.click(within(panel).getByRole('heading', { level: 2 }));
@@ -104,7 +104,7 @@ describe.each(['mobile', 'desktop'] as const)('Página inicial (%s)', (viewport)
 
   it('ligação direta para uma zona abre-a logo', () => {
     show(viewport, '/?lado=avaliar');
-    expect(screen.getByRole('searchbox', { name: 'Onde trabalhas?' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Onde trabalhas?' })).toBeInTheDocument();
     show(viewport, '/?lado=outra-coisa');
     expect(screen.getAllByRole('button', { name: /^Espreitar/ }).length).toBeGreaterThan(0);
   });
@@ -116,9 +116,9 @@ describe('Página inicial (computador): começar a escrever', () => {
     const { user } = show('desktop');
     await user.keyboard('p');
     expect(where()).toBe('/?lado=espreitar');
-    expect(screen.getByRole('searchbox')).toHaveValue('p');
+    expect(screen.getByRole('combobox')).toHaveValue('p');
     await user.keyboard('a');
-    expect(screen.getByRole('searchbox')).toHaveValue('pa');
+    expect(screen.getByRole('combobox')).toHaveValue('pa');
   });
 
   it('atalhos com Ctrl/Cmd não abrem nada', async () => {

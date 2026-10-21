@@ -67,3 +67,9 @@ export const SearchOrganizationsQuery = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 export type SearchOrganizationsQuery = z.infer<typeof SearchOrganizationsQuery>;
+
+/** Sugestões enquanto se escreve (organizações, profissões, setores e sítios) */
+export const SuggestQuery = z.object({
+  q: z.string().trim().min(2).max(80),
+});
+export type SuggestQuery = z.infer<typeof SuggestQuery>;

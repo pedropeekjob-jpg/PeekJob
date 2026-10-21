@@ -13,7 +13,7 @@ import { withShared } from '../features/share/share';
  * - Modo API (VITE_API_URL): listas e detalhes vêm da API; os tipos mantêm-se.
  */
 
-const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+export const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 function fromAdded(a: AddedOrg): Org {
   return {
@@ -77,11 +77,23 @@ export function useRankedOrgs() {
   );
 }
 
-export function searchOrgs(orgs: Org[], q: string, type: string | 'Todas' = 'Todas') {
+/** As profissões de quem partilhou salário ou entrevista (pesquisa por profissão, 21/10) */
+export const orgRoles = (o: Org) => [...new Set([...o.salaries.map((s) => s.role), ...o.interviews.map((i) => i.role)])];
+
+/** A profissão da organização que coincide com o termo (3+ letras), se houver */
+export function roleMatch(o: Org, nq: string): string | undefined {
+  if (nq.length < 3) return undefined;
+  return orgRoles(o).find((r) => norm(r).includes(nq));
+}
+
+export function searchOrgs(orgs: Org[], q: string, type: string | 'Todas' = 'Todas'): Org[] {
   const nq = norm(q.trim());
-  return orgs.filter(
-    (o) => (!nq || norm(`${o.name} ${o.type} ${o.sector} ${o.city}`).includes(nq)) && (type === 'Todas' || o.type === type),
-  );
+  return orgs.flatMap((o) => {
+    if (type !== 'Todas' && o.type !== type) return [];
+    if (!nq || norm(`${o.name} ${o.type} ${o.sector} ${o.city}`).includes(nq)) return [o];
+    const role = roleMatch(o, nq);
+    return role ? [{ ...o, matchedRole: role }] : [];
+  });
 }
 
 /**
@@ -107,7 +119,7 @@ export function useSearch(q: string, opts: { type?: string; includePending?: boo
       try {
         const r = await api<{ items: ApiOrg[] }>(`/orgs/search?${params}`);
         const items = r.items.map((o) => toOrg(o));
-        for (const o of items) remember(o);
+        for (const { matchedRole: _r, ...o } of items) remember(o);
         if (alive) setRemoteRes({ key, items });
       } catch {
         if (alive) setRemoteRes({ key, items: [] });
@@ -123,6 +135,6 @@ export function useSearch(q: string, opts: { type?: string; includePending?: boo
     if (!apiMode || !nq) return { items: searchOrgs(orgs, nq, type ?? 'Todas'), loading: false };
     const fresh = remoteRes?.key === key;
     const byId = new Map(orgs.map((o) => [o.id, o]));
-    return { items: (fresh ? remoteRes!.items : []).map((o) => byId.get(o.id) ?? o), loading: !fresh };
+    return { items: (fresh ? remoteRes!.items : []).map((o) => ({ ...(byId.get(o.id) ?? o), matchedRole: o.matchedRole })), loading: !fresh };
   }, [orgs, nq, type, key, remoteRes]);
 }

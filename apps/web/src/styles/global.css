@@ -560,6 +560,7 @@ a.plain {
   border-color: var(--ink);
 }
 .search {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -917,6 +918,7 @@ main h1:focus,
 .search:focus-within {
   /* campo ativo: borda verde-água escura e halo claro (o mesmo realce do hover dos botões) */
   outline: none;
+  z-index: 20; /* a lista de sugestões fica por cima do que vem a seguir */
   border-color: var(--action);
   box-shadow: var(--active-ring);
 }

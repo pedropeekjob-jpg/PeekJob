@@ -23,6 +23,8 @@ export interface ApiOrg {
   claimed?: boolean;
   /** só na página da organização */
   extras?: ExtraSummary[];
+  /** só na pesquisa: a profissão que coincidiu */
+  matchedRole?: string;
 }
 export interface ApiReview {
   id: string;
@@ -134,6 +136,7 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = [], extras: OrgExtras = 
     paidOnTimePct: extras.salaries?.paidOnTimePct ?? undefined,
     claimed: !!o.claimed,
     extras: o.extras ?? [],
+    matchedRole: o.matchedRole,
   };
 }
 

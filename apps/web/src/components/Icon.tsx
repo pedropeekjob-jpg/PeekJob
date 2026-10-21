@@ -42,6 +42,26 @@ const P: Record<string, JSX.Element> = {
   ),
   mail: <path d="M4 6h16v12H4zM4 7l8 6 8-6" />,
   check: <path d="M20 6L9 17l-5-5" />,
+  building: (
+    <>
+      <path d="M5 21V5a1 1 0 011-1h8a1 1 0 011 1v16M15 10h3a1 1 0 011 1v10M3 21h18" />
+      <path d="M8.5 8h3M8.5 12h3M8.5 16h3" />
+    </>
+  ),
+  briefcase: (
+    <>
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2M3 13h18" />
+    </>
+  ),
+  grid: (
+    <>
+      <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+    </>
+  ),
   pin: (
     <>
       <path d="M12 21s-7-6.2-7-11.5A7 7 0 0119 9.5C19 14.8 12 21 12 21z" />

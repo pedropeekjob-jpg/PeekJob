@@ -12,7 +12,7 @@ export const PROFILE_SCENARIOS = [
     name: 'pesquisa: escrever "padaria porto"',
     path: '/pesquisa',
     run: async (p) => {
-      await p.getByRole('searchbox').first().pressSequentially('padaria porto', { delay: 40 });
+      await p.getByRole('combobox').first().pressSequentially('padaria porto', { delay: 40 });
       await p.waitForTimeout(1300); // espera da pesquisa
     },
   },

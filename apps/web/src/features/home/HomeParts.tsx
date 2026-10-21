@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 're
 import { Link, useNavigate } from 'react-router';
 import { LogoAnimated } from '../../components/Brand';
 import { Icon } from '../../components/Icon';
+import { useSuggest } from '../../components/Suggest';
+import { useSuggestions, type Suggestion, type SuggestKind } from '../search/suggest';
 import { ResponsibilityNote } from '../../components/UI';
 import { tr } from '../../i18n';
 import { reviewHref, searchHref, type Zone } from './home';
@@ -96,13 +98,18 @@ interface SearchFormProps {
   initial?: string;
   autoFocus: boolean;
   href: (q: string) => string;
+  /** para onde vai uma sugestão escolhida (organização ou termo) */
+  pickHref: (s: Suggestion) => string;
+  kinds?: SuggestKind[];
   cta: string;
 }
 
 /** Campo de pesquisa a sério: Enter (ou a seta) leva ao destino com o que se escreveu */
-function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFocus, href, cta }: SearchFormProps) {
+function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFocus, href, pickHref, kinds, cta }: SearchFormProps) {
   const nav = useNavigate();
   const [q, setQ] = useState(initial);
+  const items = useSuggestions(q, kinds);
+  const suggest = useSuggest({ id, query: q, items, onPick: (s) => nav(pickHref(s)) });
   const submit = (e: FormEvent) => {
     e.preventDefault();
     nav(href(q));
@@ -123,7 +130,9 @@ function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFoc
         enterKeyHint="search"
         // eslint-disable-next-line jsx-a11y/no-autofocus -- a pessoa acabou de escolher esta zona (só com teclado físico/rato)
         autoFocus={autoFocus}
+        {...suggest.inputProps}
       />
+      {suggest.list}
       <button type="submit" className={styles.go} aria-label={submitLabel}>
         {/* seta mais grossa (21/10): antes o traço fino quase desaparecia */}
         <Icon name="arrow" size={22} stroke={2.75} />
@@ -131,6 +140,12 @@ function SearchForm({ id, label, placeholder, submitLabel, initial = '', autoFoc
     </form>
   );
 }
+
+/** Espreitar: uma organização abre a página dela; um termo (profissão, setor, sítio) pesquisa-o */
+const peekPick = (s: Suggestion) => (s.kind === 'org' ? `/org/${s.id}` : searchHref(s.label));
+/** Avaliar: só organizações e sítios (a profissão não diz onde se trabalha); a organização vai direta às notas */
+const JOB_KINDS: SuggestKind[] = ['org', 'place'];
+const jobPick = (s: Suggestion) => (s.kind === 'org' ? `/avaliar?org=${encodeURIComponent(s.id)}` : reviewHref(s.label));
 
 /** Espreitar aberto: título, pesquisa a sério (Enter leva aos resultados) e ligação para ver todas */
 export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFocus: boolean; onClose: () => void }) {
@@ -152,6 +167,7 @@ export function PeekPanel({ typed, autoFocus, onClose }: { typed: string; autoFo
         initial={typed}
         autoFocus={autoFocus}
         href={searchHref}
+        pickHref={peekPick}
         cta="pesquisar"
       />
       {/* porta para o Explorar com o peso de um botão (14/10): era uma ligação pequena e passava despercebida */}
@@ -181,6 +197,8 @@ export function JobPanel({ autoFocus, onClose }: { autoFocus: boolean; onClose: 
         submitLabel={tr('Avaliar onde trabalho', 'Review where I work')}
         autoFocus={autoFocus}
         href={reviewHref}
+        pickHref={jobPick}
+        kinds={JOB_KINDS}
         cta="avaliar"
       />
       <Link to="/avaliar" className={`link ${styles.all}`} data-ev="cta_click" data-ev-cta="avaliar_lista" data-ev-area="home">

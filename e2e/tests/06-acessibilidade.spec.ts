@@ -50,7 +50,7 @@ test('páginas públicas sem falhas de acessibilidade (WCAG 2.1 AA)', async ({ p
     await audit(page, path, found);
   }
   await page.goto('/pesquisa');
-  await page.getByRole('searchbox').first().fill('padaria');
+  await page.getByRole('combobox').first().fill('padaria');
   await page.getByText('Padaria Ribeira').first().click();
   await page.waitForURL(/\/org\//);
   await audit(page, '/org/:id', found);
@@ -81,7 +81,7 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   await page.waitForURL(/\/avaliar\/verificar/);
   await audit(page, '/avaliar/verificar', found);
   await page.goto('/pesquisa');
-  await page.getByRole('searchbox').first().fill('oficina sete');
+  await page.getByRole('combobox').first().fill('oficina sete');
   await page.getByText('Oficina Sete', { exact: true }).first().click();
   await page.waitForURL(/\/org\//);
   const orgUrl = page.url();

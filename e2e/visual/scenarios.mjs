@@ -84,7 +84,7 @@ export const SCENARIOS = [
     path: '/pesquisa',
     full: true,
     run: async (p) => {
-      await p.getByRole('searchbox').first().fill('porto'); // foco, botão de limpar e resultados depois da espera
+      await p.getByRole('combobox').first().fill('porto'); // foco, botão de limpar e resultados depois da espera
       await p.waitForTimeout(1300);
     },
   },

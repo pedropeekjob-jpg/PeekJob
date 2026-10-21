@@ -118,6 +118,34 @@ describe('Organizações', () => {
     });
   });
 
+  describe('pesquisa por profissão e setor, e sugestões (21/10)', () => {
+    let padaria: string;
+    beforeEach(async () => {
+      padaria = await insertOrg(t.pool, { name: 'Padaria Ribeira', city: 'Viseu' });
+      await insertOrg(t.pool, { name: 'Oficina Sete', city: 'Vila Real' });
+      await t.pool.query(`UPDATE organizations SET sector = 'Restauração' WHERE id = $1`, [padaria]);
+      await t.pool.query(`INSERT INTO salaries (org_id, author_ref, role, monthly_gross) VALUES ($1, 'a1', 'Pasteleiro/a', 900), ($1, 'a2', 'Pasteleiro/a', 950)`, [padaria]);
+    });
+
+    it('encontra a organização pela profissão (sem acentos) e diz qual coincidiu', async () => {
+      const res = await t.http().get('/orgs/search?q=pasteleiro').expect(200);
+      expect(res.body.items).toEqual([expect.objectContaining({ id: padaria, matchedRole: 'Pasteleiro/a' })]);
+    });
+
+    it('encontra pelo setor', async () => {
+      const res = await t.http().get('/orgs/search?q=restauracao').expect(200);
+      expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Padaria Ribeira']);
+    });
+
+    it('sugestões: organizações, profissões, setores e sítios', async () => {
+      expect((await t.http().get('/orgs/suggest?q=pa').expect(200)).body).toMatchObject({ orgs: [{ id: padaria, name: 'Padaria Ribeira' }] });
+      expect((await t.http().get('/orgs/suggest?q=paste').expect(200)).body.roles).toEqual([{ label: 'Pasteleiro/a', orgs: 1 }]);
+      expect((await t.http().get('/orgs/suggest?q=restau').expect(200)).body.sectors).toEqual(['Restauração']);
+      expect((await t.http().get('/orgs/suggest?q=vi').expect(200)).body.places).toEqual(['Vila Real', 'Viseu']);
+      expect((await t.http().get('/orgs/suggest?q=p').expect(400)).status).toBe(400);
+    });
+  });
+
   describe('GET /orgs/:id', () => {
     it('devolve a organização com nota e nº de avaliações', async () => {
       const id = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
