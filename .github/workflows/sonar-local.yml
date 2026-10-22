@@ -16,7 +16,8 @@ permissions:
 
 jobs:
   sonar-local:
-    runs-on: ubuntu-latest
+    # fixo em 24.04 (o Playwright 1.56 não suporta a imagem 26.04)
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
