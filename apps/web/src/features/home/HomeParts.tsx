@@ -57,6 +57,11 @@ export function Door({ zone, onOpen, focusOnMount }: DoorProps) {
         </span>
         <span className={styles.doorSub}>{t.sub()}</span>
       </span>
+      {/* com rato (22/10): o título deixa de estar fixo e acompanha o cursor na zona */}
+      <span className={styles.cursorLabel} aria-hidden="true">
+        {t.label()}
+        <Icon name="next" size={18} stroke={2.6} />
+      </span>
       <span className="sr-only">: {t.hint()}</span>
     </button>
   );
