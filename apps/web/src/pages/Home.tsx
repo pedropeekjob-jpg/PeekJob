@@ -1,6 +1,6 @@
 import { useCallback, useState, type PointerEvent, type ReactNode } from 'react';
 import { DesktopHeader, MobileHomeHeader, SiteFooter } from '../components/Layout';
-import type { Zone } from '../features/home/home';
+import { cursorLabelSpot, type Zone } from '../features/home/home';
 import { Door, HomeMark, JobPanel, PeekPanel } from '../features/home/HomeParts';
 import styles from '../features/home/Home.module.css';
 import { useHomeZone } from '../features/home/useHomeZone';
@@ -24,12 +24,22 @@ export default function Home() {
   const intent = useCallback((z: Zone) => preload(...NEXT[z]), []);
   const [hover, setHover] = useState<Zone | null>(null);
 
-  // a mancha de luz segue o cursor (variáveis CSS, sem re-render)
+  // a mancha de luz e a etiqueta seguem o cursor (variáveis CSS, sem re-render); a etiqueta nunca tapa o logo
   const follow = useCallback((e: PointerEvent<HTMLElement>) => {
     if (e.pointerType !== 'mouse') return;
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty('--gx', `${e.clientX - r.left}px`);
-    e.currentTarget.style.setProperty('--gy', `${e.clientY - r.top}px`);
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    el.style.setProperty('--gx', `${x}px`);
+    el.style.setProperty('--gy', `${y}px`);
+    const label = el.querySelector<HTMLElement>(`.${styles.cursorLabel}`);
+    if (!label?.offsetWidth) return;
+    const m = el.parentElement?.querySelector(`.${styles.mark}`)?.getBoundingClientRect();
+    const avoid = m && { left: m.left - r.left, top: m.top - r.top, right: m.right - r.left, bottom: m.bottom - r.top };
+    const spot = cursorLabelSpot({ x, y }, { w: label.offsetWidth, h: label.offsetHeight }, { w: r.width, h: r.height }, avoid ?? null);
+    el.style.setProperty('--lx', `${spot.x}px`);
+    el.style.setProperty('--ly', `${spot.y}px`);
   }, []);
 
   const half = (z: Zone) => ({
