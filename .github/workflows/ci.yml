@@ -49,7 +49,8 @@ jobs:
 
   browser:
     # Testes no browser (Playwright): a aplicação como em produção (API a servir a web) + PostgreSQL, telemóvel e computador
-    runs-on: ubuntu-latest
+    # fixo em 24.04: o Playwright 1.56 não instala o Chromium na imagem 26.04 que o ubuntu-latest passou a usar
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       postgres:

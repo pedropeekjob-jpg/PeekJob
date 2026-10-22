@@ -19,8 +19,14 @@
   --job-fg: #ffffff;
   --job-glow: rgba(255, 255, 255, 0.16);
   --rule: var(--teal);
-  --label: var(--ink);
-  --job-label: #ffffff;
+  /* 22/10: títulos em cinzento claro (pedido do cliente). Texto grande (48 px, negrito): o mínimo é 3:1, que estes
+     cumprem sobre o branco com a luz menta (3,05:1) e sobre o verde-água escuro (3,6:1) */
+  --label: #8a8e91;
+  --job-label: #c9d1d4;
+  --cursor-peek-bg: var(--ink);
+  --cursor-peek-fg: #fff;
+  --cursor-job-bg: #fff;
+  --cursor-job-fg: var(--ink);
   --door-sub: rgba(1, 11, 19, 0.56);
   --job-sub: #e6eef0;
   --search-bg: var(--surface);
@@ -214,6 +220,60 @@
 }
 .job .doorSub {
   color: var(--job-sub);
+}
+
+/* Com rato (22/10, "no PC ficavam no rato"): o título sai do sítio e acompanha o cursor dentro da zona.
+   Continua no nome do botão para leitores de ecrã; com o teclado aparece no foco */
+.cursorLabel {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cursorLabel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px 10px 18px;
+    border-radius: 999px;
+    font-family: var(--font-system);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(calc(var(--gx) + 18px), calc(var(--gy) + 18px));
+    transition:
+      opacity 0.2s,
+      transform 0.08s linear;
+  }
+  .peek .cursorLabel {
+    background: var(--cursor-peek-bg);
+    color: var(--cursor-peek-fg);
+  }
+  .job .cursorLabel {
+    background: var(--cursor-job-bg);
+    color: var(--cursor-job-fg);
+  }
+  .half:hover .cursorLabel,
+  .door:focus-visible .cursorLabel {
+    opacity: 1;
+  }
+  /* por cima do logo (fica entre as duas zonas) a etiqueta confundia (14/10): esconde-se */
+  .split:has(.mark:hover) .cursorLabel {
+    opacity: 0;
+  }
 }
 
 /* A linha do esboço: desenha-se da esquerda para a direita e desliza com a zona */
@@ -512,6 +572,7 @@
   .glow::before,
   .doorText,
   .chevron,
+  .cursorLabel,
   .rule,
   .mark,
   .panel > *,

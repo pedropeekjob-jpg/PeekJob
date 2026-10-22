@@ -24,17 +24,17 @@ describe('partes do fluxo de avaliar', () => {
     await user.click(radios[2]);
     expect(radios[2]).toHaveAttribute('aria-checked', 'true');
     expect(radios.map((r) => r.tabIndex)).toEqual([-1, -1, 0, -1, -1]);
-    expect(screen.getByText('3 · Aceitável')).toBeInTheDocument();
+    expect(screen.getByText('Aceitável')).toBeInTheDocument();
     await user.keyboard('{ArrowRight}');
     expect(radios[3]).toHaveAttribute('aria-checked', 'true');
     expect(radios[3]).toHaveFocus();
     await user.keyboard('{End}');
-    expect(screen.getByText('5 · Excelente')).toBeInTheDocument();
+    expect(screen.getByText('Excelente')).toBeInTheDocument();
     expect(radios[0].closest('[data-level]')).toHaveAttribute('data-level', '5');
     await user.keyboard('{Home}{ArrowLeft}');
     expect(radios[0]).toHaveAttribute('aria-checked', 'true');
     expect(radios[0]).toHaveFocus();
-    expect(screen.getByText('1 · Péssimo')).toBeInTheDocument();
+    expect(screen.getByText('Péssimo')).toBeInTheDocument();
     await user.keyboard('a'); // outras teclas não mudam nada
     expect(radios[0]).toHaveAttribute('aria-checked', 'true');
     await user.click(radios[0]); // tocar na escolhida tira-a
