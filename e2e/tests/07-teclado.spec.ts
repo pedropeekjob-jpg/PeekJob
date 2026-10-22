@@ -45,7 +45,7 @@ test.describe('Teclado', () => {
     await page.keyboard.press('ArrowRight');
     await expect(scoreRadio(page, 'Salário justo', 3)).toBeFocused();
     await expect(scoreRadio(page, 'Salário justo', 3)).toHaveAttribute('aria-checked', 'true');
-    await expect(page.getByText('3 · Aceitável')).toBeVisible();
+    await expect(page.getByText('Aceitável', { exact: true })).toBeVisible();
     // Tab sai das bolinhas para "Comentar" e para a ajuda do critério seguinte, até às bolinhas dele
     await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: 'Comentar sobre Salário justo' })).toBeFocused();

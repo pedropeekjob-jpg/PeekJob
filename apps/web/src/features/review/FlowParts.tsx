@@ -189,7 +189,8 @@ function RemoveParam<K extends ParamKey>({ k, label, onRemove }: { k: K; label: 
 }
 
 /**
- * Um critério (ou parâmetro com escala) com as bolinhas de 1 a 5 juntas (21/10, noite: o cliente preferiu-as ao slider).
+ * Um critério (ou parâmetro com escala) com as bolinhas de 1 a 5 juntas (21/10, noite: o cliente preferiu-as ao slider),
+ * na mesma linha do nome e da etiqueta (22/10).
  * Rádio: um só Tab; setas, Home e End mudam a nota; tocar na escolhida tira-a. As bolinhas até à nota ganham a cor do
  * nível (mais escura quanto maior) e a etiqueta diz o que ela quer dizer (Péssimo … Excelente).
  * memo: ao dar uma nota só a linha desse critério volta a correr (medido com scripts/react-profile.mjs).
@@ -208,35 +209,36 @@ function ScoreRowImpl<K extends ParamKey>({ k, value, onPick, desktop = false, c
   };
   return (
     <div className={desktop ? styles.scoreWide : styles.score} data-respect={k === 'respeito' || undefined} data-level={level}>
-      <div className={`row ${styles.scoreHead}`}>
+      {/* nome, bolinhas e etiqueta na mesma linha (22/10: como antes do slider) */}
+      <div className={styles.scoreLine}>
         <span className={`row ${styles.scoreName}`}>
           <span id={nameId} className={styles.scoreLabel}>
             {c.label}
           </span>
           <HelpTip id={nameId} label={c.label} text={c.help} />
         </span>
+        <div role="radiogroup" aria-labelledby={nameId} className={`row ${styles.dots}`}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              className={styles.dotButton}
+              aria-checked={n === value}
+              aria-label={tr(`${c.label}, ${n} de 5, ${scoreWord(n)}`, `${c.label}, ${n} of 5, ${scoreWord(n)}`)}
+              tabIndex={isTabStop(n, value) ? 0 : -1}
+              onKeyDown={(e) => onKey(e, n)}
+              onClick={() => onPick(k, n === value ? 0 : n)}
+            >
+              <span className={styles.dot} data-on={n <= value || undefined}>
+                {n}
+              </span>
+            </button>
+          ))}
+        </div>
         <span className={styles.levelPill} data-level={level} aria-hidden="true">
-          {value ? `${value} · ${word}` : word}
+          {word}
         </span>
-      </div>
-      <div role="radiogroup" aria-labelledby={nameId} className={`row ${styles.dots}`}>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button
-            key={n}
-            type="button"
-            role="radio"
-            className={styles.dotButton}
-            aria-checked={n === value}
-            aria-label={tr(`${c.label}, ${n} de 5, ${scoreWord(n)}`, `${c.label}, ${n} of 5, ${scoreWord(n)}`)}
-            tabIndex={isTabStop(n, value) ? 0 : -1}
-            onKeyDown={(e) => onKey(e, n)}
-            onClick={() => onPick(k, n === value ? 0 : n)}
-          >
-            <span className={styles.dot} data-on={n <= value || undefined}>
-              {n}
-            </span>
-          </button>
-        ))}
       </div>
       <div className={`row between ${styles.paramFoot}`}>
         <ParamComment k={k} label={c.label} comment={comment} onComment={onComment} invalid={invalid} />
