@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { MemoryRouter } from 'react-router';
@@ -14,27 +14,32 @@ function Score({ desktop = false }: { desktop?: boolean }) {
 }
 
 describe('partes do fluxo de avaliar', () => {
-  it.each([false, true])('nota: slider de 1 a 5 com etiqueta que muda; largar sem mexer dá a nota; × e Delete tiram (computador: %s)', async (desktop) => {
+  it.each([false, true])('nota: bolinhas de 1 a 5, um só Tab, setas/Home/End mudam a nota e a etiqueta acompanha (computador: %s)', async (desktop) => {
     const user = userEvent.setup();
     render(<Score desktop={desktop} />);
-    const slider = screen.getByRole('slider', { name: 'Salário justo' });
-    expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
-    expect(slider).toHaveAttribute('data-empty');
+    expect(screen.getByRole('radiogroup', { name: 'Salário justo' })).toBeInTheDocument();
+    const radios = screen.getAllByRole('radio');
+    expect(radios.map((r) => r.tabIndex)).toEqual([0, -1, -1, -1, -1]);
     expect(screen.getByText('Sem nota')).toBeInTheDocument();
-    fireEvent.pointerUp(slider);
-    expect(slider).toHaveAttribute('aria-valuetext', '3 de 5, Aceitável');
-    fireEvent.change(slider, { target: { value: '5' } });
-    expect(slider).toHaveAttribute('aria-valuetext', '5 de 5, Excelente');
+    await user.click(radios[2]);
+    expect(radios[2]).toHaveAttribute('aria-checked', 'true');
+    expect(radios.map((r) => r.tabIndex)).toEqual([-1, -1, 0, -1, -1]);
+    expect(screen.getByText('3 · Aceitável')).toBeInTheDocument();
+    await user.keyboard('{ArrowRight}');
+    expect(radios[3]).toHaveAttribute('aria-checked', 'true');
+    expect(radios[3]).toHaveFocus();
+    await user.keyboard('{End}');
     expect(screen.getByText('5 · Excelente')).toBeInTheDocument();
-    expect(slider.closest('[data-level]')).toHaveAttribute('data-level', '5');
-    fireEvent.change(slider, { target: { value: '1' } });
+    expect(radios[0].closest('[data-level]')).toHaveAttribute('data-level', '5');
+    await user.keyboard('{Home}{ArrowLeft}');
+    expect(radios[0]).toHaveAttribute('aria-checked', 'true');
+    expect(radios[0]).toHaveFocus();
     expect(screen.getByText('1 · Péssimo')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Tirar a nota de Salário justo' }));
-    expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
-    fireEvent.change(slider, { target: { value: '2' } });
-    slider.focus();
-    await user.keyboard('{Delete}');
-    expect(slider).toHaveAttribute('aria-valuetext', 'Sem nota');
+    await user.keyboard('a'); // outras teclas não mudam nada
+    expect(radios[0]).toHaveAttribute('aria-checked', 'true');
+    await user.click(radios[0]); // tocar na escolhida tira-a
+    expect(screen.queryByRole('radio', { checked: true })).not.toBeInTheDocument();
+    expect(radios[1]).toHaveAccessibleName('Salário justo, 2 de 5, Mau');
   });
 
   it('ajuda (?): a explicação do critério, que abre ao tocar e fecha com Escape', async () => {

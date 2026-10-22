@@ -2,10 +2,10 @@ import { Link } from 'react-router';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { CRITERION } from '../../data/criteria';
-import type { Org } from '../../data/orgs';
+import type { ExtraSummary, Org } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { fmt, plural } from '../../lib/format';
-import { EXTRA } from '../../data/params';
+import { EXTRA, optionLabel } from '../../data/params';
 import { useToggle } from '../../lib/useToggle';
 import { CritLine, PrioMark } from '../../components/Score';
 import { MoreToggle } from '../../components/UI';
@@ -124,6 +124,14 @@ export function DesktopCriteria({ org }: { org: Org }) {
   );
 }
 
+/** "67% dizem que sim", "3,5 de 5" ou, nas opções, as escolhidas da mais à menos ("Base + comissão 67% · Só comissão 33%") */
+function extraValue(r: ExtraSummary) {
+  if (r.yesPct != null) return tr(`${r.yesPct}% dizem que sim`, `${r.yesPct}% say yes`);
+  if (r.avg != null) return tr(`${fmt(r.avg)} de 5`, `${fmt(r.avg)} out of 5`);
+  const picked = (r.choices ?? []).filter((c) => c.pct > 0).sort((a, b) => b.pct - a.pct);
+  return picked.length ? picked.map((c) => `${optionLabel(c.value)} ${c.pct}%`).join(' · ') : '—';
+}
+
 /**
  * O dia a dia no tipo de trabalho (21/10): os parâmetros que quem avaliou respondeu,
  * com a percentagem de "sim" ou a nota média. Só aparecem com 3 ou mais respostas.
@@ -141,7 +149,7 @@ export function ExtrasSummary({ org, desktop = false }: { org: Org; desktop?: bo
           <li key={r.key} className={`row between ${styles.extraRow}`}>
             <span className={styles.extraName}>{EXTRA[r.key].label}</span>
             <span className={styles.extraValue}>
-              {r.yesPct != null ? tr(`${r.yesPct}% dizem que sim`, `${r.yesPct}% say yes`) : r.avg != null ? tr(`${fmt(r.avg)} de 5`, `${fmt(r.avg)} out of 5`) : '—'}
+              {extraValue(r)}
               <span className="small muted"> · {plural(r.n, tr('resposta', 'answer'), tr('respostas', 'answers'))}</span>
             </span>
           </li>

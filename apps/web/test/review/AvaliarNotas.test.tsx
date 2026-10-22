@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import AvaliarNotas from '../../src/pages/AvaliarNotas';
 import { renderScreen, WithDraft } from '../utils/render';
-import { setScore } from '../utils/score';
+import { scoreText, setScore } from '../utils/score';
 
 const show = (viewport: 'mobile' | 'desktop', patch = {}) =>
   renderScreen(
@@ -20,10 +20,10 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     expect(await screen.findByRole('heading', { level: 1, name: /Dá uma nota de 1 a 5/ })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Passo 2 de 3' })).toBeInTheDocument();
     // 8 critérios + 1 parâmetro com escala sugerido para restauração (folgas e escalas)
-    expect(screen.getAllByRole('slider')).toHaveLength(9);
+    expect(screen.getAllByRole('radiogroup')).toHaveLength(9);
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
     setScore('Ambiente', 4);
-    expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
+    expect(scoreText('Ambiente')).toBe('4 de 5, Bom');
     const publish = screen.getByRole('button', { name: /Publicar avaliação/ });
     expect(publish).toHaveTextContent('1/8');
     await user.click(publish);
@@ -68,11 +68,12 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     expect(screen.getByText(/^A PeekJob não trata nem resolve irregularidades/)).toBeInTheDocument();
   });
 
-  it('o × tira a nota escolhida', async () => {
+  it('tocar na nota escolhida tira-a', async () => {
     show('mobile', { scores: { ambiente: 4 } });
-    expect(await screen.findByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', '4 de 5, Bom');
+    await screen.findByRole('radiogroup', { name: 'Ambiente' });
+    expect(scoreText('Ambiente')).toBe('4 de 5, Bom');
     setScore('Ambiente', 0);
-    expect(screen.getByRole('slider', { name: 'Ambiente' })).toHaveAttribute('aria-valuetext', 'Sem nota');
+    expect(scoreText('Ambiente')).toBe('Sem nota');
   });
 
   it('ajuda por critério abre e fecha', async () => {
@@ -90,7 +91,7 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     await user.click(within(tips).getByRole('button', { name: 'Sim' }));
     expect(within(tips).getByRole('button', { name: 'Sim' })).toHaveAttribute('aria-pressed', 'true');
     setScore('Folgas e escalas', 2);
-    expect(screen.getByRole('slider', { name: 'Folgas e escalas' })).toHaveAttribute('aria-valuetext', '2 de 5, Mau');
+    expect(scoreText('Folgas e escalas')).toBe('2 de 5, Mau');
     // os parâmetros não contam para "pelo menos uma nota"
     expect(screen.getByRole('button', { name: /Dá pelo menos uma nota/ })).toBeDisabled();
 
@@ -99,6 +100,19 @@ describe('Avaliar · notas e publicar (telemóvel, passo 2 de 3)', () => {
     expect(within(section).getByRole('group', { name: 'Contrato escrito' })).toBeInTheDocument();
     await user.click(within(section).getByRole('button', { name: 'Tirar Contrato escrito' }));
     expect(within(section).queryByRole('group', { name: 'Contrato escrito' })).not.toBeInTheDocument();
+  });
+
+  it('comissões: acrescentar "Como te pagam" e escolher uma opção (tocar de novo tira)', async () => {
+    const { user } = show('mobile');
+    const section = (await screen.findByRole('heading', { name: 'No teu tipo de trabalho' })).closest('section')!;
+    await user.click(within(section).getByRole('button', { name: 'Acrescentar parâmetro' }));
+    await user.click(within(section).getByRole('button', { name: '+ Como te pagam' }));
+    const pay = within(section).getByRole('group', { name: 'Como te pagam' });
+    expect(within(pay).getAllByRole('button').map((b) => b.textContent)).toEqual(['Só ordenado', 'Base + comissão', 'Só comissão']);
+    await user.click(within(pay).getByRole('button', { name: 'Só comissão' }));
+    expect(within(pay).getByRole('button', { name: 'Só comissão' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(within(pay).getByRole('button', { name: 'Só comissão' }));
+    expect(within(pay).getByRole('button', { name: 'Só comissão' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('comentário por critério: abre, conta caracteres e bloqueia insultos', async () => {

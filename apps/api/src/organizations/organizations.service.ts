@@ -1,6 +1,6 @@
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { ConflictException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CRITERION_KEYS, EXTRA_MIN_ANSWERS, extraKind, isExtraKey, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery, type SuggestQuery } from '@peekjob/shared';
+import { CRITERION_KEYS, EXTRA_MIN_ANSWERS, extraKind, extraOptions, isExtraKey, nifKind, type CreateOrganizationInput, type SearchOrganizationsQuery, type SuggestQuery } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { isUuid } from '../common/zod';
 import { PG_POOL, tx } from '../db/db.module';
@@ -273,7 +273,8 @@ export class OrganizationsService {
     // parâmetros do tipo de trabalho: só os que têm respostas suficientes para não identificar ninguém
     const ex = await this.pool.query(
       `SELECT e.key, count(*)::int AS n, count(*) FILTER (WHERE e.value = 'true'::jsonb)::int AS yes,
-              round(avg((e.value #>> '{}')::numeric) FILTER (WHERE jsonb_typeof(e.value) = 'number'), 1) AS avg
+              round(avg((e.value #>> '{}')::numeric) FILTER (WHERE jsonb_typeof(e.value) = 'number'), 1) AS avg,
+              coalesce(jsonb_agg(e.value #>> '{}') FILTER (WHERE jsonb_typeof(e.value) = 'string'), '[]') AS picks
          FROM reviews r, jsonb_each(r.extras) e
         WHERE r.org_id = $1 AND r.status = 'published'
         GROUP BY e.key HAVING count(*) >= $2 ORDER BY count(*) DESC, e.key`,
@@ -281,7 +282,16 @@ export class OrganizationsService {
     );
     const extras = ex.rows
       .filter((r) => isExtraKey(r.key))
-      .map((r) => (extraKind(r.key) === 'yesno' ? { key: r.key, n: r.n, yesPct: Math.round((r.yes / r.n) * 100) } : { key: r.key, n: r.n, avg: num(r.avg) }));
+      .map((r) => {
+        const kind = extraKind(r.key);
+        if (kind === 'yesno') return { key: r.key, n: r.n, yesPct: Math.round((r.yes / r.n) * 100) };
+        // opções: a percentagem de cada uma, pela ordem da lista (as que ninguém escolheu ficam a 0)
+        if (kind === 'choice') {
+          const picks: string[] = r.picks;
+          return { key: r.key, n: r.n, choices: extraOptions(r.key).map((value) => ({ value, pct: Math.round((picks.filter((p) => p === value).length / r.n) * 100) })) };
+        }
+        return { key: r.key, n: r.n, avg: num(r.avg) };
+      });
     return { ...toPublicOrg(agg.rows[0]), locations: locs.rows, extras };
   }
 

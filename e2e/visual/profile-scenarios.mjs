@@ -28,9 +28,9 @@ export const PROFILE_SCENARIOS = [
     path: '/avaliar/notas',
     state: STATE,
     run: async (p) => {
-      // slider (21/10): End vai ao 5, a seta para a esquerda desce ao 4
+      // bolinhas (21/10): a primeira, End vai ao 5, a seta para a esquerda desce ao 4
       for (const c of ['Salário justo', 'Equilíbrio', 'Respeito e inclusão', 'Ambiente', 'Liderança', 'Estabilidade', 'Progressão', 'Propósito']) {
-        await p.getByRole('slider', { name: c }).first().focus();
+        await p.getByRole('radiogroup', { name: c }).first().getByRole('radio').first().focus();
         await p.keyboard.press('End');
         await p.keyboard.press('ArrowLeft');
       }

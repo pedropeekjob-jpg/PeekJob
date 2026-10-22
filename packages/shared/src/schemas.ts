@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CRITERION_KEYS, ORG_TYPES, REVIEW_TAGS, REVIEW_TEXT_MAX } from './criteria';
 import { DISTRICTS } from './districts';
-import { EXTRA_KEYS, extraKind, isExtraKey, PARAM_COMMENT_MAX } from './params';
+import { EXTRA_KEYS, extraKind, extraOptions, isExtraKey, PARAM_COMMENT_MAX, type ExtraKey } from './params';
 import { isValidNif, normalizeNif } from './nif';
 
 const nifField = z
@@ -37,15 +37,17 @@ export const CreateReviewInput = z.object({
   recommend: z.boolean().nullable().default(null),
   tags: z.array(z.enum(REVIEW_TAGS)).max(REVIEW_TAGS.length).default([]),
   text: z.string().trim().max(REVIEW_TEXT_MAX).default(''),
-  /** parâmetros do tipo de trabalho: nota de 1 a 5 ou sim/não, conforme o parâmetro */
+  /** parâmetros do tipo de trabalho: nota de 1 a 5, sim/não ou uma das opções, conforme o parâmetro */
   extras: z
-    .record(z.enum(EXTRA_KEYS), z.union([score, z.boolean()]))
+    .record(z.enum(EXTRA_KEYS), z.union([score, z.boolean(), z.string().max(40)]))
     .default({})
     .superRefine((e, ctx) => {
+      const ok = { scale: (v: unknown) => typeof v === 'number', yesno: (v: unknown) => typeof v === 'boolean', choice: (v: unknown, k: ExtraKey) => typeof v === 'string' && extraOptions(k).includes(v) };
+      const message = { scale: 'Dá uma nota de 1 a 5', yesno: 'Responde sim ou não', choice: 'Escolhe uma das opções' };
       for (const [k, v] of Object.entries(e)) {
-        if (isExtraKey(k) && (extraKind(k) === 'yesno') !== (typeof v === 'boolean')) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [k], message: extraKind(k) === 'yesno' ? 'Responde sim ou não' : 'Dá uma nota de 1 a 5' });
-        }
+        if (!isExtraKey(k)) continue;
+        const kind = extraKind(k);
+        if (!ok[kind](v, k)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [k], message: message[kind] });
       }
     }),
   /** um comentário curto por critério ou parâmetro (os vazios não se guardam) */

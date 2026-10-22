@@ -9,7 +9,7 @@ import { fmt } from '../../lib/format';
 import { useStore, type MyReview } from '../../lib/store';
 import { useToggle } from '../../lib/useToggle';
 import { reviewLists } from './org';
-import { paramMeta, isExtraKey, type ExtraKey, type ParamKey } from '../../data/params';
+import { optionLabel, paramMeta, isExtraKey, type ExtraKey, type ParamKey } from '../../data/params';
 import { CRITERIA } from '../../data/criteria';
 import { PublishErrorBox } from '../review/PublishErrorBox';
 import { REVIEW_TEXT_MAX } from '../review/useReviewDraft';
@@ -44,6 +44,7 @@ export function ReviewDetails({ r }: { r: Pick<Review, 'extras' | 'comments' | '
     const v = isExtraKey(k) ? extras[k] : r.scores?.[k];
     if (typeof v === 'boolean') return v ? tr('Sim', 'Yes') : tr('Não', 'No');
     if (typeof v === 'number') return tr(`${v} de 5`, `${v} of 5`);
+    if (typeof v === 'string') return optionLabel(v);
     return null;
   };
   return (

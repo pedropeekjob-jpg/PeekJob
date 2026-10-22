@@ -19,12 +19,13 @@ export interface OrgLocation {
   mapY: number;
 }
 
-/** Um parâmetro do tipo de trabalho na página da organização: % de "sim" ou nota média */
+/** Um parâmetro do tipo de trabalho na página da organização: % de "sim", nota média ou % de cada opção */
 export interface ExtraSummary {
   key: ExtraKey;
   n: number;
   yesPct?: number;
   avg?: number | null;
+  choices?: { value: string; pct: number }[];
 }
 
 export interface Review {

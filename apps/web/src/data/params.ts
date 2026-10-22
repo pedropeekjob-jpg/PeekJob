@@ -1,8 +1,8 @@
-import { EXTRA_KEYS, extraKind, isExtraKey, suggestedExtras, type ExtraKey, type ExtraKind } from '@peekjob/shared';
+import { EXTRA_KEYS, extraKind, extraOptions, isExtraKey, suggestedExtras, type ExtraKey, type ExtraKind } from '@peekjob/shared';
 import { tr } from '../i18n';
 import { CRITERION, type CriterionKey } from './criteria';
 
-export { EXTRA_KEYS, extraKind, isExtraKey, suggestedExtras, type ExtraKey, type ExtraKind };
+export { EXTRA_KEYS, extraKind, extraOptions, isExtraKey, suggestedExtras, type ExtraKey, type ExtraKind };
 
 /** Um critério ou um parâmetro do tipo de trabalho: o que se avalia e se pode comentar */
 export type ParamKey = CriterionKey | ExtraKey;
@@ -35,7 +35,17 @@ const TEXTS: Record<ExtraKey, { label: Text; help: Text }> = {
   reconhecimento: { label: ['Reconhecimento', 'Recognition'], help: ['O teu tempo e esforço são reconhecidos e valorizados.', 'Your time and effort are recognised and valued.'] },
   contrato_escrito: { label: ['Contrato escrito', 'Written contract'], help: ['Tens contrato por escrito, com funções, horário e salário.', 'You have a written contract, with duties, hours and pay.'] },
   horas_extra_pagas: { label: ['Horas extra pagas', 'Paid overtime'], help: ['As horas a mais são pagas ou compensadas com tempo livre.', 'Extra hours are paid or given back as time off.'] },
+  comissoes: { label: ['Como te pagam', 'How you’re paid'], help: ['Se ganhas só ordenado, ordenado base mais comissões, ou só à comissão.', 'Whether you earn a salary only, a base salary plus commission, or commission only.'] },
+  comissoes_claras: { label: ['Comissões claras', 'Clear commission'], help: ['Sabes como se calculam as comissões e são pagas a tempo, sem surpresas.', 'You know how commission is worked out and it’s paid on time, with no surprises.'] },
 };
+
+/** Nomes das opções dos parâmetros de escolha */
+const OPTION_TEXT: Record<string, Text> = {
+  so_ordenado: ['Só ordenado', 'Salary only'],
+  base_comissao: ['Base + comissão', 'Base + commission'],
+  so_comissao: ['Só comissão', 'Commission only'],
+};
+export const optionLabel = (v: string) => (OPTION_TEXT[v] ? tr(...OPTION_TEXT[v]) : v);
 
 /** Parâmetro com textos no idioma atual (getters: mudam com o idioma) */
 const param = (key: ExtraKey): ExtraParam => ({

@@ -160,12 +160,15 @@ describe('Organizações', () => {
       const id = await insertOrg(t.pool, { name: 'Padaria Ribeira' });
       const post = async (u: string, extras: Record<string, unknown>) =>
         expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login(u)).send({ ...goodReview, extras })).status).toBe(201);
-      await post('u1', { gorjetas: true, folgas_escala: 2 });
-      await post('u2', { gorjetas: false, folgas_escala: 4 });
+      await post('u1', { gorjetas: true, folgas_escala: 2, comissoes: 'base_comissao' });
+      await post('u2', { gorjetas: false, folgas_escala: 4, comissoes: 'so_comissao' });
       expect((await t.http().get(`/orgs/${id}`).expect(200)).body.extras).toEqual([]);
-      await post('u3', { gorjetas: true });
+      await post('u3', { gorjetas: true, comissoes: 'base_comissao' });
       const res = await t.http().get(`/orgs/${id}`).expect(200);
-      expect(res.body.extras).toEqual([{ key: 'gorjetas', n: 3, yesPct: 67 }]);
+      expect(res.body.extras).toEqual([
+        { key: 'comissoes', n: 3, choices: [{ value: 'so_ordenado', pct: 0 }, { value: 'base_comissao', pct: 67 }, { value: 'so_comissao', pct: 33 }] },
+        { key: 'gorjetas', n: 3, yesPct: 67 },
+      ]);
     });
 
     it('404 para pendentes e inexistentes', async () => {

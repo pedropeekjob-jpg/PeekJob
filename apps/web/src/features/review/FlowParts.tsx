@@ -1,14 +1,14 @@
-import { memo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
+import { memo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Dots } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { PARAM_COMMENT_MAX } from '@peekjob/shared';
 import { CRITERION } from '../../data/criteria';
-import { EXTRA, paramMeta, type ExtraKey, type ParamKey } from '../../data/params';
+import { EXTRA, extraOptions, optionLabel, paramMeta, type ExtraKey, type ParamKey } from '../../data/params';
 import type { Scores } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { tagLabel } from '../../i18n/labels';
 import { fmt } from '../../lib/format';
-import { isBadTag, MOBILE_ORDER, scoreOf, scoreWord, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
+import { isBadTag, isTabStop, MOBILE_ORDER, scoreForKey, scoreOf, scoreWord, STEP_LABELS, STEPS_TOTAL, stepState, tagOrder, visibleTags } from './flow';
 import styles from './Flow.module.css';
 
 /** Partes partilhadas pelos ecrãs do fluxo de avaliar */
@@ -189,9 +189,9 @@ function RemoveParam<K extends ParamKey>({ k, label, onRemove }: { k: K; label: 
 }
 
 /**
- * Um critério (ou parâmetro com escala) com um slider de 1 a 5 (21/10; antes cinco botões). A cor intensifica-se com a nota
- * e a etiqueta diz o que ela quer dizer (Péssimo … Excelente). Sem nota, o slider fica cinzento: tocar ou usar as setas dá a nota;
- * o × (ou Delete) tira-a.
+ * Um critério (ou parâmetro com escala) com as bolinhas de 1 a 5 juntas (21/10, noite: o cliente preferiu-as ao slider).
+ * Rádio: um só Tab; setas, Home e End mudam a nota; tocar na escolhida tira-a. As bolinhas até à nota ganham a cor do
+ * nível (mais escura quanto maior) e a etiqueta diz o que ela quer dizer (Péssimo … Excelente).
  * memo: ao dar uma nota só a linha desse critério volta a correr (medido com scripts/react-profile.mjs).
  */
 function ScoreRowImpl<K extends ParamKey>({ k, value, onPick, desktop = false, comment, onComment, invalid, onRemove }: ScoreRowProps<K>) {
@@ -199,15 +199,12 @@ function ScoreRowImpl<K extends ParamKey>({ k, value, onPick, desktop = false, c
   const nameId = `nota-${k}`;
   const word = scoreWord(value);
   const level = value || undefined;
-  // sem nota o slider está no meio: tocar aí não muda o valor (não há onChange), por isso a nota dá-se ao largar
-  const pickCurrent = (e: { currentTarget: HTMLInputElement }) => {
-    if (!value) onPick(k, Number(e.currentTarget.value));
-  };
-  const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === 'Delete' || e.key === 'Backspace') && value) {
-      e.preventDefault();
-      onPick(k, 0);
-    }
+  const onKey = (e: KeyboardEvent<HTMLButtonElement>, n: number) => {
+    const to = scoreForKey(e.key, n);
+    if (to == null) return;
+    e.preventDefault();
+    onPick(k, to);
+    (e.currentTarget.parentElement?.children[to - 1] as HTMLElement | undefined)?.focus();
   };
   return (
     <div className={desktop ? styles.scoreWide : styles.score} data-respect={k === 'respeito' || undefined} data-level={level}>
@@ -222,31 +219,25 @@ function ScoreRowImpl<K extends ParamKey>({ k, value, onPick, desktop = false, c
           {value ? `${value} · ${word}` : word}
         </span>
       </div>
-      <div className={`row ${styles.sliderRow}`}>
-        <input
-          type="range"
-          min={1}
-          max={5}
-          step={1}
-          className={styles.slider}
-          value={value || 3}
-          data-empty={!value || undefined}
-          style={{ '--pct': `${((value || 1) - 1) * 25}%` } as CSSProperties}
-          aria-labelledby={nameId}
-          aria-valuetext={value ? tr(`${value} de 5, ${word}`, `${value} of 5, ${word}`) : tr('Sem nota', 'No score')}
-          onChange={(e) => onPick(k, Number(e.target.value))}
-          onPointerUp={pickCurrent}
-          onKeyDown={onKey}
-        />
-        <button type="button" className={styles.clear} aria-label={tr(`Tirar a nota de ${c.label}`, `Remove the ${c.label} score`)} onClick={() => onPick(k, 0)} hidden={!value}>
-          <Icon name="close" size={14} stroke={2.2} />
-        </button>
-      </div>
-      <span className={`row between mono ${styles.ticks}`} aria-hidden="true">
+      <div role="radiogroup" aria-labelledby={nameId} className={`row ${styles.dots}`}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <span key={n}>{n}</span>
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            className={styles.dotButton}
+            aria-checked={n === value}
+            aria-label={tr(`${c.label}, ${n} de 5, ${scoreWord(n)}`, `${c.label}, ${n} of 5, ${scoreWord(n)}`)}
+            tabIndex={isTabStop(n, value) ? 0 : -1}
+            onKeyDown={(e) => onKey(e, n)}
+            onClick={() => onPick(k, n === value ? 0 : n)}
+          >
+            <span className={styles.dot} data-on={n <= value || undefined}>
+              {n}
+            </span>
+          </button>
         ))}
-      </span>
+      </div>
       <div className={`row between ${styles.paramFoot}`}>
         <ParamComment k={k} label={c.label} comment={comment} onComment={onComment} invalid={invalid} />
         <RemoveParam k={k} label={c.label} onRemove={onRemove} />
@@ -291,6 +282,46 @@ export const YesNoRow = memo(function YesNoRow({ k, value, onPick, desktop = fal
             );
           })}
         </div>
+      </div>
+      <div className={`row between ${styles.paramFoot}`}>
+        <ParamComment k={k} label={p.label} comment={comment} onComment={onComment} invalid={invalid} />
+        <RemoveParam k={k} label={p.label} onRemove={onRemove} />
+      </div>
+    </div>
+  );
+});
+
+interface ChoiceRowProps extends CommentProps<ExtraKey> {
+  k: ExtraKey;
+  value: string | undefined;
+  onPick: (k: ExtraKey, v: string | null) => void;
+  onRemove?: (k: ExtraKey) => void;
+  desktop?: boolean;
+}
+
+/** Parâmetro de escolha (ex.: como te pagam: só ordenado, base + comissão, só comissão); tocar de novo tira a resposta */
+export const ChoiceRow = memo(function ChoiceRow({ k, value, onPick, desktop = false, comment, onComment, invalid, onRemove }: ChoiceRowProps) {
+  const p = EXTRA[k];
+  const nameId = `nota-${k}`;
+  return (
+    <div className={desktop ? styles.scoreWide : styles.score}>
+      <div className={`row ${styles.scoreHead}`}>
+        <span className={`row ${styles.scoreName}`}>
+          <span id={nameId} className={styles.scoreLabel}>
+            {p.label}
+          </span>
+          <HelpTip id={nameId} label={p.label} text={p.help} />
+        </span>
+      </div>
+      <div role="group" aria-labelledby={nameId} className={`row ${styles.choices}`}>
+        {extraOptions(k).map((o) => {
+          const on = value === o;
+          return (
+            <button key={o} type="button" aria-pressed={on} onClick={() => onPick(k, on ? null : o)} className={styles.yesNo}>
+              {optionLabel(o)}
+            </button>
+          );
+        })}
       </div>
       <div className={`row between ${styles.paramFoot}`}>
         <ParamComment k={k} label={p.label} comment={comment} onComment={onComment} invalid={invalid} />
