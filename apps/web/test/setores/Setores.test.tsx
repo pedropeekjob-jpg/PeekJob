@@ -15,7 +15,7 @@ describe.each(['mobile', 'desktop'] as const)('Setores (%s)', (viewport) => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Encontra o teu tipo de lugar.' })).toBeInTheDocument();
     const group = screen.getByRole('group', { name: 'Tipo de organização' });
     const buttons = within(group).getAllByRole('button');
-    expect(buttons.map((b) => b.querySelector('.num')!.textContent)).toEqual(['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa']);
+    expect(buttons.map((b) => b.querySelector('.num')!.textContent)).toEqual(['Empresa', 'Associação', 'Voluntariado', 'Nome individual']);
     expect(within(buttons[0]).getByText(/^\d+ organizaç/)).toBeInTheDocument();
     expect(within(buttons[0]).getByRole('img', { name: /^Nota média \d,\d de 5$/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Ver ranking · todos os tipos/ })).toHaveAttribute('href', '/ranking');
@@ -55,8 +55,8 @@ describe.each(['mobile', 'desktop'] as const)('Setores (%s)', (viewport) => {
     await user.click(screen.getByRole('button', { name: 'Mostrar todos os tipos' }));
     expect(screen.getByRole('button', { name: /Voluntariado/ })).toHaveAttribute('aria-pressed', 'false');
     // carregar outra vez no tipo escolhido também tira o filtro
-    await user.click(screen.getByRole('button', { name: /PME/ }));
-    await user.click(screen.getByRole('button', { name: /PME/ }));
+    await user.click(screen.getByRole('button', { name: /Empresa/ }));
+    await user.click(screen.getByRole('button', { name: /Empresa/ }));
     expect(screen.getByText(/^\d+ setores$/)).toBeInTheDocument();
   });
 });

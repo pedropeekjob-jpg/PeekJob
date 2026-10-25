@@ -11,7 +11,7 @@ import { tr } from '../i18n';
 import { useIsDesktop } from '../lib/useMedia';
 import { DeskSteps, FlowHead, LockLine, MiniSteps } from '../features/review/FlowParts';
 
-/** Avaliar · passo 1: escolher a organização (e o local) ou adicionar uma que falta */
+/** Avaliar · passo 1: escolher a organização (e o local) ou adicionar uma que falta; a seguir, o cargo e o período */
 export default function AvaliarEscolher() {
   const desktop = useIsDesktop();
   const { go, leave } = useFlowNav();
@@ -21,7 +21,7 @@ export default function AvaliarEscolher() {
 
   // vindo da página da organização, com um só local: não há nada a escolher
   useEffect(() => {
-    if (picker.autoStart && picker.confirm()) go('/avaliar/notas', { replace: true });
+    if (picker.autoStart && picker.confirm()) go('/avaliar/cargo', { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- só na entrada
   }, []);
 
@@ -31,13 +31,13 @@ export default function AvaliarEscolher() {
   };
   const next = async () => {
     const ok = step === 'add' ? await add.submit() : picker.confirm();
-    if (ok) go('/avaliar/notas');
+    if (ok) go('/avaliar/cargo');
   };
   const nextLabel = step === 'add' ? tr('Adicionar e continuar', 'Add and continue') : tr('Continuar', 'Continue');
 
   const search = <OrgSearchBox value={picker.query} onChange={picker.setQuery} />;
   const results = (
-    <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={(o) => picker.pick(o) && go('/avaliar/notas')} />
+    <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={(o) => picker.pick(o) && go('/avaliar/cargo')} />
   );
   const detail = (
     <>

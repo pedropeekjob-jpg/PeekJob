@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { toOrg, type ApiOrg } from '../../src/api/mappers';
 
-const api: ApiOrg = { id: 'x', name: 'Café', type: 'PME', city: 'Porto', status: 'active', reviewsCount: 0 };
+const api: ApiOrg = { id: 'x', name: 'Café', type: 'Empresa', city: 'Porto', status: 'active', reviewsCount: 0 };
 const iso = new Date().toISOString();
 
 describe('entrevistas e salários vindos da API', () => {

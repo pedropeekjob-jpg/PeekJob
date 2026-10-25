@@ -29,20 +29,22 @@ const F = (patch: Partial<Filters> = {}): Filters => ({ ...NO_FILTERS, ...patch 
 
 describe('filtros no endereço', () => {
   it('lê e escreve só o que não é o valor por omissão (ida e volta)', () => {
-    const sp = new URLSearchParams('tipo=PME,Associação&dim=1–9&dist=Porto&resp=1&ver=1&setor=Saúde&ordem=nota');
+    const sp = new URLSearchParams('tipo=Empresa,Associação&dim=1–9&dist=Porto&resp=1&ver=1&setor=Saúde&ordem=nota');
     const { filters, sort } = readFilters(sp);
-    expect(filters).toEqual({ tipo: ['PME', 'Associação'], dim: ['1–9'], dist: ['Porto'], resp: true, ver: true, setor: 'Saúde' });
+    expect(filters).toEqual({ tipo: ['Empresa', 'Associação'], dim: ['1–9'], dist: ['Porto'], resp: true, ver: true, setor: 'Saúde' });
     expect(sort).toBe('nota');
     expect(readFilters(writeFilters(filters, sort))).toEqual({ filters, sort });
     expect(writeFilters(NO_FILTERS, 'mim').toString()).toBe('');
-    expect(readFilters(new URLSearchParams('tipo=,PME,&ordem=outra'))).toEqual({ filters: F({ tipo: ['PME'] }), sort: 'mim' });
+    expect(readFilters(new URLSearchParams('tipo=,Empresa,&ordem=outra'))).toEqual({ filters: F({ tipo: ['Empresa'] }), sort: 'mim' });
+    // links antigos (antes de 25/10): PME e Grande empresa passam a Empresa, sem repetir
+    expect(readFilters(new URLSearchParams('tipo=PME,Grande empresa')).filters.tipo).toEqual(['Empresa']);
   });
 
   it('juntar/tirar valores e contar filtros ativos', () => {
     expect(toggleIn(['a'], 'b')).toEqual(['a', 'b']);
     expect(toggleIn(['a', 'b'], 'a')).toEqual(['b']);
     expect(activeCount(NO_FILTERS)).toBe(0);
-    expect(activeCount(F({ tipo: ['PME', 'Associação'], resp: true, ver: true, setor: 'Saúde' }))).toBe(5);
+    expect(activeCount(F({ tipo: ['Empresa', 'Associação'], resp: true, ver: true, setor: 'Saúde' }))).toBe(5);
   });
 
   it('o hook escreve no endereço com replace e guarda a ordem ao mudar filtros', () => {

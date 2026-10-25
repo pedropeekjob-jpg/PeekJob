@@ -58,3 +58,37 @@ export function districtOf(municipality: string | null | undefined): District | 
 }
 
 export const isDistrict = (v: unknown): v is District => typeof v === 'string' && (DISTRICTS as readonly string[]).includes(v);
+
+export interface Municipality {
+  name: string;
+  district: District;
+}
+
+const ALL_MUNICIPALITIES: (Municipality & { k: string; words: string[] })[] = DISTRICTS.flatMap((district) =>
+  MUNICIPALITIES[district].map((name) => {
+    const k = key(name);
+    return { name, district, k, words: k.split(/[\s-]+/) };
+  }),
+);
+
+/**
+ * Concelhos para sugerir enquanto se escreve a localidade (25/10, em vez de um mapa).
+ * Primeiro os que começam pelo texto, depois os que têm uma palavra que começa por ele ("gai" → Vila Nova de Gaia).
+ * Sem acentos nem maiúsculas; os nomes repetidos (Lagoa, Calheta) aparecem uma vez por distrito.
+ */
+export function suggestMunicipalities(q: string, max = 6): Municipality[] {
+  const nq = key(q);
+  if (nq.length < 2) return [];
+  const starts = ALL_MUNICIPALITIES.filter((m) => m.k.startsWith(nq));
+  const inside = ALL_MUNICIPALITIES.filter((m) => !m.k.startsWith(nq) && m.words.some((w) => w.startsWith(nq)));
+  const byName = (a: Municipality, b: Municipality) => a.name.localeCompare(b.name, 'pt') || a.district.localeCompare(b.district, 'pt');
+  return [...starts.sort(byName), ...inside.sort(byName)].slice(0, max).map(({ name, district }) => ({ name, district }));
+}
+
+/** O concelho escrito à mão, com a grafia oficial e o distrito (se não houver dúvidas); null se não for um concelho */
+export function findMunicipality(text: string | null | undefined): Municipality | null {
+  if (!text) return null;
+  const k = key(text);
+  const found = ALL_MUNICIPALITIES.filter((m) => m.k === k);
+  return found.length === 1 ? { name: found[0].name, district: found[0].district } : null;
+}

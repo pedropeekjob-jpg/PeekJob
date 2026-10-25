@@ -70,7 +70,7 @@ export const SCENARIOS = [
   { name: 'ranking-vazio', path: '/ranking?dist=Braga&ver=1' },
   {
     name: 'ranking-folha',
-    path: '/ranking?tipo=PME&ver=1',
+    path: '/ranking?tipo=Empresa&ver=1',
     mobileOnly: true,
     run: async (p) => {
       await tap(p, 'button', /^Filtros, \d+ activos/);

@@ -27,7 +27,7 @@ describe('moderação: regras e textos', () => {
     expect(reportsText(1)).toBe('1 denúncia');
     expect(reviewersText(0)).toBe('Ainda sem avaliações');
     expect(reviewersText(2)).toBe('2 pessoas já avaliaram');
-    expect(orgDetails('PME', { city: 'Faro', address: null, nif: null })).toBe('PME · Faro');
-    expect(orgDetails('PME', { city: 'Faro', address: 'Rua A', nif: '500697256' })).toBe('PME · Faro · Rua A · NIF 500697256');
+    expect(orgDetails('Empresa', { city: 'Faro', address: null, nif: null })).toBe('Empresa · Faro');
+    expect(orgDetails('Empresa', { city: 'Faro', address: 'Rua A', nif: '500697256' })).toBe('Empresa · Faro · Rua A · NIF 500697256');
   });
 });

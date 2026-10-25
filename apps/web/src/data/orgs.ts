@@ -1,9 +1,10 @@
-import type { ExtraKey, Extras } from '@peekjob/shared';
+import type { ExtraKey, Extras, PublicJob } from '@peekjob/shared';
 import { byPt } from '../lib/format';
 import type { CriterionKey } from './criteria';
 
-export type OrgType = 'PME' | 'Associação' | 'Voluntariado' | 'Nome individual' | 'Grande empresa';
-export const ORG_TYPES: OrgType[] = ['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa'];
+/** 25/10: PME e Grande empresa passaram a um só tipo, Empresa (a dimensão é que distingue) */
+export type OrgType = 'Empresa' | 'Associação' | 'Voluntariado' | 'Nome individual';
+export const ORG_TYPES: OrgType[] = ['Empresa', 'Associação', 'Voluntariado', 'Nome individual'];
 export type SizeBand = '1–9' | '10–49' | '50–249' | '250+';
 
 export type Scores = Record<CriterionKey, number | null>;
@@ -46,6 +47,8 @@ export interface Review {
   comments?: Partial<Record<string, string>>;
   /** notas por critério (para mostrar a nota ao lado do comentário) */
   scores?: Partial<Scores>;
+  /** cargo, se ainda lá trabalha e há quanto tempo (25/10; o cargo também vai em `role`) */
+  job?: PublicJob | null;
 }
 
 export interface Interview {
@@ -127,7 +130,7 @@ function genericReviews(org: { id: string; score: number }): Review[] {
 const RIBEIRA: Org = {
   id: 'padaria-ribeira',
   name: 'Padaria Ribeira',
-  type: 'PME',
+  type: 'Empresa',
   sector: 'Restauração',
   city: 'Porto',
   district: 'Porto',
@@ -151,8 +154,8 @@ const RIBEIRA: Org = {
     loc('campanha', 'Fabrico · Campanhã', 'Rua do Freixo, 40, Porto', 41.1462, -8.5813, 82, 30),
   ],
   reviews: [
-    { id: 'r1', role: 'Balcão', locationId: 'flores', when: 'há 4 dias', score: 4.5, title: 'Equipa que se ajuda e chefia que ouve.', body: 'Horários combinados com antecedência. Salário justo, mas sem prémios.', useful: 7, verified: true, tags: ['Horários cumpridos', 'Ambiente seguro'] },
-    { id: 'r2', role: 'Fabrico', locationId: 'campanha', when: 'há 1 mês', score: 4.0, title: 'Bom para começar, pouco espaço para crescer.', body: 'Aprendi muito. Para progredir é preciso esperar que alguém saia.', useful: 3, verified: true },
+    { id: 'r1', role: 'Balcão', job: { role: 'Balcão', current: true, tenure: '1to3' }, locationId: 'flores', when: 'há 4 dias', score: 4.5, title: 'Equipa que se ajuda e chefia que ouve.', body: 'Horários combinados com antecedência. Salário justo, mas sem prémios.', useful: 7, verified: true, tags: ['Horários cumpridos', 'Ambiente seguro'] },
+    { id: 'r2', role: 'Fabrico', job: { role: 'Fabrico', current: false, tenure: 'lt1' }, locationId: 'campanha', when: 'há 1 mês', score: 4.0, title: 'Bom para começar, pouco espaço para crescer.', body: 'Aprendi muito. Para progredir é preciso esperar que alguém saia.', useful: 3, verified: true },
     { id: 'r3', role: 'Balcão', locationId: 'flores', when: 'há 2 meses', score: 4.6, title: 'Respeitam quem tem filhos.', body: 'Ajustaram-me o horário quando precisei. Nunca houve problema.', useful: 5, verified: true, tags: ['Horários para quem cuida'] },
     { id: 'r4', role: 'Pastelaria', locationId: 'campanha', when: 'há 3 meses', score: 3.9, title: 'Muito trabalho ao fim de semana.', body: 'Boa equipa, mas os sábados são pesados e pouco compensados.', useful: 2, verified: false },
     { id: 'r5', role: 'Entregas', locationId: 'campanha', when: 'há 5 meses', score: 4.2, title: 'Pagam sempre a horas.', body: 'Em dois anos nunca houve atraso. Contrato desde o primeiro mês.', useful: 6, verified: true },
@@ -182,15 +185,15 @@ type Seed = [
 const SEEDS: Seed[] = [
   ['maos-dadas', 'Associação Mãos Dadas', 'Associação', 'Ação social', 'Braga', 'Braga', 22, 4.6, 18, 0, 0.1, s(3.4, 4.2, 4.9, 4.8, 4.6, 3.9, 4.0, 4.9), 'Propósito forte e equipa que cuida de quem cuida. Salários modestos.', 41.5503, -8.42, 'Rua do Souto, 15, Braga'],
   ['rede-vizinha', 'Rede Vizinha', 'Voluntariado', 'Comunidade', 'Porto', 'Porto', 40, 4.7, 14, 2, 0.3, s(null, 4.5, 4.9, 4.8, 4.4, null, 4.1, 4.9), 'Voluntariado bem organizado, com formação e horários flexíveis.', 41.157, -8.6291, 'Rua de Cedofeita, 200, Porto'],
-  ['oficina-sete', 'Oficina Sete', 'PME', 'Design', 'Porto', 'Porto', 9, 4.2, 9, 0, 0, s(4.0, 3.9, 4.5, 4.4, 4.1, 3.8, 4.3, 3.9), 'Estúdio pequeno, projetos variados e muita autonomia.', 41.1496, -8.6109, 'Rua de Miguel Bombarda, 451, Porto'],
+  ['oficina-sete', 'Oficina Sete', 'Empresa', 'Design', 'Porto', 'Porto', 9, 4.2, 9, 0, 0, s(4.0, 3.9, 4.5, 4.4, 4.1, 3.8, 4.3, 3.9), 'Estúdio pequeno, projetos variados e muita autonomia.', 41.1496, -8.6109, 'Rua de Miguel Bombarda, 451, Porto'],
   ['estudio-lume', 'Estúdio Lume', 'Nome individual', 'Arquitetura', 'Coimbra', 'Coimbra', 3, 3.9, 6, 'novo', 0, s(3.6, 3.4, 4.2, 4.3, 3.9, 3.2, 4.4, 3.8), 'Aprende-se muito, mas os prazos apertam.', 40.2033, -8.4103, 'Rua da Sofia, 30, Coimbra'],
-  ['clinica-foz', 'Clínica Foz', 'PME', 'Saúde', 'Porto', 'Porto', 40, 4.0, 41, 2, 0, s(3.9, 3.6, 4.2, 4.1, 3.8, 4.4, 3.9, 4.3), 'Estável e bem organizada. Turnos longos em época alta.', 41.1556, -8.6748, 'Avenida do Brasil, 80, Porto'],
+  ['clinica-foz', 'Clínica Foz', 'Empresa', 'Saúde', 'Porto', 'Porto', 40, 4.0, 41, 2, 0, s(3.9, 3.6, 4.2, 4.1, 3.8, 4.4, 3.9, 4.3), 'Estável e bem organizada. Turnos longos em época alta.', 41.1556, -8.6748, 'Avenida do Brasil, 80, Porto'],
   ['ponte-norte', 'Associação Ponte Norte', 'Associação', 'Cultura', 'Porto', 'Porto', 14, 4.3, 12, -1, 0, s(3.1, 4.4, 4.7, 4.6, 4.2, 3.5, 4.0, 4.8), 'Projetos com impacto e ambiente muito inclusivo.', 41.1466, -8.6061, 'Rua de Santa Catarina, 500, Porto'],
   ['banco-tempo', 'Banco de Tempo Bonfim', 'Voluntariado', 'Comunidade', 'Porto', 'Porto', 28, 4.5, 15, 0, 0.1, s(null, 4.6, 4.8, 4.7, 4.3, null, 3.9, 4.9), 'Trocas de tempo entre vizinhos, com coordenação próxima.', 41.1474, -8.5958, 'Rua do Bonfim, 120, Porto'],
   ['ana-reis', 'Ana Reis Fotografia', 'Nome individual', 'Fotografia', 'Porto', 'Porto', 3, 4.1, 5, 'novo', 0, s(3.7, 3.9, 4.6, 4.2, 4.0, 3.3, 4.2, 3.6), 'Trabalho criativo e pagamentos a tempo. Pouca estabilidade.', 41.1412, -8.6158, 'Rua de Mouzinho da Silveira, 20, Porto'],
-  ['cafe-vinha', 'Café Vinha', 'PME', 'Restauração', 'Vila Nova de Gaia', 'Porto', 11, 3.8, 17, 3, 0.2, s(3.5, 3.4, 4.0, 4.1, 3.7, 3.6, 3.4, 3.5), 'Bom ambiente entre colegas. Horários pouco previsíveis.', 41.1333, -8.6167, 'Avenida da República, 300, Vila Nova de Gaia'],
-  ['norte-logistica', 'Norte Logística', 'PME', 'Logística', 'Maia', 'Porto', 45, 3.1, 52, -2, -0.1, s(2.6, 2.4, 2.9, 3.4, 2.8, 3.6, 3.0, 3.1), 'Contratos estáveis, mas turnos pesados e chefias pouco disponíveis.', 41.2357, -8.6199, 'Zona Industrial da Maia, Lote 12'],
-  ['lavandaria-sol', 'Lavandaria Sol', 'PME', 'Limpeza', 'Matosinhos', 'Porto', 8, 2.9, 11, -4, -0.4, s(2.4, 2.6, 2.7, 3.2, 2.8, 3.1, 2.7, 2.9), 'Relatos de horas extra não pagas e pouca comunicação.', 41.1844, -8.6963, 'Rua Brito Capelo, 90, Matosinhos'],
+  ['cafe-vinha', 'Café Vinha', 'Empresa', 'Restauração', 'Vila Nova de Gaia', 'Porto', 11, 3.8, 17, 3, 0.2, s(3.5, 3.4, 4.0, 4.1, 3.7, 3.6, 3.4, 3.5), 'Bom ambiente entre colegas. Horários pouco previsíveis.', 41.1333, -8.6167, 'Avenida da República, 300, Vila Nova de Gaia'],
+  ['norte-logistica', 'Norte Logística', 'Empresa', 'Logística', 'Maia', 'Porto', 45, 3.1, 52, -2, -0.1, s(2.6, 2.4, 2.9, 3.4, 2.8, 3.6, 3.0, 3.1), 'Contratos estáveis, mas turnos pesados e chefias pouco disponíveis.', 41.2357, -8.6199, 'Zona Industrial da Maia, Lote 12'],
+  ['lavandaria-sol', 'Lavandaria Sol', 'Empresa', 'Limpeza', 'Matosinhos', 'Porto', 8, 2.9, 11, -4, -0.4, s(2.4, 2.6, 2.7, 3.2, 2.8, 3.1, 2.7, 2.9), 'Relatos de horas extra não pagas e pouca comunicação.', 41.1844, -8.6963, 'Rua Brito Capelo, 90, Matosinhos'],
 ];
 
 const size = (n: number): SizeBand => (n < 10 ? '1–9' : n < 50 ? '10–49' : n < 250 ? '50–249' : '250+');

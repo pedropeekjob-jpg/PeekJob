@@ -78,12 +78,12 @@ describe('componentes de dados', () => {
     expect(row).toHaveAttribute('href', '/org/padaria-ribeira');
     expect(row).toHaveAttribute('data-ev', 'select_org');
     expect(row).toHaveAttribute('data-ev-match', '91');
-    expect(row).toHaveTextContent('Padaria RibeiraPME · Porto91%');
+    expect(row).toHaveTextContent('Padaria RibeiraEmpresa · Porto91%');
     expect(other).toHaveAttribute('href', '/outro');
     expect(other).toHaveTextContent('Meta');
     expect(other).toHaveTextContent('dir');
     expect(screen.getByRole('img', { name: 'Ainda sem nota' })).toBeInTheDocument();
-    expect(card).toHaveTextContent('Padaria RibeiraPME · Porto77%');
-    expect(card).toHaveAttribute('data-ev-org-type', 'PME');
+    expect(card).toHaveTextContent('Padaria RibeiraEmpresa · Porto77%');
+    expect(card).toHaveAttribute('data-ev-org-type', 'Empresa');
   });
 });

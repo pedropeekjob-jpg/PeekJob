@@ -14,7 +14,7 @@ describe('setores: agregados e ligações', () => {
   });
 
   it('tipos pela ordem fixa; setores por nota, respeito ou n.º (desempate pela nota)', () => {
-    expect(typeCards(ORGS).map((c) => c.t)).toEqual(['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa']);
+    expect(typeCards(ORGS).map((c) => c.t)).toEqual(['Empresa', 'Associação', 'Voluntariado', 'Nome individual']);
     const byN = sectorRows(ORGS, null, 'n');
     expect(byN[0].n).toBeGreaterThanOrEqual(byN[1].n);
     const resp = sectorRows(ORGS, null, 'resp').map((s) => s.resp);
@@ -27,6 +27,6 @@ describe('setores: agregados e ligações', () => {
     expect(rankingHref(null)).toBe('/ranking');
     expect(rankingHref('Nome individual')).toBe('/ranking?tipo=Nome%20individual');
     expect(sectorHref(null, 'Ação social')).toBe('/ranking?setor=A%C3%A7%C3%A3o%20social');
-    expect(sectorHref('PME', 'Saúde')).toBe('/ranking?tipo=PME&setor=Sa%C3%BAde');
+    expect(sectorHref('Empresa', 'Saúde')).toBe('/ranking?tipo=Empresa&setor=Sa%C3%BAde');
   });
 });

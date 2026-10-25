@@ -51,6 +51,34 @@ describe('Avaliações', () => {
     expect(count.rows[0].n).toBe(0);
   });
 
+  it('cargo e período (25/10): em público só o cargo e o escalão de tempo; a própria pessoa vê os anos', async () => {
+    const job = { role: 'Balcão', current: false, from: 2019, to: 2021 };
+    const cookie = await t.login('u1');
+    const res = await t.http().post(`/orgs/${orgId}/reviews`).set(cookie).send({ ...goodReview, job }).expect(201);
+    expect(res.body.review.job).toEqual({ role: 'Balcão', current: false, tenure: '1to3' });
+    const list = await t.http().get(`/orgs/${orgId}/reviews`).expect(200);
+    const pub = list.body[0] ?? list.body.items?.[0];
+    expect(pub.job).toEqual({ role: 'Balcão', current: false, tenure: '1to3' });
+    expect(JSON.stringify(pub)).not.toMatch(/2019|2021/);
+    const mine = await t.http().get('/me/reviews').set(cookie).expect(200);
+    expect(mine.body.items[0].job).toEqual(job);
+    // editar sem mandar o cargo mantém-no
+    await t.http().patch(`/me/reviews/${res.body.review.id}`).set(cookie).send({ ...goodReview, text: 'Mudei o texto.' }).expect(200);
+    expect((await t.http().get('/me/reviews').set(cookie)).body.items[0].job).toEqual(job);
+  });
+
+  it('cargo: datas incoerentes (400) e nomes ou insultos no cargo (422)', async () => {
+    const cookie = await t.login('u1');
+    await t.http().post(`/orgs/${orgId}/reviews`).set(cookie).send({ ...goodReview, job: { role: 'Balcão', current: false, from: 2021, to: 2019 } }).expect(400);
+    const bad = await t.http().post(`/orgs/${orgId}/reviews`).set(cookie).send({ ...goodReview, job: { role: 'Ajudante do Ricardo incompetente', current: true, from: 2021 } }).expect(422);
+    expect(bad.body.field).toBe('job.role');
+  });
+
+  it('as avaliações sem cargo (antes de 25/10) continuam a funcionar', async () => {
+    const res = await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(goodReview).expect(201);
+    expect(res.body.review.job).toBeNull();
+  });
+
   it('parâmetros do tipo de trabalho e comentários por parâmetro: guardam-se e aparecem na lista pública', async () => {
     const body = { ...goodReview, extras: { gorjetas: true, folgas_escala: 2 }, comments: { ambiente: 'Equipa sempre pronta a ajudar.', gorjetas: 'Divididas por todos.' } };
     const res = await t.http().post(`/orgs/${orgId}/reviews`).set(await t.login('u1')).send(body).expect(201);
@@ -126,7 +154,7 @@ describe('Avaliações', () => {
 
   describe('organizações criadas por utilizadores', () => {
     it('ficam pendentes até 3 pessoas diferentes avaliarem', async () => {
-      const created = await t.http().post('/orgs').set(await t.login('u1')).send({ name: 'Café do Largo', type: 'PME', city: 'Porto' }).expect(201);
+      const created = await t.http().post('/orgs').set(await t.login('u1')).send({ name: 'Café do Largo', type: 'Empresa', city: 'Porto' }).expect(201);
       const id = created.body.id;
       expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u1')).send(goodReview)).status).toBe(201);
       expect((await t.http().post(`/orgs/${id}/reviews`).set(await t.login('u2')).send(goodReview)).status).toBe(201);

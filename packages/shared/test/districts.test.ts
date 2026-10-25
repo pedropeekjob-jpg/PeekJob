@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DISTRICTS, districtOf, isDistrict, MUNICIPALITIES } from '../src';
+import { DISTRICTS, districtOf, findMunicipality, isDistrict, MUNICIPALITIES, suggestMunicipalities } from '../src';
 
 /** Contagens oficiais de concelhos por distrito e região autónoma */
 const OFFICIAL: Record<string, number> = {
@@ -40,3 +40,30 @@ describe('distritos e concelhos', () => {
     expect(isDistrict(3)).toBe(false);
   });
 });
+
+describe('concelhos para a localidade (25/10)', () => {
+  it('sugere primeiro os que começam pelo texto e depois os que têm uma palavra que começa por ele', () => {
+    expect(suggestMunicipalities('gai')).toEqual([{ name: 'Vila Nova de Gaia', district: 'Porto' }]);
+    expect(suggestMunicipalities('porto').map((m) => m.name)).toEqual(['Porto', 'Porto de Mós', 'Porto Moniz', 'Porto Santo', 'Vila do Porto']);
+    expect(suggestMunicipalities('evo')[0]).toEqual({ name: 'Évora', district: 'Évora' });
+  });
+
+  it('os nomes repetidos aparecem com o distrito de cada um', () => {
+    expect(suggestMunicipalities('lagoa')).toEqual([
+      { name: 'Lagoa', district: 'Açores' },
+      { name: 'Lagoa', district: 'Faro' },
+    ]);
+  });
+
+  it('com menos de duas letras não sugere nada; no máximo seis', () => {
+    expect(suggestMunicipalities('p')).toEqual([]);
+    expect(suggestMunicipalities('vi').length).toBe(6);
+  });
+
+  it('reconhece um concelho escrito à mão (grafia oficial e distrito)', () => {
+    expect(findMunicipality('  vila nova de GAIA ')).toEqual({ name: 'Vila Nova de Gaia', district: 'Porto' });
+    expect(findMunicipality('Foz do Douro')).toBeNull();
+    expect(findMunicipality('Lagoa')).toBeNull();
+  });
+});
+

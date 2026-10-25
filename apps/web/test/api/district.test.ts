@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { toOrg, type ApiOrg } from '../../src/api/mappers';
 import { applyFilters, filterGroups, NO_FILTERS } from '../../src/features/ranking/ranking';
 
-const api = (patch: Partial<ApiOrg>): ApiOrg => ({ id: 'x', name: 'Café', type: 'PME', city: 'Matosinhos', status: 'active', reviewsCount: 6, score: 4, ...patch });
+const api = (patch: Partial<ApiOrg>): ApiOrg => ({ id: 'x', name: 'Café', type: 'Empresa', city: 'Matosinhos', status: 'active', reviewsCount: 6, score: 4, ...patch });
 
 describe('distrito vindo da API', () => {
   it('usa o distrito da API (não a cidade); sem distrito fica vazio', () => {

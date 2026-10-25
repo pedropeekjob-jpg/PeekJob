@@ -85,7 +85,7 @@ export function useSuggest({
         {open &&
           items.map((s, i) => (
             <li
-              key={`${s.kind}-${'id' in s ? s.id : s.label}`}
+              key={`${s.kind}-${'id' in s ? s.id : `${s.label}-${s.district ?? ''}`}`}
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
@@ -123,6 +123,6 @@ function subText(s: Suggestion) {
     case 'sector':
       return tr('Setor', 'Sector');
     case 'place':
-      return tr('Sítio', 'Place');
+      return s.district ?? tr('Sítio', 'Place');
   }
 }

@@ -70,7 +70,7 @@ describe('Organizações', () => {
   });
 
   describe('POST /orgs — avaliar uma organização que não está na lista', () => {
-    const nova = { name: 'Café do Largo', type: 'PME', city: 'Porto' };
+    const nova = { name: 'Café do Largo', type: 'Empresa', city: 'Porto' };
 
     it('exige sessão', async () => {
       expect((await t.http().post('/orgs').send(nova)).status).toBe(401);
@@ -87,9 +87,11 @@ describe('Organizações', () => {
       expect(res.body.issues[0].path).toEqual(['nif']);
     });
 
-    it('aceita grandes empresas (o foco são as pequenas, mas qualquer empresa pode ser avaliada)', async () => {
+    it('os tipos antigos (PME, Grande empresa) entram como "Empresa" (25/10)', async () => {
       const res = await t.http().post('/orgs').set(await t.login('u1')).send({ ...nova, name: 'Sonae', type: 'Grande empresa' }).expect(201);
-      expect(res.body).toMatchObject({ name: 'Sonae', status: 'pending' });
+      expect(res.body).toMatchObject({ name: 'Sonae', status: 'pending', type: 'Empresa' });
+      const pme = await t.http().post('/orgs').set(await t.login('u2')).send({ ...nova, name: 'Tasca do Zé', type: 'PME' }).expect(201);
+      expect(pme.body.type).toBe('Empresa');
     });
 
     it('exige NIF a empresas em nome individual', async () => {

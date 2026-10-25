@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CreateOrganizationInput, CreateReviewInput } from '../src/schemas';
 
 describe('CreateOrganizationInput', () => {
-  const base = { name: '  Padaria Nova  ', type: 'PME', city: 'Porto' };
+  const base = { name: '  Padaria Nova  ', type: 'Empresa', city: 'Porto' };
 
   it('aceita dados mínimos e normaliza espaços', () => {
     const r = CreateOrganizationInput.parse(base);
@@ -19,8 +19,9 @@ describe('CreateOrganizationInput', () => {
     expect(() => CreateOrganizationInput.parse({ ...base, type: 'Nome individual' })).toThrow(/NIF/);
   });
 
-  it('aceita grandes empresas (qualquer empresa pode ser avaliada)', () => {
-    expect(CreateOrganizationInput.parse({ ...base, name: 'Continente', type: 'Grande empresa' }).type).toBe('Grande empresa');
+  it('os tipos antigos (PME, Grande empresa) passam a "Empresa"', () => {
+    expect(CreateOrganizationInput.parse({ ...base, name: 'Continente', type: 'Grande empresa' }).type).toBe('Empresa');
+    expect(CreateOrganizationInput.parse({ ...base, type: 'PME' }).type).toBe('Empresa');
   });
 
   it('recusa tipos desconhecidos e nomes curtos', () => {

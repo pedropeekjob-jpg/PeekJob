@@ -26,7 +26,7 @@ describe('Importação do OpenStreetMap', () => {
     const r = await importOrgs(t.pool, orgs);
     expect(r).toEqual({ created: 7, linked: 0, skipped: 0 });
     const { rows } = await t.pool.query(`SELECT name, type, city, sector, status, source FROM organizations WHERE name = 'Padaria Ribeira'`);
-    expect(rows[0]).toEqual({ name: 'Padaria Ribeira', type: 'PME', city: 'Porto', sector: 'Comércio', status: 'pending', source: 'import' });
+    expect(rows[0]).toEqual({ name: 'Padaria Ribeira', type: 'Empresa', city: 'Porto', sector: 'Comércio', status: 'pending', source: 'import' });
     const loc = await t.pool.query(`SELECT l.address, l.lat, l.lng, l.status FROM org_locations l JOIN organizations o ON o.id = l.org_id WHERE o.name = 'Padaria Ribeira'`);
     expect(loc.rows[0]).toEqual({ address: 'Rua de Cima 12, 4050-123 Porto', lat: 41.1496, lng: -8.6109, status: 'active' });
     const src = await t.pool.query(`SELECT s.source, s.license, s.external_id FROM org_sources s JOIN organizations o ON o.id = s.org_id WHERE o.name = 'Padaria Ribeira'`);

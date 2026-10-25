@@ -25,7 +25,7 @@ test('verificar com uma fotografia do recibo', async ({ page }, info) => {
   const nif = randomNif();
   const name = `Oficina Foto ${info.project.name} ${Date.now() % 100000}`;
   const [org] = await sql<{ id: string }>(
-    `INSERT INTO organizations (name, type, city, status, nif, nif_verified, source) VALUES ($1, 'PME', 'Porto', 'active', $2, true, 'seed') RETURNING id`,
+    `INSERT INTO organizations (name, type, city, status, nif, nif_verified, source) VALUES ($1, 'Empresa', 'Porto', 'active', $2, true, 'seed') RETURNING id`,
     [name, nif],
   );
   await login(page, uniqueEmail('foto'));

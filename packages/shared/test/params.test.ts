@@ -19,7 +19,7 @@ describe('parâmetros por tipo de trabalho', () => {
   it('voluntariado e associações sem setor conhecido; e o geral', () => {
     expect(suggestedExtras('Comunidade', 'Associação')).toEqual(['despesas', 'acompanhamento', 'reconhecimento']);
     expect(suggestedExtras(null, 'Voluntariado')).toEqual(['despesas', 'acompanhamento', 'reconhecimento']);
-    expect(suggestedExtras('—', 'PME')).toEqual(['contrato_escrito', 'horas_extra_pagas', 'pausas']);
+    expect(suggestedExtras('—', 'Empresa')).toEqual(['contrato_escrito', 'horas_extra_pagas', 'pausas']);
   });
 
   it('todos os sugeridos existem e as chaves não se repetem', () => {

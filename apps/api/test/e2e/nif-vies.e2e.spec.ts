@@ -32,7 +32,7 @@ describe('Organizações: NIF confirmado no VIES', () => {
 
   it('NIF confirmado e nome parecido: fica com NIF verificado, nome oficial como alias e proveniência', async () => {
     answers.set('500697256', { status: 'valid', name: 'EDP - ENERGIAS DE PORTUGAL, S.A.', address: 'AV 24 DE JULHO 12, LISBOA' });
-    const res = await create({ name: 'EDP Energias de Portugal', type: 'PME', city: 'Lisboa', nif: '500697256' }, await t.login('ana')).expect(201);
+    const res = await create({ name: 'EDP Energias de Portugal', type: 'Empresa', city: 'Lisboa', nif: '500697256' }, await t.login('ana')).expect(201);
     expect(res.body.nifCheck).toEqual({ status: 'confirmed', officialName: 'EDP - ENERGIAS DE PORTUGAL, S.A.' });
     const o = await t.pool.query('SELECT nif_verified, status FROM organizations WHERE id = $1', [res.body.id]);
     expect(o.rows[0]).toEqual({ nif_verified: true, status: 'pending' });
@@ -44,14 +44,14 @@ describe('Organizações: NIF confirmado no VIES', () => {
 
   it('com o NIF confirmado, a primeira avaliação ativa a organização (regra existente)', async () => {
     answers.set('500697256', { status: 'valid', name: 'EDP, S.A.', address: null });
-    const res = await create({ name: 'EDP', type: 'PME', city: 'Lisboa', nif: '500697256' }, await t.login('ana')).expect(201);
+    const res = await create({ name: 'EDP', type: 'Empresa', city: 'Lisboa', nif: '500697256' }, await t.login('ana')).expect(201);
     const r = await t.http().post(`/orgs/${res.body.id}/reviews`).set(await t.login('ana')).send(goodReview).expect(201);
     expect(r.body.orgStatus).toBe('active');
   });
 
   it('NIF existe mas o nome não bate certo: não verifica e devolve o nome oficial para a pessoa confirmar', async () => {
     answers.set('500697256', { status: 'valid', name: 'EDP, S.A.', address: null });
-    const res = await create({ name: 'Padaria Ribeira', type: 'PME', city: 'Porto', nif: '500697256' }, await t.login('ana')).expect(201);
+    const res = await create({ name: 'Padaria Ribeira', type: 'Empresa', city: 'Porto', nif: '500697256' }, await t.login('ana')).expect(201);
     expect(res.body.nifCheck).toEqual({ status: 'name_mismatch', officialName: 'EDP, S.A.' });
     const o = await t.pool.query('SELECT nif_verified FROM organizations WHERE id = $1', [res.body.id]);
     expect(o.rows[0].nif_verified).toBe(false);
@@ -61,7 +61,7 @@ describe('Organizações: NIF confirmado no VIES', () => {
     const a = await create({ name: 'Associação Mãos Dadas', type: 'Associação', city: 'Braga', nif: '513000003' }, await t.login('ana')).expect(201);
     expect(a.body.nifCheck).toEqual({ status: 'not_found' });
     answers.set('500697256', { status: 'unavailable' });
-    const b = await create({ name: 'EDP', type: 'PME', city: 'Lisboa', nif: '500697256' }, await t.login('rui')).expect(201);
+    const b = await create({ name: 'EDP', type: 'Empresa', city: 'Lisboa', nif: '500697256' }, await t.login('rui')).expect(201);
     expect(b.body.nifCheck).toEqual({ status: 'unavailable' });
   });
 

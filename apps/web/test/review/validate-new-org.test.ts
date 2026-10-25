@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { validateNewOrg } from '../../src/features/review/useAddOrg';
 
-const ok = { name: 'Horta da Sé', type: 'Associação' as const, city: 'Porto', nif: '' };
+const ok = { name: 'Horta da Sé', type: 'Associação' as const, city: 'Porto', district: null, nif: '' };
 describe('validateNewOrg', () => {
   it('tudo certo', () => expect(validateNewOrg(ok)).toBeNull());
   it('NIF válido com espaços', () => expect(validateNewOrg({ ...ok, nif: '513 000 003' })).toBeNull());

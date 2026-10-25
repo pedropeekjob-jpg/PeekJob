@@ -1,4 +1,4 @@
-import { isValidNif, normalizeNif } from '@peekjob/shared';
+import { findMunicipality, isValidNif, normalizeNif, type District } from '@peekjob/shared';
 import { useCallback, useState } from 'react';
 import type { OrgType } from '../../data/orgs';
 import { tr } from '../../i18n';
@@ -8,6 +8,8 @@ export interface NewOrg {
   name: string;
   type: OrgType;
   city: string;
+  /** distrito do concelho escolhido nas sugestões (ou reconhecido no que se escreveu) */
+  district: District | null;
   nif: string;
 }
 
@@ -24,7 +26,7 @@ export function validateNewOrg(o: NewOrg): string | null {
 /** Formulário "adicionar organização que não está cá": estado, validação e envio */
 export function useAddOrg() {
   const { addOrg, updateDraft } = useStore();
-  const [form, setForm] = useState<NewOrg>({ name: '', type: 'PME', city: '', nif: '' });
+  const [form, setForm] = useState<NewOrg>({ name: '', type: 'Empresa', city: '', district: null, nif: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -45,8 +47,11 @@ export function useAddOrg() {
       return false;
     }
     const nif = normalizeNif(form.nif);
+    // concelho escrito à mão: fica com a grafia oficial e o distrito; outra localidade vai tal como está
+    const known = form.district ? { name: form.city.trim(), district: form.district } : findMunicipality(form.city);
+    const city = known?.name ?? form.city.trim();
     setBusy(true);
-    const r = await addOrg({ name: form.name.trim(), type: form.type, city: form.city.trim(), ...(nif ? { nif } : {}) });
+    const r = await addOrg({ name: form.name.trim(), type: form.type, city, ...(known ? { district: known.district } : {}), ...(nif ? { nif } : {}) });
     setBusy(false);
     if (!r.ok) {
       setError(r.status === 401 ? tr('Entra primeiro para adicionar uma organização.', 'Sign in first to add an organisation.') : r.message);

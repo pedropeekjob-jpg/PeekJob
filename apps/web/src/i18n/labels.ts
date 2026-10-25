@@ -5,11 +5,10 @@ import { tr } from '.';
  * O valor nunca muda; só o que se mostra.
  */
 const ORG_TYPE_EN: Record<string, string> = {
-  PME: 'SME',
+  Empresa: 'Company',
   Associação: 'Association',
   Voluntariado: 'Volunteering',
   'Nome individual': 'Sole trader',
-  'Grande empresa': 'Large company',
   Todas: 'All',
   Todos: 'All',
 };

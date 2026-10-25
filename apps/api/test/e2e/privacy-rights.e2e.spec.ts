@@ -78,7 +78,7 @@ describe('Os meus dados (RGPD)', () => {
 
     it('as organizações que a pessoa criou ficam, sem ligação a ela', async () => {
       const me = await t.login('criadora');
-      const created = await t.http().post('/orgs').set(me).send({ name: 'Café do Largo', type: 'PME', city: 'Porto' }).expect(201);
+      const created = await t.http().post('/orgs').set(me).send({ name: 'Café do Largo', type: 'Empresa', city: 'Porto' }).expect(201);
       expect((await t.http().delete('/me').set(me).send({})).status).toBe(204);
       const { rows } = await t.pool.query('SELECT created_by FROM organizations WHERE id = $1', [created.body.id]);
       expect(rows).toEqual([{ created_by: null }]);

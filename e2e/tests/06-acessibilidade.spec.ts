@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { expect, login, pickOrg, test, uniqueEmail, setScore } from '../support/fixtures';
+import { expect, fillJob, login, pickOrg, test, uniqueEmail, setScore } from '../support/fixtures';
 
 /**
  * WCAG 2.1 AA (axe-core): todas as páginas, em telemóvel e computador, também os passos de avaliar e o perfil.
@@ -64,7 +64,9 @@ test('fluxo de avaliar e área pessoal sem falhas de acessibilidade', async ({ p
   await login(page, uniqueEmail('a11y'));
   await page.goto('/avaliar');
   await audit(page, '/avaliar', found);
-  await pickOrg(page, 'oficina sete', 'Oficina Sete');
+  await pickOrg(page, 'oficina sete', 'Oficina Sete', { stopAtJob: true });
+  await audit(page, '/avaliar/cargo', found);
+  await fillJob(page);
   await audit(page, '/avaliar/notas', found);
   await setScore(page, 'Ambiente', 3);
   if (isMobile) await page.getByRole('button', { name: /Contar como é/ }).click();

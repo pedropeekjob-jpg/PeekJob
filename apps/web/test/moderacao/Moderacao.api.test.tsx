@@ -38,7 +38,7 @@ const CLAIM = {
   id: 'c1', orgId: 'o1', orgName: 'Oficina Nove', city: 'Porto', nif: '501442600', method: 'document', emailDomain: null, domainKnown: false,
   name: 'Rui Nove', role: 'Sócio', members: 0, createdAt: new Date().toISOString(),
 };
-const ORG = { id: 'p1', name: 'Loja Nova', type: 'PME', city: 'Faro', nif: '500697256', address: null, createdAt: new Date().toISOString(), reviewers: 0, duplicates: [] };
+const ORG = { id: 'p1', name: 'Loja Nova', type: 'Empresa', city: 'Faro', nif: '500697256', address: null, createdAt: new Date().toISOString(), reviewers: 0, duplicates: [] };
 
 function routes(overrides: Record<string, unknown> = {}) {
   api.mockImplementation(async (path: string) => {

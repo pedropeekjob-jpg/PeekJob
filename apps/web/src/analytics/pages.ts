@@ -30,6 +30,7 @@ const PAGES = (): Record<string, PageMeta> => ({
   '/a-preparar': { title: tr(`A preparar · ${BRAND}`, `Getting ready · ${BRAND}`), index: false },
   '/avaliar': { title: tr(`Avaliar · ${BRAND}`, `Review · ${BRAND}`), index: false },
   '/avaliar/verificar': { title: tr(`Verificar · ${BRAND}`, `Verify · ${BRAND}`), index: false },
+  '/avaliar/cargo': { title: tr(`O teu trabalho · ${BRAND}`, `Your job · ${BRAND}`), index: false },
   '/avaliar/notas': { title: tr(`Notas · ${BRAND}`, `Scores · ${BRAND}`), index: false },
   '/avaliar/texto': { title: tr(`Avaliar · texto · ${BRAND}`, `Review · text · ${BRAND}`), index: false },
   '/avaliar/feito': { title: tr(`Publicada · ${BRAND}`, `Published · ${BRAND}`), index: false },

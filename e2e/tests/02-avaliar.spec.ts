@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect, expectNoHorizontalScroll, login, openMagicLink, pickOrg, test, uniqueEmail, scoreRadio, setScore } from '../support/fixtures';
+import { expect, expectNoHorizontalScroll, fillJob, login, openMagicLink, pickOrg, test, uniqueEmail, scoreRadio, setScore } from '../support/fixtures';
 
 /** O fluxo principal: entrar, escolher a organização, dar notas e escrever no mesmo ecrã, reescrever, publicar e verificar depois */
 test.describe('Avaliar onde trabalho', () => {
@@ -71,7 +71,7 @@ test.describe('Avaliar onde trabalho', () => {
     await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.keyboard.press('Enter')]);
     await expect(page).toHaveURL(/\/avaliar\?q=oficina/);
     await page.getByText('Oficina Sete', { exact: true }).first().click();
-    await page.waitForURL(/\/avaliar\/notas/);
+    await fillJob(page);
     await expect(page.getByRole('radiogroup', { name: 'Salário justo' })).toBeVisible();
   });
 
@@ -83,7 +83,7 @@ test.describe('Avaliar onde trabalho', () => {
     await page.waitForURL(/\/org\//);
     const orgUrl = page.url();
     await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
-    await page.waitForURL(/\/avaliar\/notas/);
+    await fillJob(page);
     await page.getByRole('button', { name: /^Fechar/ }).click();
     await expect(page).toHaveURL(orgUrl);
     await page.goBack();
@@ -120,7 +120,7 @@ test.describe('Avaliar onde trabalho', () => {
     const email = uniqueEmail('a-meio');
     await openOrgFromList(page);
     await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
-    await page.waitForURL(/\/avaliar\/notas/);
+    await fillJob(page);
     await setScore(page, 'Ambiente', 4);
     await page.getByRole('button', { name: /Publicar avaliação/ }).click();
     await expect(page.getByRole('alert').filter({ hasText: 'Entra para publicar.' })).toBeVisible();
@@ -148,7 +148,7 @@ async function openOrgFromList(page: Page) {
 /** Avaliar esta organização → uma nota → publicar */
 async function startAndPublish(page: Page) {
   await page.getByRole('button', { name: 'Avaliar esta organização' }).first().click();
-  await page.waitForURL(/\/avaliar\/notas/);
+  await fillJob(page);
   await setScore(page, 'Ambiente', 4);
   await page.getByRole('button', { name: /Publicar avaliação/ }).click();
   await page.waitForURL(/\/avaliar\/feito/);

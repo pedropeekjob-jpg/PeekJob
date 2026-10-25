@@ -7,7 +7,8 @@ import { ORG_BY_ID, type Org, type OrgType, type Scores } from '../data/orgs';
 import { textLengthBucket, track } from '../analytics';
 import { detectRedFlags, findPersonalAttacks, softenText } from './moderation';
 import { getLang, tr } from '../i18n';
-import { stepsLabel, type CreateInterviewInput, type CreateSalaryInput, type Extras } from '@peekjob/shared';
+import { stepsLabel, type CreateInterviewInput, type CreateSalaryInput, type Extras, type ReviewJob } from '@peekjob/shared';
+import { jobInput } from '../features/review/job';
 import type { ExtraKey, ParamKey } from '../data/params';
 import { emptyShared, type SharedLocal } from '../features/share/share';
 
@@ -36,6 +37,8 @@ export interface MyReview {
   verified?: boolean;
   /** quem escreveu mudou o texto depois de publicar */
   edited?: boolean;
+  /** cargo e período (as avaliações de antes de 25/10 não têm) */
+  job?: ReviewJob | null;
 }
 
 export interface SupportMessage {
@@ -76,7 +79,18 @@ export interface Draft {
   extraKeys: ExtraKey[];
   /** comentário curto por critério ou parâmetro */
   comments: Comments;
+  /** cargo e período (25/10), pedidos logo a seguir a escolher a organização */
+  job: JobDraft;
 }
+
+/** Cargo e período enquanto se preenchem (current: null = ainda não respondeu) */
+export interface JobDraft {
+  role: string;
+  current: boolean | null;
+  from: number | null;
+  to: number | null;
+}
+export const emptyJob = (): JobDraft => ({ role: '', current: null, from: null, to: null });
 
 export interface AddedOrg {
   id: string;
@@ -120,7 +134,7 @@ const EXAMPLE_TEXT =
   'Gosto das colegas, mas há meses que o salário chega com duas semanas de atraso. O encarregado faz comentários sobre o meu corpo à frente dos clientes.';
 
 export const emptyDraft = (): Draft => ({
-  orgId: null, locationId: null, verified: null, scores: {}, recommend: null, tags: [], text: '', extras: {}, extraKeys: [], comments: {},
+  orgId: null, locationId: null, verified: null, scores: {}, recommend: null, tags: [], text: '', extras: {}, extraKeys: [], comments: {}, job: emptyJob(),
 });
 
 /** Rascunho de exemplo (igual ao do design) para a demonstração do fluxo de avaliar */
@@ -135,6 +149,7 @@ export const exampleDraft = (): Draft => ({
   extras: {},
   extraKeys: [],
   comments: {},
+  job: { role: 'Balcão', current: true, from: 2022, to: null },
 });
 
 const initial = (): State =>
@@ -175,7 +190,7 @@ function load(): State {
       const saved = JSON.parse(raw);
       VOLATILE.forEach((k) => delete saved[k]);
       const base = initial();
-      // rascunhos guardados antes de haver parâmetros e comentários ficam com eles vazios
+      // rascunhos guardados antes de haver parâmetros, comentários e cargo ficam com os do rascunho de base
       return { ...base, ...saved, draft: { ...base.draft, ...saved.draft } };
     }
   } catch {
@@ -382,7 +397,7 @@ function useAppState() {
       remember: (o: Org) => setRemote((x) => (x.known[o.id] ? x : { ...x, known: { ...x.known, [o.id]: o } })),
 
       /** Adiciona uma organização que falta. Modo API: devolve o id real (ou o da existente, se o NIF já existir). */
-      addOrg: async (o: Omit<AddedOrg, 'id'> & { nif?: string }): Promise<Result<{ id: string; duplicates: { id: string; name: string }[] }>> => {
+      addOrg: async (o: Omit<AddedOrg, 'id'> & { nif?: string; district?: string }): Promise<Result<{ id: string; duplicates: { id: string; name: string }[] }>> => {
         if (!apiMode) {
           const id = 'nova-' + o.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
           set((s) => ({
@@ -469,7 +484,7 @@ function useAppState() {
             const id = 'mine-' + Date.now();
             const review: MyReview = {
               id, orgId: d.orgId, locationId: d.locationId ?? undefined, scores: d.scores, avg: avgOf(d.scores),
-              recommend: d.recommend, tags: d.tags, text: d.text, extras: d.extras, comments: cleanComments(d.comments), when: 'hoje', flagged: rf.flagged, verified: !!d.verified,
+              recommend: d.recommend, tags: d.tags, text: d.text, extras: d.extras, comments: cleanComments(d.comments), job: jobInput(d.job), when: 'hoje', flagged: rf.flagged, verified: !!d.verified,
             };
             const msgs = rf.flagged && s.user
               ? [{ id: 'msg-' + Date.now(), orgId: d.orgId, kinds: rf.kinds, found: rf.found, when: 'hoje', read: false }, ...s.messages]
@@ -483,7 +498,7 @@ function useAppState() {
         try {
           const loc = d.locationId && /^[0-9a-f-]{36}$/i.test(d.locationId) ? d.locationId : undefined;
           const r = await api<{ review: ApiReview }>(`/orgs/${d.orgId}/reviews`, {
-            body: { scores: d.scores, recommend: d.recommend, tags: d.tags, text: d.text, extras: d.extras, comments: cleanComments(d.comments), locationId: loc },
+            body: { scores: d.scores, recommend: d.recommend, tags: d.tags, text: d.text, extras: d.extras, comments: cleanComments(d.comments), job: jobInput(d.job), locationId: loc },
           });
           const mine = toMyReview({ ...r.review, orgId: d.orgId });
           set((s) => ({ myReviews: [mine, ...s.myReviews.filter((x) => x.id !== mine.id)], lastPublished: mine.id, draft: emptyDraft() }));

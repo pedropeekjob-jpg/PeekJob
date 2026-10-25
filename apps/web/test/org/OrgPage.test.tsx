@@ -60,6 +60,9 @@ describe.each(['mobile', 'desktop'] as const)('Página da organização (%s)', (
     const { user } = show(viewport);
     const list = await screen.findAllByRole('article');
     expect(list).toHaveLength(2);
+    // cargo e há quanto tempo (25/10), nunca os anos
+    expect(list[0]).toHaveTextContent('Balcão · trabalha lá · 1 a 3 anos · há 4 dias');
+    expect(list[1]).toHaveTextContent('Fabrico · já saiu · menos de 1 ano');
     await user.click(screen.getByRole('button', { name: 'Ver todas as 23 avaliações' }));
     expect(screen.getAllByRole('article')).toHaveLength(5);
     const first = screen.getAllByRole('article')[0];
