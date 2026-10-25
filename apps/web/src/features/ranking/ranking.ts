@@ -50,7 +50,7 @@ const list = (v: string | null) => (v ? v.split(',').filter(Boolean) : []);
 /** Filtros e ordem a partir do endereço; links antigos com tipo=PME passam a Empresa (?tipo=…&dim=…&dist=…&resp=1&ver=1&setor=…&ordem=nota) */
 export function readFilters(sp: URLSearchParams): { filters: Filters; sort: Sort } {
   return {
-    filters: { tipo: [...new Set(list(sp.get('tipo')).map(normalizeOrgType))], dim: list(sp.get('dim')), dist: list(sp.get('dist')), resp: sp.get('resp') === '1', ver: sp.get('ver') === '1', setor: sp.get('setor') },
+    filters: { tipo: [...new Set(list(sp.get('tipo')).map((t) => normalizeOrgType(t)))], dim: list(sp.get('dim')), dist: list(sp.get('dist')), resp: sp.get('resp') === '1', ver: sp.get('ver') === '1', setor: sp.get('setor') },
     sort: sp.get('ordem') === 'nota' ? 'nota' : 'mim',
   };
 }
