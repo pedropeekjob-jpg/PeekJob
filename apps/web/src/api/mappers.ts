@@ -1,4 +1,4 @@
-import { stepsLabel, type Extras } from '@peekjob/shared';
+import { stepsLabel, type Extras, type PublicJob, type ReviewJob } from '@peekjob/shared';
 import type { ExtraSummary, Interview, Org, OrgLocation, OrgType, Review, SalaryBand, Scores } from '../data/orgs';
 import { ago } from '../lib/format';
 import type { Comments, MyReview, SupportMessage } from '../lib/store';
@@ -45,6 +45,8 @@ export interface ApiReview {
   editedAt?: string | null;
   /** resposta pública da organização */
   reply?: { text: string; createdAt: string; updatedAt: string } | null;
+  /** cargo e período: em público sem os anos; nas minhas avaliações, completo */
+  job?: PublicJob | ReviewJob | null;
 }
 
 export interface ApiInterview {
@@ -97,7 +99,8 @@ function mapLocations(locs: ApiOrg['locations'], city: string): OrgLocation[] {
 }
 
 export function toReview(r: ApiReview): Review {
-  return { id: r.id, role: 'Equipa', when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags, reply: r.reply?.text, extras: r.extras ?? {}, comments: r.comments ?? {}, scores: r.scores };
+  const job = r.job && 'tenure' in r.job ? r.job : null;
+  return { id: r.id, role: job?.role ?? 'Equipa', job, when: when(r.createdAt), score: r.avg, title: '', body: r.text, useful: r.helpful ?? 0, verified: r.verified, tags: r.tags, reply: r.reply?.text, extras: r.extras ?? {}, comments: r.comments ?? {}, scores: r.scores };
 }
 
 /** Converte uma organização da API para o modelo usado pelos ecrãs (campos sem dados ficam vazios) */
@@ -141,7 +144,7 @@ export function toOrg(o: ApiOrg, reviews: ApiReview[] = [], extras: OrgExtras = 
 }
 
 export function toMyReview(r: ApiReview & { orgId: string }): MyReview {
-  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, extras: r.extras ?? {}, comments: r.comments ?? {}, when: when(r.createdAt), flagged: r.flagged, verified: r.verified, edited: !!r.editedAt };
+  return { id: r.id, orgId: r.orgId, scores: r.scores, avg: r.avg, recommend: r.recommend, tags: r.tags, text: r.text, extras: r.extras ?? {}, comments: r.comments ?? {}, when: when(r.createdAt), flagged: r.flagged, verified: r.verified, edited: !!r.editedAt, job: r.job && 'from' in r.job ? r.job : null };
 }
 
 export function toMessage(m: {

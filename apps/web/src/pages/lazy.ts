@@ -17,6 +17,7 @@ export const Pages = {
   OrgPage: lazyPage(() => import('./OrgPage')),
   Denunciar: lazyPage(() => import('./Denunciar')),
   AvaliarEscolher: lazyPage(() => import('./AvaliarEscolher')),
+  AvaliarCargo: lazyPage(() => import('./AvaliarCargo')),
   AvaliarVerificar: lazyPage(() => import('./AvaliarVerificar')),
   AvaliarNotas: lazyPage(() => import('./AvaliarNotas')),
   AvaliarFeito: lazyPage(() => import('./AvaliarFeito')),

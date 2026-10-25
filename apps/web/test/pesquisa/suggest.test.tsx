@@ -32,7 +32,7 @@ describe('sugestões (21/10)', () => {
 });
 
 const ITEMS: Suggestion[] = [
-  { kind: 'org', id: 'padaria-ribeira', label: 'Padaria Ribeira', city: 'Porto', type: 'PME' },
+  { kind: 'org', id: 'padaria-ribeira', label: 'Padaria Ribeira', city: 'Porto', type: 'Empresa' },
   { kind: 'role', label: 'Pastelaria', orgs: 1 },
 ];
 function Field({ onPick, onSubmit }: { onPick: (s: Suggestion) => void; onSubmit: () => void }) {
@@ -62,7 +62,7 @@ describe('campo com sugestões (combobox)', () => {
     await user.type(box, 'pa');
     expect(box).toHaveAttribute('aria-expanded', 'true');
     const options = screen.getAllByRole('option');
-    expect(options.map((o) => o.textContent)).toEqual(['Padaria RibeiraPME · Porto', 'PastelariaProfissão · em 1 organização']);
+    expect(options.map((o) => o.textContent)).toEqual(['Padaria RibeiraEmpresa · Porto', 'PastelariaProfissão · em 1 organização']);
     await user.keyboard('{ArrowDown}{ArrowDown}');
     expect(box).toHaveAttribute('aria-activedescendant', options[1].id);
     expect(options[1]).toHaveAttribute('aria-selected', 'true');

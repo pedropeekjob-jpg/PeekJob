@@ -1,19 +1,24 @@
 import { ConflictException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { detectRedFlags, findPersonalAttacks, softenText, type CreateReviewInput, type UpdateReviewInput } from '@peekjob/shared';
+import { detectRedFlags, findPersonalAttacks, publicJob, softenText, type CreateReviewInput, type ReviewJob, type UpdateReviewInput } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { isUuid } from '../common/zod';
 import { isUniqueViolation, PG_POOL, tx } from '../db/db.module';
 import { shouldActivate } from '../domain/activation';
 
 const round1 = (v: number) => Math.round(v * 10) / 10;
-const COLUMNS = 'id, scores, avg, recommend, tags, text, extras, comments, flagged, verified, created_at, edited_at';
+const COLUMNS = 'id, scores, avg, recommend, tags, text, extras, comments, job, flagged, verified, created_at, edited_at';
 
 /**
  * Regras de publicação (também ao editar): insultos e nomes de pessoas bloqueiam, com uma sugestão sem eles;
  * possíveis ilegalidades não bloqueiam, marcam a avaliação e geram uma mensagem privada de apoio.
  */
 function screen(input: UpdateReviewInput) {
-  const fields: [string, string][] = [['text', input.text], ...Object.entries(input.comments ?? {}).map(([k, v]) => [`comments.${k}`, v ?? ''] as [string, string])];
+  const fields: [string, string][] = [
+    ['text', input.text],
+    ...Object.entries(input.comments ?? {}).map(([k, v]) => [`comments.${k}`, v ?? ''] as [string, string]),
+    // o cargo também aparece em público
+    ...(input.job ? [['job.role', input.job.role] as [string, string]] : []),
+  ];
   for (const [field, text] of fields) {
     const attack = findPersonalAttacks(text);
     if (attack.blocked) {
@@ -52,11 +57,11 @@ export class ReviewsService {
         await c.query('SAVEPOINT ins');
         review = (
           await c.query(
-            `INSERT INTO reviews (org_id, location_id, author_ref, scores, avg, recommend, tags, text, flagged, flag_kinds, extras, comments, verified)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+            `INSERT INTO reviews (org_id, location_id, author_ref, scores, avg, recommend, tags, text, flagged, flag_kinds, extras, comments, job, verified)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
                      EXISTS (SELECT 1 FROM verifications v WHERE v.org_id = $1 AND v.user_ref = $3))
              RETURNING ${COLUMNS}`,
-            [orgId, input.locationId ?? null, authorRef, input.scores, avg, input.recommend, input.tags, input.text, rf.flagged, rf.kinds, input.extras ?? {}, input.comments ?? {}],
+            [orgId, input.locationId ?? null, authorRef, input.scores, avg, input.recommend, input.tags, input.text, rf.flagged, rf.kinds, input.extras ?? {}, input.comments ?? {}, input.job ?? null],
           )
         ).rows[0];
       } catch (e) {
@@ -96,9 +101,9 @@ export class ReviewsService {
       const review = (
         await c.query(
           `UPDATE reviews SET scores = $2, avg = $3, recommend = $4, tags = $5, text = $6, flagged = $7, flag_kinds = $8, extras = $9, comments = $10,
-                   edited_at = clock_timestamp()
+                   job = coalesce($11, job), edited_at = clock_timestamp()
             WHERE id = $1 RETURNING ${COLUMNS}`,
-          [reviewId, input.scores, avg, input.recommend, input.tags, input.text, rf.flagged, rf.kinds, input.extras ?? {}, input.comments ?? {}],
+          [reviewId, input.scores, avg, input.recommend, input.tags, input.text, rf.flagged, rf.kinds, input.extras ?? {}, input.comments ?? {}, input.job ?? null],
         )
       ).rows[0];
       // a mensagem de apoio vai uma só vez por avaliação
@@ -125,7 +130,7 @@ export class ReviewsService {
   async listPublic(orgId: string) {
     if (!isUuid(orgId)) throw new NotFoundException();
     const { rows } = await this.pool.query(
-      `SELECT r.id, r.scores, r.avg, r.recommend, r.tags, r.text, r.extras, r.comments, r.flagged, r.verified, r.created_at, r.edited_at,
+      `SELECT r.id, r.scores, r.avg, r.recommend, r.tags, r.text, r.extras, r.comments, r.job, r.flagged, r.verified, r.created_at, r.edited_at,
               (SELECT count(*)::int FROM review_helpful h WHERE h.review_id = r.id) AS helpful,
               p.text AS reply_text, p.created_at AS reply_created_at, p.updated_at AS reply_updated_at
          FROM reviews r JOIN organizations o ON o.id = r.org_id
@@ -153,6 +158,8 @@ function toPublic(r: Record<string, unknown>) {
     text: r.text,
     extras: r.extras ?? {},
     comments: r.comments ?? {},
+    // só o cargo, se ainda lá trabalha e o escalão de tempo: os anos ficam de fora
+    job: publicJob(r.job as ReviewJob | null),
     flagged: r.flagged,
     verified: r.verified ?? false,
     helpful: (r.helpful as number | undefined) ?? 0,

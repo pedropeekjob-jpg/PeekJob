@@ -5,7 +5,7 @@ test('reivindicar a página, aprovação da moderação e resposta pública', as
   const stamp = `${info.project.name} ${Date.now()}`;
   // organização própria deste teste (cada projeto e cada corrida tem a sua)
   const name = `Clínica Mar ${Date.now() % 1_000_000}`;
-  const [org] = await sql<{ id: string }>(`INSERT INTO organizations (name, type, city, status, source) VALUES ($1, 'PME', 'Porto', 'active', 'seed') RETURNING id`, [name]);
+  const [org] = await sql<{ id: string }>(`INSERT INTO organizations (name, type, city, status, source) VALUES ($1, 'Empresa', 'Porto', 'active', 'seed') RETURNING id`, [name]);
   const text = `Escalas mudadas na véspera (${stamp}).`;
   await sql(`INSERT INTO reviews (org_id, author_ref, scores, avg, recommend, tags, text) VALUES ($1, $2, '{"equilibrio": 2}', 2, false, '{}', $3)`, [org.id, `e2e-${Date.now()}`, text]);
 

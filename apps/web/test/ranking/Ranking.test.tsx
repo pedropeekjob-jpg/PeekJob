@@ -82,8 +82,8 @@ describe('Ranking no telemóvel: folha de filtros', () => {
     const sheet = screen.getByRole('dialog');
     await user.click(within(sheet).getByRole('button', { name: 'Voluntariado' }));
     expect(search()).toBe('?tipo=Voluntariado');
-    await user.click(within(sheet).getByRole('button', { name: 'PME' }));
-    expect(search()).toBe('?tipo=Voluntariado%2CPME');
+    await user.click(within(sheet).getByRole('button', { name: 'Empresa' }));
+    expect(search()).toBe('?tipo=Voluntariado%2CEmpresa');
     // os 20 distritos: 3 visíveis e "+17" para os restantes
     await user.click(within(sheet).getByRole('button', { name: '+17' }));
     expect(within(sheet).getByRole('button', { name: 'Menos' })).toHaveAttribute('aria-expanded', 'true');
@@ -92,11 +92,11 @@ describe('Ranking no telemóvel: folha de filtros', () => {
     await user.click(within(sheet).getByRole('button', { name: '10–49' }));
     await user.click(within(sheet).getByRole('switch', { name: /Respeito e inclusão 4 ou mais/ }));
     await user.click(within(sheet).getByRole('switch', { name: /Só avaliações verificadas/ }));
-    expect(search()).toBe('?tipo=Voluntariado%2CPME&dim=10%E2%80%9349&dist=Porto&resp=1&ver=1');
+    expect(search()).toBe('?tipo=Voluntariado%2CEmpresa&dim=10%E2%80%9349&dist=Porto&resp=1&ver=1');
     const showBtn = within(sheet).getByRole('button', { name: /^Ver \d+ organizaç/ });
     await user.click(showBtn);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tipo: Voluntariado, PME. Abrir filtros' })).toHaveTextContent('Voluntariado +1');
+    expect(screen.getByRole('button', { name: 'Tipo: Voluntariado, Empresa. Abrir filtros' })).toHaveTextContent('Voluntariado +1');
     expect(screen.getByRole('button', { name: 'Distrito: Porto. Abrir filtros' })).toHaveTextContent('Porto');
     expect(screen.getByRole('button', { name: 'Dimensão: 10–49. Abrir filtros' })).toHaveTextContent('10 a 49 pessoas');
     expect(screen.getByRole('button', { name: 'Respeito e inclusão 4 ou mais. Abrir filtros' })).toBeInTheDocument();

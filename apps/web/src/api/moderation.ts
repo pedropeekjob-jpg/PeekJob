@@ -86,7 +86,7 @@ function demoData(): { reports: ReportedContent[]; orgs: PendingOrg[]; appeals: 
     ],
     orgs: [
       {
-        id: 'demo-o1', name: 'Padaria da Ribeira', type: 'PME', city: 'Porto', nif: null, address: 'Rua das Flores, Porto',
+        id: 'demo-o1', name: 'Padaria da Ribeira', type: 'Empresa', city: 'Porto', nif: null, address: 'Rua das Flores, Porto',
         createdAt: daysAgo(3), reviewers: 1,
         duplicates: [{ id: ribeira.id, name: ribeira.name, city: ribeira.city, type: ribeira.type, status: 'active' }],
       },

@@ -22,6 +22,9 @@ export function publishErrorMessage(f: Failure): PublishError {
   if (f.status === 422 && typeof f.body?.field === 'string' && f.body.field.startsWith('comments.')) {
     return { message: tr('Há um comentário com nomes ou insultos. Descreve a situação.', 'One comment has names or insults. Describe the situation.') };
   }
+  if (f.status === 422 && f.body?.field === 'job.role') {
+    return { message: tr('O cargo tem nomes ou insultos. Escreve só a função.', 'Your role has names or insults. Just write the job.') };
+  }
   if (f.status === 422 && typeof f.body?.suggestion === 'string') {
     return { message: tr('Tira nomes de pessoas e insultos. Descreve a situação.', 'Remove people’s names and insults. Describe the situation.'), suggestion: f.body.suggestion };
   }

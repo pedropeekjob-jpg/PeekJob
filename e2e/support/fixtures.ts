@@ -90,13 +90,26 @@ export { expect };
 
 /**
  * Procura no fluxo de avaliar e escolhe a organização (espera pela resposta da pesquisa, como quem vê os resultados).
- * Com um só local segue logo para as notas; com vários, confirma o local primeiro.
+ * Com um só local segue logo para o cargo e o período; com vários, confirma o local primeiro.
+ * Depois preenche o cargo e o período e chega às notas (ou para no cargo, com `stopAtJob`).
  */
-export async function pickOrg(page: Page, query: string, name: string) {
+export async function pickOrg(page: Page, query: string, name: string, { stopAtJob = false } = {}) {
   await Promise.all([page.waitForResponse((r) => r.url().includes('/orgs/search')), page.getByPlaceholder(/empresa, associação/i).fill(query)]);
   await page.getByText(name, { exact: true }).first().click();
   const next = page.getByRole('button', { name: /^Continuar/ }).first();
-  await Promise.race([page.waitForURL(/\/avaliar\/notas/), next.waitFor().then(() => next.click())]);
+  await Promise.race([page.waitForURL(/\/avaliar\/cargo/), next.waitFor().then(() => next.click())]);
+  await page.waitForURL(/\/avaliar\/cargo/);
+  if (!stopAtJob) await fillJob(page);
+}
+
+/** O teu trabalho lá (25/10): cargo, "ainda trabalho lá" desde 2022, e continuar para as notas */
+export async function fillJob(page: Page, role = 'Designer') {
+  await page.waitForURL(/\/avaliar\/cargo/);
+  await page.getByRole('combobox', { name: 'Cargo ou função' }).fill(role);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Sim, trabalho lá' }).click();
+  await page.getByRole('combobox', { name: 'Desde' }).selectOption('2022');
+  await page.getByRole('button', { name: /^Continuar/ }).first().click();
   await page.waitForURL(/\/avaliar\/notas/);
 }
 

@@ -64,9 +64,9 @@ describe('página da organização: regras puras', () => {
   it('textos', () => {
     expect(scoreAria(padaria)).toBe('Nota 4,4 de 5, com 23 avaliações');
     expect(scoreAria({ ...padaria, reviewsCount: 0 })).toBe('Ainda sem nota');
-    expect(shareCta('entrevistas', 'PME')).toBe('Partilhar a minha entrevista');
+    expect(shareCta('entrevistas', 'Empresa')).toBe('Partilhar a minha entrevista');
     expect(shareCta('salarios', 'Voluntariado')).toBe('Avaliar esta organização');
-    expect(shareCta('salarios', 'PME')).toBe('Partilhar o meu salário');
+    expect(shareCta('salarios', 'Empresa')).toBe('Partilhar o meu salário');
     expect(harassmentLine({ harassmentReports: 1, reviewsCount: 1 })).toBe('1 relato de assédio em 1 avaliação.');
     expect(locationsSuffix(1)).toBe('');
     expect(locationsSuffix(3)).toBe(' · 3 locais');

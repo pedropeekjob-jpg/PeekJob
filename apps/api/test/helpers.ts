@@ -71,7 +71,7 @@ export async function insertOrg(
   const r = await pool.query(
     `INSERT INTO organizations (name, type, city, status, nif, nif_verified, source)
      VALUES ($1, $2, $3, $4, $5, $6, 'seed') RETURNING id`,
-    [o.name, o.type ?? 'PME', o.city ?? 'Porto', o.status ?? 'active', o.nif ?? null, o.nifVerified ?? false],
+    [o.name, o.type ?? 'Empresa', o.city ?? 'Porto', o.status ?? 'active', o.nif ?? null, o.nifVerified ?? false],
   );
   return r.rows[0].id;
 }

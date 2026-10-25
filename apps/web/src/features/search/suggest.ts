@@ -6,7 +6,7 @@ import type { Org, OrgType } from '../../data/orgs';
 /** Sugestões enquanto se escreve (21/10): em todos os campos de pesquisa */
 export type Suggestion =
   | { kind: 'org'; id: string; label: string; city: string; type?: OrgType }
-  | { kind: 'role' | 'sector' | 'place'; label: string; orgs?: number };
+  | { kind: 'role' | 'sector' | 'place'; label: string; orgs?: number; district?: string };
 
 export type SuggestKind = Suggestion['kind'];
 export const ALL_KINDS: SuggestKind[] = ['org', 'role', 'sector', 'place'];

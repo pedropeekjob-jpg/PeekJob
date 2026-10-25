@@ -1,4 +1,6 @@
-import type { FormEvent } from 'react';
+import { suggestMunicipalities, type District } from '@peekjob/shared';
+import { useMemo, type FormEvent } from 'react';
+import { useSuggest } from '../../components/Suggest';
 import { Ring } from '../../components/Data';
 import { Icon } from '../../components/Icon';
 import { MapView } from '../../components/MapView';
@@ -140,12 +142,14 @@ export function AddOrgForm({
             ))}
           </select>
         </div>
-        <div className="field">
-          <label htmlFor="na" className={styles.fieldLabel}>
-            {desktop ? tr('Localidade', 'Town or city') : tr('Morada ou localidade', 'Address or town')}
-          </label>
-          <input className="input" id="na" type="text" value={form.city} onChange={(e) => onChange('city', e.target.value)} placeholder={tr('Ex.: Porto', 'E.g. Porto')} required aria-invalid={!!error && !form.city.trim()} />
-        </div>
+        <PlaceField
+          value={form.city}
+          invalid={!!error && !form.city.trim()}
+          onChange={(city, district) => {
+            onChange('city', city);
+            onChange('district', district);
+          }}
+        />
       </div>
       <NifField
         value={form.nif}
@@ -154,7 +158,10 @@ export function AddOrgForm({
         invalid={!!error && form.type === 'Nome individual'}
         onOfficial={(o) => {
           if (o.name) onChange('name', o.name);
-          if (o.city) onChange('city', o.city);
+          if (o.city) {
+            onChange('city', o.city);
+            onChange('district', null);
+          }
         }}
       />
       {error && (
@@ -167,6 +174,37 @@ export function AddOrgForm({
       </button>
       <button type="submit" hidden />
     </form>
+  );
+}
+
+/**
+ * Localidade com sugestões dos concelhos (25/10: em vez de um mapa, que obrigava a arrastar e fazer zoom
+ * só para dar uma localidade). Escolher uma sugestão dá a grafia oficial e o distrito; pode escrever-se outra localidade.
+ */
+function PlaceField({ value, invalid, onChange }: { value: string; invalid: boolean; onChange: (city: string, district: District | null) => void }) {
+  const items = useMemo(() => suggestMunicipalities(value).map((m) => ({ kind: 'place' as const, label: m.name, district: m.district })), [value]);
+  // escolhido o concelho, a lista não volta a abrir com o mesmo nome
+  const shown = items.length === 1 && items[0].label === value ? [] : items;
+  const suggest = useSuggest({ id: 'na', query: value, items: shown, onPick: (s) => onChange(s.label, s.kind === 'place' ? ((s.district as District | undefined) ?? null) : null) });
+  return (
+    <div className={`field ${styles.placeField}`}>
+      <label htmlFor="na" className={styles.fieldLabel}>
+        {tr('Localidade', 'Town or city')}
+      </label>
+      <input
+        className="input"
+        id="na"
+        type="text"
+        autoComplete="off"
+        value={value}
+        onChange={(e) => onChange(e.target.value, null)}
+        placeholder={tr('Ex.: Vila Nova de Gaia', 'E.g. Vila Nova de Gaia')}
+        required
+        aria-invalid={invalid}
+        {...suggest.inputProps}
+      />
+      {suggest.list}
+    </div>
   );
 }
 

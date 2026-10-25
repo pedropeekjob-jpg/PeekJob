@@ -4,6 +4,7 @@ import { Link, MemoryRouter, Route, Routes, useNavigate, useParams } from 'react
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LangRoot } from '../../src/i18n';
 import { StoreProvider } from '../../src/lib/store';
+import AvaliarCargo from '../../src/pages/AvaliarCargo';
 import AvaliarEscolher from '../../src/pages/AvaliarEscolher';
 import AvaliarFeito from '../../src/pages/AvaliarFeito';
 import AvaliarNotas from '../../src/pages/AvaliarNotas';
@@ -69,6 +70,7 @@ function show(viewport: 'mobile' | 'desktop', entries = ['/pesquisa', '/org/ofic
             <Route path="/pesquisa" element={<Lista />} />
             <Route path="/org/:id" element={<Org />} />
             <Route path="/avaliar" element={<AvaliarEscolher />} />
+            <Route path="/avaliar/cargo" element={<AvaliarCargo />} />
             <Route path="/avaliar/notas" element={<AvaliarNotas />} />
             <Route path="/avaliar/feito" element={<AvaliarFeito />} />
             <Route path="/avaliar/verificar" element={<AvaliarVerificar />} />
@@ -85,6 +87,15 @@ function show(viewport: 'mobile' | 'desktop', entries = ['/pesquisa', '/org/ofic
 /** Espera pelo ecrã (pelo título) e confirma que está lá */
 const at = async (name: string | RegExp) => expect(await screen.findByRole('heading', { level: 1, name })).toBeInTheDocument();
 const closeLabel = /^(Fechar|Cancelar)/;
+/** O teu trabalho lá (25/10): cargo e período, e continuar para as notas */
+async function job(user: ReturnType<typeof userEvent.setup>) {
+  await at('O teu trabalho lá');
+  const role = screen.getByRole('combobox', { name: 'Cargo ou função' });
+  if (!(role as HTMLInputElement).value) await user.type(role, 'Carpintaria');
+  await user.click(screen.getByRole('button', { name: 'Sim, trabalho lá' }));
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Desde' }), '2022');
+  await user.click(screen.getByRole('button', { name: /^Continuar/ }));
+}
 
 describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para onde se estava (%s)', (viewport) => {
   beforeEach(() => localStorage.clear());
@@ -92,6 +103,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para
   it('lista → organização (um local) → notas → fechar volta à organização; voltar volta à lista', async () => {
     const user = show(viewport);
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
+    await job(user);
     await screen.findAllByRole('radiogroup');
     if (viewport === 'desktop') return; // no computador as notas não têm "fechar" (o cabeçalho leva a qualquer lado)
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
@@ -104,6 +116,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para
     const user = show(viewport);
     await user.click(screen.getByRole('link', { name: 'avaliar padaria' }));
     await user.click(await screen.findByRole('button', { name: /^Continuar/ }));
+    await job(user);
     await screen.findAllByRole('radiogroup');
     if (viewport === 'desktop') return;
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
@@ -125,6 +138,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: sair do fluxo volta para
   it('aberto diretamente (sem histórico): fechar vai para a organização', async () => {
     if (viewport === 'desktop') return;
     const user = show(viewport, ['/avaliar?org=oficina-sete']);
+    await job(user);
     await screen.findAllByRole('radiogroup');
     await user.click(screen.getByRole('button', { name: /^Fechar/ }));
     await at(/^org/);
@@ -136,6 +150,7 @@ describe('avaliar: publicar', () => {
   it('"publicado" substitui as notas: fechar volta à organização e voltar à lista (nunca às notas vazias)', async () => {
     const user = show('mobile');
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
+    await job(user);
     await screen.findAllByRole('radiogroup', { name: 'Ambiente' });
     setScore('Ambiente', 4);
     await user.click(screen.getByRole('button', { name: /Publicar avaliação/ }));
@@ -149,6 +164,7 @@ describe('avaliar: publicar', () => {
 
 /** Publica a partir das notas (uma nota chega) */
 async function publish(user: ReturnType<typeof userEvent.setup>) {
+  await job(user);
   await screen.findAllByRole('radiogroup', { name: 'Ambiente' });
   setScore('Ambiente', 4);
   await user.click(screen.getByRole('button', { name: /Publicar avaliação/ }));
@@ -162,6 +178,7 @@ describe.each(['mobile', 'desktop'] as const)('avaliar: todos os caminhos de sa�
   it('mudar de organização nas notas não deixa ecrãs para trás: "Ver na página" abre a nova; voltar leva à anterior e depois à lista', async () => {
     const user = show(viewport);
     await user.click(screen.getByRole('link', { name: 'avaliar oficina' }));
+    await job(user);
     await screen.findAllByRole('radiogroup');
     // "Mudar" (telemóvel) ou o passo 1 "Organização" (computador)
     await user.click(viewport === 'mobile' ? screen.getByRole('button', { name: 'Mudar' }) : screen.getByRole('button', { name: /Passo 1, Organização/ }));

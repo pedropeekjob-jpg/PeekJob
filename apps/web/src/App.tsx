@@ -101,6 +101,7 @@ export default function App() {
           <Route path="/org/:id/salarios" element={<Pages.OrgPage tab="salarios" />} />
           <Route path="/org/:id/denunciar/:reviewId" element={<Pages.Denunciar />} />
           <Route path="/avaliar" element={<Pages.AvaliarEscolher />} />
+          <Route path="/avaliar/cargo" element={<Pages.AvaliarCargo />} />
           <Route path="/avaliar/verificar" element={<Pages.AvaliarVerificar />} />
           <Route path="/avaliar/notas" element={<Pages.AvaliarNotas />} />
           {/* o comentário passou para o ecrã das notas: ligações antigas vão para lá */}

@@ -18,7 +18,7 @@ describe('Geocodificação dos locais adicionados à mão', () => {
     (await t.pool.query('SELECT lat, lng, geocode_attempts, geocode_source, geocode_next_at > now() AS waiting FROM org_locations WHERE org_id = $1', [id])).rows[0];
   const addOrg = async (address = 'Rua das Flores, 112') => {
     const me = await t.login('ana');
-    const r = await t.http().post('/orgs').set(me).send({ name: `Tasca Nova ${Date.now() % 100000}`, type: 'PME', city: 'Porto', address }).expect(201);
+    const r = await t.http().post('/orgs').set(me).send({ name: `Tasca Nova ${Date.now() % 100000}`, type: 'Empresa', city: 'Porto', address }).expect(201);
     return r.body.id as string;
   };
 

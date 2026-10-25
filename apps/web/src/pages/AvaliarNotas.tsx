@@ -20,6 +20,7 @@ import { useStore } from '../lib/store';
 import { useIsDesktop } from '../lib/useMedia';
 import { DeskSteps, FlowHead, LockLine, MiniSteps, RecommendButtons, ScoreRow, TagPicker } from '../features/review/FlowParts';
 import { DESKTOP_ORDER, MOBILE_ORDER, scoreOf } from '../features/review/flow';
+import { jobInput } from '../features/review/job';
 import styles from './AvaliarNotas.module.css';
 
 type Review = ReturnType<typeof useReviewDraft>;
@@ -40,6 +41,8 @@ export default function AvaliarNotas() {
   if (apiMode && draft.orgId && !org && !remote.ready) return null;
   // Ao publicar o rascunho é limpo antes de ir para "publicado": não voltar a /avaliar pelo meio
   if (!draft.orgId || !org) return review.busy ? null : <Navigate to="/avaliar" replace />;
+  // o cargo e o período vêm antes das notas (25/10)
+  if (!jobInput(draft.job)) return review.busy ? null : <Navigate to="/avaliar/cargo" replace />;
 
   const props: ViewProps = { org, locationLabel: org.locations.find((l) => l.id === draft.locationId)?.label, verified: !!draft.verified, review };
   return desktop ? <DesktopNotas {...props} /> : <MobileNotas {...props} />;

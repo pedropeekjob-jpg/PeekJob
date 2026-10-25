@@ -34,9 +34,15 @@ export const CRITERIA: Criterion[] = [
 export const PREF_WEIGHTS = [3, 2, 1];
 export const DEFAULT_PREFS: CriterionKey[] = ['respeito', 'salario', 'equilibrio'];
 
-/** O foco são as pequenas (PME, associações, voluntariado, nome individual), mas qualquer empresa pode ser avaliada */
-export const ORG_TYPES = ['PME', 'Associação', 'Voluntariado', 'Nome individual', 'Grande empresa'] as const;
+/**
+ * O foco são as pequenas, mas qualquer empresa pode ser avaliada.
+ * 25/10 (cliente): "PME" e "Grande empresa" passam a um só tipo, "Empresa"; a dimensão (1–9 … 250+) é que distingue.
+ */
+export const ORG_TYPES = ['Empresa', 'Associação', 'Voluntariado', 'Nome individual'] as const;
 export type OrgType = (typeof ORG_TYPES)[number];
+/** Os tipos antigos (links guardados, importações, versões anteriores da app) passam a "Empresa" */
+const LEGACY_TYPES: Record<string, OrgType> = { PME: 'Empresa', 'Grande empresa': 'Empresa' };
+export const normalizeOrgType = <T>(t: T): T | OrgType => (typeof t === 'string' && LEGACY_TYPES[t]) || t;
 
 export const GOOD_TAGS = ['Ambiente seguro', 'Horários cumpridos', 'Igualdade salarial', 'Horários para quem cuida'] as const;
 export const BAD_TAGS = ['Salário em atraso', 'Horas extra não pagas', 'Sem contrato', 'Discriminação'] as const;

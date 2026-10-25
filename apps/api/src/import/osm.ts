@@ -9,7 +9,7 @@ export interface ImportedOrg {
   /** "node/123", "way/456", "relation/789" */
   externalId: string;
   name: string;
-  type: 'PME' | 'Associação';
+  type: 'Empresa' | 'Associação';
   sector: string | null;
   city: string;
   /** distrito ou região autónoma; null se não se souber (o trigger da base de dados tenta pela cidade) */
@@ -93,15 +93,15 @@ function classify(t: Record<string, string>): { type: ImportedOrg['type']; secto
   if (t.office && new RegExp(`^(${OFFICE_EXCLUDE})$`).test(t.office)) return null;
   if (t.social_facility || t.amenity === 'social_facility' || t.amenity === 'community_centre') return { type: 'Associação', sector: 'Ação social' };
   if (t.office && ASSOC_OFFICE.test(t.office)) return { type: 'Associação', sector: t.office === 'cooperative' ? 'Comunidade' : 'Ação social' };
-  if (t.amenity && /^(restaurant|cafe|bar|pub|fast_food|ice_cream)$/.test(t.amenity)) return { type: 'PME', sector: 'Restauração' };
-  if (t.amenity && /^(dentist|clinic|veterinary|pharmacy)$/.test(t.amenity)) return { type: 'PME', sector: 'Saúde' };
-  if (t.amenity && /^(kindergarten|childcare|driving_school|language_school|music_school)$/.test(t.amenity)) return { type: 'PME', sector: 'Educação' };
+  if (t.amenity && /^(restaurant|cafe|bar|pub|fast_food|ice_cream)$/.test(t.amenity)) return { type: 'Empresa', sector: 'Restauração' };
+  if (t.amenity && /^(dentist|clinic|veterinary|pharmacy)$/.test(t.amenity)) return { type: 'Empresa', sector: 'Saúde' };
+  if (t.amenity && /^(kindergarten|childcare|driving_school|language_school|music_school)$/.test(t.amenity)) return { type: 'Empresa', sector: 'Educação' };
   if (t.amenity === 'arts_centre') return { type: 'Associação', sector: 'Cultura' };
-  if (t.tourism) return { type: 'PME', sector: 'Turismo' };
-  if (t.craft) return { type: 'PME', sector: 'Ofícios' };
-  if (t.shop) return { type: 'PME', sector: 'Comércio' };
-  if (t.office === 'it') return { type: 'PME', sector: 'Tecnologia' };
-  if (t.office) return { type: 'PME', sector: 'Serviços' };
+  if (t.tourism) return { type: 'Empresa', sector: 'Turismo' };
+  if (t.craft) return { type: 'Empresa', sector: 'Ofícios' };
+  if (t.shop) return { type: 'Empresa', sector: 'Comércio' };
+  if (t.office === 'it') return { type: 'Empresa', sector: 'Tecnologia' };
+  if (t.office) return { type: 'Empresa', sector: 'Serviços' };
   return null;
 }
 

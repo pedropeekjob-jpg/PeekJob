@@ -31,7 +31,7 @@ describe('Moderação: organizações novas e resumo', () => {
     const res = await t.http().get('/moderation/orgs').set(mod).expect(200);
     expect(res.body.items.map((o: { name: string }) => o.name)).toEqual(['Padaria da Ribeira', 'Oficina Nova']);
     const first = res.body.items[0];
-    expect(first).toMatchObject({ id: pending, city: 'Porto', type: 'PME', reviewers: 1 });
+    expect(first).toMatchObject({ id: pending, city: 'Porto', type: 'Empresa', reviewers: 1 });
     expect(first.duplicates).toEqual([expect.objectContaining({ id: active, name: 'Padaria Ribeira', status: 'active' })]);
     expect(res.body.items[1].duplicates).toEqual([]);
   });

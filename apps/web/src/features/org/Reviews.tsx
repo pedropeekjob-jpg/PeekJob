@@ -13,6 +13,7 @@ import { optionLabel, paramMeta, isExtraKey, type ExtraKey, type ParamKey } from
 import { CRITERIA } from '../../data/criteria';
 import { PublishErrorBox } from '../review/PublishErrorBox';
 import { REVIEW_TEXT_MAX } from '../review/useReviewDraft';
+import { periodText, tenureText } from '../review/job';
 import { OrgReply } from './OrgCommon';
 import { useMyReview } from './useMyReview';
 import { useOrgActions, useUseful } from './useOrgPage';
@@ -126,6 +127,7 @@ function MyReviewItem({ r, org, desktop }: { r: MyReview; org: Org; desktop: boo
         <span className={`row wrap grow ${styles.mineTags}`}>
           <span className="pill pill-ink">{tr('A tua avaliação', 'Your review')}</span>
           <span className="small muted">
+            {r.job ? `${r.job.role}, ${periodText(r.job)} · ` : ''}
             {loc ? `${loc.label} · ` : ''}
             {whenLabel(r.when)}
             {r.edited ? tr(' · editada', ' · edited') : ''}
@@ -169,7 +171,8 @@ function VerifiedMark() {
 function ReviewItem({ r, org, desktop }: { r: Review; org: Org; desktop: boolean }) {
   const useful = useUseful();
   const n = useful.count(r);
-  const meta = `${r.role} · ${whenLabel(r.when)}`;
+  // cargo e há quanto tempo (25/10), nunca os anos
+  const meta = [r.role, r.job ? tenureText(r.job) : '', whenLabel(r.when)].filter(Boolean).join(' · ');
   const check = r.verified ? <VerifiedMark /> : null;
   const actions = (
     <div className={`row ${styles.actions}`}>

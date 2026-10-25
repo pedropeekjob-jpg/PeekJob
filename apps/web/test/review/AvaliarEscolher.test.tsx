@@ -22,7 +22,7 @@ const show = (viewport: 'mobile' | 'desktop', route = '/avaliar') =>
 describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização (%s)', (viewport) => {
   beforeEach(() => localStorage.clear());
 
-  it('procura, escolhe a organização e o local (vários), e continua para as notas', async () => {
+  it('procura, escolhe a organização e o local (vários), e continua para o cargo e o período', async () => {
     const { user } = show(viewport);
     await user.type(screen.getByRole('searchbox', { name: /Nome da organização/ }), 'padaria');
     await user.click(await screen.findByRole('button', { name: /Padaria Ribeira/ }));
@@ -34,7 +34,7 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(radios[1]).toHaveAttribute('aria-checked', 'true');
     await user.click(screen.getByRole('button', { name: /^Continuar/ }));
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
-    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/notas');
+    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/cargo');
     expect(screen.getByTestId('draft').textContent).toMatch(/^padaria-ribeira\|.+/);
   });
 
@@ -59,7 +59,7 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     const submit = () => user.click(screen.getByRole('button', { name: /Adicionar e continuar/ }));
     await submit();
     expect(screen.getByRole('alert')).toHaveTextContent('Escreve a localidade.');
-    await user.type(screen.getByRole('textbox', { name: /localidade/i }), 'Porto');
+    await user.type(screen.getByRole('combobox', { name: /localidade/i }), 'Porto');
     await user.type(screen.getByRole('textbox', { name: /NIF/ }), '123');
     await submit();
     expect(screen.getByRole('alert')).toHaveTextContent('O NIF não é válido.');
@@ -73,6 +73,23 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(screen.getByTestId('draft').textContent).toMatch(/^nova-horta-da-se\|sede$/);
   });
 
+  it('localidade: sugere os concelhos enquanto se escreve, com o distrito (25/10, em vez de um mapa)', async () => {
+    const { user } = show(viewport);
+    await user.click(screen.getByRole('button', { name: /Adicionar organização que não está cá|Não encontras/ }));
+    const place = screen.getByRole('combobox', { name: /localidade/i });
+    await user.type(place, 'gai');
+    const option = await screen.findByRole('option', { name: /Vila Nova de Gaia/ });
+    expect(option).toHaveTextContent('Porto');
+    await user.click(option);
+    expect(place).toHaveValue('Vila Nova de Gaia');
+    expect(screen.queryByRole('listbox', { name: 'Sugestões' })).not.toBeInTheDocument();
+    // nomes repetidos: uma sugestão por distrito
+    await user.clear(place);
+    await user.type(place, 'lagoa');
+    const list = await screen.findByRole('listbox', { name: 'Sugestões' });
+    expect(within(list).getAllByRole('option').map((o) => o.textContent)).toEqual(['LagoaAçores', 'LagoaFaro']);
+  });
+
   it('nome em falta', async () => {
     const { user } = show(viewport);
     await user.click(screen.getByRole('button', { name: /Adicionar organização que não está cá|Não encontras/ }));
@@ -82,12 +99,12 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(screen.getByRole('searchbox', { name: /Nome da organização/ })).toBeInTheDocument();
   });
 
-  it('organização com um só local: escolher leva logo às notas (sem perguntar o local)', async () => {
+  it('organização com um só local: escolher leva logo ao cargo e período (sem perguntar o local)', async () => {
     const { user } = show(viewport);
     await user.type(screen.getByRole('searchbox', { name: /Nome da organização/ }), 'oficina sete');
     await user.click(await screen.findByRole('button', { name: /Oficina Sete/ }));
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
-    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/notas');
+    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/cargo');
     expect(screen.getByTestId('draft').textContent).toMatch(/^oficina-sete\|.+/);
   });
 
@@ -97,10 +114,10 @@ describe.each(['mobile', 'desktop'] as const)('Avaliar · escolher organização
     expect(await screen.findByRole('button', { name: /Padaria Ribeira/ })).toBeInTheDocument();
   });
 
-  it('?org= com um só local: começa logo nas notas', async () => {
+  it('?org= com um só local: começa logo no cargo e período', async () => {
     show(viewport, '/avaliar?org=oficina-sete');
     expect(await screen.findByTestId('outra-rota')).toBeInTheDocument();
-    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/notas');
+    expect(screen.getByTestId('where')).toHaveTextContent('/avaliar/cargo');
     expect(screen.getByTestId('draft').textContent).toMatch(/^oficina-sete\|/);
   });
 

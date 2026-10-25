@@ -1,0 +1,36 @@
+/* Avaliar · o teu trabalho lá (cargo e período, 25/10) */
+.form {
+  gap: 22px;
+}
+/* a lista de cargos abre por baixo do campo */
+.roleField {
+  position: relative;
+}
+.quick {
+  gap: 6px;
+  margin-top: -10px;
+}
+.quickChip {
+  height: 36px;
+  font-size: 14px;
+}
+.now {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.years {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.select {
+  padding-left: 12px;
+}
+.privacy {
+  gap: 8px;
+  margin: 0;
+}
+.error {
+  font-size: 14px;
+  color: var(--warn-text);
+}
