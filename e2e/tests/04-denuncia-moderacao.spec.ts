@@ -113,3 +113,46 @@ test('contestar uma remoção: pedido no aviso, revisão na moderação, a avali
   await page.goto('/apoio');
   await expect(page.getByText('Revimos a tua contestação sobre Clínica Foz: a decisão foi revertida.')).toBeVisible();
 });
+
+/** Artigo 16.º do RSD: a notificação de conteúdo ilegal identifica o conteúdo, o fundamento, quem notifica e a boa-fé */
+test('notificação de conteúdo ilegal (art. 16.º) chega completa à moderação', async ({ page, browser }, info) => {
+  const text = `O gerente aceita pagamentos por fora (${info.project.name} ${Date.now()}).`;
+  const [org] = await sql<{ id: string }>(`SELECT id FROM organizations WHERE name = 'Clínica Foz'`);
+  const [rev] = await sql<{ id: string }>(
+    `INSERT INTO reviews (org_id, author_ref, scores, avg, recommend, tags, text) VALUES ($1, $2, '{"lideranca": 2}', 2, false, '{}', $3) RETURNING id`,
+    [org.id, `e2e-${Date.now()}`, text],
+  );
+
+  await page.goto(`/org/${org.id}/denunciar/${rev.id}`);
+  await page.getByRole('radio', { name: /Conteúdo ilegal/ }).click();
+  // incompleta: não envia e diz o que falta
+  await page.getByRole('button', { name: /Enviar denúncia/ }).click();
+  await expect(page.getByText(/Confirma a declaração de boa-fé/)).toBeVisible();
+
+  await page.getByLabel('Que lei é violada?').selectOption('difamacao');
+  await page.getByLabel('Porque é ilegal?').fill('Acusa o gerente de um crime (corrupção) sem qualquer facto, o que é falso e difamatório.');
+  await page.getByLabel(/^Nome/).fill('Rita Sousa');
+  await page.getByLabel(/^Email/).fill('rita.e2e@exemplo.pt');
+  await page.getByLabel(/boa-fé/).check();
+  await page.getByRole('button', { name: /Enviar denúncia/ }).click();
+  await expect(page.getByText(/Enviámos a confirmação para rita.e2e@exemplo.pt/)).toBeVisible();
+
+  const [n] = await sql<{ legal_ground: string; content_url: string; good_faith: boolean }>(
+    `SELECT legal_ground, content_url, good_faith FROM reports WHERE review_id = $1`,
+    [rev.id],
+  );
+  expect(n).toMatchObject({ legal_ground: 'difamacao', good_faith: true });
+  expect(n.content_url).toContain(`/org/${org.id}/denunciar/${rev.id}`);
+
+  const ctx = await browser.newContext({ viewport: info.project.use.viewport ?? undefined });
+  const mod = await ctx.newPage();
+  const email = uniqueEmail('moderadora');
+  await login(mod, email);
+  await makeModerator(email);
+  await mod.goto('/moderacao');
+  const card = mod.locator('article').filter({ hasText: text }).first();
+  const notice = card.getByRole('group', { name: 'Notificação de conteúdo ilegal' });
+  await expect(notice).toContainText('Difamação ou acusação falsa de crime');
+  await expect(notice).toContainText('Rita Sousa · rita.e2e@exemplo.pt');
+  await ctx.close();
+});

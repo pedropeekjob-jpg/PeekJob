@@ -111,6 +111,7 @@ export const REPORT_REASONS = [
   reason('ofensa', ['Insulto ou linguagem ofensiva', ''], ['Insult or offensive language', '']),
   reason('falso', ['Parece falsa', 'Não trabalhou cá ou está a promover'], ['Looks fake', 'Never worked here or is promoting something']),
   reason('privado', ['Dados privados', 'Moradas, telefones, saúde'], ['Private data', 'Addresses, phone numbers, health']),
+  reason('ilegal', ['Conteúdo ilegal', 'Difamação, ameaças, ódio, dados pessoais…'], ['Illegal content', 'Defamation, threats, hate, personal data…']),
   reason('outro', ['Outro motivo', ''], ['Other reason', '']),
 ];
 

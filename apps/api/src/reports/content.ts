@@ -7,12 +7,12 @@ export type ContentKind = (typeof CONTENT_KINDS)[number];
 
 export const CONTENT_SQL: Record<ContentKind, { published: string; lock: string; setStatus: string }> = {
   review: {
-    published: `SELECT 1 FROM reviews WHERE id = $1 AND status = 'published'`,
+    published: `SELECT o.id AS org_id, o.name AS org_name FROM reviews r JOIN organizations o ON o.id = r.org_id WHERE r.id = $1 AND r.status = 'published'`,
     lock: `SELECT r.id, r.author_ref, r.status, o.name AS org_name FROM reviews r JOIN organizations o ON o.id = r.org_id WHERE r.id = $1 FOR UPDATE OF r`,
     setStatus: `UPDATE reviews SET status = $2 WHERE id = $1`,
   },
   interview: {
-    published: `SELECT 1 FROM interviews WHERE id = $1 AND status = 'published'`,
+    published: `SELECT o.id AS org_id, o.name AS org_name FROM interviews i JOIN organizations o ON o.id = i.org_id WHERE i.id = $1 AND i.status = 'published'`,
     lock: `SELECT i.id, i.author_ref, i.status, o.name AS org_name FROM interviews i JOIN organizations o ON o.id = i.org_id WHERE i.id = $1 FOR UPDATE OF i`,
     setStatus: `UPDATE interviews SET status = $2 WHERE id = $1`,
   },

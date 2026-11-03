@@ -217,3 +217,14 @@
   padding: 0;
   list-style: none;
 }
+
+/* Notificação de conteúdo ilegal (art. 16.º) */
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--warn-text);
+  overflow-wrap: anywhere;
+}

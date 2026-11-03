@@ -1,6 +1,7 @@
+import { LEGAL_GROUNDS } from '@peekjob/shared';
 import { useState } from 'react';
 import { Link } from 'react-router';
-import type { Appeal, ContentKind, PendingOrg, ReportedContent } from '../../api/moderation';
+import type { Appeal, ContentKind, PendingOrg, ReportedContent, ReportItem } from '../../api/moderation';
 import { Icon } from '../../components/Icon';
 import { tr } from '../../i18n';
 import { orgTypeLabel, tagLabel } from '../../i18n/labels';
@@ -120,6 +121,7 @@ export function ReportCard({ item, onDecide }: { item: ReportedContent; onDecide
             <strong>{reasonLabel(r.reason)}</strong>
             {r.details && <span> — {r.details}</span>}
             <span className="small muted"> · {sinceIso(r.createdAt)}</span>
+            {r.reason === 'ilegal' && <NoticeFacts r={r} />}
           </li>
         ))}
       </ul>
@@ -143,6 +145,31 @@ export function ReportCard({ item, onDecide }: { item: ReportedContent; onDecide
         {!ok && <span className="small muted">{tr('Escreve ou escolhe uma justificação.', 'Write or pick a reason.')}</span>}
       </div>
     </article>
+  );
+}
+
+/** O que a notificação de conteúdo ilegal trouxe (art. 16.º): fundamento, endereço, quem notifica e boa-fé */
+function NoticeFacts({ r }: { r: ReportItem }) {
+  const ground = LEGAL_GROUNDS.find((g) => g.id === r.legalGround);
+  const who = [r.contactName, r.contactEmail].filter(Boolean).join(' · ');
+  return (
+    <div role="group" aria-label={tr('Notificação de conteúdo ilegal', 'Notice of illegal content')} className={`small ${styles.notice}`}>
+      <span>
+        {tr('Fundamento', 'Ground')}: {ground ? tr(ground.pt, ground.en) : '—'}
+      </span>
+      {r.contentUrl && (
+        <span>
+          {tr('Endereço', 'Address')}:{' '}
+          <a href={r.contentUrl} target="_blank" rel="noreferrer">
+            {r.contentUrl}
+          </a>
+        </span>
+      )}
+      <span>
+        {tr('Notificante', 'Notifier')}: {who || tr('anónimo (abuso sexual de crianças)', 'anonymous (child sexual abuse)')}
+      </span>
+      <span>{r.goodFaith ? tr('Declarou boa-fé', 'Declared good faith') : tr('Sem declaração de boa-fé', 'No good-faith statement')}</span>
+    </div>
   );
 }
 

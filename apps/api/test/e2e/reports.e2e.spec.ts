@@ -69,6 +69,99 @@ describe('Denúncias e moderação', () => {
     });
   });
 
+  describe('notificação de conteúdo ilegal (RSD, art. 16.º)', () => {
+    const notice = {
+      reason: 'ilegal',
+      legalGround: 'difamacao',
+      details: 'Acusa o gerente de roubar dinheiro aos clientes, o que é falso e constitui difamação.',
+      contactName: 'Rita Sousa',
+      contactEmail: 'rita@exemplo.pt',
+      goodFaith: true,
+    };
+
+    it('aceita uma notificação completa e guarda o fundamento, o endereço exato e a boa-fé', async () => {
+      const res = await report(notice).expect(201);
+      const { rows } = await t.pool.query('SELECT reason, legal_ground, content_url, good_faith, contact_name, contact_email FROM reports');
+      expect(rows).toEqual([
+        {
+          reason: 'ilegal',
+          legal_ground: 'difamacao',
+          content_url: `http://localhost:5173/org/${orgId}/denunciar/${reviewId}`,
+          good_faith: true,
+          contact_name: 'Rita Sousa',
+          contact_email: 'rita@exemplo.pt',
+        },
+      ]);
+      expect(res.body.reference).toMatch(/^[A-Z0-9]{8}$/);
+    });
+
+    it.each([
+      ['sem fundamento', { legalGround: undefined }, 'legalGround'],
+      ['com uma explicação genérica ("não gosto")', { details: 'Não gosto desta avaliação.' }, 'explanation'],
+      ['sem nome', { contactName: undefined }, 'contactName'],
+      ['sem email', { contactEmail: undefined }, 'contactEmail'],
+      ['sem declaração de boa-fé', { goodFaith: false }, 'goodFaith'],
+    ])('recusa uma notificação incompleta: %s (400)', async (_label, change, field) => {
+      const res = await report({ ...notice, ...change });
+      expect(res.status).toBe(400);
+      expect(res.body.fields).toContain(field);
+      expect(await t.pool.query('SELECT 1 FROM reports')).toMatchObject({ rowCount: 0 });
+    });
+
+    it('abuso sexual de crianças pode ser notificado sem identificação', async () => {
+      await report({ ...notice, legalGround: 'abuso_criancas', contactName: undefined, contactEmail: undefined }).expect(201);
+    });
+
+    it('com conta também identifica quem notifica (nome e email ficam na notificação)', async () => {
+      await report(notice, await t.login('leitor')).expect(201);
+      const { rows } = await t.pool.query('SELECT contact_email, reporter_ref FROM reports');
+      expect(rows[0].contact_email).toBe('rita@exemplo.pt');
+      expect(rows[0].reporter_ref).toBeTruthy();
+    });
+
+    it('confirma a receção por email, com a referência, o conteúdo e o que foi notificado (n.º 4)', async () => {
+      const res = await report(notice).expect(201);
+      const mail = t.mailer.outbox.at(-1)!;
+      expect(mail.to).toBe('rita@exemplo.pt');
+      expect(mail.subject).toMatch(/recebemos/i);
+      expect(mail.text).toContain(res.body.reference);
+      expect(mail.text).toContain('Padaria Ribeira');
+      expect(mail.text).toContain(`/org/${orgId}/denunciar/${reviewId}`);
+      expect(mail.text).toContain('Difamação');
+    });
+
+    it('a decisão diz que foi tomada por uma pessoa e as vias de recurso (n.os 5 e 6)', async () => {
+      const res = await report(notice).expect(201);
+      expect((await decide({ action: 'keep', note: 'É uma opinião sobre o trabalho, não uma acusação de crime.' })).status).toBe(200);
+      const mail = t.mailer.outbox.at(-1)!;
+      expect(mail.to).toBe('rita@exemplo.pt');
+      expect(mail.text).toContain('mantém-se');
+      expect(mail.text).toMatch(/sem meios automatizados/);
+      expect(mail.text).toMatch(/6 meses/);
+      expect(mail.text).toMatch(/resolução extrajudicial/);
+      expect(mail.text).toMatch(/tribunais/);
+      expect(mail.text).toContain(res.body.reference);
+    });
+
+    it('a moderação vê a notificação completa, marcada como ilegal', async () => {
+      await report(notice).expect(201);
+      const res = await t.http().get('/moderation/reports').set(mod).expect(200);
+      expect(res.body.items[0].reports[0]).toMatchObject({
+        reason: 'ilegal',
+        legalGround: 'difamacao',
+        contentUrl: `http://localhost:5173/org/${orgId}/denunciar/${reviewId}`,
+        goodFaith: true,
+        contactName: 'Rita Sousa',
+        contactEmail: 'rita@exemplo.pt',
+      });
+    });
+  });
+
+  it('quem deixa email numa denúncia comum também recebe a confirmação de receção', async () => {
+    await report({ reason: 'nome', contactName: 'Rui', contactEmail: 'rui@exemplo.pt' }).expect(201);
+    expect(t.mailer.outbox.at(-1)).toMatchObject({ to: 'rui@exemplo.pt' });
+  });
+
   describe('fila de moderação', () => {
     it('só moderadores (401 sem sessão, 403 sem papel)', async () => {
       expect((await t.http().get('/moderation/reports')).status).toBe(401);

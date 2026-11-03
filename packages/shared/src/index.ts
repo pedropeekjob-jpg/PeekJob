@@ -11,3 +11,4 @@ export * from './districts';
 export * from './job';
 export * from './contributions';
 export * from './report';
+export * from './notice';

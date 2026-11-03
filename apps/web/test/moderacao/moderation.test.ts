@@ -11,7 +11,7 @@ describe('moderação: regras e textos', () => {
 
   it('motivos: os conhecidos, ilegal e outro', () => {
     expect(reasonLabel('nome')).toBe('Identifica uma pessoa');
-    expect(reasonLabel('ilegal')).toBe('Possível ilegalidade');
+    expect(reasonLabel('ilegal')).toBe('Conteúdo ilegal');
     expect(reasonLabel('qualquer')).toBe('Outro motivo');
   });
 

@@ -5,7 +5,7 @@ import type { Org } from '../../data/orgs';
 import { tr } from '../../i18n';
 import { useToggle } from '../../lib/useToggle';
 import type { ReportTarget } from './report';
-import { Confirmation, ContactFields, DetailBox, DetailCount, IllegalSupport, ModSteps, QuotedTarget, ReasonPicker, SendError } from './ReportParts';
+import { Confirmation, ContactFields, DetailBox, DetailCount, IllegalNoticeFields, IllegalSupport, ModSteps, QuotedTarget, ReasonPicker, SendError } from './ReportParts';
 import type { ReportState } from './useReport';
 import styles from './Report.module.css';
 
@@ -37,15 +37,19 @@ export function ReportDesktop({ org, target, r, orgPath }: ViewProps) {
                 <QuotedTarget target={target} />
               </div>
               <ReasonPicker r={r} desktop />
-              <div className={styles.detail}>
-                <div className={`row between ${styles.baseline}`}>
-                  <label htmlFor={fieldId} className={styles.detailLabel}>
-                    {tr('Comentário', 'Comment')} <span className={styles.optional}>{tr('(opcional)', '(optional)')}</span>
-                  </label>
-                  <DetailCount r={r} live />
+              {r.illegal ? (
+                <IllegalNoticeFields r={r} />
+              ) : (
+                <div className={styles.detail}>
+                  <div className={`row between ${styles.baseline}`}>
+                    <label htmlFor={fieldId} className={styles.detailLabel}>
+                      {tr('Comentário', 'Comment')} <span className={styles.optional}>{tr('(opcional)', '(optional)')}</span>
+                    </label>
+                    <DetailCount r={r} live />
+                  </div>
+                  <DetailBox r={r} id={fieldId} />
                 </div>
-                <DetailBox r={r} id={fieldId} />
-              </div>
+              )}
               <ContactFields r={r} />
               <SendError r={r} />
               <div className={`row wrap ${styles.actions}`}>
@@ -114,7 +118,9 @@ export function ReportMobile({ target, r, orgPath }: ViewProps) {
                 </Link>
               </div>
               <ReasonPicker r={r} desktop={false} />
-              {detailOpen ? (
+              {r.illegal ? (
+                <IllegalNoticeFields r={r} />
+              ) : detailOpen ? (
                 <div className="field fade-up">
                   <div className={`row between ${styles.baseline}`}>
                     <label htmlFor={fieldId} className="small muted">

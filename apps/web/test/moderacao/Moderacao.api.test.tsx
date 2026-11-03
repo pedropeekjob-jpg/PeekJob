@@ -24,7 +24,12 @@ const { default: Moderacao } = await import('../../src/pages/Moderacao');
 
 const REPORT = {
   kind: 'review', contentId: 'r9', orgId: 'o1', orgName: 'Oficina Nove', text: '', tags: [], count: 1, firstReportedAt: new Date().toISOString(),
-  reports: [{ id: 'x', reason: 'ilegal', details: '', createdAt: new Date().toISOString() }],
+  reports: [
+    {
+      id: 'x', reason: 'ilegal', details: 'Acusa o dono de fugir aos impostos, o que é falso.', createdAt: new Date().toISOString(),
+      legalGround: 'difamacao', contentUrl: 'https://peekjob.pt/org/o1/denunciar/r9', goodFaith: true, contactName: 'Rita Sousa', contactEmail: 'rita@exemplo.pt',
+    },
+  ],
 };
 const INTERVIEW_REPORT = {
   kind: 'interview', contentId: 'i7', role: 'Balcão', orgId: 'o1', orgName: 'Oficina Nove', text: 'A Dona Rosa foi rude.', tags: [], count: 1, firstReportedAt: new Date().toISOString(),
@@ -86,7 +91,13 @@ describe.each(['mobile', 'desktop'] as const)('Moderação, modo API (%s)', (vie
     const card = await screen.findByRole('article', { name: /Oficina Nove/ });
     expect(screen.queryByText(/Demonstração/)).not.toBeInTheDocument();
     expect(within(card).getByText('(sem texto)', { exact: false })).toBeInTheDocument();
-    expect(within(card).getByText('Possível ilegalidade')).toBeInTheDocument();
+    expect(within(card).getByText('Conteúdo ilegal')).toBeInTheDocument();
+    // notificação do art. 16.º: fundamento, endereço, quem notifica e boa-fé
+    const notice = within(card).getByRole('group', { name: 'Notificação de conteúdo ilegal' });
+    expect(notice).toHaveTextContent('Difamação ou acusação falsa de crime');
+    expect(within(notice).getByRole('link', { name: 'https://peekjob.pt/org/o1/denunciar/r9' })).toHaveAttribute('href', 'https://peekjob.pt/org/o1/denunciar/r9');
+    expect(notice).toHaveTextContent('Rita Sousa · rita@exemplo.pt');
+    expect(notice).toHaveTextContent('Declarou boa-fé');
     await user.type(within(card).getByRole('textbox'), 'Não viola as regras.');
     await user.click(within(card).getByRole('button', { name: 'Manter' }));
     expect(api).toHaveBeenCalledWith('/moderation/reviews/r9/decision', { body: { action: 'keep', note: 'Não viola as regras.' } });

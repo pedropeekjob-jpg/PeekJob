@@ -1,3 +1,4 @@
+import { noticeProblems, type NoticeField } from '@peekjob/shared';
 import { useState } from 'react';
 import { apiMode } from '../../api/http';
 import { REPORT_REASONS } from '../../data/content';
@@ -13,10 +14,18 @@ export function useReport(orgId: string | undefined, itemId: string | undefined,
   const [detail, setDetail] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  /** notificação de conteúdo ilegal (art. 16.º): fundamento e declaração de boa-fé */
+  const [legalGround, setLegalGround] = useState('');
+  const [goodFaith, setGoodFaith] = useState(false);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState<string | null>(null);
+
+  const illegal = reason === 'ilegal';
+  const problems: NoticeField[] = illegal ? noticeProblems({ legalGround, explanation: detail, contactName, contactEmail, goodFaith }) : [];
+  /** contacto pedido: sempre na notificação de conteúdo ilegal; nas outras, só sem conta (opcional) */
+  const withContact = illegal || anonymous;
 
   const setReason = (id: string) => {
     setReasonState(id);
@@ -24,7 +33,7 @@ export function useReport(orgId: string | undefined, itemId: string | undefined,
   };
 
   const send = async () => {
-    if (!reason) {
+    if (!reason || problems.length) {
       setTried(true);
       return;
     }
@@ -35,8 +44,9 @@ export function useReport(orgId: string | undefined, itemId: string | undefined,
       const r = await reportContent(kind === 'entrevista' ? 'interview' : 'review', itemId, {
         reason,
         details: detail.trim(),
-        contactName: anonymous && contactName.trim() ? contactName.trim() : undefined,
-        contactEmail: anonymous && contactEmail.trim() ? contactEmail.trim() : undefined,
+        contactName: withContact && contactName.trim() ? contactName.trim() : undefined,
+        contactEmail: withContact && contactEmail.trim() ? contactEmail.trim() : undefined,
+        ...(illegal ? { legalGround, goodFaith } : {}),
       });
       setBusy(false);
       if (!r.ok) {
@@ -56,6 +66,16 @@ export function useReport(orgId: string | undefined, itemId: string | undefined,
     reasonLabel: REPORT_REASONS.find((r) => r.id === reason)?.label,
     setReason,
     missingReason: tried && !reason,
+    illegal,
+    /** o que falta na notificação (só se mostra depois de tentar enviar) */
+    missing: (f: NoticeField) => tried && problems.includes(f),
+    legalGround,
+    setLegalGround,
+    goodFaith,
+    setGoodFaith,
+    withContact,
+    /** o servidor confirma a receção e diz a decisão por email (só no modo API) */
+    byEmail: apiMode && withContact,
     detail,
     setDetail,
     contactName,

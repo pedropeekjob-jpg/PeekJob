@@ -1,4 +1,5 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { LEGAL_GROUND_IDS, noticeProblems } from '@peekjob/shared';
+import { BadRequestException, Body, Controller, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { z } from 'zod';
 import { AuthGuard, CurrentUser, Roles, type AuthUser } from '../auth/auth.guard';
@@ -15,6 +16,9 @@ const ReportBody = z.object({
   details: z.string().trim().max(1000).default(''),
   contactName: z.string().trim().max(120).optional(),
   contactEmail: z.string().trim().toLowerCase().email().max(254).optional(),
+  /** só nas notificações de conteúdo ilegal (RSD, art. 16.º) */
+  legalGround: z.enum(LEGAL_GROUND_IDS).optional(),
+  goodFaith: z.boolean().optional(),
   lang: Lang,
 });
 const DecisionBody = z.object({
@@ -45,6 +49,11 @@ export class ReportsController {
 
   private async create(kind: ContentKind, id: string, body: unknown, req: Request) {
     const b = parse(ReportBody, body);
+    if (b.reason === 'ilegal') {
+      // Notificação de conteúdo ilegal: tem de estar completa (art. 16.º, n.º 2), senão não serve de base à decisão
+      const fields = noticeProblems({ ...b, explanation: b.details });
+      if (fields.length) throw new BadRequestException({ message: 'Notificação incompleta', fields });
+    }
     const user = await this.auth.userForSession(readCookie(req, SESSION_COOKIE));
     const ref = user ? userRef(privacySecret(), user.id) : null;
     const r = await this.reports.create(kind, id, b, ref, req.ip ?? 'desconhecido');
