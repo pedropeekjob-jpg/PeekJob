@@ -23,7 +23,10 @@ describe('denúncia: regras e textos', () => {
     expect(reportErrorText(400, 'x')).toMatch(/^Verifica o email/);
     expect(reportErrorText(500, 'Falhou.')).toBe('Falhou.');
     expect(decisionChannel(false, '')).toBe('Vês a decisão nas tuas mensagens.');
-    expect(decisionChannel(true, ' a@b.pt ')).toBe('Recebes a decisão por email.');
+    expect(decisionChannel(true, ' a@b.pt ')).toBe('Enviámos a confirmação para a@b.pt. Recebes a decisão por email.');
     expect(decisionChannel(true, '  ')).toBe('');
+    // notificação de conteúdo ilegal com conta: o email dado também recebe a confirmação e a decisão
+    expect(decisionChannel(false, 'a@b.pt', true)).toBe('Enviámos a confirmação para a@b.pt. Recebes a decisão por email.');
+    expect(decisionChannel(false, 'a@b.pt')).toBe('Vês a decisão nas tuas mensagens.');
   });
 });

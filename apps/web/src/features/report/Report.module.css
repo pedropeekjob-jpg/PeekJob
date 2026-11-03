@@ -121,6 +121,28 @@
   margin-bottom: 6px;
 }
 
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.select {
+  padding-left: 12px;
+}
+.goodFaith {
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 6px;
+}
+.checkbox {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
 /* Apoio para situações ilegais */
 .illegal {
   display: flex;

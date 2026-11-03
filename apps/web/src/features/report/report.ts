@@ -36,8 +36,10 @@ export function reportErrorText(status: number | undefined, message: string, kin
   return message;
 }
 
-/** Como a pessoa vai saber a decisão: mensagens (com conta), email (sem conta, se o deu) ou nada */
-export function decisionChannel(anonymous: boolean, email: string) {
+/** Como a pessoa vai saber a decisão: email (se o deu: confirmação já enviada), mensagens (com conta) ou nada */
+export function decisionChannel(anonymous: boolean, email: string, withContact = anonymous) {
+  const e = email.trim();
+  if (withContact && e) return tr(`Enviámos a confirmação para ${e}. Recebes a decisão por email.`, `We sent the confirmation to ${e}. We’ll email you the decision.`);
   if (!anonymous) return tr('Vês a decisão nas tuas mensagens.', 'You’ll see the decision in your messages.');
-  return email.trim() ? tr('Recebes a decisão por email.', 'We’ll email you the decision.') : '';
+  return '';
 }

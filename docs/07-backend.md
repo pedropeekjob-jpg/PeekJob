@@ -89,7 +89,7 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | PATCH | `/me/reviews/:id` | sessão | Editar a minha avaliação (notas, etiquetas, texto; as regras de publicar: nomes e insultos → 422 com sugestão; nova possível ilegalidade → mensagem de apoio, uma só vez). Retirada pela moderação → 409. Fica `editedAt` |
 | DELETE | `/me/reviews/:id` | sessão | Apagar a minha avaliação (e as mensagens, denúncias, "úteis" e resposta ligadas), sem apagar a conta |
 | POST | `/reviews/rewrite` | todos | Reescrever com IA: proposta publicável (sem nomes nem insultos, com os mesmos factos); não guarda o texto; 20 pedidos/10 min por pessoa |
-| POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem |
+| POST | `/reviews/:id/reports` | todos | Denunciar uma avaliação (motivo, detalhe, contacto opcional); máx. 10/dia por origem. Com `reason: 'ilegal'` é uma notificação do art. 16.º: exige `legalGround`, explicação em `details` (≥ 50 caracteres), `contactName`, `contactEmail` e `goodFaith: true` (400 com `fields` em falta) |
 | POST | `/interviews/:id/reports` | todos | Denunciar uma entrevista (como as avaliações) |
 | GET | `/moderation/reports` | moderador | Fila: denúncias em aberto agrupadas por avaliação ou entrevista (`kind`, `contentId`; nas entrevistas, a função) |
 | POST | `/moderation/interviews/:id/decision` | moderador | `remove` ou `keep` uma entrevista, com justificação; avisos e contestação como nas avaliações |
@@ -148,6 +148,14 @@ Quem escreve com raiva recebe uma proposta publicável e decide se a usa. Pode s
 - Qualquer pessoa denuncia, com ou sem conta. A avaliação só sai do site por decisão de um moderador, sempre com justificação.
 - Quem escreveu recebe o motivo em privado quando a avaliação é removida. Quem denunciou com conta recebe a decisão nas mensagens; sem conta, por email se o deixou. O contacto é apagado logo a seguir.
 - O IP nunca é guardado: só um HMAC, para limitar abusos.
+- **Notificação de conteúdo ilegal (art. 16.º):** o motivo "Conteúdo ilegal" abre um formulário próprio, porque um botão genérico não chega. Pede, como o n.º 2 exige:
+  - a) a lei ou o direito violado (lista em `packages/shared/src/notice.ts`) e uma explicação concreta de porque é ilegal;
+  - b) o endereço exato do conteúdo (preenchido sozinho; a API guarda-o em `reports.content_url`);
+  - c) o nome e o email de quem notifica, também com conta (exceto abuso sexual de crianças, que pode ser anónimo);
+  - d) a declaração de boa-fé de que a informação é exata e completa.
+  - As regras são as mesmas na web e na API (`noticeProblems`). A moderação vê tudo no cartão da denúncia.
+- **Confirmação de receção (n.º 4):** quem deixa email (em qualquer denúncia) recebe logo um email com a referência, o endereço do conteúdo e, nas ilegais, o fundamento e a explicação.
+- **Decisão (n.os 5 e 6):** o email da decisão leva a referência, o motivo, que foi decidida por uma pessoa sem meios automatizados, e as vias de recurso: pedir a revisão em 6 meses, a resolução extrajudicial (art. 21.º) e os tribunais.
 - **Ecrã de moderação** (`/moderacao`, só para o papel `moderator`; entrada no Perfil):
   - **Denúncias:** avaliação, motivos e justificações frequentes; remover ou manter.
   - **Organizações novas:** aprovar, rejeitar com justificação, ou fundir num duplicado sugerido.

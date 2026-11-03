@@ -56,6 +56,11 @@ test('páginas públicas sem falhas de acessibilidade (WCAG 2.1 AA)', async ({ p
   await audit(page, '/org/:id', found);
   await page.locator('a[href*="/denunciar/"]').first().click();
   await audit(page, '/org/:id/denunciar', found);
+  // notificação de conteúdo ilegal (art. 16.º): formulário próprio, com os erros à vista
+  // (a página continua em inglês desde o ?lang=en)
+  await page.getByRole('radio', { name: /Conteúdo ilegal|Illegal content/ }).click();
+  await page.getByRole('button', { name: /Enviar denúncia|Send report/ }).click();
+  await audit(page, '/org/:id/denunciar (ilegal)', found);
   expect(report(found)).toEqual([]);
 });
 

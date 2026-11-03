@@ -1,8 +1,9 @@
 import { ConflictException, HttpException, HttpStatus, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { createHmac } from 'crypto';
+import { contentLocation, LEGAL_GROUNDS, type LegalGround } from '@peekjob/shared';
 import { Pool } from 'pg';
 import { MAILER, type Mailer } from '../auth/mailer';
-import { mailSubject } from '../common/config';
+import { mailSubject, webOrigin } from '../common/config';
 import { pick, type Lang } from '../common/lang';
 import { privacySecret } from '../common/privacy';
 import { isUuid } from '../common/zod';
@@ -17,6 +18,8 @@ export interface NewReport {
   details: string;
   contactName?: string;
   contactEmail?: string;
+  legalGround?: LegalGround;
+  goodFaith?: boolean;
   lang: Lang;
 }
 
@@ -24,6 +27,13 @@ export interface NewReport {
 const WHAT: Record<ContentKind, { pt: string; ptThe: string; en: string; enNoun: string }> = {
   review: { pt: 'uma avaliação', ptThe: 'a avaliação', en: 'a review', enNoun: 'review' },
   interview: { pt: 'uma entrevista', ptThe: 'a entrevista', en: 'an interview', enNoun: 'interview' },
+};
+
+/** Referência curta de uma denúncia (a mesma no ecrã e nos emails) */
+const referenceOf = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase();
+const groundLabel = (id: string | null | undefined, lang: Lang) => {
+  const g = LEGAL_GROUNDS.find((x) => x.id === id);
+  return g ? pick(lang, g.pt, g.en) : '';
 };
 
 const ipHash = (ip: string) => createHmac('sha256', privacySecret()).update(`ip:${ip}`).digest('hex');
@@ -51,16 +61,57 @@ export class ReportsService {
     }
     try {
       const { rows } = await this.pool.query(
-        `INSERT INTO reports (review_id, interview_id, reason, details, reporter_ref, reporter_ip_hash, contact_name, contact_email, lang)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-        [...targetIds(kind, contentId), r.reason, r.details, reporterRef, h, r.contactName || null, r.contactEmail || null, r.lang],
+        `INSERT INTO reports (review_id, interview_id, reason, details, reporter_ref, reporter_ip_hash, contact_name, contact_email, lang,
+                              legal_ground, content_url, good_faith)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
+        [
+          ...targetIds(kind, contentId),
+          r.reason,
+          r.details,
+          reporterRef,
+          h,
+          r.contactName || null,
+          r.contactEmail || null,
+          r.lang,
+          r.reason === 'ilegal' ? (r.legalGround ?? null) : null,
+          contentLocation(webOrigin(), found.rows[0].org_id, contentId),
+          r.reason === 'ilegal' && r.goodFaith === true,
+        ],
       );
-      return { id: rows[0].id as string, reference: (rows[0].id as string).replace(/-/g, '').slice(0, 8).toUpperCase() };
+      const reference = referenceOf(rows[0].id as string);
+      if (r.contactEmail) await this.confirmReceipt(kind, reference, r, found.rows[0].org_name, contentLocation(webOrigin(), found.rows[0].org_id, contentId));
+      return { id: rows[0].id as string, reference };
     } catch (e) {
       if (isUniqueViolation(e)) {
         throw new ConflictException(kind === 'review' ? 'Já denunciaste esta avaliação. A moderação está a analisar.' : 'Já denunciaste esta entrevista. A moderação está a analisar.');
       }
       throw e;
+    }
+  }
+
+  /** Confirmação de receção (art. 16.º, n.º 4): o que se notificou e o que acontece a seguir. Falhar o email não perde a denúncia. */
+  private async confirmReceipt(kind: ContentKind, reference: string, r: NewReport, orgName: string, url: string) {
+    const what = WHAT[kind];
+    const ground = r.reason === 'ilegal' ? groundLabel(r.legalGround, r.lang) : '';
+    const hi = r.contactName ? ` ${r.contactName}` : '';
+    try {
+      await this.mailer.send({
+        to: r.contactEmail!,
+        subject: mailSubject(pick(r.lang, `Recebemos a tua denúncia (PJ-${reference})`, `We received your report (PJ-${reference})`)),
+        text: pick(
+          r.lang,
+          `Olá${hi},\n\nRecebemos a tua denúncia sobre ${what.pt} de ${orgName}.\n` +
+            `Referência: PJ-${reference}\nConteúdo: ${url}\n` +
+            (ground ? `Fundamento: ${ground}\nExplicação: ${r.details}\n` : '') +
+            `\nUma pessoa da moderação analisa-a em até 48 horas e dizemos-te a decisão e o motivo.`,
+          `Hi${hi},\n\nWe received your report about ${what.en} of ${orgName}.\n` +
+            `Reference: PJ-${reference}\nContent: ${url}\n` +
+            (ground ? `Ground: ${ground}\nExplanation: ${r.details}\n` : '') +
+            `\nA person from moderation reviews it within 48 hours and we will tell you the decision and the reason.`,
+        ),
+      });
+    } catch (e) {
+      this.log.error(`Falha ao confirmar a receção por email: ${(e as Error).message}`);
     }
   }
 
@@ -71,7 +122,10 @@ export class ReportsService {
               coalesce(r.text, i.text) AS text, coalesce(r.tags, '{}') AS tags, i.role,
               coalesce(r.status, i.status) AS status, coalesce(r.created_at, i.created_at) AS content_created_at,
               o.id AS org_id, o.name AS org_name,
-              json_agg(json_build_object('id', p.id, 'reason', p.reason, 'details', p.details, 'createdAt', p.created_at) ORDER BY p.created_at) AS reports,
+              json_agg(json_build_object('id', p.id, 'reason', p.reason, 'details', p.details, 'createdAt', p.created_at,
+                'legalGround', p.legal_ground, 'contentUrl', p.content_url, 'goodFaith', p.good_faith,
+                'contactName', CASE WHEN p.reason = 'ilegal' THEN p.contact_name END,
+                'contactEmail', CASE WHEN p.reason = 'ilegal' THEN p.contact_email END) ORDER BY p.created_at) AS reports,
               count(*)::int AS count, min(p.created_at) AS first_at
          FROM reports p
          LEFT JOIN reviews r ON r.id = p.review_id
@@ -135,7 +189,7 @@ export class ReportsService {
       return { orgName: content.org_name as string, outcome, closedCount: closed.rowCount ?? 0, contacts: closed.rows.filter((r) => r.contact_email) };
     });
 
-    // Quem denunciou sem conta e deixou email: recebe a decisão; depois o contacto é apagado.
+    // Quem deixou email recebe a decisão (art. 16.º, n.º 5) e as vias de recurso; depois o contacto é apagado.
     const what = WHAT[kind];
     const sent = new Set<string>();
     for (const c of result.contacts) {
@@ -149,9 +203,19 @@ export class ReportsService {
             text: pick(
               lang,
               `Olá${c.contact_name ? ` ${c.contact_name}` : ''},\n\nAnalisámos a tua denúncia sobre ${what.pt} de ${result.orgName}.\n` +
-                `Decisão: ${what.ptThe} ${result.outcome === 'upheld' ? 'foi removida' : 'mantém-se'}.\nMotivo: ${note}\n\nObrigado por ajudares a manter a PeekJob segura.`,
+                `Referência: PJ-${referenceOf(c.id)}\n` +
+                `Decisão: ${what.ptThe} ${result.outcome === 'upheld' ? 'foi removida' : 'mantém-se'}.\nMotivo: ${note}\n\n` +
+                `A decisão foi tomada por uma pessoa da equipa de moderação, sem meios automatizados.\n` +
+                `Se não concordares, podes pedir a revisão gratuita da decisão nos próximos 6 meses, respondendo a este email com a referência. ` +
+                `Podes também recorrer a um organismo de resolução extrajudicial de litígios certificado (art. 21.º do Regulamento dos Serviços Digitais) ou aos tribunais.\n\n` +
+                `Obrigado por ajudares a manter a PeekJob segura.`,
               `Hi${c.contact_name ? ` ${c.contact_name}` : ''},\n\nWe reviewed your report about ${what.en} of ${result.orgName}.\n` +
-                `Decision: the ${what.enNoun} ${result.outcome === 'upheld' ? 'was removed' : 'stays'}.\nReason: ${note}\n\nThank you for helping keep PeekJob safe.`,
+                `Reference: PJ-${referenceOf(c.id)}\n` +
+                `Decision: the ${what.enNoun} ${result.outcome === 'upheld' ? 'was removed' : 'stays'}.\nReason: ${note}\n\n` +
+                `The decision was made by a person on the moderation team, without automated means.\n` +
+                `If you disagree, you can ask for a free review of the decision within 6 months by replying to this email with the reference. ` +
+                `You can also turn to a certified out-of-court dispute settlement body (Article 21 of the Digital Services Act) or to the courts.\n\n` +
+                `Thank you for helping keep PeekJob safe.`,
             ),
           });
         } catch (e) {

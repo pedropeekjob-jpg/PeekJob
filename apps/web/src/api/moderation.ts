@@ -9,6 +9,12 @@ export interface ReportItem {
   reason: string;
   details: string;
   createdAt: string;
+  /** notificação de conteúdo ilegal (RSD, art. 16.º) */
+  legalGround?: string | null;
+  contentUrl?: string | null;
+  goodFaith?: boolean;
+  contactName?: string | null;
+  contactEmail?: string | null;
 }
 /** O que se denuncia: uma avaliação ou uma entrevista */
 export type ContentKind = 'review' | 'interview';

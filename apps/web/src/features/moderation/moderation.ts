@@ -16,7 +16,7 @@ const DAY = 86_400_000;
 export const sinceIso = (iso: string, now = Date.now()) => ago(Math.floor((now - new Date(iso).getTime()) / DAY));
 
 export const reasonLabel = (id: string) =>
-  REPORT_REASONS.find((r) => r.id === id)?.label ?? (id === 'ilegal' ? tr('Possível ilegalidade', 'Possibly illegal') : tr('Outro motivo', 'Other reason'));
+  REPORT_REASONS.find((r) => r.id === id)?.label ?? tr('Outro motivo', 'Other reason');
 
 /** Justificações frequentes (o texto chega a quem escreveu e a quem denunciou) */
 export const removeTemplates = () => [

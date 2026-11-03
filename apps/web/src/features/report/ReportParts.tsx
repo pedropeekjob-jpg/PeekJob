@@ -1,3 +1,5 @@
+import { ANONYMOUS_GROUNDS, LEGAL_GROUNDS, NOTICE_MAX_EXPLANATION, NOTICE_MIN_EXPLANATION, type LegalGround, type NoticeField } from '@peekjob/shared';
+import { useId } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '../../components/Icon';
 import { REPORT_REASONS } from '../../data/content';
@@ -56,15 +58,164 @@ export const DetailCount = ({ r, live = false }: { r: ReportState; live?: boolea
   </span>
 );
 
-/** Sem conta: contacto opcional para receber a decisão */
+/** Sem conta: contacto opcional para receber a decisão (na notificação de conteúdo ilegal vai no formulário próprio) */
 export function ContactFields({ r }: { r: ReportState }) {
-  if (!r.anonymous) return null;
+  if (!r.anonymous || r.illegal) return null;
   return (
     <fieldset className={styles.contact}>
       <legend className={`small ${styles.contactLegend}`}>{tr('Queres saber a decisão? (opcional)', 'Want to know the decision? (optional)')}</legend>
       <input className="input" type="text" autoComplete="name" placeholder={tr('Nome', 'Name')} value={r.contactName} onChange={(e) => r.setContactName(e.target.value)} />
       <input className="input" type="email" autoComplete="email" placeholder={tr('Email', 'Email')} value={r.contactEmail} onChange={(e) => r.setContactEmail(e.target.value)} />
       <span className="small muted">{tr('Só usamos o email para te dizer a decisão e apagamo-lo a seguir.', 'We only use it to tell you the decision, then delete it.')}</span>
+    </fieldset>
+  );
+}
+
+const noticeErrors = (): Record<NoticeField, string> => ({
+  legalGround: tr('Escolhe a lei ou o direito que achas que é violado.', 'Choose the law or right you think is breached.'),
+  explanation: tr(
+    `Explica com factos concretos porque é ilegal (pelo menos ${NOTICE_MIN_EXPLANATION} caracteres).`,
+    `Explain with concrete facts why it is illegal (at least ${NOTICE_MIN_EXPLANATION} characters).`,
+  ),
+  contactName: tr('Escreve o teu nome.', 'Write your name.'),
+  contactEmail: tr('Escreve um email válido.', 'Write a valid email.'),
+  goodFaith: tr('Confirma a declaração de boa-fé.', 'Confirm the good-faith statement.'),
+});
+
+function FieldError({ r, field, id }: { r: ReportState; field: NoticeField; id: string }) {
+  if (!r.missing(field)) return null;
+  return (
+    <span id={id} role="alert" className={`small ${styles.error}`}>
+      {noticeErrors()[field]}
+    </span>
+  );
+}
+
+/**
+ * Notificação de conteúdo ilegal (Regulamento dos Serviços Digitais, art. 16.º, n.º 2): fundamento e explicação (a),
+ * endereço exato do conteúdo (b), nome e email (c, exceto abuso sexual de crianças) e declaração de boa-fé (d).
+ */
+export function IllegalNoticeFields({ r }: { r: ReportState }) {
+  const id = useId();
+  const f = (name: NoticeField | 'url') => `${id}-${name}`;
+  const err = (name: NoticeField) => (r.missing(name) ? `${f(name)}-err` : undefined);
+  const lang = tr('pt', 'en');
+  const anonymousOk = ANONYMOUS_GROUNDS.includes(r.legalGround as LegalGround);
+  const optional = anonymousOk ? <span className={styles.optional}> {tr('(opcional)', '(optional)')}</span> : null;
+  return (
+    <fieldset className={styles.notice}>
+      <legend className={`small ${styles.contactLegend}`}>{tr('Notificação de conteúdo ilegal', 'Notice of illegal content')}</legend>
+      <span className="small muted">
+        {tr(
+          'Ao abrigo do Regulamento dos Serviços Digitais (art. 16.º). Uma pessoa analisa e responde-te com a decisão e o motivo.',
+          'Under the Digital Services Act (Article 16). A person reviews it and replies with the decision and the reason.',
+        )}
+      </span>
+
+      <label htmlFor={f('legalGround')} className={styles.detailLabel}>
+        {tr('Que lei é violada?', 'Which law is breached?')}
+      </label>
+      <select
+        id={f('legalGround')}
+        className={`input ${styles.select}`}
+        value={r.legalGround}
+        required
+        aria-invalid={r.missing('legalGround') || undefined}
+        aria-describedby={err('legalGround')}
+        onChange={(e) => r.setLegalGround(e.target.value)}
+      >
+        <option value="">{tr('Escolhe…', 'Choose…')}</option>
+        {LEGAL_GROUNDS.map((g) => (
+          <option key={g.id} value={g.id}>
+            {lang === 'en' ? g.en : g.pt}
+          </option>
+        ))}
+      </select>
+      <FieldError r={r} field="legalGround" id={`${f('legalGround')}-err`} />
+
+      <div className={`row between ${styles.baseline}`}>
+        <label htmlFor={f('explanation')} className={styles.detailLabel}>
+          {tr('Porque é ilegal?', 'Why is it illegal?')}
+        </label>
+        <span className="mono small muted">
+          {r.detail.length}/{NOTICE_MAX_EXPLANATION}
+        </span>
+      </div>
+      <textarea
+        id={f('explanation')}
+        className={`textarea ${styles.textarea}`}
+        rows={4}
+        maxLength={NOTICE_MAX_EXPLANATION}
+        required
+        value={r.detail}
+        aria-invalid={r.missing('explanation') || undefined}
+        aria-describedby={err('explanation')}
+        onChange={(e) => r.setDetail(e.target.value)}
+        placeholder={tr('Que factos são falsos ou que direito é violado, e porquê.', 'Which facts are false or which right is breached, and why.')}
+      />
+      <FieldError r={r} field="explanation" id={`${f('explanation')}-err`} />
+
+      <label htmlFor={f('url')} className={styles.detailLabel}>
+        {tr('Endereço do conteúdo', 'Content address')}
+      </label>
+      <input id={f('url')} className="input mono small" type="text" readOnly value={window.location.href} />
+
+      <label htmlFor={f('contactName')} className={styles.detailLabel}>
+        {tr('Nome', 'Name')}
+        {optional}
+      </label>
+      <input
+        id={f('contactName')}
+        className="input"
+        type="text"
+        autoComplete="name"
+        required={!anonymousOk}
+        value={r.contactName}
+        aria-invalid={r.missing('contactName') || undefined}
+        aria-describedby={err('contactName')}
+        onChange={(e) => r.setContactName(e.target.value)}
+      />
+      <FieldError r={r} field="contactName" id={`${f('contactName')}-err`} />
+      <label htmlFor={f('contactEmail')} className={styles.detailLabel}>
+        {tr('Email', 'Email')}
+        {optional}
+      </label>
+      <input
+        id={f('contactEmail')}
+        className="input"
+        type="email"
+        autoComplete="email"
+        required={!anonymousOk}
+        value={r.contactEmail}
+        aria-invalid={r.missing('contactEmail') || undefined}
+        aria-describedby={err('contactEmail')}
+        onChange={(e) => r.setContactEmail(e.target.value)}
+      />
+      <FieldError r={r} field="contactEmail" id={`${f('contactEmail')}-err`} />
+      <span className="small muted">
+        {tr(
+          'Usamos o nome e o email só para confirmar a receção e dizer-te a decisão. Não os mostramos a quem escreveu.',
+          'We only use your name and email to confirm receipt and tell you the decision. We don’t show them to the author.',
+        )}
+      </span>
+
+      <label className={`row ${styles.goodFaith}`}>
+        <input
+          type="checkbox"
+          checked={r.goodFaith}
+          aria-invalid={r.missing('goodFaith') || undefined}
+          aria-describedby={err('goodFaith')}
+          onChange={(e) => r.setGoodFaith(e.target.checked)}
+          className={styles.checkbox}
+        />
+        <span>
+          {tr(
+            'Declaro de boa-fé que a informação e as alegações desta notificação são exatas e completas.',
+            'I declare in good faith that the information and allegations in this notice are accurate and complete.',
+          )}
+        </span>
+      </label>
+      <FieldError r={r} field="goodFaith" id={`${f('goodFaith')}-err`} />
     </fieldset>
   );
 }
@@ -110,7 +261,7 @@ export function QuotedTarget({ target }: { target: ReportTarget }) {
 
 /** Denúncia recebida: motivo, prazo, como se sabe a decisão e referência */
 export function Confirmation({ r, orgPath, desktop }: { r: ReportState; orgPath: string; desktop: boolean }) {
-  const channel = decisionChannel(r.anonymous, r.contactEmail);
+  const channel = decisionChannel(r.anonymous, r.contactEmail, r.byEmail);
   return (
     <div className={`fade-up ${styles.confirm}`} role="status">
       <span aria-hidden="true" className={styles.check}>

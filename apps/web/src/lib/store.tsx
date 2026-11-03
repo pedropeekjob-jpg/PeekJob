@@ -518,7 +518,7 @@ function useAppState() {
       reportContent: async (
         kind: 'review' | 'interview',
         id: string,
-        body: { reason: string; details: string; contactName?: string; contactEmail?: string },
+        body: { reason: string; details: string; contactName?: string; contactEmail?: string; legalGround?: string; goodFaith?: boolean },
       ): Promise<Result<{ reference: string }>> => {
         try {
           const r = await api<{ reference: string }>(`/${kind === 'review' ? 'reviews' : 'interviews'}/${id}/reports`, { body: { ...body, lang: getLang() } });
