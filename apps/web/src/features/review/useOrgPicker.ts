@@ -17,7 +17,7 @@ export const visibleCount = (desktop: boolean, searching: boolean) => (desktop ?
 export function useOrgPicker(desktop: boolean) {
   const [params] = useSearchParams();
   const orgs = useOrgs();
-  const { draft, startDraft } = useStore();
+  const { draft, startDraft, remember } = useStore();
 
   const fromLink = params.get('org');
   const typed = params.get('q');
@@ -53,11 +53,12 @@ export function useOrgPicker(desktop: boolean) {
 
   /**
    * Escolher uma organização. Com um só local não há nada a perguntar: grava no rascunho e devolve true
-   * (o ecrã segue logo para as notas). Com vários, pergunta o local.
+   * (o ecrã segue logo para as notas). Com vários, pergunta o local. `locationId`: o pino tocado no mapa.
    */
   const pick = useCallback(
-    (o: Org): boolean => {
-      const loc = o.id === draft.orgId && draft.locationId ? draft.locationId : o.locations[0]?.id ?? null;
+    (o: Org, locationId?: string): boolean => {
+      const loc = locationId ?? (o.id === draft.orgId && draft.locationId ? draft.locationId : o.locations[0]?.id ?? null);
+      remember(o);
       setChosenId(o.id);
       setLocationId(loc);
       if (o.locations.length <= 1) {
@@ -67,7 +68,7 @@ export function useOrgPicker(desktop: boolean) {
       setStep('confirm');
       return false;
     },
-    [draft.locationId, draft.orgId, startDraft],
+    [draft.locationId, draft.orgId, remember, startDraft],
   );
 
   /** Vindo de "Avaliar esta organização" (?org=) com um só local: segue logo para as notas */

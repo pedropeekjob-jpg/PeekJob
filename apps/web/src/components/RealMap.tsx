@@ -3,13 +3,8 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, type CSSProperties } from 'react';
 import type { OrgLocation } from '../data/orgs';
 import { tr } from '../i18n';
-import { mapPoints, tilesConfig } from './map';
+import { attributionHtml, mapPoints, tilesConfig } from './map';
 import styles from './MapView.module.css';
-
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-/** A atribuição é obrigatória (licença dos dados); a menção ao OpenStreetMap leva à página de direitos */
-const attributionHtml = (text: string) =>
-  esc(text).replace('OpenStreetMap', '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>');
 
 const TEAL = '#00A9AF';
 const INK = '#010B13';

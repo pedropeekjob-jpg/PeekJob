@@ -91,6 +91,8 @@ export function searchOrgs(orgs: Org[], q: string, type: string | 'Todas' = 'Tod
   return orgs.flatMap((o) => {
     if (type !== 'Todas' && o.type !== type) return [];
     if (!nq || norm(`${o.name} ${o.type} ${o.sector} ${o.city}`).includes(nq)) return [o];
+    // pela morada de um local (03/11, 4+ letras), como na API
+    if (nq.length >= 4 && o.locations.some((l) => norm(l.address).includes(nq))) return [o];
     const role = roleMatch(o, nq);
     return role ? [{ ...o, matchedRole: role }] : [];
   });
@@ -137,4 +139,30 @@ export function useSearch(q: string, opts: { type?: string; includePending?: boo
     const byId = new Map(orgs.map((o) => [o.id, o]));
     return { items: (fresh ? remoteRes!.items : []).map((o) => ({ ...(byId.get(o.id) ?? o), matchedRole: o.matchedRole })), loading: !fresh };
   }, [orgs, nq, type, key, remoteRes]);
+}
+
+/**
+ * Organizações já avaliadas para o mapa (com os locais com coordenadas). Demonstração: as de exemplo;
+ * modo API: GET /orgs/map, pedido só quando o mapa abre (`enabled`) e guardado para esta visita.
+ */
+let mapCache: Promise<Org[]> | null = null;
+export function useMapOrgs(enabled: boolean): Org[] {
+  const orgs = useOrgs();
+  const [remoteOrgs, setRemoteOrgs] = useState<Org[]>([]);
+  useEffect(() => {
+    if (!apiMode || !enabled) return;
+    let alive = true;
+    mapCache ??= api<{ items: ApiOrg[] }>('/orgs/map').then(
+      (r) => r.items.map((o) => toOrg(o)),
+      (e) => {
+        mapCache = null; // falhou: tenta outra vez da próxima vez que o mapa abrir
+        throw e;
+      },
+    );
+    mapCache.then((list) => alive && setRemoteOrgs(list)).catch(() => alive && setRemoteOrgs([]));
+    return () => {
+      alive = false;
+    };
+  }, [enabled]);
+  return apiMode ? remoteOrgs : orgs;
 }

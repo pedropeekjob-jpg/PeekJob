@@ -64,7 +64,8 @@ Não existe em Portugal uma API pública e gratuita com a lista de empresas e as
 | GET | `/auth/me` | sessão | Quem está autenticado |
 | POST | `/auth/logout` | sessão | Termina a sessão → 204 |
 | GET | `/orgs` | todos | Organizações ativas com nota, médias, locais e nº de relatos de assédio (só o número) |
-| GET | `/orgs/search?q=&type=&includePending=` | todos | Pesquisa tolerante (acentos, maiúsculas, erros, nomes antigos) |
+| GET | `/orgs/search?q=&type=&includePending=` | todos | Pesquisa tolerante (acentos, maiúsculas, erros, nomes antigos); também pela morada de um local ativo (4+ letras) |
+| GET | `/orgs/map` | todos | Organizações já avaliadas para o mapa do «Onde trabalhas?»: nota geral e locais ativos com coordenadas (sem nome individual, sem contagens por local); cache de 5 min |
 | POST | `/orgs` | sessão | Cria a organização pendente e devolve os possíveis duplicados e `nifCheck`: confirmed, name_mismatch, exists, not_found ou unavailable |
 | GET | `/orgs/nif/:nif` | sessão | Nome e morada oficiais (VIES), para preencher o formulário; para NIFs de pessoas só o estado |
 | GET | `/orgs/:id` | todos | Organização ativa com nota, nº de avaliações e média por critério; fundida → 308 |

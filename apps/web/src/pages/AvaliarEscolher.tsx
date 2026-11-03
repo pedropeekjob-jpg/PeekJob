@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import type { Org } from '../data/orgs';
 import { Icon } from '../components/Icon';
 import { ResponsibilityNote } from '../components/UI';
 import { Shell } from '../components/Layout';
 import styles from '../features/review/OrgPicker.module.css';
+import { OrgsMapPanel } from '../features/review/OrgsMapPanel';
 import { AddOrgForm, LocationPicker, OrgResults, OrgSearchBox, PickIllustration } from '../features/review/OrgPickerParts';
 import { useAddOrg } from '../features/review/useAddOrg';
 import { useFlowNav } from '../features/review/useFlowNav';
@@ -39,6 +41,8 @@ export default function AvaliarEscolher() {
   const results = (
     <OrgResults orgs={picker.visible} total={picker.results.length} query={picker.q} selectedId={step === 'confirm' ? chosen?.id ?? null : null} desktop={desktop} onPick={(o) => picker.pick(o) && go('/avaliar/cargo')} />
   );
+  // empresas já avaliadas no mapa: tocar num pino escolhe a organização e o local
+  const choose = (o: Org, loc: string) => picker.pick(o, loc) && go('/avaliar/cargo');
   const detail = (
     <>
       {step === 'confirm' && chosen && <LocationPicker org={chosen} active={picker.effectiveLocation} desktop={desktop} onPick={picker.setLocationId} onOther={() => picker.setStep('pick')} />}
@@ -79,8 +83,17 @@ export default function AvaliarEscolher() {
             <section aria-live="polite" className={styles.detail}>
               {step === 'pick' && (
                 <div className={`fade-up ${styles.placeholder}`}>
-                  <PickIllustration />
-                  <h2 className={styles.placeholderTitle}>{tr('Escolhe a organização à esquerda', 'Choose the organisation on the left')}</h2>
+                  <OrgsMapPanel
+                    query={picker.query}
+                    desktop
+                    onChoose={choose}
+                    closed={
+                      <>
+                        <PickIllustration />
+                        <h2 className={styles.placeholderTitle}>{tr('Escolhe a organização à esquerda', 'Choose the organisation on the left')}</h2>
+                      </>
+                    }
+                  />
                 </div>
               )}
               {detail}
@@ -111,6 +124,7 @@ export default function AvaliarEscolher() {
           <div className={`fade-up ${styles.mobilePick}`}>
             <h1 className={styles.title}>{tr('Onde trabalhas?', 'Where do you work?')}</h1>
             {search}
+            <OrgsMapPanel query={picker.query} desktop={false} onChoose={choose} />
             {results}
             <button type="button" className={`link ${styles.addLink}`} onClick={startAdd}>
               {tr('Não encontras? Adicionar organização', 'Can’t find it? Add organisation')}

@@ -16,6 +16,11 @@ const DEFAULT_TILES: Tiles = { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.
 /** Mosaicos: os que o servidor configura (/pj-config.js), ou o OpenStreetMap (demonstração) */
 export const tilesConfig = (cfg: { tiles?: Tiles } | undefined = typeof window === 'undefined' ? undefined : window.__PJ__): Tiles => cfg?.tiles ?? DEFAULT_TILES;
 
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+/** A atribuição é obrigatória (licença dos dados); a menção ao OpenStreetMap leva à página de direitos */
+export const attributionHtml = (text: string) =>
+  esc(text).replace('OpenStreetMap', '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>');
+
 const KEY = 'pj-map';
 
 /**
