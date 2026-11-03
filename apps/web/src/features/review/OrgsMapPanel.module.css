@@ -1,0 +1,75 @@
+/* Avaliar · empresas avaliadas no mapa (03/11) */
+
+.cta {
+  gap: 6px 12px;
+  align-items: center;
+}
+.ctaButton {
+  gap: 6px;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.head {
+  gap: 4px 12px;
+  align-items: center;
+}
+.close {
+  padding: 0;
+  min-height: 32px;
+}
+
+/* Mapa real (Leaflet): por baixo dos menus (o Leaflet usa z-index até 1000) */
+.real {
+  height: var(--h);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #e9eeef;
+  position: relative;
+  z-index: 0;
+}
+/* o divIcon do Leaflet traz fundo e contorno brancos: aqui só o SVG do pino */
+.pin {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 2px rgb(1 11 19 / 0.25));
+}
+.pin:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Cartão do pino escolhido */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--teal-tint);
+  flex-wrap: wrap;
+}
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.cardName {
+  font-size: 16px;
+  font-weight: 600;
+}
+.choose {
+  flex: none;
+  margin-left: auto;
+}
+/* no computador, o mapa ocupa a coluna da direita */
+.panel {
+  align-self: stretch;
+  text-align: left;
+}

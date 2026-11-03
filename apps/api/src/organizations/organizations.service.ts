@@ -91,7 +91,8 @@ export class OrganizationsService {
 
   /**
    * Pesquisa tolerante a acentos, maiúsculas e erros (pg_trgm), incluindo nomes antigos (aliases).
-   * Pesquisar o nome de uma cidade ou distrito (ex.: «Lisboa») lista também as organizações de lá;
+   * Pesquisar o nome de uma cidade ou distrito (ex.: «Lisboa») lista também as organizações de lá, e a morada
+   * de um local ativo (03/11, 4+ letras) encontra a organização desse local;
    * as que coincidem pelo nome ficam à frente.
    */
   async search(q: SearchOrganizationsQuery): Promise<OrgSummary[]> {
@@ -125,6 +126,8 @@ export class OrganizationsService {
                OR o.search_city = input.q
                OR lower(f_unaccent(o.district)) = input.q
                OR (length(input.q) >= 3 AND lower(f_unaccent(coalesce(o.sector, ''))) LIKE '%' || input.q || '%')
+               OR (length(input.q) >= 4 AND EXISTS (SELECT 1 FROM org_locations l
+                     WHERE l.org_id = o.id AND l.status = 'active' AND lower(f_unaccent(l.address)) LIKE '%' || input.q || '%'))
                OR ro.role IS NOT NULL)
         GROUP BY o.id, input.q, ro.role
         ORDER BY score DESC, o.name
@@ -302,6 +305,29 @@ export class OrganizationsService {
       [limit],
     );
     return rows.map(toPublicOrg);
+  }
+
+  /**
+   * Mapa das organizações já avaliadas (03/11): ativas, com pelo menos uma avaliação publicada e locais
+   * ativos com coordenadas (as que já temos: importadas do OSM ou geocodificadas em segundo plano).
+   * Anonimato: vão todos os locais da organização e só a nota geral, nunca quantas avaliações tem cada local
+   * (numa loja pequena isso apontava para quem avaliou); nome individual fica de fora (a morada pode ser uma casa).
+   */
+  async mapPins(limit = 2000) {
+    const { rows } = await this.pool.query(
+      `SELECT o.id, o.name, o.type, o.city, o.status, s.reviews_count, s.score,
+              jsonb_agg(jsonb_build_object('id', l.id, 'label', l.label, 'address', l.address, 'lat', l.lat, 'lng', l.lng) ORDER BY l.created_at, l.id) AS locations
+         FROM organizations o
+         JOIN (SELECT org_id, count(*)::int AS reviews_count, round(avg(avg), 1) AS score
+                 FROM reviews WHERE status = 'published' GROUP BY org_id) s ON s.org_id = o.id
+         JOIN org_locations l ON l.org_id = o.id AND l.status = 'active' AND l.lat IS NOT NULL AND l.lng IS NOT NULL
+        WHERE o.status = 'active' AND o.type <> 'Nome individual'
+        GROUP BY o.id, s.reviews_count, s.score
+        ORDER BY s.reviews_count DESC, o.name
+        LIMIT $1`,
+      [limit],
+    );
+    return rows.map(({ reviews_count, score, ...o }) => ({ ...o, reviewsCount: reviews_count, score: num(score) }));
   }
 
   async approve(id: string) {

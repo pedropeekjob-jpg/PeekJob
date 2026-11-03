@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { CreateOrganizationInput, isValidNif, normalizeNif, SearchOrganizationsQuery, SuggestQuery } from '@peekjob/shared';
 import type { Response } from 'express';
 import { z } from 'zod';
@@ -22,6 +22,13 @@ export class OrganizationsController {
   @Get('search')
   async search(@Query() query: unknown) {
     return { items: await this.orgs.search(parse(SearchOrganizationsQuery, query)) };
+  }
+
+  /** Pinos do mapa das organizações já avaliadas (igual para toda a gente: pode ficar em cache 5 minutos) */
+  @Get('map')
+  @Header('cache-control', 'public, max-age=300')
+  async map() {
+    return { items: await this.orgs.mapPins() };
   }
 
   @Get('suggest')
